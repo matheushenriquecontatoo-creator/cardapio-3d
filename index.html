@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Restaurante Demo</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f3ef;
+            color: #1c1c1c;
+        }
+
+        header {
+            background: #171717;
+            color: white;
+            padding: 35px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #bdbdbd;
+            font-size: 14px;
+        }
+
+        .categorias {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 18px 16px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .categoria-btn {
+            border: none;
+            background: #eeeeee;
+            padding: 10px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .categoria-btn.ativa {
+            background: #171717;
+            color: white;
+        }
+
+        main {
+            max-width: 700px;
+            margin: auto;
+            padding: 25px 16px 50px;
+        }
+
+        .titulo-categoria {
+            font-size: 22px;
+            margin-bottom: 16px;
+        }
+
+        .produto {
+            display: flex;
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            cursor: pointer;
+        }
+
+        .produto img {
+            width: 125px;
+            height: 125px;
+            object-fit: cover;
+        }
+
+        .produto-info {
+            padding: 16px;
+            flex: 1;
+        }
+
+        .produto-info h3 {
+            font-size: 17px;
+            margin-bottom: 7px;
+        }
+
+        .produto-info p {
+            color: #6b6b6b;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .preco {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .produto.escondido {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+
+            header {
+                padding: 30px 16px;
+            }
+
+            header h1 {
+                font-size: 25px;
+            }
+
+            .produto img {
+                width: 110px;
+                height: 110px;
+            }
+
+            .produto-info {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Restaurante Demo</h1>
+        <p>Uma experiência diferente à mesa</p>
+    </header>
+
+    <nav class="categorias">
+
+        <button class="categoria-btn ativa" data-categoria="destaques">
+            Destaques
+        </button>
+
+        <button class="categoria-btn" data-categoria="pratos">
+            Pratos
+        </button>
+
+        <button class="categoria-btn" data-categoria="bebidas">
+            Bebidas
+        </button>
+
+        <button class="categoria-btn" data-categoria="sobremesas">
+            Sobremesas
+        </button>
+
+    </nav>
+
+    <main>
+
+        <h2 class="titulo-categoria" id="tituloCategoria">
+            Destaques
+        </h2>
+
+        <!-- HAMBÚRGUER -->
+
+        <div class="produto" data-categoria="destaques pratos">
+
+            <img
+                src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80"
+                alt="Hambúrguer artesanal"
+            >
+
+            <div class="produto-info">
+
+                <h3>Hambúrguer da Casa</h3>
+
+                <p>
+                    Hambúrguer artesanal, queijo,
+                    molho especial e acompanhamentos.
+                </p>
+
+                <span class="preco">
+                    R$ 34,90
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- FETTUCCINE -->
+
+        <div class="produto" data-categoria="destaques pratos">
+
+            <img
+                src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+                alt="Fettuccine"
+            >
+
+            <div class="produto-info">
+
+                <h3>Fettuccine Especial</h3>
+
+                <p>
+                    Massa artesanal preparada
+                    com molho especial da casa.
+                </p>
+
+                <span class="preco">
+                    R$ 49,90
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- REFRIGERANTE -->
+
+        <div class="produto" data-categoria="bebidas">
+
+            <img
+                src="https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=500&q=80"
+                alt="Refrigerante"
+            >
+
+            <div class="produto-info">
+
+                <h3>Refrigerante</h3>
+
+                <p>
+                    Refrigerante gelado 350ml.
+                </p>
+
+                <span class="preco">
+                    R$ 7,00
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- BROWNIE -->
+
+        <div class="produto" data-categoria="destaques sobremesas">
+
+            <img
+                src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=500&q=80"
+                alt="Brownie de chocolate"
+            >
+
+            <div class="produto-info">
+
+                <h3>Brownie de Chocolate</h3>
+
+                <p>
+                    Brownie de chocolate servido
+                    com calda especial.
+                </p>
+
+                <span class="preco">
+                    R$ 19,90
+                </span>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer>
+        Cardápio Digital
+    </footer>
+
+
+    <script>
+
+        const botoes = document.querySelectorAll(".categoria-btn");
+        const produtos = document.querySelectorAll(".produto");
+        const titulo = document.getElementById("tituloCategoria");
+
+        botoes.forEach(botao => {
+
+            botao.addEventListener("click", () => {
+
+                const categoria = botao.dataset.categoria;
+
+                botoes.forEach(item => {
+                    item.classList.remove("ativa");
+                });
+
+                botao.classList.add("ativa");
+
+                produtos.forEach(produto => {
+
+                    const categoriasDoProduto =
+                        produto.dataset.categoria.split(" ");
+
+                    if (categoriasDoProduto.includes(categoria)) {
+                        produto.classList.remove("escondido");
+                    } else {
+                        produto.classList.add("escondido");
+                    }
+
+                });
+
+                titulo.textContent =
+                    botao.textContent.trim();
+
+            });
+
+        });
+
+    </script>
+
+</body>
+</html>
+
+git : O termo 'git' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável. Verifique a grafia do nome ou, se um caminho tiver sido incluído, 
+veja se o caminho está correto e tente novamente.
+No linha:1 caractere:1
++ git --version
++ ~~~
+    + CategoryInfo          : ObjectNotFound: (git:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
