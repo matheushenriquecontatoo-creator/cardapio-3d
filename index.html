@@ -115,16 +115,15 @@
             display: none;
         }
 
-        /* MODAL */
+        /* =========================
+           MODAIS
+        ========================= */
 
         .modal {
             display: none;
-
             position: fixed;
             inset: 0;
-
-            background: rgba(0, 0, 0, 0.75);
-
+            background: rgba(0, 0, 0, 0.78);
             z-index: 1000;
 
             align-items: center;
@@ -139,17 +138,26 @@
 
         .modal-conteudo {
             background: white;
-
             width: 100%;
-            max-width: 420px;
-
+            max-width: 440px;
             border-radius: 20px;
-
             padding: 25px;
-
             position: relative;
-
             text-align: center;
+
+            animation: aparecer 0.2s ease;
+        }
+
+        @keyframes aparecer {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .modal-conteudo h2 {
@@ -170,7 +178,6 @@
 
         .fechar-modal {
             position: absolute;
-
             top: 10px;
             right: 15px;
 
@@ -178,15 +185,14 @@
             background: none;
 
             font-size: 28px;
-
             cursor: pointer;
-
             color: #333;
+
+            z-index: 10;
         }
 
         .btn-3d {
             width: 100%;
-
             padding: 14px;
 
             border: none;
@@ -196,7 +202,6 @@
             color: white;
 
             font-size: 16px;
-
             cursor: pointer;
         }
 
@@ -204,64 +209,56 @@
             background: #333;
         }
 
-        /* ÁREA 3D */
+        /* =========================
+           VISUALIZADOR 3D
+        ========================= */
 
         .area-3d {
             width: 100%;
-            height: 260px;
+            height: 300px;
 
             margin: 20px 0;
 
             border-radius: 16px;
 
-            background: linear-gradient(135deg, #111, #333);
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
+            background:
+                radial-gradient(circle at center, #333 0%, #181818 55%, #090909 100%);
 
             overflow: hidden;
+
+            position: relative;
         }
 
-        .objeto-3d {
-            width: 120px;
-            height: 120px;
+        #canvas3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+        }
 
-            border-radius: 24px;
+        .controle-3d {
+            font-size: 13px;
+            color: #888;
+            margin-top: 5px;
+        }
 
-            background: linear-gradient(145deg, #ffffff, #999999);
+        .carregando-3d {
+            position: absolute;
+            inset: 0;
 
             display: flex;
-
             align-items: center;
             justify-content: center;
 
-            font-size: 28px;
-            font-weight: bold;
+            color: white;
+            font-size: 14px;
 
-            color: #111;
-
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-
-            transform: rotateX(15deg) rotateY(-20deg);
-
-            animation: girar3D 5s infinite linear;
+            pointer-events: none;
         }
 
-        @keyframes girar3D {
-
-            from {
-                transform: rotateX(15deg) rotateY(0deg);
-            }
-
-            to {
-                transform: rotateX(15deg) rotateY(360deg);
-            }
-
-        }
-
-        /* MOBILE */
+        /* =========================
+           MOBILE
+        ========================= */
 
         @media (max-width: 700px) {
 
@@ -282,13 +279,27 @@
                 height: 210px;
             }
 
+            .modal {
+                padding: 12px;
+            }
+
+            .modal-conteudo {
+                padding: 20px;
+            }
+
+            .area-3d {
+                height: 280px;
+            }
+
         }
 
     </style>
 
 </head>
 
+
 <body>
+
 
     <header>
 
@@ -462,7 +473,9 @@
     </main>
 
 
-    <!-- MODAL DO PRODUTO -->
+    <!-- =========================
+         MODAL DO PRODUTO
+    ========================= -->
 
     <div id="modalProduto" class="modal">
 
@@ -494,7 +507,9 @@
     </div>
 
 
-    <!-- MODAL 3D -->
+    <!-- =========================
+         MODAL 3D
+    ========================= -->
 
     <div id="modal3D" class="modal">
 
@@ -508,18 +523,25 @@
                 ×
             </button>
 
-            <h2>Visualização 3D</h2>
+            <h2 id="titulo3D">
+                Visualização 3D
+            </h2>
 
             <div class="area-3d">
 
-                <div class="objeto-3d">
-                    3D
+                <canvas id="canvas3d"></canvas>
+
+                <div
+                    id="carregando3d"
+                    class="carregando-3d"
+                >
+                    Preparando visualização 3D...
                 </div>
 
             </div>
 
-            <p>
-                Em breve você poderá visualizar este produto em 3D.
+            <p class="controle-3d">
+                Arraste para girar • Use o scroll para aproximar
             </p>
 
         </div>
@@ -527,28 +549,588 @@
     </div>
 
 
+    <!-- THREE.JS -->
+
+    <script type="module">
+
+        import * as THREE from
+        "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+
+        import { OrbitControls } from
+        "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
+
+
+        let cena;
+        let camera;
+        let renderizador;
+        let controles;
+
+        let objetoAtual;
+
+        let animacaoAtiva = false;
+
+
+        function iniciar3D() {
+
+            const canvas =
+                document.getElementById("canvas3d");
+
+            cena = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(
+                45,
+                canvas.clientWidth / canvas.clientHeight,
+                0.1,
+                100
+            );
+
+            camera.position.set(4, 3, 6);
+
+
+            renderizador =
+                new THREE.WebGLRenderer({
+                    canvas: canvas,
+                    antialias: true,
+                    alpha: true
+                });
+
+
+            renderizador.setPixelRatio(
+                Math.min(window.devicePixelRatio, 2)
+            );
+
+
+            renderizador.setSize(
+                canvas.clientWidth,
+                canvas.clientHeight,
+                false
+            );
+
+
+            renderizador.shadowMap.enabled = true;
+
+
+            controles =
+                new OrbitControls(
+                    camera,
+                    renderizador.domElement
+                );
+
+
+            controles.enableDamping = true;
+
+            controles.minDistance = 3;
+
+            controles.maxDistance = 9;
+
+
+            /* ILUMINAÇÃO */
+
+            const luzAmbiente =
+                new THREE.HemisphereLight(
+                    0xffffff,
+                    0x444444,
+                    2.5
+                );
+
+            cena.add(luzAmbiente);
+
+
+            const luzPrincipal =
+                new THREE.DirectionalLight(
+                    0xffffff,
+                    4
+                );
+
+            luzPrincipal.position.set(
+                4,
+                6,
+                5
+            );
+
+            luzPrincipal.castShadow = true;
+
+            cena.add(luzPrincipal);
+
+
+            const luzFrontal =
+                new THREE.PointLight(
+                    0xffffff,
+                    3,
+                    20
+                );
+
+            luzFrontal.position.set(
+                -4,
+                3,
+                4
+            );
+
+            cena.add(luzFrontal);
+
+
+            /* CHÃO */
+
+            const geometriaChao =
+                new THREE.CircleGeometry(
+                    3,
+                    64
+                );
+
+            const materialChao =
+                new THREE.MeshStandardMaterial({
+                    color: 0x222222,
+                    roughness: 0.8
+                });
+
+
+            const chao =
+                new THREE.Mesh(
+                    geometriaChao,
+                    materialChao
+                );
+
+
+            chao.rotation.x =
+                -Math.PI / 2;
+
+            chao.position.y = -1.3;
+
+            cena.add(chao);
+
+
+            criarHamburguer();
+
+            animacaoAtiva = true;
+
+            animar();
+
+            document
+                .getElementById("carregando3d")
+                .style.display = "none";
+
+
+            window.addEventListener(
+                "resize",
+                ajustar3D
+            );
+
+        }
+
+
+        /* =========================
+           HAMBÚRGUER 3D
+        ========================= */
+
+        function criarHamburguer() {
+
+            limparObjeto();
+
+
+            const grupo =
+                new THREE.Group();
+
+
+            /* PÃO INFERIOR */
+
+            const paoInferior =
+                new THREE.Mesh(
+
+                    new THREE.CylinderGeometry(
+                        1.55,
+                        1.45,
+                        0.45,
+                        64
+                    ),
+
+                    new THREE.MeshStandardMaterial({
+                        color: 0xc98232,
+                        roughness: 0.75
+                    })
+
+                );
+
+
+            paoInferior.position.y = -0.85;
+
+            paoInferior.castShadow = true;
+
+            grupo.add(paoInferior);
+
+
+            /* CARNE */
+
+            const carne =
+                new THREE.Mesh(
+
+                    new THREE.CylinderGeometry(
+                        1.5,
+                        1.5,
+                        0.55,
+                        64
+                    ),
+
+                    new THREE.MeshStandardMaterial({
+                        color: 0x4a2114,
+                        roughness: 0.9
+                    })
+
+                );
+
+
+            carne.position.y = -0.35;
+
+            carne.castShadow = true;
+
+            grupo.add(carne);
+
+
+            /* QUEIJO */
+
+            const queijo =
+                new THREE.Mesh(
+
+                    new THREE.BoxGeometry(
+                        2.8,
+                        0.12,
+                        2.8
+                    ),
+
+                    new THREE.MeshStandardMaterial({
+                        color: 0xffc928,
+                        roughness: 0.5
+                    })
+
+                );
+
+
+            queijo.position.y = 0.02;
+
+            queijo.rotation.y =
+                Math.PI / 4;
+
+            queijo.castShadow = true;
+
+            grupo.add(queijo);
+
+
+            /* ALFACE */
+
+            const alface =
+                new THREE.Mesh(
+
+                    new THREE.CylinderGeometry(
+                        1.58,
+                        1.58,
+                        0.18,
+                        64
+                    ),
+
+                    new THREE.MeshStandardMaterial({
+                        color: 0x3d8f35,
+                        roughness: 0.9
+                    })
+
+                );
+
+
+            alface.position.y = 0.17;
+
+            grupo.add(alface);
+
+
+            /* PÃO SUPERIOR */
+
+            const paoSuperior =
+                new THREE.Mesh(
+
+                    new THREE.SphereGeometry(
+                        1.58,
+                        64,
+                        32,
+                        0,
+                        Math.PI * 2,
+                        0,
+                        Math.PI / 2
+                    ),
+
+                    new THREE.MeshStandardMaterial({
+                        color: 0xd8943c,
+                        roughness: 0.7
+                    })
+
+                );
+
+
+            paoSuperior.position.y = 0.25;
+
+            paoSuperior.scale.y = 0.65;
+
+            paoSuperior.castShadow = true;
+
+            grupo.add(paoSuperior);
+
+
+            /* GERGELIM */
+
+            for (let i = 0; i < 18; i++) {
+
+                const semente =
+                    new THREE.Mesh(
+
+                        new THREE.SphereGeometry(
+                            0.06,
+                            12,
+                            8
+                        ),
+
+                        new THREE.MeshStandardMaterial({
+                            color: 0xffe4a3
+                        })
+
+                    );
+
+
+                const angulo =
+                    Math.random() * Math.PI * 2;
+
+                const raio =
+                    Math.random() * 1.1;
+
+
+                semente.position.set(
+                    Math.cos(angulo) * raio,
+                    0.9 + Math.random() * 0.15,
+                    Math.sin(angulo) * raio
+                );
+
+
+                semente.scale.y = 0.4;
+
+                grupo.add(semente);
+
+            }
+
+
+            objetoAtual = grupo;
+
+            cena.add(grupo);
+
+        }
+
+
+        /* =========================
+           LIMPAR OBJETO
+        ========================= */
+
+        function limparObjeto() {
+
+            if (!objetoAtual) {
+                return;
+            }
+
+
+            cena.remove(objetoAtual);
+
+
+            objetoAtual.traverse(
+                function (objeto) {
+
+                    if (objeto.geometry) {
+                        objeto.geometry.dispose();
+                    }
+
+
+                    if (objeto.material) {
+
+                        if (Array.isArray(objeto.material)) {
+
+                            objeto.material.forEach(
+                                material =>
+                                    material.dispose()
+                            );
+
+                        } else {
+
+                            objeto.material.dispose();
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+            objetoAtual = null;
+
+        }
+
+
+        /* =========================
+           ANIMAÇÃO
+        ========================= */
+
+        function animar() {
+
+            if (!animacaoAtiva) {
+                return;
+            }
+
+
+            requestAnimationFrame(animar);
+
+
+            if (objetoAtual) {
+
+                objetoAtual.rotation.y += 0.003;
+
+            }
+
+
+            controles.update();
+
+
+            renderizador.render(
+                cena,
+                camera
+            );
+
+        }
+
+
+        /* =========================
+           AJUSTAR TAMANHO
+        ========================= */
+
+        function ajustar3D() {
+
+            const canvas =
+                document.getElementById("canvas3d");
+
+
+            const largura =
+                canvas.clientWidth;
+
+            const altura =
+                canvas.clientHeight;
+
+
+            camera.aspect =
+                largura / altura;
+
+
+            camera.updateProjectionMatrix();
+
+
+            renderizador.setSize(
+                largura,
+                altura,
+                false
+            );
+
+        }
+
+
+        /* =========================
+           ABRIR 3D
+        ========================= */
+
+        window.abrir3DReal = function () {
+
+            document
+                .getElementById("modalProduto")
+                .classList.remove("ativo");
+
+
+            document
+                .getElementById("modal3D")
+                .classList.add("ativo");
+
+
+            setTimeout(function () {
+
+                if (!cena) {
+
+                    iniciar3D();
+
+                } else {
+
+                    ajustar3D();
+
+                }
+
+            }, 100);
+
+        };
+
+
+        /* =========================
+           FECHAR 3D
+        ========================= */
+
+        window.fechar3DReal = function () {
+
+            document
+                .getElementById("modal3D")
+                .classList.remove("ativo");
+
+        };
+
+
+        /* BOTÃO 3D */
+
+        window.abrir3D = function () {
+
+            abrir3DReal();
+
+        };
+
+
+        window.fechar3D = function () {
+
+            fechar3DReal();
+
+        };
+
+
+    </script>
+
+
+    <!-- JAVASCRIPT DO CARDÁPIO -->
+
     <script>
 
-        /* FILTRO DE CATEGORIAS */
+        /* =========================
+           FILTRO DE CATEGORIAS
+        ========================= */
 
         function filtrarProdutos(categoria) {
 
-            const produtos = document.querySelectorAll(".produto");
+            const produtos =
+                document.querySelectorAll(".produto");
 
-            produtos.forEach(function(produto) {
 
-                const categorias = produto.dataset.categoria;
+            produtos.forEach(function (produto) {
+
+                const categorias =
+                    produto.dataset.categoria;
+
 
                 if (
                     categoria === "todos" ||
                     categorias.includes(categoria)
                 ) {
 
-                    produto.classList.remove("escondido");
+                    produto.classList.remove(
+                        "escondido"
+                    );
 
                 } else {
 
-                    produto.classList.add("escondido");
+                    produto.classList.add(
+                        "escondido"
+                    );
 
                 }
 
@@ -557,15 +1139,30 @@
         }
 
 
-        /* ABRIR PRODUTO */
+        /* =========================
+           ABRIR PRODUTO
+        ========================= */
 
-        function abrirProduto(nome, descricao, preco) {
+        function abrirProduto(
+            nome,
+            descricao,
+            preco
+        ) {
 
-            document.getElementById("modalNome").textContent = nome;
+            document
+                .getElementById("modalNome")
+                .textContent = nome;
 
-            document.getElementById("modalDescricao").textContent = descricao;
 
-            document.getElementById("modalPreco").textContent = preco;
+            document
+                .getElementById("modalDescricao")
+                .textContent = descricao;
+
+
+            document
+                .getElementById("modalPreco")
+                .textContent = preco;
+
 
             document
                 .getElementById("modalProduto")
@@ -574,7 +1171,9 @@
         }
 
 
-        /* FECHAR PRODUTO */
+        /* =========================
+           FECHAR PRODUTO
+        ========================= */
 
         function fecharModal() {
 
@@ -585,32 +1184,50 @@
         }
 
 
-        /* ABRIR 3D */
+        /* =========================
+           FECHAR CLICANDO FORA
+        ========================= */
 
-        function abrir3D() {
+        document
+            .getElementById("modalProduto")
+            .addEventListener(
+                "click",
+                function (evento) {
 
-            document
-                .getElementById("modalProduto")
-                .classList.remove("ativo");
+                    if (
+                        evento.target ===
+                        this
+                    ) {
 
-            document
-                .getElementById("modal3D")
-                .classList.add("ativo");
+                        fecharModal();
 
-        }
+                    }
+
+                }
+            );
 
 
-        /* FECHAR 3D */
+        document
+            .getElementById("modal3D")
+            .addEventListener(
+                "click",
+                function (evento) {
 
-        function fechar3D() {
+                    if (
+                        evento.target ===
+                        this
+                    ) {
 
-            document
-                .getElementById("modal3D")
-                .classList.remove("ativo");
+                        fechar3D();
 
-        }
+                    }
+
+                }
+            );
+
 
     </script>
+
 
 </body>
 
