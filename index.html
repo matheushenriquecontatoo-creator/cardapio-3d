@@ -449,6 +449,17 @@
 
 
         function abrirProduto(nome, descricao, preco) {
+    document.getElementById("modalNome").textContent = nome;
+    document.getElementById("modalDescricao").textContent = descricao;
+    document.getElementById("modalPreco").textContent = preco;
+
+    document.getElementById("modalProduto").classList.add("ativo");
+}
+
+function fecharModal() {
+    document.getElementById("modalProduto").classList.remove("ativo");
+}
+
 
             alert(
                 nome +
