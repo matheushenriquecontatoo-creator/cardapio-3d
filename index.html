@@ -456,7 +456,14 @@
     document.getElementById("modalProduto").classList.add("ativo");
 }
 
-function fecharModal() {
+function fecharModal() { function abrir3D() {
+    document.getElementById("modalProduto").classList.remove("ativo");
+    document.getElementById("modal3D").classList.add("ativo");
+}
+
+function fechar3D() {
+    document.getElementById("modal3D").classList.remove("ativo");
+}
     document.getElementById("modalProduto").classList.remove("ativo");
 }
 
