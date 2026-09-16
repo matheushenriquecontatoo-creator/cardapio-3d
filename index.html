@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>Restaurante Demo</title>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+>
 
-<!-- THREE.JS -->
+<title>Cardápio 3D</title>
+
+<!-- =====================================================
+     THREE.JS
+===================================================== -->
+
 <script type="importmap">
 {
     "imports": {
@@ -16,6 +24,11 @@
 </script>
 
 <style>
+
+/* =====================================================
+   RESET
+===================================================== */
+
 *{
     margin:0;
     padding:0;
@@ -32,16 +45,37 @@ body{
     color:#111;
 }
 
-/* =========================
+button{
+    font-family:inherit;
+}
+
+.escondido{
+    display:none!important;
+}
+
+/* =====================================================
    HEADER
-========================= */
+===================================================== */
 
 header{
     background:
-        radial-gradient(circle at 50% 0%,#333 0%,#111 45%,#050505 100%);
+        radial-gradient(
+            circle at 50% 0%,
+            #383838 0%,
+            #111 48%,
+            #050505 100%
+        );
+
     color:#fff;
-    padding:42px 20px;
+
+    padding:
+        42px
+        20px
+        35px;
+
     text-align:center;
+
+    position:relative;
 }
 
 header h1{
@@ -55,20 +89,46 @@ header p{
     font-size:15px;
 }
 
-/* =========================
+.header-status{
+    margin-top:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:7px 12px;
+    border-radius:30px;
+    background:rgba(255,255,255,.08);
+    color:#bbb;
+    font-size:11px;
+}
+
+.status-ponto{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#58d68d;
+}
+
+/* =====================================================
    CATEGORIAS
-========================= */
+===================================================== */
 
 .categorias{
     display:flex;
     gap:10px;
+
     overflow-x:auto;
+
     padding:18px 20px;
+
     background:#fff;
+
     position:sticky;
     top:0;
+
     z-index:50;
-    box-shadow:0 3px 15px rgba(0,0,0,.06);
+
+    box-shadow:
+        0 3px 15px rgba(0,0,0,.06);
 }
 
 .categorias::-webkit-scrollbar{
@@ -77,12 +137,21 @@ header p{
 
 .categoria{
     border:none;
+
     background:#eee;
-    padding:12px 19px;
+
+    padding:
+        12px
+        19px;
+
     border-radius:30px;
+
     cursor:pointer;
+
     white-space:nowrap;
+
     font-size:14px;
+
     transition:.2s;
 }
 
@@ -95,27 +164,41 @@ header p{
     color:#fff;
 }
 
-/* =========================
+/* =====================================================
    PRODUTOS
-========================= */
+===================================================== */
 
 .produtos{
     max-width:1050px;
-    margin:30px auto 60px;
-    padding:0 20px;
+
+    margin:
+        30px
+        auto
+        100px;
+
+    padding:
+        0
+        20px;
 
     display:grid;
-    grid-template-columns:repeat(2,1fr);
+
+    grid-template-columns:
+        repeat(2,1fr);
+
     gap:22px;
 }
 
 .produto{
     background:#fff;
+
     border-radius:20px;
+
     overflow:hidden;
+
     cursor:pointer;
 
-    box-shadow:0 5px 22px rgba(0,0,0,.08);
+    box-shadow:
+        0 5px 22px rgba(0,0,0,.08);
 
     transition:
         transform .25s,
@@ -124,13 +207,17 @@ header p{
 
 .produto:hover{
     transform:translateY(-5px);
-    box-shadow:0 14px 35px rgba(0,0,0,.14);
+
+    box-shadow:
+        0 14px 35px rgba(0,0,0,.14);
 }
 
 .produto img{
     width:100%;
     height:240px;
+
     object-fit:cover;
+
     display:block;
 }
 
@@ -145,8 +232,11 @@ header p{
 
 .produto-info p{
     color:#666;
+
     font-size:14px;
+
     line-height:1.5;
+
     margin-bottom:13px;
 }
 
@@ -155,18 +245,75 @@ header p{
     font-weight:bold;
 }
 
-.escondido{
-    display:none!important;
+/* =====================================================
+   BOTÃO CARRINHO FLUTUANTE
+===================================================== */
+
+.carrinho-flutuante{
+    position:fixed;
+
+    right:20px;
+    bottom:20px;
+
+    z-index:800;
+
+    border:none;
+
+    background:#111;
+    color:#fff;
+
+    padding:
+        14px
+        18px;
+
+    border-radius:50px;
+
+    font-size:14px;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    transition:.2s;
 }
 
-/* =========================
+.carrinho-flutuante:hover{
+    transform:translateY(-2px);
+}
+
+.carrinho-contador{
+    min-width:22px;
+    height:22px;
+
+    padding:0 6px;
+
+    border-radius:20px;
+
+    background:#fff;
+    color:#111;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:11px;
+}
+
+/* =====================================================
    MODAIS
-========================= */
+===================================================== */
 
 .modal{
     display:none;
 
     position:fixed;
+
     inset:0;
 
     background:rgba(0,0,0,.80);
@@ -197,10 +344,16 @@ header p{
 
     text-align:center;
 
-    animation:aparecer .2s ease;
+    animation:
+        aparecer .2s ease;
+
+    max-height:94vh;
+
+    overflow-y:auto;
 }
 
 @keyframes aparecer{
+
     from{
         opacity:0;
         transform:scale(.95);
@@ -210,20 +363,25 @@ header p{
         opacity:1;
         transform:scale(1);
     }
+
 }
 
 .fechar-modal{
     position:absolute;
+
     top:8px;
     right:13px;
 
     border:none;
+
     background:transparent;
 
     font-size:28px;
+
     cursor:pointer;
 
     color:#222;
+
     z-index:20;
 }
 
@@ -234,19 +392,23 @@ header p{
 
 #modalDescricao{
     color:#666;
+
     line-height:1.5;
+
     margin-bottom:14px;
 }
 
 .modal-preco{
     font-size:22px;
+
     font-weight:bold;
+
     margin-bottom:20px;
 }
 
-/* =========================
+/* =====================================================
    BOTÕES
-========================= */
+===================================================== */
 
 .botoes-produto{
     display:grid;
@@ -254,15 +416,18 @@ header p{
 }
 
 .btn-principal,
-.btn-ar{
+.btn-ar,
+.btn-secundario{
     width:100%;
 
     border:none;
+
     border-radius:14px;
 
     padding:15px;
 
     font-size:15px;
+
     font-weight:bold;
 
     cursor:pointer;
@@ -288,9 +453,54 @@ header p{
     background:#ddd;
 }
 
-/* =========================
+.btn-secundario{
+    background:#f1f1f1;
+    color:#111;
+}
+
+/* =====================================================
+   QUANTIDADE
+===================================================== */
+
+.quantidade-box{
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    gap:18px;
+
+    margin:
+        18px
+        0;
+}
+
+.btn-quantidade{
+    width:40px;
+    height:40px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#111;
+    color:#fff;
+
+    font-size:22px;
+
+    cursor:pointer;
+}
+
+.quantidade-numero{
+    font-size:19px;
+    font-weight:bold;
+
+    min-width:25px;
+}
+
+/* =====================================================
    3D
-========================= */
+===================================================== */
 
 .area-3d{
     width:100%;
@@ -299,6 +509,7 @@ header p{
     margin:20px 0;
 
     border-radius:19px;
+
     overflow:hidden;
 
     position:relative;
@@ -315,19 +526,24 @@ header p{
 #canvas3d{
     width:100%;
     height:100%;
+
     display:block;
+
     touch-action:none;
 }
 
 .carregando-3d{
     position:absolute;
+
     inset:0;
 
     display:flex;
+
     align-items:center;
     justify-content:center;
 
     color:#fff;
+
     font-size:14px;
 
     background:rgba(0,0,0,.25);
@@ -337,17 +553,22 @@ header p{
 
 .erro-3d{
     position:absolute;
+
     inset:0;
 
     display:none;
+
     align-items:center;
     justify-content:center;
 
     flex-direction:column;
+
     gap:10px;
 
     color:#fff;
+
     text-align:center;
+
     padding:30px;
 
     background:#111;
@@ -359,22 +580,168 @@ header p{
 
 .controle-3d{
     color:#777;
+
     font-size:13px;
+
     margin-top:8px;
 }
 
 .produto-3d-nome{
     color:#888;
+
     font-size:13px;
+
     margin-top:-5px;
 }
 
-/* =========================
-   AR / CÂMERA
-========================= */
+/* =====================================================
+   CARRINHO
+===================================================== */
+
+.carrinho-lista{
+    text-align:left;
+
+    margin-top:15px;
+}
+
+.carrinho-vazio{
+    color:#777;
+
+    padding:
+        25px
+        0;
+
+    text-align:center;
+}
+
+.item-carrinho{
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        auto;
+
+    gap:12px;
+
+    padding:
+        15px
+        0;
+
+    border-bottom:
+        1px solid #eee;
+}
+
+.item-carrinho-nome{
+    font-weight:bold;
+
+    margin-bottom:5px;
+}
+
+.item-carrinho-preco{
+    color:#777;
+
+    font-size:13px;
+}
+
+.item-controles{
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+}
+
+.item-btn{
+    width:28px;
+    height:28px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#eee;
+
+    cursor:pointer;
+
+    font-weight:bold;
+}
+
+.item-qtd{
+    min-width:18px;
+
+    text-align:center;
+
+    font-weight:bold;
+
+    font-size:13px;
+}
+
+.carrinho-total{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:
+        20px
+        0;
+
+    font-size:19px;
+
+    font-weight:bold;
+}
+
+.formulario-pedido{
+    text-align:left;
+
+    margin-top:8px;
+}
+
+.formulario-pedido label{
+    display:block;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    margin:
+        12px
+        0
+        6px;
+}
+
+.formulario-pedido input,
+.formulario-pedido textarea{
+    width:100%;
+
+    border:
+        1px solid #ddd;
+
+    border-radius:12px;
+
+    padding:13px;
+
+    font-size:14px;
+
+    outline:none;
+
+    font-family:inherit;
+}
+
+.formulario-pedido textarea{
+    min-height:80px;
+
+    resize:vertical;
+}
+
+/* =====================================================
+   AR
+===================================================== */
 
 .ar-tela{
     position:fixed;
+
     inset:0;
 
     display:none;
@@ -392,6 +759,7 @@ header p{
 
 #videoCamera{
     position:absolute;
+
     inset:0;
 
     width:100%;
@@ -404,6 +772,7 @@ header p{
 
 #canvasAR{
     position:absolute;
+
     inset:0;
 
     width:100%;
@@ -414,6 +783,7 @@ header p{
 
 .ar-topo{
     position:absolute;
+
     top:0;
     left:0;
     right:0;
@@ -424,20 +794,24 @@ header p{
         18px;
 
     display:flex;
+
     justify-content:space-between;
     align-items:center;
 
     z-index:10;
 
-    background:linear-gradient(
-        rgba(0,0,0,.65),
-        transparent
-    );
+    background:
+        linear-gradient(
+            rgba(0,0,0,.65),
+            transparent
+        );
 }
 
 .ar-titulo{
     color:#fff;
+
     font-size:16px;
+
     font-weight:bold;
 }
 
@@ -446,12 +820,15 @@ header p{
     height:42px;
 
     border:none;
+
     border-radius:50%;
 
     background:rgba(0,0,0,.65);
+
     color:#fff;
 
     font-size:25px;
+
     cursor:pointer;
 }
 
@@ -459,25 +836,36 @@ header p{
     position:absolute;
 
     left:50%;
+
     bottom:
-        calc(30px + env(safe-area-inset-bottom));
+        calc(
+            30px +
+            env(safe-area-inset-bottom)
+        );
 
-    transform:translateX(-50%);
+    transform:
+        translateX(-50%);
 
-    width:calc(100% - 36px);
+    width:
+        calc(100% - 36px);
+
     max-width:430px;
 
-    padding:14px 18px;
+    padding:
+        14px
+        18px;
 
     border-radius:17px;
 
-    background:rgba(0,0,0,.68);
+    background:
+        rgba(0,0,0,.68);
 
     color:#fff;
 
     text-align:center;
 
     font-size:13px;
+
     line-height:1.5;
 
     z-index:10;
@@ -487,24 +875,30 @@ header p{
 
 .ar-status{
     margin-top:6px;
+
     color:#bbb;
+
     font-size:11px;
 }
 
 .ar-carregando{
     position:absolute;
+
     inset:0;
 
     display:none;
+
     align-items:center;
     justify-content:center;
 
     flex-direction:column;
+
     gap:12px;
 
     color:#fff;
 
-    background:rgba(0,0,0,.85);
+    background:
+        rgba(0,0,0,.85);
 
     z-index:20;
 
@@ -527,10 +921,12 @@ header p{
         0 0 0 8px rgba(255,255,255,.12),
         0 0 30px rgba(255,255,255,.5);
 
-    animation:pulsar 1.2s infinite;
+    animation:
+        pulsar 1.2s infinite;
 }
 
 @keyframes pulsar{
+
     0%,100%{
         transform:scale(1);
         opacity:.7;
@@ -540,11 +936,12 @@ header p{
         transform:scale(1.35);
         opacity:1;
     }
+
 }
 
-/* =========================
-   MODAL AR INFORMATIVO
-========================= */
+/* =====================================================
+   MODAL AR
+===================================================== */
 
 .ar-conteudo{
     text-align:center;
@@ -556,12 +953,17 @@ header p{
 
     border-radius:50%;
 
-    margin:5px auto 18px;
+    margin:
+        5px
+        auto
+        18px;
 
     background:#111;
+
     color:#fff;
 
     display:flex;
+
     align-items:center;
     justify-content:center;
 
@@ -574,24 +976,96 @@ header p{
 
 .ar-conteudo p{
     color:#666;
+
     line-height:1.5;
+
     margin-bottom:20px;
 }
 
 .ar-aviso{
     font-size:12px;
+
     color:#999;
+
     margin-top:14px;
 }
 
-/* =========================
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+
+    bottom:85px;
+
+    transform:
+        translateX(-50%)
+        translateY(20px);
+
+    background:#111;
+
+    color:#fff;
+
+    padding:
+        13px
+        18px;
+
+    border-radius:30px;
+
+    font-size:13px;
+
+    z-index:5000;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.25s;
+
+    white-space:nowrap;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+}
+
+.toast.ativo{
+    opacity:1;
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+}
+
+/* =====================================================
+   RODAPÉ
+===================================================== */
+
+footer{
+    text-align:center;
+
+    padding:
+        25px
+        20px
+        100px;
+
+    color:#999;
+
+    font-size:12px;
+}
+
+/* =====================================================
    RESPONSIVO
-========================= */
+===================================================== */
 
 @media(max-width:700px){
 
     header{
-        padding:30px 15px;
+        padding:
+            30px
+            15px;
     }
 
     header h1{
@@ -600,7 +1074,11 @@ header p{
 
     .produtos{
         grid-template-columns:1fr;
-        padding:0 15px;
+
+        padding:
+            0
+            15px;
+
         margin-top:22px;
     }
 
@@ -614,13 +1092,12 @@ header p{
 
     .modal-conteudo{
         padding:22px;
-        max-height:94vh;
-        overflow-y:auto;
     }
 
     .area-3d{
         height:300px;
     }
+
 }
 
 @media(max-width:380px){
@@ -632,205 +1109,97 @@ header p{
     .modal-conteudo{
         padding:19px;
     }
+
+    .carrinho-flutuante{
+        right:12px;
+        bottom:12px;
+    }
+
 }
+
 </style>
 </head>
 
 <body>
 
-<!-- =========================
-     CABEÇALHO
-========================= -->
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
 <header>
-    <h1>Restaurante Demo</h1>
-    <p>Escolha seu prato favorito</p>
+
+    <h1 id="restauranteNome">
+        Restaurante Demo
+    </h1>
+
+    <p id="restauranteDescricao">
+        Escolha seu prato favorito
+    </p>
+
+    <div class="header-status">
+
+        <span class="status-ponto"></span>
+
+        Cardápio digital
+
+    </div>
+
 </header>
 
-<!-- =========================
+
+<!-- =====================================================
      CATEGORIAS
-========================= -->
+===================================================== -->
 
-<div class="categorias">
+<div
+    class="categorias"
+    id="categorias"
+></div>
 
-    <button
-        class="categoria ativa"
-        onclick="filtrarProdutos('todos',this)"
-    >
-        Destaques
-    </button>
 
-    <button
-        class="categoria"
-        onclick="filtrarProdutos('pratos',this)"
-    >
-        Pratos
-    </button>
-
-    <button
-        class="categoria"
-        onclick="filtrarProdutos('bebidas',this)"
-    >
-        Bebidas
-    </button>
-
-    <button
-        class="categoria"
-        onclick="filtrarProdutos('sobremesas',this)"
-    >
-        Sobremesas
-    </button>
-
-</div>
-
-<!-- =========================
+<!-- =====================================================
      PRODUTOS
-========================= -->
+===================================================== -->
 
-<main class="produtos">
+<main
+    class="produtos"
+    id="listaProdutos"
+></main>
 
-    <div
-        class="produto"
-        data-categoria="destaques pratos"
-        onclick="abrirProduto(
-            'hamburguer',
-            'Hambúrguer da Casa',
-            'Hambúrguer artesanal, queijo, molho especial e acompanhamentos.',
-            'R$ 34,90'
-        )"
+
+<!-- =====================================================
+     CARRINHO FLUTUANTE
+===================================================== -->
+
+<button
+    class="carrinho-flutuante"
+    onclick="abrirCarrinho()"
+>
+
+    🛒
+
+    <span>
+        Pedido
+    </span>
+
+    <span
+        id="carrinhoContador"
+        class="carrinho-contador"
     >
+        0
+    </span>
 
-        <img
-            src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80"
-            alt="Hambúrguer da Casa"
-        >
-
-        <div class="produto-info">
-
-            <h2>Hambúrguer da Casa</h2>
-
-            <p>
-                Hambúrguer artesanal, queijo,
-                molho especial e acompanhamentos.
-            </p>
-
-            <div class="preco">
-                R$ 34,90
-            </div>
-
-        </div>
-
-    </div>
+</button>
 
 
-    <div
-        class="produto"
-        data-categoria="destaques pratos"
-        onclick="abrirProduto(
-            'fettuccine',
-            'Fettuccine Especial',
-            'Massa fresca ao molho cremoso com ingredientes selecionados.',
-            'R$ 49,90'
-        )"
-    >
-
-        <img
-            src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80"
-            alt="Fettuccine Especial"
-        >
-
-        <div class="produto-info">
-
-            <h2>Fettuccine Especial</h2>
-
-            <p>
-                Massa fresca ao molho cremoso
-                com ingredientes selecionados.
-            </p>
-
-            <div class="preco">
-                R$ 49,90
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div
-        class="produto"
-        data-categoria="destaques bebidas"
-        onclick="abrirProduto(
-            'refrigerante',
-            'Refrigerante',
-            'Refrigerante gelado para acompanhar sua refeição.',
-            'R$ 7,00'
-        )"
-    >
-
-        <img
-            src="https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=900&q=80"
-            alt="Refrigerante"
-        >
-
-        <div class="produto-info">
-
-            <h2>Refrigerante</h2>
-
-            <p>
-                Refrigerante gelado para acompanhar
-                sua refeição.
-            </p>
-
-            <div class="preco">
-                R$ 7,00
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div
-        class="produto"
-        data-categoria="destaques sobremesas"
-        onclick="abrirProduto(
-            'brownie',
-            'Brownie de Chocolate',
-            'Brownie de chocolate servido com uma textura macia e intensa.',
-            'R$ 19,90'
-        )"
-    >
-
-        <img
-            src="https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&w=900&q=80"
-            alt="Brownie de Chocolate"
-        >
-
-        <div class="produto-info">
-
-            <h2>Brownie de Chocolate</h2>
-
-            <p>
-                Brownie de chocolate servido
-                com uma textura macia e intensa.
-            </p>
-
-            <div class="preco">
-                R$ 19,90
-            </div>
-
-        </div>
-
-    </div>
-
-</main>
-
-<!-- =========================
+<!-- =====================================================
      MODAL PRODUTO
-========================= -->
+===================================================== -->
 
-<div id="modalProduto" class="modal">
+<div
+    id="modalProduto"
+    class="modal"
+>
 
     <div class="modal-conteudo">
 
@@ -850,17 +1219,49 @@ header p{
             class="modal-preco"
         ></div>
 
+        <div class="quantidade-box">
+
+            <button
+                class="btn-quantidade"
+                onclick="alterarQuantidadeProduto(-1)"
+            >
+                −
+            </button>
+
+            <span
+                id="quantidadeProduto"
+                class="quantidade-numero"
+            >
+                1
+            </span>
+
+            <button
+                class="btn-quantidade"
+                onclick="alterarQuantidadeProduto(1)"
+            >
+                +
+            </button>
+
+        </div>
+
         <div class="botoes-produto">
 
             <button
                 class="btn-principal"
+                onclick="adicionarProdutoAtual()"
+            >
+                Adicionar ao pedido
+            </button>
+
+            <button
+                class="btn-ar"
                 onclick="abrir3D()"
             >
                 Ver em 3D
             </button>
 
             <button
-                class="btn-ar"
+                class="btn-secundario"
                 onclick="abrirAR()"
             >
                 Ver na minha mesa
@@ -872,11 +1273,15 @@ header p{
 
 </div>
 
-<!-- =========================
-     MODAL 3D
-========================= -->
 
-<div id="modal3D" class="modal">
+<!-- =====================================================
+     MODAL 3D
+===================================================== -->
+
+<div
+    id="modal3D"
+    class="modal"
+>
 
     <div class="modal-conteudo">
 
@@ -911,11 +1316,15 @@ header p{
                 id="erro3d"
                 class="erro-3d"
             >
-                <strong>Não foi possível carregar o 3D.</strong>
+
+                <strong>
+                    Não foi possível carregar o 3D.
+                </strong>
 
                 <span>
                     Verifique sua conexão e tente novamente.
                 </span>
+
             </div>
 
         </div>
@@ -925,22 +1334,34 @@ header p{
         </p>
 
         <button
-            class="btn-ar"
+            class="btn-principal"
             style="margin-top:16px;"
             onclick="abrirAR()"
         >
             Ver na minha mesa
         </button>
 
+        <button
+            class="btn-secundario"
+            style="margin-top:10px;"
+            onclick="adicionarProdutoAtual()"
+        >
+            Adicionar ao pedido
+        </button>
+
     </div>
 
 </div>
 
-<!-- =========================
-     MODAL AR
-========================= -->
 
-<div id="modalAR" class="modal">
+<!-- =====================================================
+     MODAL AR
+===================================================== -->
+
+<div
+    id="modalAR"
+    class="modal"
+>
 
     <div class="modal-conteudo ar-conteudo">
 
@@ -979,9 +1400,10 @@ header p{
 
 </div>
 
-<!-- =========================
+
+<!-- =====================================================
      TELA AR
-========================= -->
+===================================================== -->
 
 <div
     id="telaAR"
@@ -995,14 +1417,18 @@ header p{
         playsinline
     ></video>
 
-    <canvas id="canvasAR"></canvas>
+    <canvas
+        id="canvasAR"
+    ></canvas>
 
     <div class="ar-topo">
 
         <div class="ar-titulo">
+
             <span id="arNomeProduto">
                 Produto
             </span>
+
         </div>
 
         <button
@@ -1017,6 +1443,9 @@ header p{
     <div class="ar-instrucoes">
 
         Arraste o produto para girar.
+
+        <br>
+
         Use dois dedos para aumentar ou diminuir.
 
         <div class="ar-status">
@@ -1040,9 +1469,115 @@ header p{
 
 </div>
 
-<!-- =========================
-     THREE.JS
-========================= -->
+
+<!-- =====================================================
+     MODAL CARRINHO
+===================================================== -->
+
+<div
+    id="modalCarrinho"
+    class="modal"
+>
+
+    <div class="modal-conteudo">
+
+        <button
+            class="fechar-modal"
+            onclick="fecharCarrinho()"
+        >
+            ×
+        </button>
+
+        <h2>
+            Seu pedido
+        </h2>
+
+        <div
+            id="carrinhoLista"
+            class="carrinho-lista"
+        ></div>
+
+        <div
+            id="carrinhoFinalizacao"
+            style="display:none;"
+        >
+
+            <div class="carrinho-total">
+
+                <span>
+                    Total
+                </span>
+
+                <span id="carrinhoTotal">
+                    R$ 0,00
+                </span>
+
+            </div>
+
+            <div class="formulario-pedido">
+
+                <label for="clienteNome">
+                    Seu nome
+                </label>
+
+                <input
+                    id="clienteNome"
+                    type="text"
+                    placeholder="Digite seu nome"
+                >
+
+                <label for="clienteObs">
+                    Observações
+                </label>
+
+                <textarea
+                    id="clienteObs"
+                    placeholder="Ex.: sem cebola, ponto da carne..."
+                ></textarea>
+
+            </div>
+
+            <button
+                class="btn-principal"
+                style="margin-top:16px;"
+                onclick="finalizarWhatsApp()"
+            >
+                Finalizar pedido pelo WhatsApp
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    id="toast"
+    class="toast"
+>
+    Adicionado ao pedido
+</div>
+
+
+<footer>
+
+    <div id="rodapeNome">
+        Restaurante Demo
+    </div>
+
+    Cardápio digital
+
+</footer>
+
+
+<!-- =====================================================
+     THREE.JS + 3D + AR
+===================================================== -->
 
 <script type="module">
 
@@ -1056,17 +1591,46 @@ from
 "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
 
 
+/* =====================================================
+   VARIÁVEIS 3D
+===================================================== */
+
 let cena = null;
+
 let camera = null;
+
 let renderizador = null;
+
 let controles = null;
+
 let objetoAtual = null;
+
 let animacaoAtiva = false;
 
 
-/* =========================
+/* =====================================================
+   MATERIAL
+===================================================== */
+
+function material(
+    cor,
+    roughness=.7
+){
+
+    return new THREE.MeshStandardMaterial({
+
+        color:cor,
+
+        roughness:roughness
+
+    });
+
+}
+
+
+/* =====================================================
    INICIAR 3D
-========================= */
+===================================================== */
 
 function iniciar3D(){
 
@@ -1113,10 +1677,12 @@ function iniciar3D(){
 
 
     renderizador.setPixelRatio(
+
         Math.min(
             window.devicePixelRatio || 1,
             2
         )
+
     );
 
 
@@ -1145,14 +1711,13 @@ function iniciar3D(){
 
     controles.maxDistance = 9;
 
+
     controles.target.set(
         0,
         -.1,
         0
     );
 
-
-    /* LUZ AMBIENTE */
 
     const ambiente =
         new THREE.HemisphereLight(
@@ -1163,8 +1728,6 @@ function iniciar3D(){
 
     cena.add(ambiente);
 
-
-    /* LUZ PRINCIPAL */
 
     const principal =
         new THREE.DirectionalLight(
@@ -1183,8 +1746,6 @@ function iniciar3D(){
     cena.add(principal);
 
 
-    /* LUZ FRONTAL */
-
     const frontal =
         new THREE.PointLight(
             0xffffff,
@@ -1201,8 +1762,6 @@ function iniciar3D(){
     cena.add(frontal);
 
 
-    /* LUZ LATERAL */
-
     const lateral =
         new THREE.PointLight(
             0xffffff,
@@ -1218,8 +1777,6 @@ function iniciar3D(){
 
     cena.add(lateral);
 
-
-    /* CHÃO */
 
     const geometriaChao =
         new THREE.CircleGeometry(
@@ -1262,31 +1819,13 @@ function iniciar3D(){
     animar();
 
     ajustar3D();
+
 }
 
 
-/* =========================
-   MATERIAL
-========================= */
-
-function material(
-    cor,
-    roughness=.7
-){
-
-    return new THREE.MeshStandardMaterial({
-
-        color:cor,
-
-        roughness:roughness
-
-    });
-}
-
-
-/* =========================
+/* =====================================================
    HAMBÚRGUER
-========================= */
+===================================================== */
 
 function criarHamburguer(){
 
@@ -1460,12 +1999,15 @@ function criarHamburguer(){
 
         semente.position.set(
 
-            Math.cos(angulo) * raio,
+            Math.cos(angulo) *
+            raio,
 
             .9 +
-            Math.random() * .15,
+            Math.random() *
+            .15,
 
-            Math.sin(angulo) * raio
+            Math.sin(angulo) *
+            raio
 
         );
 
@@ -1482,12 +2024,13 @@ function criarHamburguer(){
         grupo;
 
     cena.add(grupo);
+
 }
 
 
-/* =========================
+/* =====================================================
    FETTUCCINE
-========================= */
+===================================================== */
 
 function criarFettuccine(){
 
@@ -1634,54 +2177,17 @@ function criarFettuccine(){
     }
 
 
-    for(
-        let i=0;
-        i<14;
-        i++
-    ){
-
-        const erva =
-            new THREE.Mesh(
-
-                new THREE.BoxGeometry(
-                    .025,
-                    .12,
-                    .025
-                ),
-
-                material(
-                    0x49713b
-                )
-
-            );
-
-
-        erva.position.set(
-
-            (Math.random()-.5)*1.5,
-
-            -.38,
-
-            (Math.random()-.5)*1.5
-
-        );
-
-
-        grupo.add(erva);
-
-    }
-
-
     objetoAtual =
         grupo;
 
     cena.add(grupo);
+
 }
 
 
-/* =========================
+/* =====================================================
    REFRIGERANTE
-========================= */
+===================================================== */
 
 function criarRefrigerante(){
 
@@ -1825,12 +2331,13 @@ function criarRefrigerante(){
         grupo;
 
     cena.add(grupo);
+
 }
 
 
-/* =========================
+/* =====================================================
    BROWNIE
-========================= */
+===================================================== */
 
 function criarBrownie(){
 
@@ -1926,57 +2433,24 @@ function criarBrownie(){
     }
 
 
-    for(
-        let i=0;
-        i<20;
-        i++
-    ){
-
-        const acucar =
-            new THREE.Mesh(
-
-                new THREE.SphereGeometry(
-                    .025,
-                    8,
-                    8
-                ),
-
-                material(
-                    0xf1e6d0,
-                    .5
-                )
-
-            );
-
-
-        acucar.position.set(
-
-            (Math.random()-.5)*2.3,
-
-            .02,
-
-            (Math.random()-.5)*1.7
-
-        );
-
-
-        grupo.add(acucar);
-
-    }
-
-
     objetoAtual =
         grupo;
 
     cena.add(grupo);
+
 }
 
 
-/* =========================
-   ESCOLHER MODELO
-========================= */
+/* =====================================================
+   MODELO
+===================================================== */
 
 function criarModelo(produto){
+
+    if(!cena){
+        return;
+    }
+
 
     if(produto==="hamburguer"){
         criarHamburguer();
@@ -1993,12 +2467,13 @@ function criarModelo(produto){
     else if(produto==="brownie"){
         criarBrownie();
     }
+
 }
 
 
-/* =========================
-   LIMPAR
-========================= */
+/* =====================================================
+   LIMPAR OBJETO
+===================================================== */
 
 function limparObjeto(){
 
@@ -2020,16 +2495,20 @@ function limparObjeto(){
 
             if(objeto.material){
 
-                if(Array.isArray(objeto.material)){
+                if(
+                    Array.isArray(
+                        objeto.material
+                    )
+                ){
 
                     objeto.material.forEach(
                         m=>m.dispose()
                     );
 
-                }else{
+                }
 
+                else{
                     objeto.material.dispose();
-
                 }
 
             }
@@ -2040,12 +2519,13 @@ function limparObjeto(){
 
     objetoAtual =
         null;
+
 }
 
 
-/* =========================
+/* =====================================================
    ANIMAÇÃO
-========================= */
+===================================================== */
 
 function animar(){
 
@@ -2057,7 +2537,10 @@ function animar(){
     requestAnimationFrame(animar);
 
 
-    if(objetoAtual){
+    if(
+        objetoAtual &&
+        !window.usuarioGirando3D
+    ){
 
         objetoAtual.rotation.y += .003;
 
@@ -2081,12 +2564,13 @@ function animar(){
         );
 
     }
+
 }
 
 
-/* =========================
-   AJUSTAR
-========================= */
+/* =====================================================
+   AJUSTAR 3D
+===================================================== */
 
 function ajustar3D(){
 
@@ -2096,23 +2580,30 @@ function ajustar3D(){
 
 
     const canvas =
-        document.getElementById("canvas3d");
+        document.getElementById(
+            "canvas3d"
+        );
 
 
     const largura =
         canvas.clientWidth;
 
+
     const altura =
         canvas.clientHeight;
 
 
-    if(largura<=0 || altura<=0){
+    if(
+        largura<=0 ||
+        altura<=0
+    ){
         return;
     }
 
 
     camera.aspect =
         largura / altura;
+
 
     camera.updateProjectionMatrix();
 
@@ -2122,12 +2613,13 @@ function ajustar3D(){
         altura,
         false
     );
+
 }
 
 
-/* =========================
+/* =====================================================
    ABRIR 3D
-========================= */
+===================================================== */
 
 window.abrir3DReal =
 function(){
@@ -2179,7 +2671,9 @@ function(){
                 .getElementById("carregando3d")
                 .style.display="none";
 
-        }catch(erro){
+        }
+
+        catch(erro){
 
             console.error(erro);
 
@@ -2200,9 +2694,9 @@ function(){
 };
 
 
-/* =========================
+/* =====================================================
    FECHAR 3D
-========================= */
+===================================================== */
 
 window.fechar3DReal =
 function(){
@@ -2214,88 +2708,34 @@ function(){
 };
 
 
-/* =========================
-   FUNÇÕES GLOBAIS
-========================= */
-
-window.abrir3D =
-function(){
-
-    window.abrir3DReal();
-
-};
-
-
-window.fechar3D =
-function(){
-
-    window.fechar3DReal();
-
-};
-
-
-window.addEventListener(
-    "resize",
-    ajustar3D
-);
-
-
-/* =========================
+/* =====================================================
    AR
-========================= */
+===================================================== */
 
 let cameraAR = null;
+
 let renderizadorAR = null;
-let controlesAR = null;
+
 let objetoAR = null;
+
+let cenaAR = null;
+
 let streamCamera = null;
 
+let escalaAR = .9;
 
-function criarObjetoAR(){
+let rotacaoAR = 0;
 
-    if(objetoAR){
+let arrastandoAR = false;
 
-        cenaAR.remove(objetoAR);
+let ultimoXAR = 0;
 
-        objetoAR.traverse(obj=>{
-
-            if(obj.geometry){
-                obj.geometry.dispose();
-            }
-
-            if(obj.material){
-
-                if(Array.isArray(obj.material)){
-
-                    obj.material.forEach(
-                        m=>m.dispose()
-                    );
-
-                }else{
-
-                    obj.material.dispose();
-
-                }
-
-            }
-
-        });
-
-    }
+let distanciaInicialAR = null;
 
 
-    objetoAR =
-        criarObjetoARPorTipo(
-            window.produtoSelecionado
-        );
-
-
-    if(objetoAR){
-        cenaAR.add(objetoAR);
-    }
-
-}
-
+/* =====================================================
+   CRIAR OBJETO AR
+===================================================== */
 
 function criarObjetoARPorTipo(tipo){
 
@@ -2307,71 +2747,105 @@ function criarObjetoARPorTipo(tipo){
 
         const pao =
             new THREE.Mesh(
+
                 new THREE.CylinderGeometry(
                     1.1,
                     1.05,
                     .35,
                     48
                 ),
-                material(0xc98232,.75)
+
+                material(
+                    0xc98232,
+                    .75
+                )
+
             );
 
-        pao.position.y=-.55;
+
+        pao.position.y =
+            -.55;
 
         grupo.add(pao);
 
 
         const carne =
             new THREE.Mesh(
+
                 new THREE.CylinderGeometry(
                     1.05,
                     1.05,
                     .4,
                     48
                 ),
-                material(0x4a2114,.9)
+
+                material(
+                    0x4a2114,
+                    .9
+                )
+
             );
 
-        carne.position.y=-.18;
+
+        carne.position.y =
+            -.18;
 
         grupo.add(carne);
 
 
         const queijo =
             new THREE.Mesh(
+
                 new THREE.BoxGeometry(
                     2,
                     .1,
                     2
                 ),
-                material(0xffc928,.5)
+
+                material(
+                    0xffc928,
+                    .5
+                )
+
             );
 
-        queijo.position.y=.05;
 
-        queijo.rotation.y=Math.PI/4;
+        queijo.position.y =
+            .05;
+
+        queijo.rotation.y =
+            Math.PI/4;
 
         grupo.add(queijo);
 
 
         const alface =
             new THREE.Mesh(
+
                 new THREE.CylinderGeometry(
                     1.08,
                     1.08,
                     .12,
                     48
                 ),
-                material(0x3d8f35,.9)
+
+                material(
+                    0x3d8f35,
+                    .9
+                )
+
             );
 
-        alface.position.y=.18;
+
+        alface.position.y =
+            .18;
 
         grupo.add(alface);
 
 
         const topo =
             new THREE.Mesh(
+
                 new THREE.SphereGeometry(
                     1.08,
                     48,
@@ -2381,12 +2855,20 @@ function criarObjetoARPorTipo(tipo){
                     0,
                     Math.PI/2
                 ),
-                material(0xd8943c,.7)
+
+                material(
+                    0xd8943c,
+                    .7
+                )
+
             );
 
-        topo.position.y=.25;
 
-        topo.scale.y=.65;
+        topo.position.y =
+            .25;
+
+        topo.scale.y =
+            .65;
 
         grupo.add(topo);
 
@@ -2397,37 +2879,57 @@ function criarObjetoARPorTipo(tipo){
 
         const prato =
             new THREE.Mesh(
+
                 new THREE.CylinderGeometry(
                     1.7,
                     1.5,
                     .12,
                     48
                 ),
-                material(0xf0f0f0,.3)
+
+                material(
+                    0xf0f0f0,
+                    .3
+                )
+
             );
 
-        prato.position.y=-.55;
+
+        prato.position.y =
+            -.55;
 
         grupo.add(prato);
 
 
         const molho =
             new THREE.Mesh(
+
                 new THREE.CylinderGeometry(
                     1.25,
                     1.25,
                     .08,
                     48
                 ),
-                material(0xd48b3d,.8)
+
+                material(
+                    0xd48b3d,
+                    .8
+                )
+
             );
 
-        molho.position.y=-.47;
+
+        molho.position.y =
+            -.47;
 
         grupo.add(molho);
 
 
-        for(let i=0;i<15;i++){
+        for(
+            let i=0;
+            i<15;
+            i++
+        ){
 
             const curva =
                 new THREE.CatmullRomCurve3([
@@ -2470,10 +2972,15 @@ function criarObjetoARPorTipo(tipo){
 
 
             grupo.add(
+
                 new THREE.Mesh(
                     tubo,
-                    material(0xe6c06a,.7)
+                    material(
+                        0xe6c06a,
+                        .7
+                    )
                 )
+
             );
 
         }
@@ -2485,30 +2992,45 @@ function criarObjetoARPorTipo(tipo){
 
         const lata =
             new THREE.Mesh(
+
                 new THREE.CylinderGeometry(
                     .58,
                     .58,
                     2,
                     48
                 ),
-                material(0xc92828,.3)
+
+                material(
+                    0xc92828,
+                    .3
+                )
+
             );
+
 
         grupo.add(lata);
 
 
         const topo =
             new THREE.Mesh(
+
                 new THREE.CylinderGeometry(
                     .55,
                     .55,
                     .06,
                     48
                 ),
-                material(0xcfcfcf,.25)
+
+                material(
+                    0xcfcfcf,
+                    .25
+                )
+
             );
 
-        topo.position.y=1.03;
+
+        topo.position.y =
+            1.03;
 
         grupo.add(topo);
 
@@ -2519,30 +3041,46 @@ function criarObjetoARPorTipo(tipo){
 
         const brownie =
             new THREE.Mesh(
+
                 new THREE.BoxGeometry(
                     2.1,
                     .55,
                     1.7
                 ),
-                material(0x3a1b0f,.85)
+
+                material(
+                    0x3a1b0f,
+                    .85
+                )
+
             );
 
-        brownie.position.y=-.25;
+
+        brownie.position.y =
+            -.25;
 
         grupo.add(brownie);
 
 
         const cobertura =
             new THREE.Mesh(
+
                 new THREE.BoxGeometry(
                     2.05,
                     .07,
                     1.65
                 ),
-                material(0x241008,.5)
+
+                material(
+                    0x241008,
+                    .5
+                )
+
             );
 
-        cobertura.position.y=.04;
+
+        cobertura.position.y =
+            .04;
 
         grupo.add(cobertura);
 
@@ -2550,11 +3088,95 @@ function criarObjetoARPorTipo(tipo){
 
 
     return grupo;
+
 }
 
 
-let cenaAR = null;
+/* =====================================================
+   CRIAR OBJETO AR
+===================================================== */
 
+function criarObjetoAR(){
+
+    if(
+        !cenaAR
+    ){
+        return;
+    }
+
+
+    if(objetoAR){
+
+        cenaAR.remove(
+            objetoAR
+        );
+
+        objetoAR.traverse(
+            obj=>{
+
+                if(obj.geometry){
+                    obj.geometry.dispose();
+                }
+
+
+                if(obj.material){
+
+                    if(
+                        Array.isArray(
+                            obj.material
+                        )
+                    ){
+
+                        obj.material.forEach(
+                            m=>m.dispose()
+                        );
+
+                    }
+
+                    else{
+                        obj.material.dispose();
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    objetoAR =
+        criarObjetoARPorTipo(
+            window.produtoSelecionado
+        );
+
+
+    if(objetoAR){
+
+        objetoAR.position.set(
+            0,
+            -.6,
+            0
+        );
+
+        objetoAR.scale.set(
+            escalaAR,
+            escalaAR,
+            escalaAR
+        );
+
+        cenaAR.add(
+            objetoAR
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   INICIAR CAMERA AR
+===================================================== */
 
 async function iniciarCameraAR(){
 
@@ -2581,8 +3203,10 @@ async function iniciarCameraAR(){
 
     try{
 
-        if(!navigator.mediaDevices ||
-           !navigator.mediaDevices.getUserMedia){
+        if(
+            !navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia
+        ){
 
             throw new Error(
                 "Câmera não suportada."
@@ -2592,17 +3216,19 @@ async function iniciarCameraAR(){
 
 
         streamCamera =
-            await navigator.mediaDevices.getUserMedia({
+            await navigator
+                .mediaDevices
+                .getUserMedia({
 
-                video:{
-                    facingMode:{
-                        ideal:"environment"
-                    }
-                },
+                    video:{
+                        facingMode:{
+                            ideal:"environment"
+                        }
+                    },
 
-                audio:false
+                    audio:false
 
-            });
+                });
 
 
         const video =
@@ -2618,6 +3244,13 @@ async function iniciarCameraAR(){
         await video.play();
 
 
+        escalaAR =
+            .9;
+
+        rotacaoAR =
+            0;
+
+
         iniciarCenaAR();
 
 
@@ -2625,7 +3258,9 @@ async function iniciarCameraAR(){
             .getElementById("arCarregando")
             .classList.remove("ativo");
 
-    }catch(erro){
+    }
+
+    catch(erro){
 
         console.error(erro);
 
@@ -2642,6 +3277,10 @@ async function iniciarCameraAR(){
 }
 
 
+/* =====================================================
+   CENA AR
+===================================================== */
+
 function iniciarCenaAR(){
 
     const canvas =
@@ -2652,6 +3291,7 @@ function iniciarCenaAR(){
 
     const largura =
         window.innerWidth;
+
 
     const altura =
         window.innerHeight;
@@ -2690,10 +3330,12 @@ function iniciarCenaAR(){
 
 
     renderizadorAR.setPixelRatio(
+
         Math.min(
             window.devicePixelRatio||1,
             2
         )
+
     );
 
 
@@ -2741,26 +3383,17 @@ function iniciarCenaAR(){
     criarObjetoAR();
 
 
-    if(objetoAR){
-
-        objetoAR.position.set(
-            0,
-            -.6,
-            0
-        );
-
-        objetoAR.scale.set(
-            .9,
-            .9,
-            .9
-        );
-
-    }
+    adicionarControlesAR();
 
 
     renderizarAR();
+
 }
 
+
+/* =====================================================
+   RENDER AR
+===================================================== */
 
 function renderizarAR(){
 
@@ -2769,7 +3402,9 @@ function renderizarAR(){
         !cenaAR ||
         !cameraAR
     ){
+
         return;
+
     }
 
 
@@ -2780,7 +3415,8 @@ function renderizarAR(){
 
     if(objetoAR){
 
-        objetoAR.rotation.y += .004;
+        objetoAR.rotation.y =
+            rotacaoAR;
 
     }
 
@@ -2793,6 +3429,182 @@ function renderizarAR(){
 }
 
 
+/* =====================================================
+   CONTROLES AR
+===================================================== */
+
+function adicionarControlesAR(){
+
+    const canvas =
+        document.getElementById(
+            "canvasAR"
+        );
+
+
+    canvas.onpointerdown =
+    function(evento){
+
+        arrastandoAR = true;
+
+        ultimoXAR =
+            evento.clientX;
+
+        canvas.setPointerCapture(
+            evento.pointerId
+        );
+
+    };
+
+
+    canvas.onpointermove =
+    function(evento){
+
+        if(
+            !arrastandoAR ||
+            !objetoAR
+        ){
+
+            return;
+
+        }
+
+
+        const diferenca =
+            evento.clientX -
+            ultimoXAR;
+
+
+        rotacaoAR +=
+            diferenca * .01;
+
+
+        ultimoXAR =
+            evento.clientX;
+
+    };
+
+
+    canvas.onpointerup =
+    function(){
+
+        arrastandoAR =
+            false;
+
+    };
+
+
+    canvas.onpointercancel =
+    function(){
+
+        arrastandoAR =
+            false;
+
+    };
+
+
+    canvas.ontouchstart =
+    function(evento){
+
+        if(
+            evento.touches.length===2
+        ){
+
+            distanciaInicialAR =
+                distanciaDoToque(
+                    evento.touches[0],
+                    evento.touches[1]
+                );
+
+        }
+
+    };
+
+
+    canvas.ontouchmove =
+    function(evento){
+
+        if(
+            evento.touches.length===2 &&
+            objetoAR &&
+            distanciaInicialAR
+        ){
+
+            const distancia =
+                distanciaDoToque(
+                    evento.touches[0],
+                    evento.touches[1]
+                );
+
+
+            const proporcao =
+                distancia /
+                distanciaInicialAR;
+
+
+            escalaAR =
+                Math.max(
+                    .35,
+                    Math.min(
+                        1.8,
+                        escalaAR *
+                        proporcao
+                    )
+                );
+
+
+            objetoAR.scale.set(
+                escalaAR,
+                escalaAR,
+                escalaAR
+            );
+
+
+            distanciaInicialAR =
+                distancia;
+
+        }
+
+    };
+
+
+    canvas.ontouchend =
+    function(){
+
+        distanciaInicialAR =
+            null;
+
+    };
+
+}
+
+
+function distanciaDoToque(
+    toque1,
+    toque2
+){
+
+    const dx =
+        toque1.clientX -
+        toque2.clientX;
+
+
+    const dy =
+        toque1.clientY -
+        toque2.clientY;
+
+
+    return Math.sqrt(
+        dx*dx +
+        dy*dy
+    );
+
+}
+
+
+/* =====================================================
+   FECHAR CAMERA AR
+===================================================== */
+
 function fecharCameraAR(){
 
     const tela =
@@ -2801,18 +3613,24 @@ function fecharCameraAR(){
         );
 
 
-    tela.classList.remove("ativo");
+    tela.classList.remove(
+        "ativo"
+    );
 
 
     if(streamCamera){
 
         streamCamera
             .getTracks()
-            .forEach(track=>{
-                track.stop();
-            });
+            .forEach(
+                track=>{
+                    track.stop();
+                }
+            );
 
-        streamCamera=null;
+
+        streamCamera =
+            null;
 
     }
 
@@ -2821,50 +3639,498 @@ function fecharCameraAR(){
 
         renderizadorAR.dispose();
 
-        renderizadorAR=null;
+        renderizadorAR =
+            null;
 
     }
 
 
-    cenaAR=null;
+    cenaAR =
+        null;
 
-    cameraAR=null;
+    cameraAR =
+        null;
 
-    controlesAR=null;
-
-    objetoAR=null;
+    objetoAR =
+        null;
 
 }
 
 
-/* =========================
-   EXPOR AR
-========================= */
+/* =====================================================
+   EXPOR FUNÇÕES
+===================================================== */
+
+window.abrir3D =
+function(){
+
+    window.abrir3DReal();
+
+};
+
+
+window.fechar3D =
+function(){
+
+    window.fechar3DReal();
+
+};
+
 
 window.iniciarCameraAR =
     iniciarCameraAR;
 
+
 window.fecharCameraAR =
     fecharCameraAR;
 
+
+window.addEventListener(
+    "resize",
+    function(){
+
+        ajustar3D();
+
+        if(
+            cameraAR &&
+            renderizadorAR
+        ){
+
+            cameraAR.aspect =
+                window.innerWidth /
+                window.innerHeight;
+
+            cameraAR.updateProjectionMatrix();
+
+            renderizadorAR.setSize(
+                window.innerWidth,
+                window.innerHeight,
+                false
+            );
+
+        }
+
+    }
+);
+
 </script>
 
-<!-- =========================
-     JAVASCRIPT DO CARDÁPIO
-========================= -->
+
+<!-- =====================================================
+     SISTEMA DO CARDÁPIO
+===================================================== -->
 
 <script>
 
+/* =====================================================
+   CONFIGURAÇÃO DOS RESTAURANTES
+=====================================================
+
+   Cada restaurante terá seu próprio "slug".
+
+   Exemplos:
+
+   ?restaurante=demo
+
+   ?restaurante=sabor-da-casa
+
+   ?restaurante=burger-house
+
+===================================================== */
+
+const RESTAURANTES = {
+
+    demo:{
+
+        nome:
+            "Restaurante Demo",
+
+        descricao:
+            "Escolha seu prato favorito",
+
+        whatsapp:
+            "5534999999999",
+
+        produtos:[
+
+            {
+
+                id:
+                    "hamburguer",
+
+                nome:
+                    "Hambúrguer da Casa",
+
+                descricao:
+                    "Hambúrguer artesanal, queijo, molho especial e acompanhamentos.",
+
+                preco:
+                    34.90,
+
+                categoria:
+                    "pratos",
+
+                imagem:
+                    "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80"
+
+            },
+
+            {
+
+                id:
+                    "fettuccine",
+
+                nome:
+                    "Fettuccine Especial",
+
+                descricao:
+                    "Massa fresca ao molho cremoso com ingredientes selecionados.",
+
+                preco:
+                    49.90,
+
+                categoria:
+                    "pratos",
+
+                imagem:
+                    "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80"
+
+            },
+
+            {
+
+                id:
+                    "refrigerante",
+
+                nome:
+                    "Refrigerante",
+
+                descricao:
+                    "Refrigerante gelado para acompanhar sua refeição.",
+
+                preco:
+                    7.00,
+
+                categoria:
+                    "bebidas",
+
+                imagem:
+                    "https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=900&q=80"
+
+            },
+
+            {
+
+                id:
+                    "brownie",
+
+                nome:
+                    "Brownie de Chocolate",
+
+                descricao:
+                    "Brownie de chocolate servido com uma textura macia e intensa.",
+
+                preco:
+                    19.90,
+
+                categoria:
+                    "sobremesas",
+
+                imagem:
+                    "https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&w=900&q=80"
+
+            }
+
+        ]
+
+    },
+
+
+    /* =================================================
+       EXEMPLO DE SEGUNDO RESTAURANTE
+
+       Essa estrutura já fica preparada para
+       receber novos restaurantes.
+
+    ================================================= */
+
+    "sabor-da-casa":{
+
+        nome:
+            "Sabor da Casa",
+
+        descricao:
+            "Comida feita para você",
+
+        whatsapp:
+            "5534999999999",
+
+        produtos:[
+
+            {
+
+                id:
+                    "hamburguer",
+
+                nome:
+                    "Burger Sabor da Casa",
+
+                descricao:
+                    "Hambúrguer artesanal especial da casa.",
+
+                preco:
+                    39.90,
+
+                categoria:
+                    "pratos",
+
+                imagem:
+                    "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80"
+
+            },
+
+            {
+
+                id:
+                    "refrigerante",
+
+                nome:
+                    "Refrigerante",
+
+                descricao:
+                    "Refrigerante gelado.",
+
+                preco:
+                    7.00,
+
+                categoria:
+                    "bebidas",
+
+                imagem:
+                    "https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=900&q=80"
+
+            }
+
+        ]
+
+    }
+
+};
+
+
+/* =====================================================
+   IDENTIFICAR RESTAURANTE PELA URL
+===================================================== */
+
+const parametros =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const slugRestaurante =
+    parametros.get(
+        "restaurante"
+    ) || "demo";
+
+
+const restauranteAtual =
+    RESTAURANTES[
+        slugRestaurante
+    ] || RESTAURANTES.demo;
+
+
+/* =====================================================
+   CARRINHO
+===================================================== */
+
+let carrinho = [];
+
+
+/* =====================================================
+   PRODUTO SELECIONADO
+===================================================== */
+
 window.produtoSelecionado =
-    "hamburguer";
+    restauranteAtual.produtos[0]?.id || null;
+
 
 window.produtoSelecionadoNome =
-    "Hambúrguer da Casa";
+    restauranteAtual.produtos[0]?.nome || "";
 
 
-/* =========================
+let quantidadeProdutoAtual =
+    1;
+
+
+/* =====================================================
+   INICIALIZAR RESTAURANTE
+===================================================== */
+
+function iniciarRestaurante(){
+
+    document
+        .getElementById(
+            "restauranteNome"
+        )
+        .textContent =
+        restauranteAtual.nome;
+
+
+    document
+        .getElementById(
+            "restauranteDescricao"
+        )
+        .textContent =
+        restauranteAtual.descricao;
+
+
+    document
+        .getElementById(
+            "rodapeNome"
+        )
+        .textContent =
+        restauranteAtual.nome;
+
+
+    renderizarCategorias();
+
+    renderizarProdutos();
+
+    atualizarCarrinho();
+
+}
+
+
+/* =====================================================
+   CATEGORIAS
+===================================================== */
+
+function renderizarCategorias(){
+
+    const container =
+        document.getElementById(
+            "categorias"
+        );
+
+
+    const categorias =
+        [
+
+            {
+                id:
+                    "todos",
+
+                nome:
+                    "Destaques"
+
+            },
+
+            {
+                id:
+                    "pratos",
+
+                nome:
+                    "Pratos"
+
+            },
+
+            {
+                id:
+                    "bebidas",
+
+                nome:
+                    "Bebidas"
+
+            },
+
+            {
+                id:
+                    "sobremesas",
+
+                nome:
+                    "Sobremesas"
+
+            }
+
+        ];
+
+
+    container.innerHTML =
+        categorias
+            .map(
+                categoria=>`
+
+                    <button
+                        class="categoria ${categoria.id==="todos" ? "ativa" : ""}"
+                        onclick="filtrarProdutos('${categoria.id}',this)"
+                    >
+                        ${categoria.nome}
+                    </button>
+
+                `
+            )
+            .join("");
+
+}
+
+
+/* =====================================================
+   PRODUTOS
+===================================================== */
+
+function renderizarProdutos(){
+
+    const container =
+        document.getElementById(
+            "listaProdutos"
+        );
+
+
+    container.innerHTML =
+        restauranteAtual.produtos
+            .map(
+                produto=>`
+
+                    <div
+                        class="produto"
+                        data-categoria="${produto.categoria}"
+                        onclick="abrirProdutoPorId('${produto.id}')"
+                    >
+
+                        <img
+                            src="${produto.imagem}"
+                            alt="${produto.nome}"
+                        >
+
+                        <div class="produto-info">
+
+                            <h2>
+                                ${produto.nome}
+                            </h2>
+
+                            <p>
+                                ${produto.descricao}
+                            </p>
+
+                            <div class="preco">
+                                ${formatarPreco(produto.preco)}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `
+            )
+            .join("");
+
+}
+
+
+/* =====================================================
    FILTRO
-========================= */
+===================================================== */
 
 function filtrarProdutos(
     categoria,
@@ -2880,20 +4146,22 @@ function filtrarProdutos(
     produtos.forEach(
         produto=>{
 
-            const categorias =
+            const categoriaProduto =
                 produto.dataset.categoria;
 
 
             if(
                 categoria==="todos" ||
-                categorias.includes(categoria)
+                categoriaProduto===categoria
             ){
 
                 produto.classList.remove(
                     "escondido"
                 );
 
-            }else{
+            }
+
+            else{
 
                 produto.classList.add(
                     "escondido"
@@ -2906,97 +4174,512 @@ function filtrarProdutos(
 
 
     document
-        .querySelectorAll(".categoria")
+        .querySelectorAll(
+            ".categoria"
+        )
         .forEach(
             b=>{
-                b.classList.remove("ativa");
+                b.classList.remove(
+                    "ativa"
+                );
             }
         );
 
 
     if(botao){
-        botao.classList.add("ativa");
+
+        botao.classList.add(
+            "ativa"
+        );
+
     }
 
 }
 
 
-/* =========================
-   PRODUTO
-========================= */
+/* =====================================================
+   ABRIR PRODUTO
+===================================================== */
 
-function abrirProduto(
-    tipo,
-    nome,
-    descricao,
-    preco
-){
+function abrirProdutoPorId(id){
+
+    const produto =
+        restauranteAtual.produtos.find(
+            item=>item.id===id
+        );
+
+
+    if(!produto){
+        return;
+    }
+
 
     window.produtoSelecionado =
-        tipo;
+        produto.id;
 
 
     window.produtoSelecionadoNome =
-        nome;
+        produto.nome;
+
+
+    quantidadeProdutoAtual =
+        1;
 
 
     document
-        .getElementById("modalNome")
+        .getElementById(
+            "modalNome"
+        )
         .textContent =
-        nome;
+        produto.nome;
 
 
     document
-        .getElementById("modalDescricao")
+        .getElementById(
+            "modalDescricao"
+        )
         .textContent =
-        descricao;
+        produto.descricao;
 
 
     document
-        .getElementById("modalPreco")
+        .getElementById(
+            "modalPreco"
+        )
         .textContent =
-        preco;
+        formatarPreco(
+            produto.preco
+        );
 
 
     document
-        .getElementById("modalProduto")
-        .classList.add("ativo");
+        .getElementById(
+            "quantidadeProduto"
+        )
+        .textContent =
+        quantidadeProdutoAtual;
+
+
+    document
+        .getElementById(
+            "modalProduto"
+        )
+        .classList.add(
+            "ativo"
+        );
 
 }
 
 
-/* =========================
-   FECHAR PRODUTO
-========================= */
+/* =====================================================
+   QUANTIDADE PRODUTO
+===================================================== */
+
+function alterarQuantidadeProduto(
+    valor
+){
+
+    quantidadeProdutoAtual +=
+        valor;
+
+
+    if(
+        quantidadeProdutoAtual<1
+    ){
+
+        quantidadeProdutoAtual =
+            1;
+
+    }
+
+
+    document
+        .getElementById(
+            "quantidadeProduto"
+        )
+        .textContent =
+        quantidadeProdutoAtual;
+
+}
+
+
+/* =====================================================
+   ADICIONAR PRODUTO
+===================================================== */
+
+function adicionarProdutoAtual(){
+
+    const produto =
+        restauranteAtual.produtos.find(
+            item=>
+                item.id ===
+                window.produtoSelecionado
+        );
+
+
+    if(!produto){
+        return;
+    }
+
+
+    const existente =
+        carrinho.find(
+            item=>
+                item.id ===
+                produto.id
+        );
+
+
+    if(existente){
+
+        existente.quantidade +=
+            quantidadeProdutoAtual;
+
+    }
+
+    else{
+
+        carrinho.push({
+
+            id:
+                produto.id,
+
+            nome:
+                produto.nome,
+
+            preco:
+                produto.preco,
+
+            quantidade:
+                quantidadeProdutoAtual
+
+        });
+
+    }
+
+
+    atualizarCarrinho();
+
+
+    fecharModal();
+
+    fechar3D();
+
+
+    mostrarToast(
+        produto.nome +
+        " adicionado ao pedido"
+    );
+
+}
+
+
+/* =====================================================
+   ATUALIZAR CARRINHO
+===================================================== */
+
+function atualizarCarrinho(){
+
+    const quantidade =
+        carrinho.reduce(
+            (
+                total,
+                item
+            )=>
+                total +
+                item.quantidade,
+            0
+        );
+
+
+    document
+        .getElementById(
+            "carrinhoContador"
+        )
+        .textContent =
+        quantidade;
+
+
+    renderizarCarrinho();
+
+}
+
+
+/* =====================================================
+   RENDERIZAR CARRINHO
+===================================================== */
+
+function renderizarCarrinho(){
+
+    const lista =
+        document.getElementById(
+            "carrinhoLista"
+        );
+
+
+    const finalizacao =
+        document.getElementById(
+            "carrinhoFinalizacao"
+        );
+
+
+    if(carrinho.length===0){
+
+        lista.innerHTML = `
+
+            <div class="carrinho-vazio">
+
+                Seu pedido está vazio.
+
+                <br><br>
+
+                Escolha um produto para começar.
+
+            </div>
+
+        `;
+
+
+        finalizacao.style.display =
+            "none";
+
+
+        return;
+
+    }
+
+
+    lista.innerHTML =
+        carrinho
+            .map(
+                item=>`
+
+                    <div class="item-carrinho">
+
+                        <div>
+
+                            <div class="item-carrinho-nome">
+                                ${item.nome}
+                            </div>
+
+                            <div class="item-carrinho-preco">
+                                ${formatarPreco(item.preco)}
+                            </div>
+
+                        </div>
+
+                        <div class="item-controles">
+
+                            <button
+                                class="item-btn"
+                                onclick="alterarQuantidadeCarrinho('${item.id}',-1)"
+                            >
+                                −
+                            </button>
+
+                            <span class="item-qtd">
+                                ${item.quantidade}
+                            </span>
+
+                            <button
+                                class="item-btn"
+                                onclick="alterarQuantidadeCarrinho('${item.id}',1)"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `
+            )
+            .join("");
+
+
+    const total =
+        calcularTotal();
+
+
+    document
+        .getElementById(
+            "carrinhoTotal"
+        )
+        .textContent =
+        formatarPreco(total);
+
+
+    finalizacao.style.display =
+        "block";
+
+}
+
+
+/* =====================================================
+   ALTERAR CARRINHO
+===================================================== */
+
+function alterarQuantidadeCarrinho(
+    id,
+    valor
+){
+
+    const item =
+        carrinho.find(
+            produto=>
+                produto.id===id
+        );
+
+
+    if(!item){
+        return;
+    }
+
+
+    item.quantidade +=
+        valor;
+
+
+    if(
+        item.quantidade<=0
+    ){
+
+        carrinho =
+            carrinho.filter(
+                produto=>
+                    produto.id!==id
+            );
+
+    }
+
+
+    atualizarCarrinho();
+
+}
+
+
+/* =====================================================
+   TOTAL
+===================================================== */
+
+function calcularTotal(){
+
+    return carrinho.reduce(
+        (
+            total,
+            item
+        )=>
+            total +
+            (
+                item.preco *
+                item.quantidade
+            ),
+        0
+    );
+
+}
+
+
+/* =====================================================
+   FORMATAR PREÇO
+===================================================== */
+
+function formatarPreco(
+    valor
+){
+
+    return valor.toLocaleString(
+        "pt-BR",
+        {
+            style:"currency",
+            currency:"BRL"
+        }
+    );
+
+}
+
+
+/* =====================================================
+   MODAL PRODUTO
+===================================================== */
 
 function fecharModal(){
 
     document
-        .getElementById("modalProduto")
-        .classList.remove("ativo");
+        .getElementById(
+            "modalProduto"
+        )
+        .classList.remove(
+            "ativo"
+        );
 
 }
 
 
-/* =========================
+/* =====================================================
+   MODAL CARRINHO
+===================================================== */
+
+function abrirCarrinho(){
+
+    document
+        .getElementById(
+            "modalCarrinho"
+        )
+        .classList.add(
+            "ativo"
+        );
+
+
+    renderizarCarrinho();
+
+}
+
+
+function fecharCarrinho(){
+
+    document
+        .getElementById(
+            "modalCarrinho"
+        )
+        .classList.remove(
+            "ativo"
+        );
+
+}
+
+
+/* =====================================================
    AR
-========================= */
+===================================================== */
 
 function abrirAR(){
 
     document
-        .getElementById("modalProduto")
-        .classList.remove("ativo");
+        .getElementById(
+            "modalProduto"
+        )
+        .classList.remove(
+            "ativo"
+        );
 
 
     document
-        .getElementById("modal3D")
-        .classList.remove("ativo");
+        .getElementById(
+            "modal3D"
+        )
+        .classList.remove(
+            "ativo"
+        );
 
 
     document
-        .getElementById("modalAR")
-        .classList.add("ativo");
+        .getElementById(
+            "modalAR"
+        )
+        .classList.add(
+            "ativo"
+        );
 
 }
 
@@ -3004,24 +4687,222 @@ function abrirAR(){
 function fecharAR(){
 
     document
-        .getElementById("modalAR")
-        .classList.remove("ativo");
+        .getElementById(
+            "modalAR"
+        )
+        .classList.remove(
+            "ativo"
+        );
 
 }
 
 
-/* =========================
+/* =====================================================
+   WHATSAPP
+===================================================== */
+
+function finalizarWhatsApp(){
+
+    if(
+        carrinho.length===0
+    ){
+
+        return;
+
+    }
+
+
+    const nome =
+        document
+            .getElementById(
+                "clienteNome"
+            )
+            .value
+            .trim();
+
+
+    const observacoes =
+        document
+            .getElementById(
+                "clienteObs"
+            )
+            .value
+            .trim();
+
+
+    if(!nome){
+
+        alert(
+            "Digite seu nome para continuar."
+        );
+
+        document
+            .getElementById(
+                "clienteNome"
+            )
+            .focus();
+
+        return;
+
+    }
+
+
+    let mensagem =
+        "Olá! Gostaria de fazer um pedido pelo cardápio digital.\n\n";
+
+
+    mensagem +=
+        "*Restaurante:* " +
+        restauranteAtual.nome +
+        "\n";
+
+
+    mensagem +=
+        "*Cliente:* " +
+        nome +
+        "\n\n";
+
+
+    mensagem +=
+        "*Pedido:*\n";
+
+
+    carrinho.forEach(
+        item=>{
+
+            mensagem +=
+                item.quantidade +
+                "x " +
+                item.nome +
+                " — " +
+                formatarPreco(
+                    item.preco *
+                    item.quantidade
+                ) +
+                "\n";
+
+        }
+    );
+
+
+    mensagem +=
+        "\n*Total: " +
+        formatarPreco(
+            calcularTotal()
+        ) +
+        "*";
+
+
+    if(observacoes){
+
+        mensagem +=
+            "\n\n*Observações:*\n" +
+            observacoes;
+
+    }
+
+
+    const numero =
+        restauranteAtual.whatsapp
+            .replace(
+                /\D/g,
+                ""
+            );
+
+
+    if(
+        !numero ||
+        numero==="5534999999999"
+    ){
+
+        alert(
+            "O WhatsApp deste restaurante ainda precisa ser configurado."
+        );
+
+        return;
+
+    }
+
+
+    const url =
+        "https://wa.me/" +
+        numero +
+        "?text=" +
+        encodeURIComponent(
+            mensagem
+        );
+
+
+    window.open(
+        url,
+        "_blank"
+    );
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+let toastTimer = null;
+
+
+function mostrarToast(
+    mensagem
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        mensagem;
+
+
+    toast.classList.add(
+        "ativo"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            ()=>{
+                toast.classList.remove(
+                    "ativo"
+                );
+            },
+            2200
+        );
+
+}
+
+
+/* =====================================================
    CLIQUE FORA
-========================= */
+===================================================== */
 
 document
-    .getElementById("modalProduto")
+    .getElementById(
+        "modalProduto"
+    )
     .addEventListener(
         "click",
         function(evento){
 
-            if(evento.target===this){
+            if(
+                evento.target===this
+            ){
+
                 fecharModal();
+
             }
 
         }
@@ -3029,13 +4910,19 @@ document
 
 
 document
-    .getElementById("modal3D")
+    .getElementById(
+        "modal3D"
+    )
     .addEventListener(
         "click",
         function(evento){
 
-            if(evento.target===this){
+            if(
+                evento.target===this
+            ){
+
                 fechar3D();
+
             }
 
         }
@@ -3043,28 +4930,56 @@ document
 
 
 document
-    .getElementById("modalAR")
+    .getElementById(
+        "modalAR"
+    )
     .addEventListener(
         "click",
         function(evento){
 
-            if(evento.target===this){
+            if(
+                evento.target===this
+            ){
+
                 fecharAR();
+
             }
 
         }
     );
 
 
-/* =========================
+document
+    .getElementById(
+        "modalCarrinho"
+    )
+    .addEventListener(
+        "click",
+        function(evento){
+
+            if(
+                evento.target===this
+            ){
+
+                fecharCarrinho();
+
+            }
+
+        }
+    );
+
+
+/* =====================================================
    ESC
-========================= */
+===================================================== */
 
 document.addEventListener(
     "keydown",
     function(evento){
 
-        if(evento.key==="Escape"){
+        if(
+            evento.key==="Escape"
+        ){
 
             fecharModal();
 
@@ -3074,32 +4989,19 @@ document.addEventListener(
 
             fecharCameraAR();
 
+            fecharCarrinho();
+
         }
 
     }
 );
 
 
-/* =========================
-   FECHAR CÂMERA AO SAIR
-========================= */
+/* =====================================================
+   INICIALIZAR
+===================================================== */
 
-window.addEventListener(
-    "beforeunload",
-    function(){
-
-        if(
-            window.streamCamera
-        ){
-            window.streamCamera
-                .getTracks()
-                .forEach(
-                    track=>track.stop()
-                );
-        }
-
-    }
-);
+iniciarRestaurante();
 
 </script>
 
