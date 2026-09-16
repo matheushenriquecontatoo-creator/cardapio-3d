@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -17,268 +16,275 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f3ef;
-            color: #1c1c1c;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            color: #111;
         }
 
         header {
-            background: #171717;
+            background: #111;
             color: white;
-            padding: 35px 20px;
+            padding: 30px 20px;
             text-align: center;
         }
 
         header h1 {
-            font-size: 28px;
+            font-size: 30px;
             margin-bottom: 8px;
         }
 
         header p {
-            color: #bdbdbd;
-            font-size: 14px;
+            color: #bbb;
         }
 
         .categorias {
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding: 18px 16px;
+            padding: 20px;
             background: white;
-            border-bottom: 1px solid #eee;
         }
 
-        .categoria-btn {
+        .categoria {
             border: none;
-            background: #eeeeee;
-            padding: 10px 16px;
+            background: #eee;
+            padding: 12px 18px;
             border-radius: 20px;
+            cursor: pointer;
             white-space: nowrap;
             font-size: 14px;
-            cursor: pointer;
         }
 
-        .categoria-btn.ativa {
-            background: #171717;
-            color: white;
+        .categoria:hover {
+            background: #ddd;
         }
 
-        main {
-            max-width: 700px;
-            margin: auto;
-            padding: 25px 16px 50px;
-        }
+        .produtos {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
 
-        .titulo-categoria {
-            font-size: 22px;
-            margin-bottom: 16px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
         }
 
         .produto {
-            display: flex;
             background: white;
             border-radius: 18px;
             overflow: hidden;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
             cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .produto:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
         }
 
         .produto img {
-            width: 125px;
-            height: 125px;
+            width: 100%;
+            height: 220px;
             object-fit: cover;
+            display: block;
         }
 
         .produto-info {
-            padding: 16px;
-            flex: 1;
+            padding: 18px;
         }
 
-        .produto-info h3 {
-            font-size: 17px;
-            margin-bottom: 7px;
+        .produto-info h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
         }
 
         .produto-info p {
-            color: #6b6b6b;
-            font-size: 13px;
-            line-height: 1.4;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
             margin-bottom: 12px;
         }
 
         .preco {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
         }
 
-        .produto.escondido {
+        .escondido {
             display: none;
         }
 
-        footer {
-            text-align: center;
-            padding: 25px;
-            color: #888;
-            font-size: 12px;
+        /* MODAL */
+
+        .modal {
+            display: none;
+
+            position: fixed;
+            inset: 0;
+
+            background: rgba(0, 0, 0, 0.75);
+
+            z-index: 1000;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
         }
 
-        @media (max-width: 480px) {
+        .modal.ativo {
+            display: flex;
+        }
+
+        .modal-conteudo {
+            background: white;
+
+            width: 100%;
+            max-width: 420px;
+
+            border-radius: 20px;
+
+            padding: 25px;
+
+            position: relative;
+
+            text-align: center;
+        }
+
+        .modal-conteudo h2 {
+            margin-bottom: 10px;
+        }
+
+        .modal-conteudo p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .modal-preco {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .fechar-modal {
+            position: absolute;
+
+            top: 10px;
+            right: 15px;
+
+            border: none;
+            background: none;
+
+            font-size: 28px;
+
+            cursor: pointer;
+
+            color: #333;
+        }
+
+        .btn-3d {
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+            border-radius: 12px;
+
+            background: #111;
+            color: white;
+
+            font-size: 16px;
+
+            cursor: pointer;
+        }
+
+        .btn-3d:hover {
+            background: #333;
+        }
+
+        /* ÁREA 3D */
+
+        .area-3d {
+            width: 100%;
+            height: 260px;
+
+            margin: 20px 0;
+
+            border-radius: 16px;
+
+            background: linear-gradient(135deg, #111, #333);
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            overflow: hidden;
+        }
+
+        .objeto-3d {
+            width: 120px;
+            height: 120px;
+
+            border-radius: 24px;
+
+            background: linear-gradient(145deg, #ffffff, #999999);
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-size: 28px;
+            font-weight: bold;
+
+            color: #111;
+
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+
+            transform: rotateX(15deg) rotateY(-20deg);
+
+            animation: girar3D 5s infinite linear;
+        }
+
+        @keyframes girar3D {
+
+            from {
+                transform: rotateX(15deg) rotateY(0deg);
+            }
+
+            to {
+                transform: rotateX(15deg) rotateY(360deg);
+            }
+
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
 
             header {
-                padding: 30px 16px;
+                padding: 25px 15px;
             }
 
             header h1 {
                 font-size: 25px;
             }
 
-            .produto img {
-                width: 110px;
-                height: 110px;
+            .produtos {
+                grid-template-columns: 1fr;
+                padding: 0 15px;
             }
 
-            .produto-info {
-                padding: 14px;
+            .produto img {
+                height: 210px;
             }
 
         }
 
-    .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.modal.ativo {
-    display: flex;
-}
-
-.modal-conteudo {
-    background: white;
-    width: 100%;
-    max-width: 420px;
-    border-radius: 20px;
-    padding: 25px;
-    position: relative;
-    text-align: center;
-}
-
-.modal-conteudo h2 {
-    margin-bottom: 10px;
-}
-
-.modal-conteudo p {
-    color: #666;
-    margin-bottom: 15px;
-}
-
-.modal-preco {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.fechar-modal {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    border: none;
-    background: none;
-    font-size: 28px;
-    cursor: pointer;
-}
-
-.btn-3d {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
-    background: #111;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-.area-3d {
-    width: 100%;
-    height: 260px;
-    margin: 20px 0;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #111, #333);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.objeto-3d {
-    width: 120px;
-    height: 120px;
-    border-radius: 24px;
-    background: linear-gradient(145deg, #ffffff, #999999);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: bold;
-    color: #111;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    transform: rotateX(15deg) rotateY(-20deg);
-    animation: girar3D 5s infinite linear;
-}
-
-@keyframes girar3D {
-    from {
-        transform: rotateX(15deg) rotateY(0deg);
-    }
-
-    to {
-        transform: rotateX(15deg) rotateY(360deg);
-    }
-}
-.area-3d {
-    width: 100%;
-    height: 260px;
-    margin: 20px 0;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #111, #333);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.objeto-3d {
-    width: 120px;
-    height: 120px;
-    border-radius: 24px;
-    background: linear-gradient(145deg, #ffffff, #999999);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: bold;
-    color: #111;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    transform: rotateX(15deg) rotateY(-20deg);
-    animation: girar3D 5s infinite linear;
-}
-
-@keyframes girar3D {
-    from {
-        transform: rotateX(15deg) rotateY(0deg);
-    }
-
-    to {
-        transform: rotateX(15deg) rotateY(360deg);
-    }
-}
-</style>
+    </style>
 
 </head>
 
@@ -286,39 +292,35 @@
 
     <header>
 
-        <h1><h1>Restaurante Demo TESTE</h1>
-    
-        <p>Uma experiência diferente à mesa</p>
+        <h1>Restaurante Demo</h1>
+
+        <p>Escolha seu prato favorito</p>
 
     </header>
 
 
-    <nav class="categorias">
+    <div class="categorias">
 
-        <button class="categoria-btn ativa" data-categoria="destaques">
+        <button class="categoria" onclick="filtrarProdutos('todos')">
             Destaques
         </button>
 
-        <button class="categoria-btn" data-categoria="pratos">
+        <button class="categoria" onclick="filtrarProdutos('pratos')">
             Pratos
         </button>
 
-        <button class="categoria-btn" data-categoria="bebidas">
+        <button class="categoria" onclick="filtrarProdutos('bebidas')">
             Bebidas
         </button>
 
-        <button class="categoria-btn" data-categoria="sobremesas">
+        <button class="categoria" onclick="filtrarProdutos('sobremesas')">
             Sobremesas
         </button>
 
-    </nav>
+    </div>
 
 
-    <main>
-
-        <h2 class="titulo-categoria" id="tituloCategoria">
-            Destaques
-        </h2>
+    <main class="produtos">
 
 
         <!-- HAMBÚRGUER -->
@@ -334,22 +336,21 @@
         >
 
             <img
-                src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80"
-                alt="Hambúrguer artesanal"
+                src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80"
+                alt="Hambúrguer da Casa"
             >
 
             <div class="produto-info">
 
-                <h3>Hambúrguer da Casa</h3>
+                <h2>Hambúrguer da Casa</h2>
 
                 <p>
-                    Hambúrguer artesanal, queijo,
-                    molho especial e acompanhamentos.
+                    Hambúrguer artesanal, queijo, molho especial e acompanhamentos.
                 </p>
 
-                <span class="preco">
+                <div class="preco">
                     R$ 34,90
-                </span>
+                </div>
 
             </div>
 
@@ -363,28 +364,27 @@
             data-categoria="destaques pratos"
             onclick="abrirProduto(
                 'Fettuccine Especial',
-                'Massa artesanal preparada com molho especial da casa.',
+                'Massa fresca ao molho cremoso com ingredientes selecionados.',
                 'R$ 49,90'
             )"
         >
 
             <img
-                src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
-                alt="Fettuccine"
+                src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80"
+                alt="Fettuccine Especial"
             >
 
             <div class="produto-info">
 
-                <h3>Fettuccine Especial</h3>
+                <h2>Fettuccine Especial</h2>
 
                 <p>
-                    Massa artesanal preparada
-                    com molho especial da casa.
+                    Massa fresca ao molho cremoso com ingredientes selecionados.
                 </p>
 
-                <span class="preco">
+                <div class="preco">
                     R$ 49,90
-                </span>
+                </div>
 
             </div>
 
@@ -395,30 +395,30 @@
 
         <div
             class="produto"
-            data-categoria="bebidas"
+            data-categoria="destaques bebidas"
             onclick="abrirProduto(
                 'Refrigerante',
-                'Refrigerante gelado 350ml.',
+                'Refrigerante gelado para acompanhar sua refeição.',
                 'R$ 7,00'
             )"
         >
 
             <img
-                src="https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=500&q=80"
+                src="https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=900&q=80"
                 alt="Refrigerante"
             >
 
             <div class="produto-info">
 
-                <h3>Refrigerante</h3>
+                <h2>Refrigerante</h2>
 
                 <p>
-                    Refrigerante gelado 350ml.
+                    Refrigerante gelado para acompanhar sua refeição.
                 </p>
 
-                <span class="preco">
+                <div class="preco">
                     R$ 7,00
-                </span>
+                </div>
 
             </div>
 
@@ -432,156 +432,186 @@
             data-categoria="destaques sobremesas"
             onclick="abrirProduto(
                 'Brownie de Chocolate',
-                'Brownie de chocolate servido com calda especial.',
+                'Brownie de chocolate servido com uma textura macia e intensa.',
                 'R$ 19,90'
             )"
         >
 
             <img
-                src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=500&q=80"
-                alt="Brownie de chocolate"
+                src="https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&w=900&q=80"
+                alt="Brownie de Chocolate"
             >
 
             <div class="produto-info">
 
-                <h3>Brownie de Chocolate</h3>
+                <h2>Brownie de Chocolate</h2>
 
                 <p>
-                    Brownie de chocolate servido
-                    com calda especial.
+                    Brownie de chocolate servido com uma textura macia e intensa.
                 </p>
 
-                <span class="preco">
+                <div class="preco">
                     R$ 19,90
-                </span>
+                </div>
 
             </div>
 
         </div>
+
 
     </main>
 
 
-    <footer>
+    <!-- MODAL DO PRODUTO -->
 
-        Cardápio Digital
+    <div id="modalProduto" class="modal">
 
-    </footer>
+        <div class="modal-conteudo">
+
+            <button
+                class="fechar-modal"
+                onclick="fecharModal()"
+                aria-label="Fechar"
+            >
+                ×
+            </button>
+
+            <h2 id="modalNome"></h2>
+
+            <p id="modalDescricao"></p>
+
+            <div id="modalPreco" class="modal-preco"></div>
+
+            <button
+                class="btn-3d"
+                onclick="abrir3D()"
+            >
+                Ver em 3D
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- MODAL 3D -->
+
+    <div id="modal3D" class="modal">
+
+        <div class="modal-conteudo">
+
+            <button
+                class="fechar-modal"
+                onclick="fechar3D()"
+                aria-label="Fechar"
+            >
+                ×
+            </button>
+
+            <h2>Visualização 3D</h2>
+
+            <div class="area-3d">
+
+                <div class="objeto-3d">
+                    3D
+                </div>
+
+            </div>
+
+            <p>
+                Em breve você poderá visualizar este produto em 3D.
+            </p>
+
+        </div>
+
+    </div>
 
 
     <script>
 
-        const botoes = document.querySelectorAll(".categoria-btn");
+        /* FILTRO DE CATEGORIAS */
 
-        const produtos = document.querySelectorAll(".produto");
+        function filtrarProdutos(categoria) {
 
-        const titulo = document.getElementById("tituloCategoria");
+            const produtos = document.querySelectorAll(".produto");
 
+            produtos.forEach(function(produto) {
 
-        botoes.forEach(botao => {
+                const categorias = produto.dataset.categoria;
 
-            botao.addEventListener("click", () => {
+                if (
+                    categoria === "todos" ||
+                    categorias.includes(categoria)
+                ) {
 
-                const categoria = botao.dataset.categoria;
+                    produto.classList.remove("escondido");
 
+                } else {
 
-                botoes.forEach(item => {
+                    produto.classList.add("escondido");
 
-                    item.classList.remove("ativa");
-
-                });
-
-
-                botao.classList.add("ativa");
-
-
-                produtos.forEach(produto => {
-
-                    const categoriasDoProduto =
-                        produto.dataset.categoria.split(" ");
-
-
-                    if (categoriasDoProduto.includes(categoria)) {
-
-                        produto.classList.remove("escondido");
-
-                    } else {
-
-                        produto.classList.add("escondido");
-
-                    }
-
-                });
-
-
-                titulo.textContent =
-                    botao.textContent.trim();
+                }
 
             });
 
-        });
+        }
 
+
+        /* ABRIR PRODUTO */
 
         function abrirProduto(nome, descricao, preco) {
-    document.getElementById("modalNome").textContent = nome;
-    document.getElementById("modalDescricao").textContent = descricao;
-    document.getElementById("modalPreco").textContent = preco;
 
-    document.getElementById("modalProduto").classList.add("ativo");
-}
+            document.getElementById("modalNome").textContent = nome;
 
-function fecharModal() { function abrir3D() {
-    document.getElementById("modalProduto").classList.remove("ativo");
-    document.getElementById("modal3D").classList.add("ativo");
-}
+            document.getElementById("modalDescricao").textContent = descricao;
 
-function fechar3D() {
-    document.getElementById("modal3D").classList.remove("ativo");
-}
-    document.getElementById("modalProduto").classList.remove("ativo");
-}
+            document.getElementById("modalPreco").textContent = preco;
+
+            document
+                .getElementById("modalProduto")
+                .classList.add("ativo");
+
+        }
 
 
-         
+        /* FECHAR PRODUTO */
 
-        
+        function fecharModal() {
+
+            document
+                .getElementById("modalProduto")
+                .classList.remove("ativo");
+
+        }
+
+
+        /* ABRIR 3D */
+
+        function abrir3D() {
+
+            document
+                .getElementById("modalProduto")
+                .classList.remove("ativo");
+
+            document
+                .getElementById("modal3D")
+                .classList.add("ativo");
+
+        }
+
+
+        /* FECHAR 3D */
+
+        function fechar3D() {
+
+            document
+                .getElementById("modal3D")
+                .classList.remove("ativo");
+
+        }
 
     </script>
 
-<div id="modalProduto" class="modal">
-    <div class="modal-conteudo">
-
-        <button class="fechar-modal" onclick="fecharModal()">×</button>
-
-        <h2 id="modalNome"></h2>
-
-        <p id="modalDescricao"></p>
-
-        <div id="modalPreco" class="modal-preco"></div>
-
-        <<button class="btn-3d" onclick="abrir3D()">
-            Ver em 3D
-        </button>
-
-    </div>
-</div>
-<div id="modal3D" class="modal">
-    <div class="modal-conteudo">
-
-        <button class="fechar-modal" onclick="fechar3D()">×</button>
-
-        <h2>Visualização 3D</h2>
-
-        <div class="area-3d">
-            <div class="objeto-3d">
-                3D
-            </div>
-        </div>
-
-        <p>Em breve você poderá visualizar este produto em 3D.</p>
-
-    </div>
-</div>
 </body>
 
 </html>
