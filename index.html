@@ -7,6 +7,15 @@
 
     <title>Restaurante Demo</title>
 
+    <!-- IMPORT MAP: CORREÇÃO DO THREE.JS + ORBITCONTROLS -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+        }
+    }
+    </script>
+
     <style>
 
         * {
@@ -15,90 +24,53 @@
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
             font-family: Arial, Helvetica, sans-serif;
-            background: #f4f4f4;
+            background: #f5f5f5;
             color: #111;
-            min-height: 100vh;
         }
-
-        button {
-            font-family: inherit;
-        }
-
-        /* =========================
-           HEADER
-        ========================= */
 
         header {
-            background:
-                radial-gradient(circle at top, #303030 0%, #151515 45%, #080808 100%);
+            background: #111;
             color: white;
-            padding: 42px 20px 38px;
+            padding: 30px 20px;
             text-align: center;
         }
 
         header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
+            font-size: 30px;
+            margin-bottom: 8px;
         }
 
         header p {
-            color: #aaa;
-            font-size: 15px;
+            color: #bbb;
         }
-
-        /* =========================
-           CATEGORIAS
-        ========================= */
 
         .categorias {
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding: 18px 20px;
+            padding: 20px;
             background: white;
-            border-bottom: 1px solid #eee;
-            scrollbar-width: none;
-        }
-
-        .categorias::-webkit-scrollbar {
-            display: none;
         }
 
         .categoria {
             border: none;
-            background: #eeeeee;
-            color: #222;
+            background: #eee;
             padding: 12px 18px;
-            border-radius: 22px;
+            border-radius: 20px;
             cursor: pointer;
             white-space: nowrap;
             font-size: 14px;
-            transition: 0.2s ease;
         }
 
         .categoria:hover {
-            background: #dddddd;
+            background: #ddd;
         }
-
-        .categoria.ativa {
-            background: #111;
-            color: white;
-        }
-
-        /* =========================
-           PRODUTOS
-        ========================= */
 
         .produtos {
             max-width: 1000px;
-            margin: 30px auto 60px;
+            margin: 30px auto;
             padding: 0 20px;
 
             display: grid;
@@ -108,33 +80,31 @@
 
         .produto {
             background: white;
-            border-radius: 20px;
+            border-radius: 18px;
             overflow: hidden;
             cursor: pointer;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.07);
+
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+
             transition:
                 transform 0.2s ease,
                 box-shadow 0.2s ease;
         }
 
         .produto:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.13);
-        }
-
-        .produto:active {
-            transform: scale(0.99);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
         }
 
         .produto img {
             width: 100%;
-            height: 230px;
+            height: 220px;
             object-fit: cover;
             display: block;
         }
 
         .produto-info {
-            padding: 20px;
+            padding: 18px;
         }
 
         .produto-info h2 {
@@ -146,16 +116,16 @@
             color: #666;
             font-size: 14px;
             line-height: 1.5;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .preco {
-            font-size: 19px;
+            font-size: 18px;
             font-weight: bold;
         }
 
         .escondido {
-            display: none !important;
+            display: none;
         }
 
         /* =========================
@@ -168,7 +138,7 @@
             position: fixed;
             inset: 0;
 
-            background: rgba(0, 0, 0, 0.82);
+            background: rgba(0, 0, 0, 0.78);
 
             z-index: 1000;
 
@@ -176,8 +146,6 @@
             justify-content: center;
 
             padding: 20px;
-
-            backdrop-filter: blur(5px);
         }
 
         .modal.ativo {
@@ -186,16 +154,16 @@
 
         .modal-conteudo {
             background: white;
+
             width: 100%;
-            max-width: 460px;
+            max-width: 440px;
 
-            max-height: 92vh;
-            overflow-y: auto;
+            border-radius: 20px;
 
-            border-radius: 24px;
-            padding: 28px;
+            padding: 25px;
 
             position: relative;
+
             text-align: center;
 
             animation: aparecer 0.2s ease;
@@ -205,18 +173,18 @@
 
             from {
                 opacity: 0;
-                transform: scale(0.94) translateY(10px);
+                transform: scale(0.95);
             }
 
             to {
                 opacity: 1;
-                transform: scale(1) translateY(0);
+                transform: scale(1);
             }
+
         }
 
         .modal-conteudo h2 {
             margin-bottom: 10px;
-            font-size: 24px;
         }
 
         .modal-conteudo p {
@@ -226,9 +194,9 @@
         }
 
         .modal-preco {
-            font-size: 23px;
+            font-size: 22px;
             font-weight: bold;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
 
         .fechar-modal {
@@ -237,139 +205,79 @@
             top: 10px;
             right: 15px;
 
-            width: 38px;
-            height: 38px;
-
             border: none;
-            background: #f1f1f1;
+            background: none;
 
-            border-radius: 50%;
-
-            font-size: 25px;
-            line-height: 1;
+            font-size: 28px;
 
             cursor: pointer;
+
             color: #333;
 
             z-index: 10;
-
-            transition: 0.2s ease;
-        }
-
-        .fechar-modal:hover {
-            background: #ddd;
-        }
-
-        /* =========================
-           BOTÕES
-        ========================= */
-
-        .botoes-produto {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn-3d,
-        .btn-ar {
-
-            width: 100%;
-
-            padding: 15px;
-
-            border: none;
-            border-radius: 13px;
-
-            font-size: 16px;
-            font-weight: bold;
-
-            cursor: pointer;
-
-            transition: 0.2s ease;
         }
 
         .btn-3d {
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+            border-radius: 12px;
+
             background: #111;
             color: white;
+
+            font-size: 16px;
+
+            cursor: pointer;
         }
 
         .btn-3d:hover {
             background: #333;
         }
 
-        .btn-ar {
-            background: #e9e9e9;
-            color: #111;
-        }
-
-        .btn-ar:hover {
-            background: #dcdcdc;
-        }
-
         /* =========================
            VISUALIZADOR 3D
         ========================= */
 
-        .modal-3d-conteudo {
-            max-width: 620px;
-            padding: 24px;
-        }
-
-        .produto-3d-info {
-            margin-bottom: 12px;
-        }
-
-        .produto-3d-info h2 {
-            margin-bottom: 5px;
-        }
-
-        .produto-3d-info span {
-            color: #888;
-            font-size: 13px;
-        }
-
         .area-3d {
-
             width: 100%;
-            height: 390px;
+            height: 300px;
 
-            margin: 18px 0;
+            margin: 20px 0;
 
-            border-radius: 20px;
+            border-radius: 16px;
 
             background:
                 radial-gradient(
                     circle at center,
-                    #3b3b3b 0%,
+                    #333 0%,
                     #181818 55%,
-                    #070707 100%
+                    #090909 100%
                 );
 
             overflow: hidden;
 
             position: relative;
-
-            box-shadow:
-                inset 0 0 50px rgba(255,255,255,0.04),
-                0 10px 30px rgba(0,0,0,0.2);
         }
 
         #canvas3d {
             width: 100%;
             height: 100%;
+
             display: block;
+
             touch-action: none;
         }
 
         .controle-3d {
             font-size: 13px;
             color: #888;
-            margin-top: 8px;
-            margin-bottom: 0 !important;
+            margin-top: 5px;
         }
 
         .carregando-3d {
-
             position: absolute;
             inset: 0;
 
@@ -386,131 +294,40 @@
         }
 
         /* =========================
-           INDICADOR 3D
-        ========================= */
-
-        .badge-3d {
-            display: inline-flex;
-
-            align-items: center;
-            justify-content: center;
-
-            background: #111;
-            color: white;
-
-            font-size: 11px;
-            font-weight: bold;
-
-            padding: 5px 9px;
-
-            border-radius: 20px;
-
-            margin-bottom: 10px;
-        }
-
-        /* =========================
-           AR PREPARADO
-        ========================= */
-
-        .ar-info {
-            padding: 22px;
-
-            background: #f5f5f5;
-
-            border-radius: 16px;
-
-            margin-bottom: 18px;
-        }
-
-        .ar-icone {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-
-        .ar-info h3 {
-            margin-bottom: 7px;
-        }
-
-        .ar-info p {
-            font-size: 14px;
-            margin-bottom: 0;
-        }
-
-        /* =========================
-           RODAPÉ
-        ========================= */
-
-        footer {
-            text-align: center;
-            padding: 25px 20px 40px;
-            color: #999;
-            font-size: 12px;
-        }
-
-        /* =========================
            MOBILE
         ========================= */
 
         @media (max-width: 700px) {
 
             header {
-                padding: 32px 15px;
+                padding: 25px 15px;
             }
 
             header h1 {
-                font-size: 26px;
-            }
-
-            header p {
-                font-size: 14px;
-            }
-
-            .categorias {
-                padding: 15px;
+                font-size: 25px;
             }
 
             .produtos {
                 grid-template-columns: 1fr;
                 padding: 0 15px;
-                margin-top: 22px;
             }
 
             .produto img {
-                height: 220px;
+                height: 210px;
             }
 
             .modal {
-                padding: 10px;
+                padding: 12px;
             }
 
             .modal-conteudo {
-                padding: 22px 18px;
-                border-radius: 20px;
-            }
-
-            .modal-3d-conteudo {
-                padding: 20px 14px;
+                padding: 20px;
             }
 
             .area-3d {
-                height: 330px;
-                border-radius: 16px;
+                height: 280px;
             }
 
-            .modal-conteudo h2 {
-                font-size: 21px;
-            }
-        }
-
-        @media (max-width: 380px) {
-
-            .area-3d {
-                height: 290px;
-            }
-
-            .produto img {
-                height: 200px;
-            }
         }
 
     </style>
@@ -519,11 +336,6 @@
 
 
 <body>
-
-
-    <!-- =========================
-         CABEÇALHO
-    ========================= -->
 
     <header>
 
@@ -536,36 +348,32 @@
     </header>
 
 
-    <!-- =========================
-         CATEGORIAS
-    ========================= -->
-
     <div class="categorias">
 
         <button
-            class="categoria ativa"
-            onclick="filtrarProdutos('todos', this)"
+            class="categoria"
+            onclick="filtrarProdutos('todos')"
         >
             Destaques
         </button>
 
         <button
             class="categoria"
-            onclick="filtrarProdutos('pratos', this)"
+            onclick="filtrarProdutos('pratos')"
         >
             Pratos
         </button>
 
         <button
             class="categoria"
-            onclick="filtrarProdutos('bebidas', this)"
+            onclick="filtrarProdutos('bebidas')"
         >
             Bebidas
         </button>
 
         <button
             class="categoria"
-            onclick="filtrarProdutos('sobremesas', this)"
+            onclick="filtrarProdutos('sobremesas')"
         >
             Sobremesas
         </button>
@@ -573,23 +381,18 @@
     </div>
 
 
-    <!-- =========================
-         PRODUTOS
-    ========================= -->
-
     <main class="produtos">
-
 
         <!-- HAMBÚRGUER -->
 
         <div
             class="produto"
             data-categoria="destaques pratos"
+
             onclick="abrirProduto(
                 'Hambúrguer da Casa',
                 'Hambúrguer artesanal, queijo, molho especial e acompanhamentos.',
-                'R$ 34,90',
-                'hamburguer'
+                'R$ 34,90'
             )"
         >
 
@@ -622,11 +425,11 @@
         <div
             class="produto"
             data-categoria="destaques pratos"
+
             onclick="abrirProduto(
                 'Fettuccine Especial',
                 'Massa fresca ao molho cremoso com ingredientes selecionados.',
-                'R$ 49,90',
-                'fettuccine'
+                'R$ 49,90'
             )"
         >
 
@@ -659,11 +462,11 @@
         <div
             class="produto"
             data-categoria="destaques bebidas"
+
             onclick="abrirProduto(
                 'Refrigerante',
                 'Refrigerante gelado para acompanhar sua refeição.',
-                'R$ 7,00',
-                'refrigerante'
+                'R$ 7,00'
             )"
         >
 
@@ -696,11 +499,11 @@
         <div
             class="produto"
             data-categoria="destaques sobremesas"
+
             onclick="abrirProduto(
                 'Brownie de Chocolate',
                 'Brownie de chocolate servido com uma textura macia e intensa.',
-                'R$ 19,90',
-                'brownie'
+                'R$ 19,90'
             )"
         >
 
@@ -727,7 +530,6 @@
 
         </div>
 
-
     </main>
 
 
@@ -750,12 +552,6 @@
                 ×
             </button>
 
-
-            <div class="badge-3d">
-                EXPERIÊNCIA 3D
-            </div>
-
-
             <h2 id="modalNome"></h2>
 
             <p id="modalDescricao"></p>
@@ -765,25 +561,12 @@
                 class="modal-preco"
             ></div>
 
-
-            <div class="botoes-produto">
-
-                <button
-                    class="btn-3d"
-                    onclick="abrir3D()"
-                >
-                    Ver em 3D
-                </button>
-
-
-                <button
-                    class="btn-ar"
-                    onclick="abrirAR()"
-                >
-                    Ver na minha mesa
-                </button>
-
-            </div>
+            <button
+                class="btn-3d"
+                onclick="abrir3D()"
+            >
+                Ver em 3D
+            </button>
 
         </div>
 
@@ -799,7 +582,7 @@
         class="modal"
     >
 
-        <div class="modal-conteudo modal-3d-conteudo">
+        <div class="modal-conteudo">
 
             <button
                 class="fechar-modal"
@@ -809,19 +592,9 @@
                 ×
             </button>
 
-
-            <div class="produto-3d-info">
-
-                <h2 id="titulo3D">
-                    Visualização 3D
-                </h2>
-
-                <span id="subtitulo3D">
-                    Explore o produto
-                </span>
-
-            </div>
-
+            <h2 id="titulo3D">
+                Visualização 3D
+            </h2>
 
             <div class="area-3d">
 
@@ -836,7 +609,6 @@
 
             </div>
 
-
             <p class="controle-3d">
                 Arraste para girar • Use o scroll para aproximar
             </p>
@@ -844,61 +616,6 @@
         </div>
 
     </div>
-
-
-    <!-- =========================
-         MODAL AR
-    ========================= -->
-
-    <div
-        id="modalAR"
-        class="modal"
-    >
-
-        <div class="modal-conteudo">
-
-            <button
-                class="fechar-modal"
-                onclick="fecharAR()"
-                aria-label="Fechar"
-            >
-                ×
-            </button>
-
-
-            <div class="ar-info">
-
-                <div class="ar-icone">
-                    AR
-                </div>
-
-                <h3>
-                    Ver na minha mesa
-                </h3>
-
-                <p>
-                    Esta experiência prepara o cardápio para a próxima etapa:
-                    visualizar o produto diretamente no ambiente através da câmera do celular.
-                </p>
-
-            </div>
-
-
-            <button
-                class="btn-3d"
-                onclick="fecharAR()"
-            >
-                Voltar ao produto
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <footer>
-        Cardápio Digital • Experiência 3D
-    </footer>
 
 
     <!-- =========================
@@ -914,18 +631,14 @@
         "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
 
 
-        let cena;
-        let camera;
-        let renderizador;
-        let controles;
+        let cena = null;
+        let camera = null;
+        let renderizador = null;
+        let controles = null;
 
         let objetoAtual = null;
 
         let animacaoAtiva = false;
-
-        let produtoSelecionado = "hamburguer";
-
-        let sistemaIniciado = false;
 
 
         /* =========================
@@ -937,57 +650,69 @@
             const canvas =
                 document.getElementById("canvas3d");
 
+            if (!canvas) {
+                return;
+            }
+
+
+            const largura =
+                canvas.clientWidth || 400;
+
+            const altura =
+                canvas.clientHeight || 300;
+
+
+            /* CENA */
 
             cena = new THREE.Scene();
 
 
-            camera = new THREE.PerspectiveCamera(
-                45,
-                canvas.clientWidth / canvas.clientHeight,
-                0.1,
-                100
-            );
+            /* CÂMERA */
 
+            camera =
+                new THREE.PerspectiveCamera(
+                    45,
+                    largura / altura,
+                    0.1,
+                    100
+                );
 
             camera.position.set(
-                4.5,
-                3.2,
-                6.5
+                4,
+                3,
+                6
             );
 
+
+            /* RENDERIZADOR */
 
             renderizador =
                 new THREE.WebGLRenderer({
-
                     canvas: canvas,
-
                     antialias: true,
-
                     alpha: true
-
                 });
 
 
             renderizador.setPixelRatio(
                 Math.min(
-                    window.devicePixelRatio,
+                    window.devicePixelRatio || 1,
                     2
                 )
             );
 
 
             renderizador.setSize(
-                canvas.clientWidth,
-                canvas.clientHeight,
+                largura,
+                altura,
                 false
             );
 
 
             renderizador.shadowMap.enabled = true;
 
-            renderizador.shadowMap.type =
-                THREE.PCFSoftShadowMap;
 
+            /* CONTROLES */
 
             controles =
                 new OrbitControls(
@@ -998,11 +723,11 @@
 
             controles.enableDamping = true;
 
-            controles.dampingFactor = 0.06;
+            controles.dampingFactor = 0.05;
 
             controles.minDistance = 3;
 
-            controles.maxDistance = 10;
+            controles.maxDistance = 9;
 
 
             /* =========================
@@ -1012,11 +737,13 @@
             const luzAmbiente =
                 new THREE.HemisphereLight(
                     0xffffff,
-                    0x222222,
+                    0x444444,
                     2.5
                 );
 
-            cena.add(luzAmbiente);
+            cena.add(
+                luzAmbiente
+            );
 
 
             const luzPrincipal =
@@ -1027,20 +754,22 @@
 
             luzPrincipal.position.set(
                 4,
-                7,
+                6,
                 5
             );
 
             luzPrincipal.castShadow = true;
 
-            cena.add(luzPrincipal);
+            cena.add(
+                luzPrincipal
+            );
 
 
             const luzFrontal =
                 new THREE.PointLight(
                     0xffffff,
                     3,
-                    20
+                                       20
                 );
 
             luzFrontal.position.set(
@@ -1049,23 +778,9 @@
                 4
             );
 
-            cena.add(luzFrontal);
-
-
-            const luzLateral =
-                new THREE.PointLight(
-                    0xffffff,
-                    2,
-                    20
-                );
-
-            luzLateral.position.set(
-                4,
-                2,
-                -4
+            cena.add(
+                luzFrontal
             );
-
-            cena.add(luzLateral);
 
 
             /* =========================
@@ -1074,18 +789,15 @@
 
             const geometriaChao =
                 new THREE.CircleGeometry(
-                    3.2,
+                    3,
                     64
                 );
 
 
             const materialChao =
                 new THREE.MeshStandardMaterial({
-
                     color: 0x222222,
-
-                    roughness: 0.82
-
+                    roughness: 0.8
                 });
 
 
@@ -1099,85 +811,52 @@
             chao.rotation.x =
                 -Math.PI / 2;
 
-
-            chao.position.y = -1.4;
+            chao.position.y =
+                -1.3;
 
 
             chao.receiveShadow = true;
 
 
-            cena.add(chao);
-
-
-            sistemaIniciado = true;
-
-            animacaoAtiva = true;
-
-
-            carregarProduto3D(
-                produtoSelecionado
+            cena.add(
+                chao
             );
 
 
+            /* MODELO */
+
+            criarHamburguer();
+
+
+            /* ANIMAÇÃO */
+
+            animacaoAtiva = true;
+
             animar();
 
+
+            /* ESCONDE CARREGAMENTO */
 
             document
                 .getElementById("carregando3d")
                 .style.display = "none";
 
 
-            window.addEventListener(
-                "resize",
-                ajustar3D
-            );
+            /* TAMANHO */
+
+            ajustar3D();
 
         }
 
 
         /* =========================
-           CARREGAR PRODUTO
-        ========================= */
-
-        function carregarProduto3D(tipo) {
-
-            produtoSelecionado = tipo;
-
-            limparObjeto();
-
-
-            if (tipo === "hamburguer") {
-
-                criarHamburguer();
-
-            }
-
-            else if (tipo === "fettuccine") {
-
-                criarFettuccine();
-
-            }
-
-            else if (tipo === "refrigerante") {
-
-                criarRefrigerante();
-
-            }
-
-            else if (tipo === "brownie") {
-
-                criarBrownie();
-
-            }
-
-        }
-
-
-        /* =========================
-           HAMBÚRGUER
+           HAMBÚRGUER 3D
         ========================= */
 
         function criarHamburguer() {
+
+            limparObjeto();
+
 
             const grupo =
                 new THREE.Group();
@@ -1196,21 +875,22 @@
                     ),
 
                     new THREE.MeshStandardMaterial({
-
                         color: 0xc98232,
-
                         roughness: 0.75
-
                     })
 
                 );
 
 
-            paoInferior.position.y = -0.85;
+            paoInferior.position.y =
+                -0.85;
 
             paoInferior.castShadow = true;
 
-            grupo.add(paoInferior);
+
+            grupo.add(
+                paoInferior
+            );
 
 
             /* CARNE */
@@ -1226,21 +906,22 @@
                     ),
 
                     new THREE.MeshStandardMaterial({
-
                         color: 0x4a2114,
-
                         roughness: 0.9
-
                     })
 
                 );
 
 
-            carne.position.y = -0.35;
+            carne.position.y =
+                -0.35;
 
             carne.castShadow = true;
 
-            grupo.add(carne);
+
+            grupo.add(
+                carne
+            );
 
 
             /* QUEIJO */
@@ -1255,24 +936,25 @@
                     ),
 
                     new THREE.MeshStandardMaterial({
-
                         color: 0xffc928,
-
                         roughness: 0.5
-
                     })
 
                 );
 
 
-            queijo.position.y = 0.02;
+            queijo.position.y =
+                0.02;
 
             queijo.rotation.y =
                 Math.PI / 4;
 
             queijo.castShadow = true;
 
-            grupo.add(queijo);
+
+            grupo.add(
+                queijo
+            );
 
 
             /* ALFACE */
@@ -1288,19 +970,20 @@
                     ),
 
                     new THREE.MeshStandardMaterial({
-
                         color: 0x3d8f35,
-
                         roughness: 0.9
-
                     })
 
                 );
 
 
-            alface.position.y = 0.17;
+            alface.position.y =
+                0.17;
 
-            grupo.add(alface);
+
+            grupo.add(
+                alface
+            );
 
 
             /* PÃO SUPERIOR */
@@ -1319,30 +1002,32 @@
                     ),
 
                     new THREE.MeshStandardMaterial({
-
                         color: 0xd8943c,
-
                         roughness: 0.7
-
                     })
 
                 );
 
 
-            paoSuperior.position.y = 0.25;
+            paoSuperior.position.y =
+                0.25;
 
-            paoSuperior.scale.y = 0.65;
+            paoSuperior.scale.y =
+                0.65;
 
             paoSuperior.castShadow = true;
 
-            grupo.add(paoSuperior);
+
+            grupo.add(
+                paoSuperior
+            );
 
 
             /* GERGELIM */
 
             for (
                 let i = 0;
-                i < 22;
+                i < 18;
                 i++
             ) {
 
@@ -1356,9 +1041,7 @@
                         ),
 
                         new THREE.MeshStandardMaterial({
-
                             color: 0xffe4a3
-
                         })
 
                     );
@@ -1390,505 +1073,24 @@
                 );
 
 
-                semente.scale.y = 0.4;
+                semente.scale.y =
+                    0.4;
 
-                grupo.add(semente);
+
+                grupo.add(
+                    semente
+                );
 
             }
 
 
-            grupo.scale.set(
-                1,
-                1,
-                1
+            objetoAtual =
+                grupo;
+
+
+            cena.add(
+                grupo
             );
-
-
-            objetoAtual = grupo;
-
-            cena.add(grupo);
-
-        }
-
-
-        /* =========================
-           FETTUCCINE
-        ========================= */
-
-        function criarFettuccine() {
-
-            const grupo =
-                new THREE.Group();
-
-
-            /* PRATO */
-
-            const prato =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        2.05,
-                        2.05,
-                        0.18,
-                        64
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0xf4f4f4,
-
-                        roughness: 0.35
-
-                    })
-
-                );
-
-
-            prato.position.y = -1.05;
-
-            prato.castShadow = true;
-
-            grupo.add(prato);
-
-
-            /* MOLHO */
-
-            const molho =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        1.65,
-                        1.65,
-                        0.18,
-                        64
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0xd88935,
-
-                        roughness: 0.75
-
-                    })
-
-                );
-
-
-            molho.position.y = -0.88;
-
-            grupo.add(molho);
-
-
-            /* FIOS DE MASSA */
-
-            for (
-                let i = 0;
-                i < 22;
-                i++
-            ) {
-
-                const massa =
-                    new THREE.Mesh(
-
-                        new THREE.TorusGeometry(
-                            0.7 +
-                            Math.random() *
-                            0.65,
-
-                            0.075,
-
-                            10,
-                            48
-                        ),
-
-                        new THREE.MeshStandardMaterial({
-
-                            color: 0xe6bd63,
-
-                            roughness: 0.65
-
-                        })
-
-                    );
-
-
-                massa.rotation.x =
-                    Math.PI / 2;
-
-
-                massa.rotation.z =
-                    Math.random() *
-                    Math.PI;
-
-
-                massa.position.y =
-                    -0.72 +
-                    Math.random() *
-                    0.9;
-
-
-                massa.position.x =
-                    (Math.random() - 0.5) *
-                    0.5;
-
-
-                massa.position.z =
-                    (Math.random() - 0.5) *
-                    0.5;
-
-
-                massa.castShadow = true;
-
-                grupo.add(massa);
-
-            }
-
-
-            /* PARMESÃO */
-
-            for (
-                let i = 0;
-                i < 18;
-                i++
-            ) {
-
-                const queijo =
-                    new THREE.Mesh(
-
-                        new THREE.SphereGeometry(
-                            0.07,
-                            10,
-                            8
-                        ),
-
-                        new THREE.MeshStandardMaterial({
-
-                            color: 0xffe8a8
-
-                        })
-
-                    );
-
-
-                queijo.position.set(
-
-                    (Math.random() - 0.5) *
-                    1.6,
-
-                    0.2 +
-                    Math.random() *
-                    0.45,
-
-                    (Math.random() - 0.5) *
-                    1.6
-
-                );
-
-
-                grupo.add(queijo);
-
-            }
-
-
-            objetoAtual = grupo;
-
-            cena.add(grupo);
-
-        }
-
-
-        /* =========================
-           REFRIGERANTE
-        ========================= */
-
-        function criarRefrigerante() {
-
-            const grupo =
-                new THREE.Group();
-
-
-            /* CORPO DA LATA */
-
-            const lata =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        0.82,
-                        0.82,
-                        2.7,
-                        64
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0xd62828,
-
-                        metalness: 0.35,
-
-                        roughness: 0.28
-
-                    })
-
-                );
-
-
-            lata.position.y = 0;
-
-            lata.castShadow = true;
-
-            grupo.add(lata);
-
-
-            /* TAMPA */
-
-            const tampa =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        0.78,
-                        0.78,
-                        0.08,
-                        64
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0xcfcfcf,
-
-                        metalness: 0.8,
-
-                        roughness: 0.2
-
-                    })
-
-                );
-
-
-            tampa.position.y = 1.37;
-
-            grupo.add(tampa);
-
-
-            /* FUNDO */
-
-            const fundo =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        0.78,
-                        0.78,
-                        0.08,
-                        64
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0x999999,
-
-                        metalness: 0.7,
-
-                        roughness: 0.3
-
-                    })
-
-                );
-
-
-            fundo.position.y = -1.37;
-
-            grupo.add(fundo);
-
-
-            /* DETALHE CENTRAL */
-
-            const detalhe =
-                new THREE.Mesh(
-
-                    new THREE.TorusGeometry(
-                        0.52,
-                        0.06,
-                        12,
-                        48
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0xffffff,
-
-                        roughness: 0.4
-
-                    })
-
-                );
-
-
-            detalhe.position.y = 0;
-
-            detalhe.rotation.x =
-                Math.PI / 2;
-
-
-            grupo.add(detalhe);
-
-
-            objetoAtual = grupo;
-
-            cena.add(grupo);
-
-        }
-
-
-        /* =========================
-           BROWNIE
-        ========================= */
-
-        function criarBrownie() {
-
-            const grupo =
-                new THREE.Group();
-
-
-            /* PRATO */
-
-            const prato =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        2.1,
-                        2.1,
-                        0.15,
-                        64
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0xf4f4f4,
-
-                        roughness: 0.35
-
-                    })
-
-                );
-
-
-            prato.position.y = -1.05;
-
-            grupo.add(prato);
-
-
-            /* BROWNIE */
-
-            const brownie =
-                new THREE.Mesh(
-
-                    new THREE.BoxGeometry(
-                        2.5,
-                        0.85,
-                        1.7
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0x4b2417,
-
-                        roughness: 0.88
-
-                    })
-
-                );
-
-
-            brownie.position.y = -0.55;
-
-            brownie.rotation.y =
-                -0.12;
-
-            brownie.castShadow = true;
-
-            grupo.add(brownie);
-
-
-            /* CAMADA DE CHOCOLATE */
-
-            const chocolate =
-                new THREE.Mesh(
-
-                    new THREE.BoxGeometry(
-                        2.35,
-                        0.12,
-                        1.58
-                    ),
-
-                    new THREE.MeshStandardMaterial({
-
-                        color: 0x24100b,
-
-                        roughness: 0.4
-
-                    })
-
-                );
-
-
-            chocolate.position.y = -0.08;
-
-            chocolate.rotation.y =
-                -0.12;
-
-            grupo.add(chocolate);
-
-
-            /* GOTAS DE CHOCOLATE */
-
-            for (
-                let i = 0;
-                i < 12;
-                i++
-            ) {
-
-                const gota =
-                    new THREE.Mesh(
-
-                        new THREE.SphereGeometry(
-                            0.09,
-                            12,
-                            8
-                        ),
-
-                        new THREE.MeshStandardMaterial({
-
-                            color: 0x180a06,
-
-                            roughness: 0.35
-
-                        })
-
-                    );
-
-
-                gota.position.set(
-
-                    (Math.random() - 0.5) *
-                    1.8,
-
-                    0.02 +
-                    Math.random() *
-                    0.08,
-
-                    (Math.random() - 0.5) *
-                    1.1
-
-                );
-
-
-                grupo.add(gota);
-
-            }
-
-
-            objetoAtual = grupo;
-
-            cena.add(grupo);
 
         }
 
@@ -1928,16 +1130,11 @@
                         ) {
 
                             objeto.material.forEach(
-                                material => {
-
-                                    material.dispose();
-
-                                }
+                                material =>
+                                    material.dispose()
                             );
 
-                        }
-
-                        else {
+                        } else {
 
                             objeto.material.dispose();
 
@@ -1949,7 +1146,8 @@
             );
 
 
-            objetoAtual = null;
+            objetoAtual =
+                null;
 
         }
 
@@ -1973,13 +1171,15 @@
             if (objetoAtual) {
 
                 objetoAtual.rotation.y +=
-                    0.0025;
+                    0.003;
 
             }
 
 
             if (controles) {
+
                 controles.update();
+
             }
 
 
@@ -2036,7 +1236,8 @@
 
 
             camera.aspect =
-                largura / altura;
+                largura /
+                altura;
 
 
             camera.updateProjectionMatrix();
@@ -2078,36 +1279,27 @@
 
                 document
                     .getElementById(
-                        "titulo3D"
+                        "carregando3d"
                     )
-                    .textContent =
-                    "Visualização 3D";
-
-
-                document
-                    .getElementById(
-                        "subtitulo3D"
-                    )
-                    .textContent =
-                    obterNomeProduto(
-                        produtoSelecionado
-                    );
+                    .style.display =
+                    "flex";
 
 
                 setTimeout(
                     function () {
 
-                        if (!sistemaIniciado) {
+                        if (!cena) {
 
                             iniciar3D();
 
-                        }
+                        } else {
 
-                        else {
-
-                            carregarProduto3D(
-                                produtoSelecionado
-                            );
+                            document
+                                .getElementById(
+                                    "carregando3d"
+                                )
+                                .style.display =
+                                "none";
 
                             ajustar3D();
 
@@ -2121,18 +1313,10 @@
 
 
         /* =========================
-           FUNÇÕES PÚBLICAS
+           FECHAR 3D
         ========================= */
 
-        window.abrir3D =
-            function () {
-
-                abrir3DReal();
-
-            };
-
-
-        window.fechar3D =
+        window.fechar3DReal =
             function () {
 
                 document
@@ -2146,65 +1330,34 @@
             };
 
 
-        window.fechar3DReal =
+        /* BOTÃO 3D */
+
+        window.abrir3D =
             function () {
 
-                fechar3D();
+                window.abrir3DReal();
 
             };
 
 
-        /* =========================
-           RECEBER PRODUTO
-        ========================= */
+        window.fechar3D =
+            function () {
 
-        window.selecionarProduto3D =
-            function (tipo) {
-
-                produtoSelecionado =
-                    tipo;
+                window.fechar3DReal();
 
             };
 
 
-        /* =========================
-           NOME DO PRODUTO
-        ========================= */
+        /* RESIZE */
 
-        function obterNomeProduto(tipo) {
+        window.addEventListener(
+            "resize",
+            function () {
 
-            const nomes = {
+                ajustar3D();
 
-                hamburguer:
-                    "Hambúrguer da Casa",
-
-                fettuccine:
-                    "Fettuccine Especial",
-
-                refrigerante:
-                    "Refrigerante",
-
-                brownie:
-                    "Brownie de Chocolate"
-
-            };
-
-
-            return (
-                nomes[tipo] ||
-                "Produto"
-            );
-
-        }
-
-
-        /* =========================
-           EXPOR CARREGAMENTO
-        ========================= */
-
-        window.carregarProduto3D =
-            carregarProduto3D;
-
+            }
+        );
 
     </script>
 
@@ -2215,17 +1368,12 @@
 
     <script>
 
-        let produtoSelecionadoGlobal =
-            "hamburguer";
-
-
         /* =========================
-           FILTRO
+           FILTRO DE CATEGORIAS
         ========================= */
 
         function filtrarProdutos(
-            categoria,
-            botao
+            categoria
         ) {
 
             const produtos =
@@ -2252,9 +1400,7 @@
                             "escondido"
                         );
 
-                    }
-
-                    else {
+                    } else {
 
                         produto.classList.add(
                             "escondido"
@@ -2264,30 +1410,6 @@
 
                 }
             );
-
-
-            document
-                .querySelectorAll(
-                    ".categoria"
-                )
-                .forEach(
-                    function (item) {
-
-                        item.classList.remove(
-                            "ativa"
-                        );
-
-                    }
-                );
-
-
-            if (botao) {
-
-                botao.classList.add(
-                    "ativa"
-                );
-
-            }
 
         }
 
@@ -2299,18 +1421,8 @@
         function abrirProduto(
             nome,
             descricao,
-            preco,
-            tipo
+            preco
         ) {
-
-            produtoSelecionadoGlobal =
-                tipo;
-
-
-            window.selecionarProduto3D(
-                tipo
-            );
-
 
             document
                 .getElementById(
@@ -2365,65 +1477,6 @@
 
 
         /* =========================
-           ABRIR 3D
-        ========================= */
-
-        function abrir3D() {
-
-            window.selecionarProduto3D(
-                produtoSelecionadoGlobal
-            );
-
-
-            window.abrir3DReal();
-
-        }
-
-
-        /* =========================
-           AR
-        ========================= */
-
-        function abrirAR() {
-
-            document
-                .getElementById(
-                    "modalProduto"
-                )
-                .classList.remove(
-                    "ativo"
-                );
-
-
-            document
-                .getElementById(
-                    "modalAR"
-                )
-                .classList.add(
-                    "ativo"
-                );
-
-        }
-
-
-        /* =========================
-           FECHAR AR
-        ========================= */
-
-        function fecharAR() {
-
-            document
-                .getElementById(
-                    "modalAR"
-                )
-                .classList.remove(
-                    "ativo"
-                );
-
-        }
-
-
-        /* =========================
            FECHAR CLICANDO FORA
         ========================= */
 
@@ -2469,30 +1522,7 @@
             );
 
 
-        document
-            .getElementById(
-                "modalAR"
-            )
-            .addEventListener(
-                "click",
-                function (evento) {
-
-                    if (
-                        evento.target ===
-                        this
-                    ) {
-
-                        fecharAR();
-
-                    }
-
-                }
-            );
-
-
-        /* =========================
-           ESC FECHA MODAIS
-        ========================= */
+        /* ESC PARA FECHAR */
 
         document.addEventListener(
             "keydown",
@@ -2507,16 +1537,12 @@
 
                     fechar3D();
 
-                    fecharAR();
-
                 }
 
             }
         );
 
-
     </script>
-
 
 </body>
 
