@@ -1,819 +1,866 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <meta charset="UTF-8">
+<title>Restaurante Demo</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Restaurante Demo</title>
-
-    <!--
-        IMPORT MAP
-        Corrige a dependência interna do OrbitControls.
-    -->
-
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
-        }
+<!-- THREE.JS -->
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
     }
-    </script>
+}
+</script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f4f4;
+    color:#111;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+header{
+    background:
+        radial-gradient(circle at 50% 0%,#333 0%,#111 45%,#050505 100%);
+    color:#fff;
+    padding:42px 20px;
+    text-align:center;
+}
+
+header h1{
+    font-size:32px;
+    margin-bottom:8px;
+    letter-spacing:-.5px;
+}
+
+header p{
+    color:#aaa;
+    font-size:15px;
+}
+
+/* =========================
+   CATEGORIAS
+========================= */
+
+.categorias{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding:18px 20px;
+    background:#fff;
+    position:sticky;
+    top:0;
+    z-index:50;
+    box-shadow:0 3px 15px rgba(0,0,0,.06);
+}
+
+.categorias::-webkit-scrollbar{
+    display:none;
+}
+
+.categoria{
+    border:none;
+    background:#eee;
+    padding:12px 19px;
+    border-radius:30px;
+    cursor:pointer;
+    white-space:nowrap;
+    font-size:14px;
+    transition:.2s;
+}
+
+.categoria:hover{
+    background:#ddd;
+}
+
+.categoria.ativa{
+    background:#111;
+    color:#fff;
+}
+
+/* =========================
+   PRODUTOS
+========================= */
+
+.produtos{
+    max-width:1050px;
+    margin:30px auto 60px;
+    padding:0 20px;
+
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:22px;
+}
+
+.produto{
+    background:#fff;
+    border-radius:20px;
+    overflow:hidden;
+    cursor:pointer;
 
+    box-shadow:0 5px 22px rgba(0,0,0,.08);
 
-    <style>
+    transition:
+        transform .25s,
+        box-shadow .25s;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+.produto:hover{
+    transform:translateY(-5px);
+    box-shadow:0 14px 35px rgba(0,0,0,.14);
+}
 
+.produto img{
+    width:100%;
+    height:240px;
+    object-fit:cover;
+    display:block;
+}
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f5f5f5;
-            color: #111;
-        }
+.produto-info{
+    padding:19px;
+}
 
+.produto-info h2{
+    font-size:20px;
+    margin-bottom:8px;
+}
 
-        header {
-            background: #111;
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-        }
+.produto-info p{
+    color:#666;
+    font-size:14px;
+    line-height:1.5;
+    margin-bottom:13px;
+}
 
+.preco{
+    font-size:18px;
+    font-weight:bold;
+}
 
-        header h1 {
-            font-size: 30px;
-            margin-bottom: 8px;
-        }
+.escondido{
+    display:none!important;
+}
 
+/* =========================
+   MODAIS
+========================= */
 
-        header p {
-            color: #aaa;
-        }
+.modal{
+    display:none;
 
+    position:fixed;
+    inset:0;
 
-        /* =========================
-           CATEGORIAS
-        ========================= */
+    background:rgba(0,0,0,.80);
 
-        .categorias {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 20px;
-            background: white;
-        }
+    z-index:1000;
 
+    align-items:center;
+    justify-content:center;
 
-        .categoria {
-            border: none;
-            background: #eee;
-            padding: 12px 18px;
-            border-radius: 30px;
-            cursor: pointer;
-            white-space: nowrap;
-            font-size: 14px;
-            transition: .2s;
-        }
+    padding:20px;
+}
 
+.modal.ativo{
+    display:flex;
+}
 
-        .categoria:hover {
-            background: #ddd;
-        }
+.modal-conteudo{
+    background:#fff;
 
+    width:100%;
+    max-width:470px;
 
-        /* =========================
-           PRODUTOS
-        ========================= */
+    border-radius:24px;
 
-        .produtos {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 0 20px;
+    padding:28px;
 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
+    position:relative;
 
+    text-align:center;
 
-        .produto {
-            background: white;
-            border-radius: 18px;
-            overflow: hidden;
-            cursor: pointer;
+    animation:aparecer .2s ease;
+}
 
-            box-shadow:
-                0 5px 20px rgba(0,0,0,.08);
+@keyframes aparecer{
+    from{
+        opacity:0;
+        transform:scale(.95);
+    }
 
-            transition:
-                transform .2s,
-                box-shadow .2s;
-        }
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
 
+.fechar-modal{
+    position:absolute;
+    top:8px;
+    right:13px;
 
-        .produto:hover {
-            transform: translateY(-4px);
+    border:none;
+    background:transparent;
 
-            box-shadow:
-                0 12px 30px rgba(0,0,0,.13);
-        }
+    font-size:28px;
+    cursor:pointer;
 
+    color:#222;
+    z-index:20;
+}
 
-        .produto img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            display: block;
-        }
+#modalNome{
+    margin-bottom:10px;
+    padding-right:20px;
+}
 
+#modalDescricao{
+    color:#666;
+    line-height:1.5;
+    margin-bottom:14px;
+}
 
-        .produto-info {
-            padding: 18px;
-        }
+.modal-preco{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
 
+/* =========================
+   BOTÕES
+========================= */
 
-        .produto-info h2 {
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
+.botoes-produto{
+    display:grid;
+    gap:10px;
+}
 
+.btn-principal,
+.btn-ar{
+    width:100%;
 
-        .produto-info p {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 12px;
-        }
+    border:none;
+    border-radius:14px;
 
+    padding:15px;
 
-        .preco {
-            font-size: 18px;
-            font-weight: bold;
-        }
+    font-size:15px;
+    font-weight:bold;
 
+    cursor:pointer;
 
-        .escondido {
-            display: none;
-        }
+    transition:.2s;
+}
 
+.btn-principal{
+    background:#111;
+    color:#fff;
+}
 
-        /* =========================
-           MODAL
-        ========================= */
+.btn-principal:hover{
+    background:#333;
+}
 
-        .modal {
-            display: none;
+.btn-ar{
+    background:#eee;
+    color:#111;
+}
 
-            position: fixed;
-            inset: 0;
+.btn-ar:hover{
+    background:#ddd;
+}
 
-            background: rgba(0,0,0,.78);
+/* =========================
+   3D
+========================= */
 
-            z-index: 1000;
+.area-3d{
+    width:100%;
+    height:340px;
 
-            align-items: center;
-            justify-content: center;
+    margin:20px 0;
 
-            padding: 20px;
-        }
+    border-radius:19px;
+    overflow:hidden;
 
+    position:relative;
 
-        .modal.ativo {
-            display: flex;
-        }
+    background:
+        radial-gradient(
+            circle at 50% 40%,
+            #404040 0%,
+            #1c1c1c 52%,
+            #080808 100%
+        );
+}
 
+#canvas3d{
+    width:100%;
+    height:100%;
+    display:block;
+    touch-action:none;
+}
 
-        .modal-conteudo {
-            background: white;
+.carregando-3d{
+    position:absolute;
+    inset:0;
 
-            width: 100%;
-            max-width: 460px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-            border-radius: 22px;
+    color:#fff;
+    font-size:14px;
 
-            padding: 26px;
+    background:rgba(0,0,0,.25);
 
-            position: relative;
+    pointer-events:none;
+}
 
-            text-align: center;
+.erro-3d{
+    position:absolute;
+    inset:0;
 
-            animation:
-                aparecer .2s ease;
-        }
+    display:none;
+    align-items:center;
+    justify-content:center;
 
+    flex-direction:column;
+    gap:10px;
 
-        @keyframes aparecer {
+    color:#fff;
+    text-align:center;
+    padding:30px;
 
-            from {
-                opacity: 0;
-                transform: scale(.95);
-            }
+    background:#111;
+}
 
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+.erro-3d strong{
+    font-size:17px;
+}
 
-        }
+.controle-3d{
+    color:#777;
+    font-size:13px;
+    margin-top:8px;
+}
 
+.produto-3d-nome{
+    color:#888;
+    font-size:13px;
+    margin-top:-5px;
+}
 
-        .fechar-modal {
-            position: absolute;
+/* =========================
+   AR / CÂMERA
+========================= */
 
-            top: 9px;
-            right: 14px;
+.ar-tela{
+    position:fixed;
+    inset:0;
 
-            border: none;
-            background: transparent;
+    display:none;
 
-            font-size: 28px;
+    background:#000;
 
-            cursor: pointer;
+    z-index:3000;
 
-            color: #222;
+    overflow:hidden;
+}
 
-            z-index: 20;
-        }
+.ar-tela.ativo{
+    display:block;
+}
 
+#videoCamera{
+    position:absolute;
+    inset:0;
 
-        #modalNome {
-            margin-bottom: 10px;
-        }
+    width:100%;
+    height:100%;
 
+    object-fit:cover;
 
-        #modalDescricao {
-            color: #666;
-            line-height: 1.5;
-            margin-bottom: 14px;
-        }
+    background:#000;
+}
 
+#canvasAR{
+    position:absolute;
+    inset:0;
 
-        .modal-preco {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
+    width:100%;
+    height:100%;
 
+    touch-action:none;
+}
 
-        /* =========================
-           BOTÕES
-        ========================= */
+.ar-topo{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
 
-        .botoes-produto {
-            display: grid;
-            gap: 10px;
-        }
+    padding:
+        calc(18px + env(safe-area-inset-top))
+        18px
+        18px;
 
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 
-        .btn-principal,
-        .btn-ar {
-            width: 100%;
+    z-index:10;
 
-            border: none;
-            border-radius: 13px;
+    background:linear-gradient(
+        rgba(0,0,0,.65),
+        transparent
+    );
+}
 
-            padding: 14px;
+.ar-titulo{
+    color:#fff;
+    font-size:16px;
+    font-weight:bold;
+}
 
-            font-size: 15px;
-            font-weight: bold;
+.ar-fechar{
+    width:42px;
+    height:42px;
 
-            cursor: pointer;
+    border:none;
+    border-radius:50%;
 
-            transition: .2s;
-        }
+    background:rgba(0,0,0,.65);
+    color:#fff;
 
+    font-size:25px;
+    cursor:pointer;
+}
 
-        .btn-principal {
-            background: #111;
-            color: white;
-        }
+.ar-instrucoes{
+    position:absolute;
 
+    left:50%;
+    bottom:
+        calc(30px + env(safe-area-inset-bottom));
 
-        .btn-principal:hover {
-            background: #333;
-        }
+    transform:translateX(-50%);
 
+    width:calc(100% - 36px);
+    max-width:430px;
 
-        .btn-ar {
-            background: #eee;
-            color: #111;
-        }
+    padding:14px 18px;
 
+    border-radius:17px;
 
-        .btn-ar:hover {
-            background: #ddd;
-        }
+    background:rgba(0,0,0,.68);
 
+    color:#fff;
 
-        /* =========================
-           ÁREA 3D
-        ========================= */
+    text-align:center;
 
-        .area-3d {
-            width: 100%;
-            height: 330px;
+    font-size:13px;
+    line-height:1.5;
 
-            margin: 20px 0;
+    z-index:10;
 
-            border-radius: 18px;
+    backdrop-filter:blur(10px);
+}
 
-            overflow: hidden;
+.ar-status{
+    margin-top:6px;
+    color:#bbb;
+    font-size:11px;
+}
 
-            position: relative;
+.ar-carregando{
+    position:absolute;
+    inset:0;
 
-            background:
-                radial-gradient(
-                    circle at 50% 40%,
-                    #383838 0%,
-                    #1b1b1b 50%,
-                    #090909 100%
-                );
-        }
+    display:none;
+    align-items:center;
+    justify-content:center;
 
+    flex-direction:column;
+    gap:12px;
 
-        #canvas3d {
-            width: 100%;
-            height: 100%;
+    color:#fff;
 
-            display: block;
+    background:rgba(0,0,0,.85);
 
-            touch-action: none;
-        }
+    z-index:20;
 
+    text-align:center;
+}
 
-        .carregando-3d {
-            position: absolute;
+.ar-carregando.ativo{
+    display:flex;
+}
 
-            inset: 0;
+.ar-ponto{
+    width:12px;
+    height:12px;
 
-            display: flex;
+    border-radius:50%;
 
-            align-items: center;
-            justify-content: center;
+    background:#fff;
 
-            color: white;
+    box-shadow:
+        0 0 0 8px rgba(255,255,255,.12),
+        0 0 30px rgba(255,255,255,.5);
 
-            font-size: 14px;
+    animation:pulsar 1.2s infinite;
+}
 
-            background: rgba(0,0,0,.2);
+@keyframes pulsar{
+    0%,100%{
+        transform:scale(1);
+        opacity:.7;
+    }
 
-            pointer-events: none;
-        }
+    50%{
+        transform:scale(1.35);
+        opacity:1;
+    }
+}
 
+/* =========================
+   MODAL AR INFORMATIVO
+========================= */
 
-        .controle-3d {
-            color: #777;
+.ar-conteudo{
+    text-align:center;
+}
 
-            font-size: 13px;
+.ar-icone{
+    width:72px;
+    height:72px;
 
-            margin-top: 8px;
-        }
+    border-radius:50%;
 
+    margin:5px auto 18px;
 
-        .produto-3d-nome {
-            color: #888;
-            font-size: 13px;
-            margin-top: -5px;
-        }
+    background:#111;
+    color:#fff;
 
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-        /* =========================
-           MODAL AR
-        ========================= */
+    font-size:29px;
+}
 
-        .ar-conteudo {
-            text-align: center;
-        }
+.ar-conteudo h2{
+    margin-bottom:10px;
+}
 
+.ar-conteudo p{
+    color:#666;
+    line-height:1.5;
+    margin-bottom:20px;
+}
 
-        .ar-icone {
-            width: 70px;
-            height: 70px;
+.ar-aviso{
+    font-size:12px;
+    color:#999;
+    margin-top:14px;
+}
 
-            border-radius: 50%;
+/* =========================
+   RESPONSIVO
+========================= */
 
-            margin: 5px auto 18px;
+@media(max-width:700px){
 
-            background: #111;
-            color: white;
+    header{
+        padding:30px 15px;
+    }
 
-            display: flex;
+    header h1{
+        font-size:26px;
+    }
 
-            align-items: center;
-            justify-content: center;
+    .produtos{
+        grid-template-columns:1fr;
+        padding:0 15px;
+        margin-top:22px;
+    }
 
-            font-size: 30px;
-        }
+    .produto img{
+        height:215px;
+    }
 
+    .modal{
+        padding:12px;
+    }
 
-        .ar-conteudo h2 {
-            margin-bottom: 10px;
-        }
+    .modal-conteudo{
+        padding:22px;
+        max-height:94vh;
+        overflow-y:auto;
+    }
 
+    .area-3d{
+        height:300px;
+    }
+}
 
-        .ar-conteudo p {
-            color: #666;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
+@media(max-width:380px){
 
+    .area-3d{
+        height:270px;
+    }
 
-        .ar-aviso {
-            font-size: 12px;
-            color: #999;
-            margin-top: 14px;
-        }
-
-
-        /* =========================
-           MOBILE
-        ========================= */
-
-        @media (max-width: 700px) {
-
-            header {
-                padding: 25px 15px;
-            }
-
-
-            header h1 {
-                font-size: 25px;
-            }
-
-
-            .produtos {
-                grid-template-columns: 1fr;
-                padding: 0 15px;
-            }
-
-
-            .produto img {
-                height: 210px;
-            }
-
-
-            .modal {
-                padding: 12px;
-            }
-
-
-            .modal-conteudo {
-                padding: 21px;
-            }
-
-
-            .area-3d {
-                height: 290px;
-            }
-
-        }
-
-    </style>
-
+    .modal-conteudo{
+        padding:19px;
+    }
+}
+</style>
 </head>
-
 
 <body>
 
-
-    <!-- =========================
-         CABEÇALHO
-    ========================= -->
-
-    <header>
-
-        <h1>
-            Restaurante Demo
-        </h1>
-
-        <p>
-            Escolha seu prato favorito
-        </p>
-
-    </header>
-
-
-    <!-- =========================
-         CATEGORIAS
-    ========================= -->
-
-    <div class="categorias">
-
-        <button
-            class="categoria"
-            onclick="filtrarProdutos('todos')"
-        >
-            Destaques
-        </button>
-
-        <button
-            class="categoria"
-            onclick="filtrarProdutos('pratos')"
-        >
-            Pratos
-        </button>
-
-        <button
-            class="categoria"
-            onclick="filtrarProdutos('bebidas')"
-        >
-            Bebidas
-        </button>
-
-        <button
-            class="categoria"
-            onclick="filtrarProdutos('sobremesas')"
-        >
-            Sobremesas
-        </button>
-
-    </div>
-
-
-    <!-- =========================
-         PRODUTOS
-    ========================= -->
-
-    <main class="produtos">
-
-
-        <!-- HAMBÚRGUER -->
-
-        <div
-            class="produto"
-            data-categoria="destaques pratos"
-
-            onclick="abrirProduto(
-                'hamburguer',
-                'Hambúrguer da Casa',
-                'Hambúrguer artesanal, queijo, molho especial e acompanhamentos.',
-                'R$ 34,90'
-            )"
-        >
-
-            <img
-                src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80"
-                alt="Hambúrguer da Casa"
-            >
-
-            <div class="produto-info">
-
-                <h2>
-                    Hambúrguer da Casa
-                </h2>
-
-                <p>
-                    Hambúrguer artesanal, queijo,
-                    molho especial e acompanhamentos.
-                </p>
-
-                <div class="preco">
-                    R$ 34,90
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- FETTUCCINE -->
-
-        <div
-            class="produto"
-            data-categoria="destaques pratos"
-
-            onclick="abrirProduto(
-                'fettuccine',
-                'Fettuccine Especial',
-                'Massa fresca ao molho cremoso com ingredientes selecionados.',
-                'R$ 49,90'
-            )"
-        >
-
-            <img
-                src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80"
-                alt="Fettuccine Especial"
-            >
-
-            <div class="produto-info">
-
-                <h2>
-                    Fettuccine Especial
-                </h2>
-
-                <p>
-                    Massa fresca ao molho cremoso
-                    com ingredientes selecionados.
-                </p>
-
-                <div class="preco">
-                    R$ 49,90
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- REFRIGERANTE -->
-
-        <div
-            class="produto"
-            data-categoria="destaques bebidas"
-
-            onclick="abrirProduto(
-                'refrigerante',
-                'Refrigerante',
-                'Refrigerante gelado para acompanhar sua refeição.',
-                'R$ 7,00'
-            )"
-        >
-
-            <img
-                src="https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=900&q=80"
-                alt="Refrigerante"
-            >
-
-            <div class="produto-info">
-
-                <h2>
-                    Refrigerante
-                </h2>
-
-                <p>
-                    Refrigerante gelado para acompanhar
-                    sua refeição.
-                </p>
-
-                <div class="preco">
-                    R$ 7,00
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- BROWNIE -->
-
-        <div
-            class="produto"
-            data-categoria="destaques sobremesas"
-
-            onclick="abrirProduto(
-                'brownie',
-                'Brownie de Chocolate',
-                'Brownie de chocolate servido com uma textura macia e intensa.',
-                'R$ 19,90'
-            )"
-        >
-
-            <img
-                src="https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&w=900&q=80"
-                alt="Brownie de Chocolate"
-            >
-
-            <div class="produto-info">
-
-                <h2>
-                    Brownie de Chocolate
-                </h2>
-
-                <p>
-                    Brownie de chocolate servido
-                    com uma textura macia e intensa.
-                </p>
-
-                <div class="preco">
-                    R$ 19,90
-                </div>
-
-            </div>
-
-        </div>
-
-
-    </main>
-
-
-    <!-- =========================
-         MODAL PRODUTO
-    ========================= -->
+<!-- =========================
+     CABEÇALHO
+========================= -->
+
+<header>
+    <h1>Restaurante Demo</h1>
+    <p>Escolha seu prato favorito</p>
+</header>
+
+<!-- =========================
+     CATEGORIAS
+========================= -->
+
+<div class="categorias">
+
+    <button
+        class="categoria ativa"
+        onclick="filtrarProdutos('todos',this)"
+    >
+        Destaques
+    </button>
+
+    <button
+        class="categoria"
+        onclick="filtrarProdutos('pratos',this)"
+    >
+        Pratos
+    </button>
+
+    <button
+        class="categoria"
+        onclick="filtrarProdutos('bebidas',this)"
+    >
+        Bebidas
+    </button>
+
+    <button
+        class="categoria"
+        onclick="filtrarProdutos('sobremesas',this)"
+    >
+        Sobremesas
+    </button>
+
+</div>
+
+<!-- =========================
+     PRODUTOS
+========================= -->
+
+<main class="produtos">
 
     <div
-        id="modalProduto"
-        class="modal"
+        class="produto"
+        data-categoria="destaques pratos"
+        onclick="abrirProduto(
+            'hamburguer',
+            'Hambúrguer da Casa',
+            'Hambúrguer artesanal, queijo, molho especial e acompanhamentos.',
+            'R$ 34,90'
+        )"
     >
 
-        <div class="modal-conteudo">
+        <img
+            src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80"
+            alt="Hambúrguer da Casa"
+        >
 
-            <button
-                class="fechar-modal"
-                onclick="fecharModal()"
-            >
-                ×
-            </button>
+        <div class="produto-info">
 
+            <h2>Hambúrguer da Casa</h2>
 
-            <h2 id="modalNome"></h2>
-
-            <p id="modalDescricao"></p>
-
-            <div
-                id="modalPreco"
-                class="modal-preco"
-            ></div>
-
-
-            <div class="botoes-produto">
-
-                <button
-                    class="btn-principal"
-                    onclick="abrir3D()"
-                >
-                    Ver em 3D
-                </button>
-
-
-                <button
-                    class="btn-ar"
-                    onclick="abrirAR()"
-                >
-                    Ver na minha mesa
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =========================
-         MODAL 3D
-    ========================= -->
-
-    <div
-        id="modal3D"
-        class="modal"
-    >
-
-        <div class="modal-conteudo">
-
-            <button
-                class="fechar-modal"
-                onclick="fechar3D()"
-            >
-                ×
-            </button>
-
-
-            <h2 id="titulo3D">
-                Visualização 3D
-            </h2>
-
-
-            <div
-                id="nomeProduto3D"
-                class="produto-3d-nome"
-            ></div>
-
-
-            <div class="area-3d">
-
-                <canvas
-                    id="canvas3d"
-                ></canvas>
-
-
-                <div
-                    id="carregando3d"
-                    class="carregando-3d"
-                >
-                    Preparando visualização 3D...
-                </div>
-
-            </div>
-
-
-            <p class="controle-3d">
-                Arraste para girar • Use o scroll para aproximar
+            <p>
+                Hambúrguer artesanal, queijo,
+                molho especial e acompanhamentos.
             </p>
 
+            <div class="preco">
+                R$ 34,90
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="produto"
+        data-categoria="destaques pratos"
+        onclick="abrirProduto(
+            'fettuccine',
+            'Fettuccine Especial',
+            'Massa fresca ao molho cremoso com ingredientes selecionados.',
+            'R$ 49,90'
+        )"
+    >
+
+        <img
+            src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80"
+            alt="Fettuccine Especial"
+        >
+
+        <div class="produto-info">
+
+            <h2>Fettuccine Especial</h2>
+
+            <p>
+                Massa fresca ao molho cremoso
+                com ingredientes selecionados.
+            </p>
+
+            <div class="preco">
+                R$ 49,90
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="produto"
+        data-categoria="destaques bebidas"
+        onclick="abrirProduto(
+            'refrigerante',
+            'Refrigerante',
+            'Refrigerante gelado para acompanhar sua refeição.',
+            'R$ 7,00'
+        )"
+    >
+
+        <img
+            src="https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=900&q=80"
+            alt="Refrigerante"
+        >
+
+        <div class="produto-info">
+
+            <h2>Refrigerante</h2>
+
+            <p>
+                Refrigerante gelado para acompanhar
+                sua refeição.
+            </p>
+
+            <div class="preco">
+                R$ 7,00
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="produto"
+        data-categoria="destaques sobremesas"
+        onclick="abrirProduto(
+            'brownie',
+            'Brownie de Chocolate',
+            'Brownie de chocolate servido com uma textura macia e intensa.',
+            'R$ 19,90'
+        )"
+    >
+
+        <img
+            src="https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&w=900&q=80"
+            alt="Brownie de Chocolate"
+        >
+
+        <div class="produto-info">
+
+            <h2>Brownie de Chocolate</h2>
+
+            <p>
+                Brownie de chocolate servido
+                com uma textura macia e intensa.
+            </p>
+
+            <div class="preco">
+                R$ 19,90
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<!-- =========================
+     MODAL PRODUTO
+========================= -->
+
+<div id="modalProduto" class="modal">
+
+    <div class="modal-conteudo">
+
+        <button
+            class="fechar-modal"
+            onclick="fecharModal()"
+        >
+            ×
+        </button>
+
+        <h2 id="modalNome"></h2>
+
+        <p id="modalDescricao"></p>
+
+        <div
+            id="modalPreco"
+            class="modal-preco"
+        ></div>
+
+        <div class="botoes-produto">
+
+            <button
+                class="btn-principal"
+                onclick="abrir3D()"
+            >
+                Ver em 3D
+            </button>
 
             <button
                 class="btn-ar"
-                style="margin-top:16px;"
                 onclick="abrirAR()"
             >
                 Ver na minha mesa
@@ -823,1728 +870,2238 @@
 
     </div>
 
+</div>
 
-    <!-- =========================
-         MODAL AR
-    ========================= -->
+<!-- =========================
+     MODAL 3D
+========================= -->
 
-    <div
-        id="modalAR"
-        class="modal"
-    >
+<div id="modal3D" class="modal">
 
-        <div class="modal-conteudo ar-conteudo">
+    <div class="modal-conteudo">
 
-            <button
-                class="fechar-modal"
-                onclick="fecharAR()"
+        <button
+            class="fechar-modal"
+            onclick="fechar3D()"
+        >
+            ×
+        </button>
+
+        <h2>
+            Visualização 3D
+        </h2>
+
+        <div
+            id="nomeProduto3D"
+            class="produto-3d-nome"
+        ></div>
+
+        <div class="area-3d">
+
+            <canvas id="canvas3d"></canvas>
+
+            <div
+                id="carregando3d"
+                class="carregando-3d"
             >
-                ×
-            </button>
-
-
-            <div class="ar-icone">
-                AR
+                Preparando visualização 3D...
             </div>
 
-
-            <h2>
-                Ver na minha mesa
-            </h2>
-
-
-            <p>
-                A experiência de realidade aumentada
-                será ativada nesta etapa do projeto.
-            </p>
-
-
-            <button
-                class="btn-principal"
-                onclick="fecharAR()"
+            <div
+                id="erro3d"
+                class="erro-3d"
             >
-                Entendi
-            </button>
+                <strong>Não foi possível carregar o 3D.</strong>
 
-
-            <div class="ar-aviso">
-                Próxima etapa: câmera + posicionamento
-                do produto no ambiente real.
+                <span>
+                    Verifique sua conexão e tente novamente.
+                </span>
             </div>
 
         </div>
 
+        <p class="controle-3d">
+            Arraste para girar • Use o scroll para aproximar
+        </p>
+
+        <button
+            class="btn-ar"
+            style="margin-top:16px;"
+            onclick="abrirAR()"
+        >
+            Ver na minha mesa
+        </button>
+
     </div>
 
+</div>
 
-    <!-- =========================
-         THREE.JS
-    ========================= -->
+<!-- =========================
+     MODAL AR
+========================= -->
 
-    <script type="module">
+<div id="modalAR" class="modal">
 
-        import * as THREE from
-        "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+    <div class="modal-conteudo ar-conteudo">
+
+        <button
+            class="fechar-modal"
+            onclick="fecharAR()"
+        >
+            ×
+        </button>
+
+        <div class="ar-icone">
+            AR
+        </div>
+
+        <h2>
+            Ver na minha mesa
+        </h2>
+
+        <p>
+            Ative a câmera para visualizar
+            o produto no ambiente real.
+        </p>
+
+        <button
+            class="btn-principal"
+            onclick="iniciarCameraAR()"
+        >
+            Ativar câmera
+        </button>
+
+        <div class="ar-aviso">
+            Permita o acesso à câmera quando solicitado.
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================
+     TELA AR
+========================= -->
+
+<div
+    id="telaAR"
+    class="ar-tela"
+>
+
+    <video
+        id="videoCamera"
+        autoplay
+        muted
+        playsinline
+    ></video>
+
+    <canvas id="canvasAR"></canvas>
+
+    <div class="ar-topo">
+
+        <div class="ar-titulo">
+            <span id="arNomeProduto">
+                Produto
+            </span>
+        </div>
+
+        <button
+            class="ar-fechar"
+            onclick="fecharCameraAR()"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <div class="ar-instrucoes">
+
+        Arraste o produto para girar.
+        Use dois dedos para aumentar ou diminuir.
+
+        <div class="ar-status">
+            Modo câmera ativo
+        </div>
+
+    </div>
+
+    <div
+        id="arCarregando"
+        class="ar-carregando ativo"
+    >
+
+        <div class="ar-ponto"></div>
+
+        <div>
+            Preparando experiência...
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================
+     THREE.JS
+========================= -->
+
+<script type="module">
+
+import * as THREE from
+"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+
+import {
+    OrbitControls
+}
+from
+"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
 
 
-        import {
-            OrbitControls
-        } from
-        "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
+let cena = null;
+let camera = null;
+let renderizador = null;
+let controles = null;
+let objetoAtual = null;
+let animacaoAtiva = false;
 
 
-        let cena = null;
+/* =========================
+   INICIAR 3D
+========================= */
 
-        let camera = null;
+function iniciar3D(){
 
-        let renderizador = null;
+    const canvas =
+        document.getElementById("canvas3d");
 
-        let controles = null;
+    const largura =
+        canvas.clientWidth || 400;
 
-        let objetoAtual = null;
-
-        let animacaoAtiva = false;
-
-
-        /* =========================
-           INICIAR
-        ========================= */
-
-        function iniciar3D() {
-
-            const canvas =
-                document.getElementById(
-                    "canvas3d"
-                );
+    const altura =
+        canvas.clientHeight || 300;
 
 
-            const largura =
-                canvas.clientWidth || 400;
+    cena =
+        new THREE.Scene();
 
 
-            const altura =
-                canvas.clientHeight || 300;
+    camera =
+        new THREE.PerspectiveCamera(
+            45,
+            largura / altura,
+            .1,
+            100
+        );
 
 
-            cena =
-                new THREE.Scene();
+    camera.position.set(
+        4,
+        2.7,
+        6
+    );
 
 
-            camera =
-                new THREE.PerspectiveCamera(
-                    45,
-                    largura / altura,
-                    0.1,
-                    100
-                );
+    renderizador =
+        new THREE.WebGLRenderer({
+
+            canvas:canvas,
+
+            antialias:true,
+
+            alpha:true
+
+        });
 
 
-            camera.position.set(
-                4,
-                3,
-                6
-            );
+    renderizador.setPixelRatio(
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        )
+    );
 
 
-            renderizador =
-                new THREE.WebGLRenderer({
-
-                    canvas: canvas,
-
-                    antialias: true,
-
-                    alpha: true
-
-                });
+    renderizador.setSize(
+        largura,
+        altura,
+        false
+    );
 
 
-            renderizador.setPixelRatio(
-                Math.min(
-                    window.devicePixelRatio || 1,
-                    2
+    renderizador.shadowMap.enabled = true;
+
+
+    controles =
+        new OrbitControls(
+            camera,
+            renderizador.domElement
+        );
+
+
+    controles.enableDamping = true;
+
+    controles.dampingFactor = .06;
+
+    controles.minDistance = 3;
+
+    controles.maxDistance = 9;
+
+    controles.target.set(
+        0,
+        -.1,
+        0
+    );
+
+
+    /* LUZ AMBIENTE */
+
+    const ambiente =
+        new THREE.HemisphereLight(
+            0xffffff,
+            0x444444,
+            2.8
+        );
+
+    cena.add(ambiente);
+
+
+    /* LUZ PRINCIPAL */
+
+    const principal =
+        new THREE.DirectionalLight(
+            0xffffff,
+            4
+        );
+
+    principal.position.set(
+        4,
+        6,
+        5
+    );
+
+    principal.castShadow = true;
+
+    cena.add(principal);
+
+
+    /* LUZ FRONTAL */
+
+    const frontal =
+        new THREE.PointLight(
+            0xffffff,
+            3,
+            20
+        );
+
+    frontal.position.set(
+        -4,
+        3,
+        4
+    );
+
+    cena.add(frontal);
+
+
+    /* LUZ LATERAL */
+
+    const lateral =
+        new THREE.PointLight(
+            0xffffff,
+            2,
+            20
+        );
+
+    lateral.position.set(
+        4,
+        1,
+        -4
+    );
+
+    cena.add(lateral);
+
+
+    /* CHÃO */
+
+    const geometriaChao =
+        new THREE.CircleGeometry(
+            3,
+            64
+        );
+
+
+    const materialChao =
+        new THREE.MeshStandardMaterial({
+
+            color:0x222222,
+
+            roughness:.8
+
+        });
+
+
+    const chao =
+        new THREE.Mesh(
+            geometriaChao,
+            materialChao
+        );
+
+
+    chao.rotation.x =
+        -Math.PI / 2;
+
+    chao.position.y =
+        -1.3;
+
+    chao.receiveShadow =
+        true;
+
+    cena.add(chao);
+
+
+    animacaoAtiva = true;
+
+    animar();
+
+    ajustar3D();
+}
+
+
+/* =========================
+   MATERIAL
+========================= */
+
+function material(
+    cor,
+    roughness=.7
+){
+
+    return new THREE.MeshStandardMaterial({
+
+        color:cor,
+
+        roughness:roughness
+
+    });
+}
+
+
+/* =========================
+   HAMBÚRGUER
+========================= */
+
+function criarHamburguer(){
+
+    limparObjeto();
+
+
+    const grupo =
+        new THREE.Group();
+
+
+    const paoInferior =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                1.55,
+                1.45,
+                .45,
+                64
+            ),
+
+            material(
+                0xc98232,
+                .75
+            )
+
+        );
+
+
+    paoInferior.position.y =
+        -.85;
+
+    grupo.add(paoInferior);
+
+
+    const carne =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                1.5,
+                1.5,
+                .55,
+                64
+            ),
+
+            material(
+                0x4a2114,
+                .9
+            )
+
+        );
+
+
+    carne.position.y =
+        -.35;
+
+    grupo.add(carne);
+
+
+    const queijo =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                2.8,
+                .12,
+                2.8
+            ),
+
+            material(
+                0xffc928,
+                .5
+            )
+
+        );
+
+
+    queijo.position.y =
+        .02;
+
+    queijo.rotation.y =
+        Math.PI / 4;
+
+    grupo.add(queijo);
+
+
+    const alface =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                1.58,
+                1.58,
+                .18,
+                64
+            ),
+
+            material(
+                0x3d8f35,
+                .9
+            )
+
+        );
+
+
+    alface.position.y =
+        .17;
+
+    grupo.add(alface);
+
+
+    const paoSuperior =
+        new THREE.Mesh(
+
+            new THREE.SphereGeometry(
+                1.58,
+                64,
+                32,
+                0,
+                Math.PI * 2,
+                0,
+                Math.PI / 2
+            ),
+
+            material(
+                0xd8943c,
+                .7
+            )
+
+        );
+
+
+    paoSuperior.position.y =
+        .25;
+
+    paoSuperior.scale.y =
+        .65;
+
+    grupo.add(paoSuperior);
+
+
+    for(
+        let i=0;
+        i<22;
+        i++
+    ){
+
+        const semente =
+            new THREE.Mesh(
+
+                new THREE.SphereGeometry(
+                    .06,
+                    12,
+                    8
+                ),
+
+                material(
+                    0xffe4a3
                 )
+
             );
 
 
-            renderizador.setSize(
-                largura,
-                altura,
+        const angulo =
+            Math.random() *
+            Math.PI *
+            2;
+
+
+        const raio =
+            Math.random() *
+            1.1;
+
+
+        semente.position.set(
+
+            Math.cos(angulo) * raio,
+
+            .9 +
+            Math.random() * .15,
+
+            Math.sin(angulo) * raio
+
+        );
+
+
+        semente.scale.y =
+            .4;
+
+        grupo.add(semente);
+
+    }
+
+
+    objetoAtual =
+        grupo;
+
+    cena.add(grupo);
+}
+
+
+/* =========================
+   FETTUCCINE
+========================= */
+
+function criarFettuccine(){
+
+    limparObjeto();
+
+
+    const grupo =
+        new THREE.Group();
+
+
+    const prato =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                2.2,
+                1.9,
+                .18,
+                64
+            ),
+
+            material(
+                0xf0f0f0,
+                .3
+            )
+
+        );
+
+
+    prato.position.y =
+        -.95;
+
+    grupo.add(prato);
+
+
+    const borda =
+        new THREE.Mesh(
+
+            new THREE.TorusGeometry(
+                1.95,
+                .08,
+                16,
+                64
+            ),
+
+            material(
+                0xffffff,
+                .25
+            )
+
+        );
+
+
+    borda.position.y =
+        -.83;
+
+    grupo.add(borda);
+
+
+    const molho =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                1.65,
+                1.65,
+                .12,
+                64
+            ),
+
+            material(
+                0xd48b3d,
+                .8
+            )
+
+        );
+
+
+    molho.position.y =
+        -.72;
+
+    grupo.add(molho);
+
+
+    for(
+        let i=0;
+        i<22;
+        i++
+    ){
+
+        const curva =
+            new THREE.CatmullRomCurve3([
+
+                new THREE.Vector3(
+                    -1.15 + Math.random()*.5,
+                    -.55 + Math.random()*.12,
+                    -.9 + Math.random()*.5
+                ),
+
+                new THREE.Vector3(
+                    -.4 + Math.random()*.7,
+                    -.48 + Math.random()*.2,
+                    -.2 + Math.random()*.8
+                ),
+
+                new THREE.Vector3(
+                    .2 + Math.random()*.8,
+                    -.5 + Math.random()*.15,
+                    .4 + Math.random()*.5
+                ),
+
+                new THREE.Vector3(
+                    .9 - Math.random()*.5,
+                    -.52 + Math.random()*.12,
+                    .9 - Math.random()*.5
+                )
+
+            ]);
+
+
+        const geometria =
+            new THREE.TubeGeometry(
+                curva,
+                24,
+                .055,
+                8,
                 false
             );
 
 
-            renderizador.shadowMap.enabled =
-                true;
+        const massa =
+            new THREE.Mesh(
 
+                geometria,
 
-            controles =
-                new OrbitControls(
-                    camera,
-                    renderizador.domElement
-                );
+                material(
+                    0xe6c06a,
+                    .7
+                )
 
-
-            controles.enableDamping =
-                true;
-
-
-            controles.dampingFactor =
-                0.05;
-
-
-            controles.minDistance =
-                3;
-
-
-            controles.maxDistance =
-                9;
-
-
-            /* =========================
-               LUZES
-            ========================= */
-
-            const luzAmbiente =
-                new THREE.HemisphereLight(
-                    0xffffff,
-                    0x444444,
-                    2.5
-                );
-
-
-            cena.add(
-                luzAmbiente
             );
 
 
-            const luzPrincipal =
-                new THREE.DirectionalLight(
-                    0xffffff,
-                    4
-                );
+        grupo.add(massa);
+
+    }
 
 
-            luzPrincipal.position.set(
-                4,
-                6,
-                5
+    for(
+        let i=0;
+        i<14;
+        i++
+    ){
+
+        const erva =
+            new THREE.Mesh(
+
+                new THREE.BoxGeometry(
+                    .025,
+                    .12,
+                    .025
+                ),
+
+                material(
+                    0x49713b
+                )
+
             );
 
 
-            luzPrincipal.castShadow =
-                true;
+        erva.position.set(
+
+            (Math.random()-.5)*1.5,
+
+            -.38,
+
+            (Math.random()-.5)*1.5
+
+        );
 
 
-            cena.add(
-                luzPrincipal
+        grupo.add(erva);
+
+    }
+
+
+    objetoAtual =
+        grupo;
+
+    cena.add(grupo);
+}
+
+
+/* =========================
+   REFRIGERANTE
+========================= */
+
+function criarRefrigerante(){
+
+    limparObjeto();
+
+
+    const grupo =
+        new THREE.Group();
+
+
+    const lata =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                .72,
+                .72,
+                2.5,
+                64
+            ),
+
+            material(
+                0xc92828,
+                .3
+            )
+
+        );
+
+
+    lata.position.y =
+        -.1;
+
+    grupo.add(lata);
+
+
+    const topo =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                .69,
+                .69,
+                .08,
+                64
+            ),
+
+            material(
+                0xcfcfcf,
+                .25
+            )
+
+        );
+
+
+    topo.position.y =
+        1.18;
+
+    grupo.add(topo);
+
+
+    const base =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                .69,
+                .69,
+                .08,
+                64
+            ),
+
+            material(
+                0xbdbdbd,
+                .3
+            )
+
+        );
+
+
+    base.position.y =
+        -1.36;
+
+    grupo.add(base);
+
+
+    const logo =
+        new THREE.Mesh(
+
+            new THREE.TorusGeometry(
+                .32,
+                .1,
+                16,
+                40
+            ),
+
+            material(
+                0xffffff,
+                .25
+            )
+
+        );
+
+
+    logo.rotation.x =
+        Math.PI / 2;
+
+    logo.position.z =
+        .73;
+
+    logo.position.y =
+        -.05;
+
+    grupo.add(logo);
+
+
+    const anel =
+        new THREE.Mesh(
+
+            new THREE.TorusGeometry(
+                .2,
+                .045,
+                12,
+                32
+            ),
+
+            material(
+                0xaaaaaa,
+                .3
+            )
+
+        );
+
+
+    anel.rotation.x =
+        Math.PI / 2;
+
+    anel.position.y =
+        1.23;
+
+    grupo.add(anel);
+
+
+    objetoAtual =
+        grupo;
+
+    cena.add(grupo);
+}
+
+
+/* =========================
+   BROWNIE
+========================= */
+
+function criarBrownie(){
+
+    limparObjeto();
+
+
+    const grupo =
+        new THREE.Group();
+
+
+    const brownie =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                2.8,
+                .7,
+                2.2
+            ),
+
+            material(
+                0x3a1b0f,
+                .85
+            )
+
+        );
+
+
+    brownie.position.y =
+        -.5;
+
+    grupo.add(brownie);
+
+
+    const cobertura =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                2.75,
+                .08,
+                2.15
+            ),
+
+            material(
+                0x241008,
+                .5
+            )
+
+        );
+
+
+    cobertura.position.y =
+        -.12;
+
+    grupo.add(cobertura);
+
+
+    for(
+        let i=0;
+        i<15;
+        i++
+    ){
+
+        const pedaco =
+            new THREE.Mesh(
+
+                new THREE.BoxGeometry(
+                    .12,
+                    .06,
+                    .12
+                ),
+
+                material(
+                    0x6a351b,
+                    .8
+                )
+
             );
 
 
-            const luzFrontal =
-                new THREE.PointLight(
-                    0xffffff,
-                    3,
-                    20
-                );
+        pedaco.position.set(
+
+            (Math.random()-.5)*2.3,
+
+            -.04,
+
+            (Math.random()-.5)*1.7
+
+        );
 
 
-            luzFrontal.position.set(
-                -4,
-                3,
-                4
+        grupo.add(pedaco);
+
+    }
+
+
+    for(
+        let i=0;
+        i<20;
+        i++
+    ){
+
+        const acucar =
+            new THREE.Mesh(
+
+                new THREE.SphereGeometry(
+                    .025,
+                    8,
+                    8
+                ),
+
+                material(
+                    0xf1e6d0,
+                    .5
+                )
+
             );
 
 
-            cena.add(
-                luzFrontal
+        acucar.position.set(
+
+            (Math.random()-.5)*2.3,
+
+            .02,
+
+            (Math.random()-.5)*1.7
+
+        );
+
+
+        grupo.add(acucar);
+
+    }
+
+
+    objetoAtual =
+        grupo;
+
+    cena.add(grupo);
+}
+
+
+/* =========================
+   ESCOLHER MODELO
+========================= */
+
+function criarModelo(produto){
+
+    if(produto==="hamburguer"){
+        criarHamburguer();
+    }
+
+    else if(produto==="fettuccine"){
+        criarFettuccine();
+    }
+
+    else if(produto==="refrigerante"){
+        criarRefrigerante();
+    }
+
+    else if(produto==="brownie"){
+        criarBrownie();
+    }
+}
+
+
+/* =========================
+   LIMPAR
+========================= */
+
+function limparObjeto(){
+
+    if(!objetoAtual){
+        return;
+    }
+
+
+    cena.remove(objetoAtual);
+
+
+    objetoAtual.traverse(
+        objeto=>{
+
+            if(objeto.geometry){
+                objeto.geometry.dispose();
+            }
+
+
+            if(objeto.material){
+
+                if(Array.isArray(objeto.material)){
+
+                    objeto.material.forEach(
+                        m=>m.dispose()
+                    );
+
+                }else{
+
+                    objeto.material.dispose();
+
+                }
+
+            }
+
+        }
+    );
+
+
+    objetoAtual =
+        null;
+}
+
+
+/* =========================
+   ANIMAÇÃO
+========================= */
+
+function animar(){
+
+    if(!animacaoAtiva){
+        return;
+    }
+
+
+    requestAnimationFrame(animar);
+
+
+    if(objetoAtual){
+
+        objetoAtual.rotation.y += .003;
+
+    }
+
+
+    if(controles){
+        controles.update();
+    }
+
+
+    if(
+        renderizador &&
+        cena &&
+        camera
+    ){
+
+        renderizador.render(
+            cena,
+            camera
+        );
+
+    }
+}
+
+
+/* =========================
+   AJUSTAR
+========================= */
+
+function ajustar3D(){
+
+    if(!camera || !renderizador){
+        return;
+    }
+
+
+    const canvas =
+        document.getElementById("canvas3d");
+
+
+    const largura =
+        canvas.clientWidth;
+
+    const altura =
+        canvas.clientHeight;
+
+
+    if(largura<=0 || altura<=0){
+        return;
+    }
+
+
+    camera.aspect =
+        largura / altura;
+
+    camera.updateProjectionMatrix();
+
+
+    renderizador.setSize(
+        largura,
+        altura,
+        false
+    );
+}
+
+
+/* =========================
+   ABRIR 3D
+========================= */
+
+window.abrir3DReal =
+function(){
+
+    document
+        .getElementById("modalProduto")
+        .classList.remove("ativo");
+
+
+    document
+        .getElementById("modal3D")
+        .classList.add("ativo");
+
+
+    document
+        .getElementById("carregando3d")
+        .style.display="flex";
+
+
+    document
+        .getElementById("erro3d")
+        .style.display="none";
+
+
+    document
+        .getElementById("nomeProduto3D")
+        .textContent =
+        window.produtoSelecionadoNome;
+
+
+    setTimeout(()=>{
+
+        try{
+
+            if(!cena){
+                iniciar3D();
+            }
+
+
+            criarModelo(
+                window.produtoSelecionado
             );
-
-
-            /* =========================
-               CHÃO
-            ========================= */
-
-            const geometriaChao =
-                new THREE.CircleGeometry(
-                    3,
-                    64
-                );
-
-
-            const materialChao =
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x222222,
-
-                    roughness: 0.8
-
-                });
-
-
-            const chao =
-                new THREE.Mesh(
-                    geometriaChao,
-                    materialChao
-                );
-
-
-            chao.rotation.x =
-                -Math.PI / 2;
-
-
-            chao.position.y =
-                -1.3;
-
-
-            chao.receiveShadow =
-                true;
-
-
-            cena.add(
-                chao
-            );
-
-
-            animacaoAtiva =
-                true;
-
-
-            animar();
 
 
             ajustar3D();
 
+
+            document
+                .getElementById("carregando3d")
+                .style.display="none";
+
+        }catch(erro){
+
+            console.error(erro);
+
+
+            document
+                .getElementById("carregando3d")
+                .style.display="none";
+
+
+            document
+                .getElementById("erro3d")
+                .style.display="flex";
+
+        }
+
+    },100);
+
+};
+
+
+/* =========================
+   FECHAR 3D
+========================= */
+
+window.fechar3DReal =
+function(){
+
+    document
+        .getElementById("modal3D")
+        .classList.remove("ativo");
+
+};
+
+
+/* =========================
+   FUNÇÕES GLOBAIS
+========================= */
+
+window.abrir3D =
+function(){
+
+    window.abrir3DReal();
+
+};
+
+
+window.fechar3D =
+function(){
+
+    window.fechar3DReal();
+
+};
+
+
+window.addEventListener(
+    "resize",
+    ajustar3D
+);
+
+
+/* =========================
+   AR
+========================= */
+
+let cameraAR = null;
+let renderizadorAR = null;
+let controlesAR = null;
+let objetoAR = null;
+let streamCamera = null;
+
+
+function criarObjetoAR(){
+
+    if(objetoAR){
+
+        cenaAR.remove(objetoAR);
+
+        objetoAR.traverse(obj=>{
+
+            if(obj.geometry){
+                obj.geometry.dispose();
+            }
+
+            if(obj.material){
+
+                if(Array.isArray(obj.material)){
+
+                    obj.material.forEach(
+                        m=>m.dispose()
+                    );
+
+                }else{
+
+                    obj.material.dispose();
+
+                }
+
+            }
+
+        });
+
+    }
+
+
+    objetoAR =
+        criarObjetoARPorTipo(
+            window.produtoSelecionado
+        );
+
+
+    if(objetoAR){
+        cenaAR.add(objetoAR);
+    }
+
+}
+
+
+function criarObjetoARPorTipo(tipo){
+
+    const grupo =
+        new THREE.Group();
+
+
+    if(tipo==="hamburguer"){
+
+        const pao =
+            new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    1.1,
+                    1.05,
+                    .35,
+                    48
+                ),
+                material(0xc98232,.75)
+            );
+
+        pao.position.y=-.55;
+
+        grupo.add(pao);
+
+
+        const carne =
+            new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    1.05,
+                    1.05,
+                    .4,
+                    48
+                ),
+                material(0x4a2114,.9)
+            );
+
+        carne.position.y=-.18;
+
+        grupo.add(carne);
+
+
+        const queijo =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    2,
+                    .1,
+                    2
+                ),
+                material(0xffc928,.5)
+            );
+
+        queijo.position.y=.05;
+
+        queijo.rotation.y=Math.PI/4;
+
+        grupo.add(queijo);
+
+
+        const alface =
+            new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    1.08,
+                    1.08,
+                    .12,
+                    48
+                ),
+                material(0x3d8f35,.9)
+            );
+
+        alface.position.y=.18;
+
+        grupo.add(alface);
+
+
+        const topo =
+            new THREE.Mesh(
+                new THREE.SphereGeometry(
+                    1.08,
+                    48,
+                    24,
+                    0,
+                    Math.PI*2,
+                    0,
+                    Math.PI/2
+                ),
+                material(0xd8943c,.7)
+            );
+
+        topo.position.y=.25;
+
+        topo.scale.y=.65;
+
+        grupo.add(topo);
+
+    }
+
+
+    else if(tipo==="fettuccine"){
+
+        const prato =
+            new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    1.7,
+                    1.5,
+                    .12,
+                    48
+                ),
+                material(0xf0f0f0,.3)
+            );
+
+        prato.position.y=-.55;
+
+        grupo.add(prato);
+
+
+        const molho =
+            new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    1.25,
+                    1.25,
+                    .08,
+                    48
+                ),
+                material(0xd48b3d,.8)
+            );
+
+        molho.position.y=-.47;
+
+        grupo.add(molho);
+
+
+        for(let i=0;i<15;i++){
+
+            const curva =
+                new THREE.CatmullRomCurve3([
+
+                    new THREE.Vector3(
+                        -1+Math.random()*.5,
+                        -.35,
+                        -.7+Math.random()*.4
+                    ),
+
+                    new THREE.Vector3(
+                        -.3+Math.random()*.6,
+                        -.3,
+                        -.1+Math.random()*.7
+                    ),
+
+                    new THREE.Vector3(
+                        .2+Math.random()*.6,
+                        -.32,
+                        .4+Math.random()*.4
+                    ),
+
+                    new THREE.Vector3(
+                        .8-Math.random()*.4,
+                        -.34,
+                        .7-Math.random()*.4
+                    )
+
+                ]);
+
+
+            const tubo =
+                new THREE.TubeGeometry(
+                    curva,
+                    20,
+                    .045,
+                    8,
+                    false
+                );
+
+
+            grupo.add(
+                new THREE.Mesh(
+                    tubo,
+                    material(0xe6c06a,.7)
+                )
+            );
+
+        }
+
+    }
+
+
+    else if(tipo==="refrigerante"){
+
+        const lata =
+            new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    .58,
+                    .58,
+                    2,
+                    48
+                ),
+                material(0xc92828,.3)
+            );
+
+        grupo.add(lata);
+
+
+        const topo =
+            new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    .55,
+                    .55,
+                    .06,
+                    48
+                ),
+                material(0xcfcfcf,.25)
+            );
+
+        topo.position.y=1.03;
+
+        grupo.add(topo);
+
+    }
+
+
+    else if(tipo==="brownie"){
+
+        const brownie =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    2.1,
+                    .55,
+                    1.7
+                ),
+                material(0x3a1b0f,.85)
+            );
+
+        brownie.position.y=-.25;
+
+        grupo.add(brownie);
+
+
+        const cobertura =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    2.05,
+                    .07,
+                    1.65
+                ),
+                material(0x241008,.5)
+            );
+
+        cobertura.position.y=.04;
+
+        grupo.add(cobertura);
+
+    }
+
+
+    return grupo;
+}
+
+
+let cenaAR = null;
+
+
+async function iniciarCameraAR(){
+
+    document
+        .getElementById("modalAR")
+        .classList.remove("ativo");
+
+
+    document
+        .getElementById("telaAR")
+        .classList.add("ativo");
+
+
+    document
+        .getElementById("arCarregando")
+        .classList.add("ativo");
+
+
+    document
+        .getElementById("arNomeProduto")
+        .textContent =
+        window.produtoSelecionadoNome;
+
+
+    try{
+
+        if(!navigator.mediaDevices ||
+           !navigator.mediaDevices.getUserMedia){
+
+            throw new Error(
+                "Câmera não suportada."
+            );
+
         }
 
 
-        /* =========================
-           MATERIAL
-        ========================= */
+        streamCamera =
+            await navigator.mediaDevices.getUserMedia({
 
-        function material(
-            cor,
-            roughness = .7
-        ) {
+                video:{
+                    facingMode:{
+                        ideal:"environment"
+                    }
+                },
 
-            return new THREE.MeshStandardMaterial({
-
-                color: cor,
-
-                roughness: roughness
+                audio:false
 
             });
 
-        }
 
-
-        /* =========================
-           HAMBÚRGUER
-        ========================= */
-
-        function criarHamburguer() {
-
-            limparObjeto();
-
-
-            const grupo =
-                new THREE.Group();
-
-
-            const paoInferior =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        1.55,
-                        1.45,
-                        .45,
-                        64
-                    ),
-
-                    material(
-                        0xc98232,
-                        .75
-                    )
-
-                );
-
-
-            paoInferior.position.y =
-                -.85;
-
-
-            grupo.add(
-                paoInferior
+        const video =
+            document.getElementById(
+                "videoCamera"
             );
 
 
-            const carne =
-                new THREE.Mesh(
+        video.srcObject =
+            streamCamera;
 
-                    new THREE.CylinderGeometry(
-                        1.5,
-                        1.5,
-                        .55,
-                        64
-                    ),
 
-                    material(
-                        0x4a2114,
-                        .9
-                    )
+        await video.play();
 
-                );
 
+        iniciarCenaAR();
 
-            carne.position.y =
-                -.35;
 
+        document
+            .getElementById("arCarregando")
+            .classList.remove("ativo");
 
-            grupo.add(
-                carne
-            );
+    }catch(erro){
 
+        console.error(erro);
 
-            const queijo =
-                new THREE.Mesh(
 
-                    new THREE.BoxGeometry(
-                        2.8,
-                        .12,
-                        2.8
-                    ),
+        fecharCameraAR();
 
-                    material(
-                        0xffc928,
-                        .5
-                    )
 
-                );
-
-
-            queijo.position.y =
-                .02;
-
-
-            queijo.rotation.y =
-                Math.PI / 4;
-
-
-            grupo.add(
-                queijo
-            );
-
-
-            const alface =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        1.58,
-                        1.58,
-                        .18,
-                        64
-                    ),
-
-                    material(
-                        0x3d8f35,
-                        .9
-                    )
-
-                );
-
-
-            alface.position.y =
-                .17;
-
-
-            grupo.add(
-                alface
-            );
-
-
-            const paoSuperior =
-                new THREE.Mesh(
-
-                    new THREE.SphereGeometry(
-                        1.58,
-                        64,
-                        32,
-                        0,
-                        Math.PI * 2,
-                        0,
-                        Math.PI / 2
-                    ),
-
-                    material(
-                        0xd8943c,
-                        .7
-                    )
-
-                );
-
-
-            paoSuperior.position.y =
-                .25;
-
-
-            paoSuperior.scale.y =
-                .65;
-
-
-            grupo.add(
-                paoSuperior
-            );
-
-
-            for (
-                let i = 0;
-                i < 18;
-                i++
-            ) {
-
-                const semente =
-                    new THREE.Mesh(
-
-                        new THREE.SphereGeometry(
-                            .06,
-                            12,
-                            8
-                        ),
-
-                        material(
-                            0xffe4a3
-                        )
-
-                    );
-
-
-                const angulo =
-                    Math.random() *
-                    Math.PI *
-                    2;
-
-
-                const raio =
-                    Math.random() *
-                    1.1;
-
-
-                semente.position.set(
-
-                    Math.cos(angulo) *
-                    raio,
-
-                    .9 +
-                    Math.random() *
-                    .15,
-
-                    Math.sin(angulo) *
-                    raio
-
-                );
-
-
-                semente.scale.y =
-                    .4;
-
-
-                grupo.add(
-                    semente
-                );
-
-            }
-
-
-            objetoAtual =
-                grupo;
-
-
-            cena.add(
-                grupo
-            );
-
-        }
-
-
-        /* =========================
-           FETTUCCINE
-        ========================= */
-
-        function criarFettuccine() {
-
-            limparObjeto();
-
-
-            const grupo =
-                new THREE.Group();
-
-
-            /* PRATO */
-
-            const prato =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        2.2,
-                        1.9,
-                        .18,
-                        64
-                    ),
-
-                    material(
-                        0xf0f0f0,
-                        .3
-                    )
-
-                );
-
-
-            prato.position.y =
-                -.95;
-
-
-            grupo.add(
-                prato
-            );
-
-
-            /* BORDA DO PRATO */
-
-            const borda =
-                new THREE.Mesh(
-
-                    new THREE.TorusGeometry(
-                        1.95,
-                        .08,
-                        16,
-                        64
-                    ),
-
-                    material(
-                        0xffffff,
-                        .25
-                    )
-
-                );
-
-
-            borda.position.y =
-                -.83;
-
-
-            grupo.add(
-                borda
-            );
-
-
-            /* MOLHO */
-
-            const molho =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        1.65,
-                        1.65,
-                        .12,
-                        64
-                    ),
-
-                    material(
-                        0xd48b3d,
-                        .8
-                    )
-
-                );
-
-
-            molho.position.y =
-                -.72;
-
-
-            grupo.add(
-                molho
-            );
-
-
-            /* FIOS DE MASSA */
-
-            for (
-                let i = 0;
-                i < 18;
-                i++
-            ) {
-
-                const curva =
-                    new THREE.CatmullRomCurve3([
-
-                        new THREE.Vector3(
-                            -1.15 + Math.random() * .5,
-                            -.55 + Math.random() * .12,
-                            -.9 + Math.random() * .5
-                        ),
-
-                        new THREE.Vector3(
-                            -.4 + Math.random() * .7,
-                            -.48 + Math.random() * .2,
-                            -.2 + Math.random() * .8
-                        ),
-
-                        new THREE.Vector3(
-                            .2 + Math.random() * .8,
-                            -.5 + Math.random() * .15,
-                            .4 + Math.random() * .5
-                        ),
-
-                        new THREE.Vector3(
-                            .9 - Math.random() * .5,
-                            -.52 + Math.random() * .12,
-                            .9 - Math.random() * .5
-                        )
-
-                    ]);
-
-
-                const geometria =
-                    new THREE.TubeGeometry(
-                        curva,
-                        24,
-                        .055,
-                        8,
-                        false
-                    );
-
-
-                const massa =
-                    new THREE.Mesh(
-                        geometria,
-                        material(
-                            0xe6c06a,
-                            .7
-                        )
-                    );
-
-
-                grupo.add(
-                    massa
-                );
-
-            }
-
-
-            /* ERVAS */
-
-            for (
-                let i = 0;
-                i < 12;
-                i++
-            ) {
-
-                const erva =
-                    new THREE.Mesh(
-
-                        new THREE.BoxGeometry(
-                            .025,
-                            .12,
-                            .025
-                        ),
-
-                        material(
-                            0x49713b
-                        )
-
-                    );
-
-
-                erva.position.set(
-
-                    (Math.random() - .5) * 1.5,
-
-                    -.38,
-
-                    (Math.random() - .5) * 1.5
-
-                );
-
-
-                grupo.add(
-                    erva
-                );
-
-            }
-
-
-            objetoAtual =
-                grupo;
-
-
-            cena.add(
-                grupo
-            );
-
-        }
-
-
-        /* =========================
-           REFRIGERANTE
-        ========================= */
-
-        function criarRefrigerante() {
-
-            limparObjeto();
-
-
-            const grupo =
-                new THREE.Group();
-
-
-            /* CORPO DA LATA */
-
-            const lata =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        .72,
-                        .72,
-                        2.5,
-                        64
-                    ),
-
-                    material(
-                        0xc92828,
-                        .3
-                    )
-
-                );
-
-
-            lata.position.y =
-                -.1;
-
-
-            grupo.add(
-                lata
-            );
-
-
-            /* TOPO */
-
-            const topo =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        .69,
-                        .69,
-                        .08,
-                        64
-                    ),
-
-                    material(
-                        0xcfcfcf,
-                        .25
-                    )
-
-                );
-
-
-            topo.position.y =
-                1.18;
-
-
-            grupo.add(
-                topo
-            );
-
-
-            /* BASE */
-
-            const base =
-                new THREE.Mesh(
-
-                    new THREE.CylinderGeometry(
-                        .69,
-                        .69,
-                        .08,
-                        64
-                    ),
-
-                    material(
-                        0xbdbdbd,
-                        .3
-                    )
-
-                );
-
-
-            base.position.y =
-                -1.36;
-
-
-            grupo.add(
-                base
-            );
-
-
-            /* LOGO */
-
-            const logo =
-                new THREE.Mesh(
-
-                    new THREE.TorusGeometry(
-                        .32,
-                        .1,
-                        16,
-                        40
-                    ),
-
-                    material(
-                        0xffffff,
-                        .25
-                    )
-
-                );
-
-
-            logo.rotation.x =
-                Math.PI / 2;
-
-
-            logo.position.z =
-                .73;
-
-
-            logo.position.y =
-                -.05;
-
-
-            grupo.add(
-                logo
-            );
-
-
-            /* ANEL */
-
-            const anel =
-                new THREE.Mesh(
-
-                    new THREE.TorusGeometry(
-                        .2,
-                        .045,
-                        12,
-                        32
-                    ),
-
-                    material(
-                        0xaaaaaa,
-                        .3
-                    )
-
-                );
-
-
-            anel.rotation.x =
-                Math.PI / 2;
-
-
-            anel.position.y =
-                1.23;
-
-
-            grupo.add(
-                anel
-            );
-
-
-            objetoAtual =
-                grupo;
-
-
-            cena.add(
-                grupo
-            );
-
-        }
-
-
-        /* =========================
-           BROWNIE
-        ========================= */
-
-        function criarBrownie() {
-
-            limparObjeto();
-
-
-            const grupo =
-                new THREE.Group();
-
-
-            /* BASE */
-
-            const brownie =
-                new THREE.Mesh(
-
-                    new THREE.BoxGeometry(
-                        2.8,
-                        .7,
-                        2.2
-                    ),
-
-                    material(
-                        0x3a1b0f,
-                        .85
-                    )
-
-                );
-
-
-            brownie.position.y =
-                -.5;
-
-
-            grupo.add(
-                brownie
-            );
-
-
-            /* COBERTURA */
-
-            const cobertura =
-                new THREE.Mesh(
-
-                    new THREE.BoxGeometry(
-                        2.75,
-                        .08,
-                        2.15
-                    ),
-
-                    material(
-                        0x241008,
-                        .5
-                    )
-
-                );
-
-
-            cobertura.position.y =
-                -.12;
-
-
-            grupo.add(
-                cobertura
-            );
-
-
-            /* PEDACINHOS */
-
-            for (
-                let i = 0;
-                i < 15;
-                i++
-            ) {
-
-                const pedaco =
-                    new THREE.Mesh(
-
-                        new THREE.BoxGeometry(
-                            .12,
-                            .06,
-                            .12
-                        ),
-
-                        material(
-                            0x6a351b,
-                            .8
-                        )
-
-                    );
-
-
-                pedaco.position.set(
-
-                    (Math.random() - .5) * 2.3,
-
-                    -.04,
-
-                    (Math.random() - .5) * 1.7
-
-                );
-
-
-                grupo.add(
-                    pedaco
-                );
-
-            }
-
-
-            /* AÇÚCAR */
-
-            for (
-                let i = 0;
-                i < 20;
-                i++
-            ) {
-
-                const acucar =
-                    new THREE.Mesh(
-
-                        new THREE.SphereGeometry(
-                            .025,
-                            8,
-                            8
-                        ),
-
-                        material(
-                            0xf1e6d0,
-                            .5
-                        )
-
-                    );
-
-
-                acucar.position.set(
-
-                    (Math.random() - .5) * 2.3,
-
-                    .02,
-
-                    (Math.random() - .5) * 1.7
-
-                );
-
-
-                grupo.add(
-                    acucar
-                );
-
-            }
-
-
-            objetoAtual =
-                grupo;
-
-
-            cena.add(
-                grupo
-            );
-
-        }
-
-
-        /* =========================
-           ESCOLHER MODELO
-        ========================= */
-
-        function criarModelo(
-            produto
-        ) {
-
-            if (
-                produto ===
-                "hamburguer"
-            ) {
-
-                criarHamburguer();
-
-            }
-
-            else if (
-                produto ===
-                "fettuccine"
-            ) {
-
-                criarFettuccine();
-
-            }
-
-            else if (
-                produto ===
-                "refrigerante"
-            ) {
-
-                criarRefrigerante();
-
-            }
-
-            else if (
-                produto ===
-                "brownie"
-            ) {
-
-                criarBrownie();
-
-            }
-
-        }
-
-
-        /* =========================
-           LIMPAR OBJETO
-        ========================= */
-
-        function limparObjeto() {
-
-            if (!objetoAtual) {
-                return;
-            }
-
-
-            cena.remove(
-                objetoAtual
-            );
-
-
-            objetoAtual.traverse(
-                function (objeto) {
-
-                    if (
-                        objeto.geometry
-                    ) {
-
-                        objeto.geometry.dispose();
-
-                    }
-
-
-                    if (
-                        objeto.material
-                    ) {
-
-                        if (
-                            Array.isArray(
-                                objeto.material
-                            )
-                        ) {
-
-                            objeto.material.forEach(
-                                m =>
-                                    m.dispose()
-                            );
-
-                        }
-
-                        else {
-
-                            objeto.material.dispose();
-
-                        }
-
-                    }
-
-                }
-            );
-
-
-            objetoAtual =
-                null;
-
-        }
-
-
-        /* =========================
-           ANIMAÇÃO
-        ========================= */
-
-        function animar() {
-
-            if (!animacaoAtiva) {
-                return;
-            }
-
-
-            requestAnimationFrame(
-                animar
-            );
-
-
-            if (
-                objetoAtual
-            ) {
-
-                objetoAtual.rotation.y +=
-                    .003;
-
-            }
-
-
-            if (
-                controles
-            ) {
-
-                controles.update();
-
-            }
-
-
-            if (
-                renderizador &&
-                cena &&
-                camera
-            ) {
-
-                renderizador.render(
-                    cena,
-                    camera
-                );
-
-            }
-
-        }
-
-
-        /* =========================
-           AJUSTAR 3D
-        ========================= */
-
-        function ajustar3D() {
-
-            if (
-                !camera ||
-                !renderizador
-            ) {
-
-                return;
-
-            }
-
-
-            const canvas =
-                document.getElementById(
-                    "canvas3d"
-                );
-
-
-            const largura =
-                canvas.clientWidth;
-
-
-            const altura =
-                canvas.clientHeight;
-
-
-            if (
-                largura <= 0 ||
-                altura <= 0
-            ) {
-
-                return;
-
-            }
-
-
-            camera.aspect =
-                largura / altura;
-
-
-            camera.updateProjectionMatrix();
-
-
-            renderizador.setSize(
-                largura,
-                altura,
-                false
-            );
-
-        }
-
-
-        /* =========================
-           ABRIR 3D
-        ========================= */
-
-        window.abrir3DReal =
-            function () {
-
-                document
-                    .getElementById(
-                        "modalProduto"
-                    )
-                    .classList.remove(
-                        "ativo"
-                    );
-
-
-                document
-                    .getElementById(
-                        "modal3D"
-                    )
-                    .classList.add(
-                        "ativo"
-                    );
-
-
-                document
-                    .getElementById(
-                        "carregando3d"
-                    )
-                    .style.display =
-                    "flex";
-
-
-                const nome =
-                    window.produtoSelecionadoNome;
-
-
-                document
-                    .getElementById(
-                        "nomeProduto3D"
-                    )
-                    .textContent =
-                    nome;
-
-
-                setTimeout(
-                    function () {
-
-                        if (!cena) {
-
-                            iniciar3D();
-
-                        }
-
-
-                        criarModelo(
-                            window.produtoSelecionado
-                        );
-
-
-                        ajustar3D();
-
-
-                        document
-                            .getElementById(
-                                "carregando3d"
-                            )
-                            .style.display =
-                            "none";
-
-                    },
-                    120
-                );
-
-            };
-
-
-        /* =========================
-           FECHAR 3D
-        ========================= */
-
-        window.fechar3DReal =
-            function () {
-
-                document
-                    .getElementById(
-                        "modal3D"
-                    )
-                    .classList.remove(
-                        "ativo"
-                    );
-
-            };
-
-
-        /* =========================
-           FUNÇÕES GLOBAIS
-        ========================= */
-
-        window.abrir3D =
-            function () {
-
-                window.abrir3DReal();
-
-            };
-
-
-        window.fechar3D =
-            function () {
-
-                window.fechar3DReal();
-
-            };
-
-
-        window.addEventListener(
-            "resize",
-            ajustar3D
+        alert(
+            "Não foi possível acessar a câmera. Verifique a permissão do navegador."
         );
 
-    </script>
+    }
+
+}
 
 
-    <!-- =========================
-         JAVASCRIPT DO CARDÁPIO
-    ========================= -->
+function iniciarCenaAR(){
 
-    <script>
-
-        window.produtoSelecionado =
-            "hamburguer";
+    const canvas =
+        document.getElementById(
+            "canvasAR"
+        );
 
 
-        window.produtoSelecionadoNome =
-            "Hambúrguer da Casa";
+    const largura =
+        window.innerWidth;
+
+    const altura =
+        window.innerHeight;
 
 
-        /* =========================
-           FILTRO
-        ========================= */
+    cenaAR =
+        new THREE.Scene();
 
-        function filtrarProdutos(
-            categoria
-        ) {
 
-            const produtos =
-                document.querySelectorAll(
-                    ".produto"
+    cameraAR =
+        new THREE.PerspectiveCamera(
+            45,
+            largura/altura,
+            .01,
+            100
+        );
+
+
+    cameraAR.position.set(
+        0,
+        0,
+        6
+    );
+
+
+    renderizadorAR =
+        new THREE.WebGLRenderer({
+
+            canvas:canvas,
+
+            alpha:true,
+
+            antialias:true
+
+        });
+
+
+    renderizadorAR.setPixelRatio(
+        Math.min(
+            window.devicePixelRatio||1,
+            2
+        )
+    );
+
+
+    renderizadorAR.setSize(
+        largura,
+        altura,
+        false
+    );
+
+
+    renderizadorAR.setClearColor(
+        0x000000,
+        0
+    );
+
+
+    const luz =
+        new THREE.HemisphereLight(
+            0xffffff,
+            0x444444,
+            3
+        );
+
+
+    cenaAR.add(luz);
+
+
+    const luz2 =
+        new THREE.DirectionalLight(
+            0xffffff,
+            3
+        );
+
+
+    luz2.position.set(
+        2,
+        4,
+        4
+    );
+
+
+    cenaAR.add(luz2);
+
+
+    criarObjetoAR();
+
+
+    if(objetoAR){
+
+        objetoAR.position.set(
+            0,
+            -.6,
+            0
+        );
+
+        objetoAR.scale.set(
+            .9,
+            .9,
+            .9
+        );
+
+    }
+
+
+    renderizarAR();
+}
+
+
+function renderizarAR(){
+
+    if(
+        !renderizadorAR ||
+        !cenaAR ||
+        !cameraAR
+    ){
+        return;
+    }
+
+
+    requestAnimationFrame(
+        renderizarAR
+    );
+
+
+    if(objetoAR){
+
+        objetoAR.rotation.y += .004;
+
+    }
+
+
+    renderizadorAR.render(
+        cenaAR,
+        cameraAR
+    );
+
+}
+
+
+function fecharCameraAR(){
+
+    const tela =
+        document.getElementById(
+            "telaAR"
+        );
+
+
+    tela.classList.remove("ativo");
+
+
+    if(streamCamera){
+
+        streamCamera
+            .getTracks()
+            .forEach(track=>{
+                track.stop();
+            });
+
+        streamCamera=null;
+
+    }
+
+
+    if(renderizadorAR){
+
+        renderizadorAR.dispose();
+
+        renderizadorAR=null;
+
+    }
+
+
+    cenaAR=null;
+
+    cameraAR=null;
+
+    controlesAR=null;
+
+    objetoAR=null;
+
+}
+
+
+/* =========================
+   EXPOR AR
+========================= */
+
+window.iniciarCameraAR =
+    iniciarCameraAR;
+
+window.fecharCameraAR =
+    fecharCameraAR;
+
+</script>
+
+<!-- =========================
+     JAVASCRIPT DO CARDÁPIO
+========================= -->
+
+<script>
+
+window.produtoSelecionado =
+    "hamburguer";
+
+window.produtoSelecionadoNome =
+    "Hambúrguer da Casa";
+
+
+/* =========================
+   FILTRO
+========================= */
+
+function filtrarProdutos(
+    categoria,
+    botao
+){
+
+    const produtos =
+        document.querySelectorAll(
+            ".produto"
+        );
+
+
+    produtos.forEach(
+        produto=>{
+
+            const categorias =
+                produto.dataset.categoria;
+
+
+            if(
+                categoria==="todos" ||
+                categorias.includes(categoria)
+            ){
+
+                produto.classList.remove(
+                    "escondido"
                 );
 
+            }else{
 
-            produtos.forEach(
-                function (produto) {
+                produto.classList.add(
+                    "escondido"
+                );
 
-                    const categorias =
-                        produto.dataset.categoria;
-
-
-                    if (
-                        categoria === "todos" ||
-                        categorias.includes(
-                            categoria
-                        )
-                    ) {
-
-                        produto.classList.remove(
-                            "escondido"
-                        );
-
-                    }
-
-                    else {
-
-                        produto.classList.add(
-                            "escondido"
-                        );
-
-                    }
-
-                }
-            );
+            }
 
         }
+    );
 
 
-        /* =========================
-           ABRIR PRODUTO
-        ========================= */
-
-        function abrirProduto(
-            tipo,
-            nome,
-            descricao,
-            preco
-        ) {
-
-            window.produtoSelecionado =
-                tipo;
-
-
-            window.produtoSelecionadoNome =
-                nome;
-
-
-            document
-                .getElementById(
-                    "modalNome"
-                )
-                .textContent =
-                nome;
-
-
-            document
-                .getElementById(
-                    "modalDescricao"
-                )
-                .textContent =
-                descricao;
-
-
-            document
-                .getElementById(
-                    "modalPreco"
-                )
-                .textContent =
-                preco;
-
-
-            document
-                .getElementById(
-                    "modalProduto"
-                )
-                .classList.add(
-                    "ativo"
-                );
-
-        }
-
-
-        /* =========================
-           FECHAR PRODUTO
-        ========================= */
-
-        function fecharModal() {
-
-            document
-                .getElementById(
-                    "modalProduto"
-                )
-                .classList.remove(
-                    "ativo"
-                );
-
-        }
-
-
-        /* =========================
-           AR
-        ========================= */
-
-        function abrirAR() {
-
-            document
-                .getElementById(
-                    "modalProduto"
-                )
-                .classList.remove(
-                    "ativo"
-                );
-
-
-            document
-                .getElementById(
-                    "modal3D"
-                )
-                .classList.remove(
-                    "ativo"
-                );
-
-
-            document
-                .getElementById(
-                    "modalAR"
-                )
-                .classList.add(
-                    "ativo"
-                );
-
-        }
-
-
-        function fecharAR() {
-
-            document
-                .getElementById(
-                    "modalAR"
-                )
-                .classList.remove(
-                    "ativo"
-                );
-
-        }
-
-
-        /* =========================
-           CLICAR FORA
-        ========================= */
-
-        document
-            .getElementById(
-                "modalProduto"
-            )
-            .addEventListener(
-                "click",
-                function (evento) {
-
-                    if (
-                        evento.target ===
-                        this
-                    ) {
-
-                        fecharModal();
-
-                    }
-
-                }
-            );
-
-
-        document
-            .getElementById(
-                "modal3D"
-            )
-            .addEventListener(
-                "click",
-                function (evento) {
-
-                    if (
-                        evento.target ===
-                        this
-                    ) {
-
-                        fechar3D();
-
-                    }
-
-                }
-            );
-
-
-        document
-            .getElementById(
-                "modalAR"
-            )
-            .addEventListener(
-                "click",
-                function (evento) {
-
-                    if (
-                        evento.target ===
-                        this
-                    ) {
-
-                        fecharAR();
-
-                    }
-
-                }
-            );
-
-
-        /* =========================
-           ESC
-        ========================= */
-
-        document.addEventListener(
-            "keydown",
-            function (evento) {
-
-                if (
-                    evento.key ===
-                    "Escape"
-                ) {
-
-                    fecharModal();
-
-                    fechar3D();
-
-                    fecharAR();
-
-                }
-
+    document
+        .querySelectorAll(".categoria")
+        .forEach(
+            b=>{
+                b.classList.remove("ativa");
             }
         );
 
-    </script>
 
+    if(botao){
+        botao.classList.add("ativa");
+    }
+
+}
+
+
+/* =========================
+   PRODUTO
+========================= */
+
+function abrirProduto(
+    tipo,
+    nome,
+    descricao,
+    preco
+){
+
+    window.produtoSelecionado =
+        tipo;
+
+
+    window.produtoSelecionadoNome =
+        nome;
+
+
+    document
+        .getElementById("modalNome")
+        .textContent =
+        nome;
+
+
+    document
+        .getElementById("modalDescricao")
+        .textContent =
+        descricao;
+
+
+    document
+        .getElementById("modalPreco")
+        .textContent =
+        preco;
+
+
+    document
+        .getElementById("modalProduto")
+        .classList.add("ativo");
+
+}
+
+
+/* =========================
+   FECHAR PRODUTO
+========================= */
+
+function fecharModal(){
+
+    document
+        .getElementById("modalProduto")
+        .classList.remove("ativo");
+
+}
+
+
+/* =========================
+   AR
+========================= */
+
+function abrirAR(){
+
+    document
+        .getElementById("modalProduto")
+        .classList.remove("ativo");
+
+
+    document
+        .getElementById("modal3D")
+        .classList.remove("ativo");
+
+
+    document
+        .getElementById("modalAR")
+        .classList.add("ativo");
+
+}
+
+
+function fecharAR(){
+
+    document
+        .getElementById("modalAR")
+        .classList.remove("ativo");
+
+}
+
+
+/* =========================
+   CLIQUE FORA
+========================= */
+
+document
+    .getElementById("modalProduto")
+    .addEventListener(
+        "click",
+        function(evento){
+
+            if(evento.target===this){
+                fecharModal();
+            }
+
+        }
+    );
+
+
+document
+    .getElementById("modal3D")
+    .addEventListener(
+        "click",
+        function(evento){
+
+            if(evento.target===this){
+                fechar3D();
+            }
+
+        }
+    );
+
+
+document
+    .getElementById("modalAR")
+    .addEventListener(
+        "click",
+        function(evento){
+
+            if(evento.target===this){
+                fecharAR();
+            }
+
+        }
+    );
+
+
+/* =========================
+   ESC
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(evento){
+
+        if(evento.key==="Escape"){
+
+            fecharModal();
+
+            fechar3D();
+
+            fecharAR();
+
+            fecharCameraAR();
+
+        }
+
+    }
+);
+
+
+/* =========================
+   FECHAR CÂMERA AO SAIR
+========================= */
+
+window.addEventListener(
+    "beforeunload",
+    function(){
+
+        if(
+            window.streamCamera
+        ){
+            window.streamCamera
+                .getTracks()
+                .forEach(
+                    track=>track.stop()
+                );
+        }
+
+    }
+);
+
+</script>
 
 </body>
-
 </html>
