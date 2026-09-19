@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard do Restaurante - Analytics 3D/AR</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #121318; color: #e2e8f0; padding: 24px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border-bottom: 1px solid #2d3748; padding-bottom: 16px; }
+    .header h1 { font-size: 24px; color: #fff; }
+    .header p { font-size: 14px; color: #a0aec0; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .card { background: #1a202c; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; }
+    .card h3 { font-size: 13px; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .card .value { font-size: 28px; font-weight: bold; color: #fff; }
+    .card .sub { font-size: 12px; color: #48bb78; margin-top: 4px; }
+    .grid-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px; }
+    .chart-container { background: #1a202c; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; }
+    .chart-container h2 { font-size: 16px; margin-bottom: 16px; color: #e2e8f0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #2d3748; font-size: 14px; }
+    th { color: #a0aec0; font-weight: 600; }
+    .btn-reset { background: #e53e3e; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-reset:hover { background: #c53030; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>Painel de Desempenho 3D & Conversão</h1>
+      <p>Acompanhe o impacto do cardápio interativo nas suas vendas</p>
+    </div>
+    <button class="btn-reset" onclick="zerarMetricas()">Zerar Dados</button>
+  </div>
+
+  <div class="kpis">
+    <div class="card">
+      <h3>Acessos ao Cardápio</h3>
+      <div class="value" id="kpiAcessos">0</div>
+      <div class="sub">Visualizações totais</div>
+    </div>
+    <div class="card">
+      <h3>Interações 3D/AR</h3>
+      <div class="value" id="kpiInteracoes">0</div>
+      <div class="sub" id="kpiEngajamento">0% de engajamento</div>
+    </div>
+    <div class="card">
+      <h3>Itens no Carrinho</h3>
+      <div class="value" id="kpiCarrinho">0</div>
+      <div class="sub">Adicionados ao pedido</div>
+    </div>
+    <div class="card">
+      <h3>Pedidos WhatsApp</h3>
+      <div class="value" id="kpiWhatsApp">0</div>
+      <div class="sub" id="kpiConversao">0% taxa de conversão</div>
+    </div>
+  </div>
+
+  <div class="grid-charts">
+    <div class="chart-container">
+      <h2>Pratos Mais Vistos em 3D</h2>
+      <canvas id="chartPratos3D"></canvas>
+    </div>
+    <div class="chart-container">
+      <h2>Desempenho por Produto</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Prato</th>
+            <th>3D / AR</th>
+            <th>Carrinho</th>
+            <th>Pedidos</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaProdutos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Ler dados do LocalStorage salvos pelo index.html
+    const STORAGE_KEY = 'cardapio_analytics_data';
+
+    function getMetrics() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function carregarDashboard() {
+      const data = getMetrics();
+
+      document.getElementById('kpiAcessos').textContent = data.visualizacoesGerais || 0;
+      const totalInteracoes = (data.interacoes3D || 0) + (data.interacoesAR || 0);
+      document.getElementById('kpiInteracoes').textContent = totalInteracoes;
+
+      const taxaEngajamento = data.visualizacoesGerais > 0 
+        ? ((totalInteracoes / data.visualizacoesGerais) * 100).toFixed(1) 
+        : 0;
+      document.getElementById('kpiEngajamento').textContent = `${taxaEngajamento}% dos clientes usam o 3D`;
+
+      document.getElementById('kpiCarrinho').textContent = data.adicionouCarrinho || 0;
+      document.getElementById('kpiWhatsApp').textContent = data.pedidosWhatsApp || 0;
+
+      const taxaConversao = data.visualizacoesGerais > 0 
+        ? ((data.pedidosWhatsApp / data.visualizacoesGerais) * 100).toFixed(1) 
+        : 0;
+      document.getElementById('kpiConversao').textContent = `${taxaConversao}% converteram em pedido`;
+
+      // Renderizar Tabela
+      const tabela = document.getElementById('tabelaProdutos');
+      tabela.innerHTML = '';
+      const produtosArray = Object.values(data.produtos || {});
+
+      if (produtosArray.length === 0) {
+        tabela.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#718096;">Nenhuma interação registrada ainda. Navegue no index.html para testar!</td></tr>';
+      } else {
+        produtosArray.forEach(p => {
+          tabela.innerHTML += `
+            <tr>
+              <td><strong>${p.nome}</strong></td>
+              <td>${p.views3d + p.viewsAR}x</td>
+              <td>${p.carrinho}x</td>
+              <td><span style="color:#48bb78; font-weight:bold;">${p.pedidos}x</span></td>
+            </tr>
+          `;
+        });
+      }
+
+      // Renderizar Gráfico
+      const ctx = document.getElementById('chartPratos3D').getContext('2d');
+      const labels = produtosArray.map(p => p.nome);
+      const views3dData = produtosArray.map(p => p.views3d + p.viewsAR);
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length ? labels : ['Sem dados'],
+          datasets: [{
+            label: 'Interações em 3D e AR',
+            data: views3dData.length ? views3dData : [0],
+            backgroundColor: '#3182ce',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#2d3748' }, ticks: { color: '#a0aec0' } },
+            x: { grid: { display: false }, ticks: { color: '#a0aec0' } }
+          }
+        }
+      });
+    }
+
+    function zerarMetricas() {
+      if (confirm('Tem certeza de que deseja zerar todas as estatísticas acumuladas?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    }
+
+    carregarDashboard();
+  </script>
+</body>
+</html>
