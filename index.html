@@ -6,8 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Cardápio Digital 3D & AR - Experiência Gastronômica</title>
 
-<!-- THREE.JS CARREGAMENTO SEGURO E RÁPIDO -->
+<!-- THREE.JS + GLTF LOADER + ORBIT CONTROLS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <!-- ANALYTICS INTEGRADO -->
 <script>
@@ -246,12 +248,12 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
 <div id="modal3D" class="modal">
     <div class="modal-conteudo">
         <button class="fechar-modal" onclick="fechar3D()">×</button>
-        <h2>Visualização 3D</h2>
+        <h2>Visualização 3D Realista</h2>
         <div id="nomeProduto3D" style="color:var(--text-muted); font-size:13px; margin-top:4px;"></div>
         <div class="area-3d">
             <canvas id="canvas3d"></canvas>
         </div>
-        <p style="font-size:12px; color:var(--text-muted)">Arraste com o dedo para girar o prato</p>
+        <p style="font-size:12px; color:var(--text-muted)">Arraste com o dedo para girar 360°</p>
         <button class="btn-principal" style="margin-top:16px;" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
     </div>
 </div>
@@ -285,10 +287,10 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
     SaaS de Cardápio Interativo 3D
 </footer>
 
-<!-- SCRIPT 3D COMPATÍVEL & ESTÁVEL -->
+<!-- ENGINE 3D REALISTA (GLTF + ILUMINAÇÃO FOTOGRÁFICA) -->
 <script>
-let scene, camera, renderer, meshGroup;
-let isDragging = false, previousMousePosition = { x: 0, y: 0 };
+let scene, camera, renderer, currentModel, controls;
+const gltfLoader = new THREE.GLTFLoader();
 
 function init3D() {
     const canvas = document.getElementById('canvas3d');
@@ -296,60 +298,58 @@ function init3D() {
     const height = canvas.clientHeight || 300;
 
     scene = new THREE.Scene();
+
     camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 2, 5);
-    camera.lookAt(0, 0, 0);
+    camera.position.set(0, 1.2, 3.5);
 
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
     renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // Configurações de iluminação e cor profissional
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
+    // ILUMINAÇÃO DE ESTÚDIO FOTOGRÁFICO
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffb703, 2.5);
-    dirLight.position.set(3, 5, 4);
-    scene.add(dirLight);
+    const mainLight = new THREE.DirectionalLight(0xfff0dd, 2.5);
+    mainLight.position.set(3, 5, 4);
+    mainLight.castShadow = true;
+    scene.add(mainLight);
 
-    // Rotação com o touch/mouse
-    canvas.addEventListener('mousedown', e => { isDragging = true; previousMousePosition = { x: e.clientX, y: e.clientY }; });
-    canvas.addEventListener('mousemove', e => {
-        if (!isDragging || !meshGroup) return;
-        const deltaX = e.clientX - previousMousePosition.x;
-        meshGroup.rotation.y += deltaX * 0.01;
-        previousMousePosition = { x: e.clientX, y: e.clientY };
-    });
-    window.addEventListener('mouseup', () => isDragging = false);
+    const fillLight = new THREE.DirectionalLight(0xd1e8ff, 1.2);
+    fillLight.position.set(-3, 2, -2);
+    scene.add(fillLight);
 
-    canvas.addEventListener('touchstart', e => { isDragging = true; previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
-    canvas.addEventListener('touchmove', e => {
-        if (!isDragging || !meshGroup) return;
-        const deltaX = e.touches[0].clientX - previousMousePosition.x;
-        meshGroup.rotation.y += deltaX * 0.01;
-        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    });
-    window.addEventListener('touchend', () => isDragging = false);
+    // CONTROLO DE ROTAÇÃO PROFISSIONAL
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enableZoom = false;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 2.0;
 
     animate();
 }
 
-function render3DModel(tipo) {
-    if (!scene) init3D();
-    if (meshGroup) scene.remove(meshGroup);
-
-    meshGroup = new THREE.Group();
+function renderProceduralFallback(tipo) {
+    const meshGroup = new THREE.Group();
 
     if (tipo.includes('hamburguer') || tipo.includes('smash') || tipo.includes('chicken') || tipo.includes('veggie')) {
-        // Pão Inf
-        const paoInf = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.1, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0xd8943c }));
+        const paoInf = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.1, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0xd8943c, roughness: 0.6 }));
         paoInf.position.y = -0.5; meshGroup.add(paoInf);
-        // Carne
-        const carne = new THREE.Mesh(new THREE.CylinderGeometry(1.22, 1.22, 0.35, 32), new THREE.MeshStandardMaterial({ color: 0x3a190e }));
+
+        const carne = new THREE.Mesh(new THREE.CylinderGeometry(1.22, 1.22, 0.35, 32), new THREE.MeshStandardMaterial({ color: 0x3a190e, roughness: 0.9 }));
         carne.position.y = -0.18; meshGroup.add(carne);
-        // Queijo
-        const queijo = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 1.8), new THREE.MeshStandardMaterial({ color: 0xffb703 }));
+
+        const queijo = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 1.8), new THREE.MeshStandardMaterial({ color: 0xffb703, roughness: 0.3 }));
         queijo.position.y = 0.02; queijo.rotation.y = 0.5; meshGroup.add(queijo);
-        // Pão Sup
-        const paoSup = new THREE.Mesh(new THREE.SphereGeometry(1.22, 32, 16, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshStandardMaterial({ color: 0xd8943c }));
+
+        const paoSup = new THREE.Mesh(new THREE.SphereGeometry(1.22, 32, 16, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshStandardMaterial({ color: 0xd8943c, roughness: 0.6 }));
         paoSup.position.y = 0.08; paoSup.scale.y = 0.6; meshGroup.add(paoSup);
     } else if (tipo.includes('batata')) {
         const copo = new THREE.Mesh(new THREE.CylinderGeometry(1, 0.7, 1.5, 32), new THREE.MeshStandardMaterial({ color: 0xe63946 }));
@@ -361,18 +361,62 @@ function render3DModel(tipo) {
             meshGroup.add(b);
         }
     } else {
-        const prato = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.4, 0.15, 32), new THREE.MeshStandardMaterial({ color: 0xf8f9fa }));
+        const prato = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.4, 0.15, 32), new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.2 }));
         prato.position.y = -0.5; meshGroup.add(prato);
         const carne = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.4, 1.2), new THREE.MeshStandardMaterial({ color: 0x4a2810 }));
         carne.position.y = -0.2; meshGroup.add(carne);
     }
 
-    scene.add(meshGroup);
+    return meshGroup;
+}
+
+function render3DModel(produto) {
+    if (!scene) init3D();
+    if (currentModel) scene.remove(currentModel);
+
+    // Tenta carregar o modelo GLB se ele existir
+    if (produto && produto.modelo3d) {
+        gltfLoader.load(
+            produto.modelo3d,
+            (gltf) => {
+                currentModel = gltf.scene;
+                currentModel.position.set(0, -0.4, 0);
+                
+                // Ajusta automaticamente a escala se necessário
+                const box = new THREE.Box3().setFromObject(currentModel);
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                if (maxDim > 0) {
+                    const scale = 2.0 / maxDim;
+                    currentModel.scale.set(scale, scale, scale);
+                }
+
+                currentModel.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+
+                scene.add(currentModel);
+            },
+            undefined,
+            (error) => {
+                console.warn("Ficheiro .glb não encontrado. A carregar modelo procedural de reserva.");
+                currentModel = renderProceduralFallback(produto.id);
+                scene.add(currentModel);
+            }
+        );
+    } else {
+        // Se ainda não houver .glb definido, mostra o modelo procedural
+        currentModel = renderProceduralFallback(produto.id);
+        scene.add(currentModel);
+    }
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    if (meshGroup && !isDragging) meshGroup.rotation.y += 0.005;
+    if (controls) controls.update();
     if (renderer && scene && camera) renderer.render(scene, camera);
 }
 
@@ -382,8 +426,10 @@ function abrir3D() {
     document.getElementById("nomeProduto3D").textContent = window.produtoSelecionadoNome;
     MenuAnalytics.track3DView({ id: window.produtoSelecionado, nome: window.produtoSelecionadoNome });
     
+    const produto = restauranteAtual.produtos.find(item => item.id === window.produtoSelecionado);
+
     setTimeout(() => {
-        render3DModel(window.produtoSelecionado);
+        render3DModel(produto);
     }, 100);
 }
 </script>
@@ -402,12 +448,12 @@ const RESTAURANTES = {
             {id:"porcoes",nome:"Porções & Acompanhamentos"}
         ],
         produtos:[
-            {id:"hamburguer-brasa",nome:"Brasa Smash Double",descricao:"2x Blends de 100g prensados na chapa, queijo cheddar inglês derretido, bacon crocante e molho da casa.",preco:38.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85"},
-            {id:"hamburguer-bacon",nome:"Brasa Bacon Supreme",descricao:"Blend 180g assado na brasa, geleia de bacon defumado, queijo gouda e cebola crispy no pão brioche.",preco:42.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1000&q=85"},
-            {id:"hamburguer-monster",nome:"Monster Trufado 3D",descricao:"3x Blends 120g, queijo ementhal, maionese trufada e picles artesanal.",preco:49.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=1000&q=85"},
-            {id:"chicken-crispy",nome:"Chicken Crispy Gold",descricao:"Sobrecoxa empanada super crocante, salada coleslaw, queijo prato e maionese de pimenta defumada.",preco:34.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=1000&q=85"},
-            {id:"veggie-gourmet",nome:"Veggie Cogumelos",descricao:"Burger de cogumelos paris e grão de bico, queijo de búfala, rúcula e tomate seco.",preco:36.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&w=1000&q=85"},
-            {id:"batata-supreme",nome:"Batata Frita Supreme",descricao:"Porção generosa de batatas rústicas com cheddar cremoso e farofa de bacon crocante.",preco:26.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85"}
+            {id:"hamburguer-brasa",nome:"Brasa Smash Double",descricao:"2x Blends de 100g prensados na chapa, queijo cheddar inglês derretido, bacon crocante e molho da casa.",preco:38.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/hamburguer-brasa.glb"},
+            {id:"hamburguer-bacon",nome:"Brasa Bacon Supreme",descricao:"Blend 180g assado na brasa, geleia de bacon defumado, queijo gouda e cebola crispy no pão brioche.",preco:42.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/hamburguer-bacon.glb"},
+            {id:"hamburguer-monster",nome:"Monster Trufado 3D",descricao:"3x Blends 120g, queijo ementhal, maionese trufada e picles artesanal.",preco:49.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/hamburguer-monster.glb"},
+            {id:"chicken-crispy",nome:"Chicken Crispy Gold",descricao:"Sobrecoxa empanada super crocante, salada coleslaw, queijo prato e maionese de pimenta defumada.",preco:34.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/chicken-crispy.glb"},
+            {id:"veggie-gourmet",nome:"Veggie Cogumelos",descricao:"Burger de cogumelos paris e grão de bico, queijo de búfala, rúcula e tomate seco.",preco:36.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/veggie-gourmet.glb"},
+            {id:"batata-supreme",nome:"Batata Frita Supreme",descricao:"Porção generosa de batatas rústicas com cheddar cremoso e farofa de bacon crocante.",preco:26.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/batata-supreme.glb"}
         ]
     },
     "restaurante":{
@@ -421,12 +467,12 @@ const RESTAURANTES = {
             {id:"sobremesas",nome:"Sobremesas"}
         ],
         produtos:[
-            {id:"file-poivre",nome:"Filé Mignon ao Poivre",descricao:"Medalhão de filé mignon com molho de pimenta verde, acompanhado de aligot de batata.",preco:68.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85"},
-            {id:"picanha-chapa",nome:"Picanha Premium na Chapa",descricao:"Picanha fatiada ao alho, arroz biro-biro, farofa da casa e vinagrete especial.",preco:74.00,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=1000&q=85"},
-            {id:"salmao-ervas",nome:"Salmão Grelhado com Ervas",descricao:"Posta de salmão fresco grelhado com manteiga de ervas e risoto de limão siciliano.",preco:72.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1000&q=85"},
-            {id:"fettuccine-alfredo",nome:"Fettuccine Alfredo Mignon",descricao:"Massa artesanal ao molho cremoso de parmesão com tiras de filé mignon grelhado.",preco:59.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1621996346565-e3d5d6281288?auto=format&fit=crop&w=1000&q=85"},
-            {id:"risoto-cogumelos",nome:"Risoto de Cogumelos Trufados",descricao:"Arroz arbóreo com mix de cogumelos frescos, azeite trufado e grana padano.",preco:54.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?auto=format&fit=crop&w=1000&q=85"},
-            {id:"brownie-gelato",nome:"Grand Brownie com Gelato",descricao:"Brownie de chocolate belga aquecido com bola de gelato de baunilha e calda quente.",preco:28.90,categoria:"sobremesas",imagem:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1000&q=85"}
+            {id:"file-poivre",nome:"Filé Mignon ao Poivre",descricao:"Medalhão de filé mignon com molho de pimenta verde, acompanhado de aligot de batata.",preco:68.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/file-poivre.glb"},
+            {id:"picanha-chapa",nome:"Picanha Premium na Chapa",descricao:"Picanha fatiada ao alho, arroz biro-biro, farofa da casa e vinagrete especial.",preco:74.00,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/picanha-chapa.glb"},
+            {id:"salmao-ervas",nome:"Salmão Grelhado com Ervas",descricao:"Posta de salmão fresco grelhado com manteiga de ervas e risoto de limão siciliano.",preco:72.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/salmao-ervas.glb"},
+            {id:"fettuccine-alfredo",nome:"Fettuccine Alfredo Mignon",descricao:"Massa artesanal ao molho cremoso de parmesão com tiras de filé mignon grelhado.",preco:59.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1621996346565-e3d5d6281288?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/fettuccine-alfredo.glb"},
+            {id:"risoto-cogumelos",nome:"Risoto de Cogumelos Trufados",descricao:"Arroz arbóreo com mix de cogumelos frescos, azeite trufado e grana padano.",preco:54.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/risoto-cogumelos.glb"},
+            {id:"brownie-gelato",nome:"Grand Brownie com Gelato",descricao:"Brownie de chocolate belga aquecido com bola de gelato de baunilha e calda quente.",preco:28.90,categoria:"sobremesas",imagem:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/brownie-gelato.glb"}
         ]
     }
 };
