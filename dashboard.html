@@ -8,9 +8,19 @@
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: #121318; color: #e2e8f0; padding: 24px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border-bottom: 1px solid #2d3748; padding-bottom: 16px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border-bottom: 1px solid #2d3748; padding-bottom: 16px; flex-wrap: wrap; gap: 16px; }
     .header h1 { font-size: 24px; color: #fff; }
     .header p { font-size: 14px; color: #a0aec0; }
+    .header-actions { display: flex; gap: 10px; }
+    
+    .btn { border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+    .btn-menu { background: #3182ce; color: #fff; }
+    .btn-menu:hover { background: #2b6cb0; }
+    .btn-demo { background: #38a169; color: #fff; }
+    .btn-demo:hover { background: #2f855a; }
+    .btn-reset { background: #e53e3e; color: #fff; }
+    .btn-reset:hover { background: #c53030; }
+
     .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
     .card { background: #1a202c; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; }
     .card h3 { font-size: 13px; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
@@ -22,8 +32,6 @@
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     th, td { text-align: left; padding: 12px; border-bottom: 1px solid #2d3748; font-size: 14px; }
     th { color: #a0aec0; font-weight: 600; }
-    .btn-reset { background: #e53e3e; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .btn-reset:hover { background: #c53030; }
   </style>
 </head>
 <body>
@@ -33,7 +41,13 @@
       <h1>Painel de Desempenho 3D & Conversão</h1>
       <p>Acompanhe o impacto do cardápio interativo nas suas vendas</p>
     </div>
-    <button class="btn-reset" onclick="zerarMetricas()">Zerar Dados</button>
+    <div class="header-actions">
+      <!-- MELHORIA 1: BOTÃO VOLTAR AO CARDÁPIO -->
+      <a href="index.html" class="btn btn-menu">📖 Ver Cardápio</a>
+      <!-- MELHORIA 2: GERADOR DE DADOS DEMO PARA VENDAS -->
+      <button class="btn btn-demo" onclick="gerarDadosDemo()">⚡ Gerar Dados Demo</button>
+      <button class="btn btn-reset" onclick="zerarMetricas()">🗑️ Zerar</button>
+    </div>
   </div>
 
   <div class="kpis">
@@ -81,8 +95,8 @@
   </div>
 
   <script>
-    // Ler dados do LocalStorage salvos pelo index.html
     const STORAGE_KEY = 'cardapio_analytics_data';
+    let meuGrafico = null;
 
     function getMetrics() {
       try {
@@ -118,7 +132,7 @@
       const produtosArray = Object.values(data.produtos || {});
 
       if (produtosArray.length === 0) {
-        tabela.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#718096;">Nenhuma interação registrada ainda. Navegue no index.html para testar!</td></tr>';
+        tabela.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#718096;">Nenhuma interação registrada. Clique em "Gerar Dados Demo" para simular!</td></tr>';
       } else {
         produtosArray.forEach(p => {
           tabela.innerHTML += `
@@ -132,12 +146,15 @@
         });
       }
 
+      // Destruir gráfico antigo para recriar se necessário
+      if (meuGrafico) meuGrafico.destroy();
+
       // Renderizar Gráfico
       const ctx = document.getElementById('chartPratos3D').getContext('2d');
       const labels = produtosArray.map(p => p.nome);
       const views3dData = produtosArray.map(p => p.views3d + p.viewsAR);
 
-      new Chart(ctx, {
+      meuGrafico = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labels.length ? labels : ['Sem dados'],
@@ -159,10 +176,53 @@
       });
     }
 
+    // FUNÇÃO DA MELHORIA 2: GERA DADOS REALISTAS PARA REUNIÕES DE VENDAS
+    function gerarDadosDemo() {
+      const dadosDemo = {
+        visualizacoesGerais: 142,
+        interacoes3D: 68,
+        interacoesAR: 24,
+        adicionouCarrinho: 51,
+        pedidosWhatsApp: 38,
+        produtos: {
+          "hamburguer": {
+            id: "hamburguer",
+            nome: "Brasa 180 (Artesanal)",
+            visualizacoes: 110,
+            views3d: 52,
+            viewsAR: 18,
+            carrinho: 39,
+            pedidos: 28
+          },
+          "refrigerante": {
+            id: "refrigerante",
+            nome: "Refrigerante Lata",
+            visualizacoes: 85,
+            views3d: 0,
+            viewsAR: 0,
+            carrinho: 25,
+            pedidos: 22
+          },
+          "file-da-casa": {
+            id: "file-da-casa",
+            nome: "Filé da Casa Grelhado",
+            visualizacoes: 48,
+            views3d: 16,
+            viewsAR: 6,
+            carrinho: 12,
+            pedidos: 10
+          }
+        }
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dadosDemo));
+      carregarDashboard();
+    }
+
     function zerarMetricas() {
       if (confirm('Tem certeza de que deseja zerar todas as estatísticas acumuladas?')) {
         localStorage.removeItem(STORAGE_KEY);
-        location.reload();
+        carregarDashboard();
       }
     }
 
