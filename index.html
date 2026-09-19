@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Cardápio Digital 3D & AR - Experiência Gastronômica</title>
 
-<!-- BIBLIOTECA OFICIAL DO GOOGLE PARA 3D + REALIDADE AUMENTADA (AR NA MESA) -->
+<!-- MODEL-VIEWER OFICIAL DA GOOGLE PARA 3D + REALIDADE AUMENTADA -->
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
 <!-- ANALYTICS INTEGRADO -->
@@ -186,15 +186,14 @@ header p{color:var(--text-muted); font-size: 15px; max-width: 500px; margin: 8px
 .btn-quantidade{width:42px; height:42px; border:none; border-radius:50%; background:#252836; color:#fff; font-size: 20px; font-weight: bold; cursor:pointer;}
 .quantidade-numero{font-size:20px; font-weight:bold; min-width:30px;}
 
-/* ÁREA DE RENDERIZAÇÃO 3D E REALIDADE AUMENTADA */
-.area-3d{width:100%; height:320px; margin:16px 0; border-radius:18px; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 50%, #252836 0%, #0d0e12 100%); border: 1px solid var(--card-border);}
+.area-3d{width:100%; height:340px; margin:16px 0; border-radius:18px; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 50%, #252836 0%, #0d0e12 100%); border: 1px solid var(--card-border);}
 model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 
-/* ESTILIZAÇÃO DO BOTÃO "VER NA MINHA MESA" DENTRO DO MODEL-VIEWER */
+/* ESTILIZAÇÃO BOTÃO REALIDADE AUMENTADA */
 .btn-ver-mesa {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-    color: #000; border: none; border-radius: 30px; padding: 12px 20px;
-    font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    color: #000; border: none; border-radius: 30px; padding: 12px 22px;
+    font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
     position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
     display: flex; align-items: center; gap: 8px; white-space: nowrap; z-index: 20;
 }
@@ -274,7 +273,7 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
                 camera-controls 
                 auto-rotate 
                 ar 
-                ar-modes="webxr scene-viewer quick-look" 
+                ar-modes="scene-viewer quick-look webxr" 
                 ar-scale="fixed"
                 shadow-intensity="1.5" 
                 shadow-softness="0.8"
@@ -283,7 +282,6 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
                 interaction-prompt="auto"
                 alt="Modelo 3D Interativo do Prato">
                 
-                <!-- BOTÃO QUE ATIVA A CÂMARA E PROJETA O PRATO NA MESA -->
                 <button slot="ar-button" class="btn-ver-mesa" onclick="notificarAR()">
                     📱 Ver em minha mesa (AR)
                 </button>
@@ -326,6 +324,9 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
 
 <!-- DADOS DOS RESTAURANTES & PRODUTOS -->
 <script>
+// MODELO 3D DEMONSTRATIVO NA NUVEM PARA TESTE IMEDIATO DE AR
+const MODELO_DEMO_AR = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
+
 const RESTAURANTES = {
     "hamburgueria":{
         nome:"Brasa 180° Smash & Grill",
@@ -453,9 +454,13 @@ function abrir3D() {
     MenuAnalytics.track3DView(produto);
 
     const viewer = document.getElementById("viewer3D");
-    if (produto && produto.modelo3d) {
-        viewer.setAttribute("src", produto.modelo3d);
-    }
+    const fonteModelo = (produto && produto.modelo3d) ? produto.modelo3d : MODELO_DEMO_AR;
+
+    // Tenta carregar o modelo local, se falhar aplica a URL de reserva na nuvem
+    viewer.setAttribute("src", fonteModelo);
+    viewer.onerror = () => {
+        viewer.setAttribute("src", MODELO_DEMO_AR);
+    };
 }
 
 function notificarAR() {
