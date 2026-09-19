@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111111">
-<meta name="description" content="Cardápio digital interativo com experiência 3D e realidade aumentada.">
-<title>Cardápio Digital</title>
+<meta name="description" content="Experiência de cardápio digital com visualização 3D, realidade aumentada e pedido online.">
+<title>Menu Experience</title>
 
 <script type="importmap">
 {
@@ -17,440 +17,506 @@
 
 <style>
 :root{
-  --bg:#f6f6f4;
-  --surface:#ffffff;
-  --text:#111111;
-  --muted:#707070;
-  --line:#e9e9e7;
-  --soft:#f1f1ef;
-  --dark:#111111;
-  --shadow:0 12px 35px rgba(0,0,0,.07);
-  --radius:22px;
+  --bg:#f5f3ef;--surface:#fff;--text:#171717;--muted:#77736d;--line:#e7e2db;
+  --dark:#171717;--accent:#c66b32;--accent-soft:#f4e5da;--success:#3d7c58;
+  --shadow:0 18px 50px rgba(28,23,18,.08);--radius:24px;
 }
-*{margin:0;padding:0;box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-button,input,textarea{font:inherit}
-button{cursor:pointer}
-img{max-width:100%}
-.escondido{display:none!important}
+button,input,textarea{font:inherit}button{cursor:pointer}img{display:block;max-width:100%}
+.escondido{display:none!important}.sem-scroll{overflow:hidden}
 
-header{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 0%,#343434 0%,#151515 45%,#080808 100%);color:#fff;padding:48px 20px 42px}
-.header-inner{width:min(1080px,100%);margin:auto;text-align:center}
-.header-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.07);border-radius:999px;color:#d7d7d7;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:18px}
-.status-ponto{width:7px;height:7px;border-radius:50%;background:#63df91;box-shadow:0 0 0 4px rgba(99,223,145,.12)}
-header h1{font-size:clamp(30px,5vw,46px);line-height:1.02;letter-spacing:-1.7px;margin-bottom:11px}
-header p{max-width:560px;margin:auto;color:#bdbdbd;font-size:15px;line-height:1.55}
-.header-meta{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}
-.header-meta span{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.08);color:#cfcfcf;font-size:11px}
+header{position:relative;overflow:hidden;color:#fff;background:
+linear-gradient(100deg,rgba(0,0,0,.82),rgba(0,0,0,.48)),
+url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1800&q=82") center/cover;
+min-height:410px;padding:26px 20px 38px}
+.header-inner{width:min(1120px,100%);margin:auto;min-height:345px;display:flex;flex-direction:column;justify-content:space-between}
+.header-top{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.marca{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:850;letter-spacing:.2px}
+.marca-dot{width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 0 6px rgba(255,255,255,.1)}
+.header-actions{display:flex;gap:8px}
+.header-action{border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:#fff;padding:9px 12px;border-radius:999px;font-size:11px;font-weight:750;backdrop-filter:blur(10px)}
+.hero-copy{max-width:720px;padding-top:45px}
+.hero-kicker{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;color:#ddd;margin-bottom:13px}
+header h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(40px,7vw,72px);line-height:.96;letter-spacing:-2.5px;margin-bottom:17px}
+header p{max-width:610px;color:#ddd;font-size:15px;line-height:1.65}
+.hero-proof{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
+.hero-proof span{padding:8px 11px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.22);border-radius:999px;font-size:10px;color:#eee;backdrop-filter:blur(8px)}
 
-.categorias{position:sticky;top:0;z-index:50;display:flex;gap:9px;overflow-x:auto;padding:13px max(20px,calc((100vw - 1080px)/2));background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nicho-switch{width:min(1120px,calc(100% - 28px));margin:-25px auto 0;position:relative;z-index:60;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 15px 35px rgba(0,0,0,.09);padding:7px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.nicho-btn{border:0;background:transparent;border-radius:13px;padding:13px 12px;text-align:left;color:#6d6861}
+.nicho-btn small{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.8px;font-weight:800;margin-bottom:3px}
+.nicho-btn strong{font-size:13px}.nicho-btn.ativo{background:#171717;color:#fff}
+
+.conteudo{width:min(1120px,100%);margin:auto;padding:38px 14px 110px}
+.barra-cardapio{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:17px}
+.barra-cardapio h2{font-family:Georgia,"Times New Roman",serif;font-size:29px;letter-spacing:-.8px}
+.barra-cardapio p{font-size:12px;color:var(--muted);margin-top:5px}
+.selo-experiencia{font-size:10px;font-weight:800;color:#8b6a55;white-space:nowrap}
+.categorias{display:flex;gap:8px;overflow-x:auto;padding:0 0 17px}
 .categorias::-webkit-scrollbar{display:none}
-.categoria{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:#555;padding:10px 16px;border-radius:999px;font-size:13px;font-weight:650;transition:.2s}
-.categoria:hover{border-color:#ccc}
-.categoria.ativa{background:var(--dark);border-color:var(--dark);color:#fff}
+.categoria{border:1px solid var(--line);background:#fff;color:#615c56;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:800;white-space:nowrap}
+.categoria.ativa{background:#171717;color:#fff;border-color:#171717}
 
-.conteudo{width:min(1080px,100%);margin:auto;padding:34px 20px 100px}
-.secao-intro{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:18px}
-.secao-intro h2{font-size:22px;letter-spacing:-.6px}
-.secao-intro p{font-size:12px;color:var(--muted);margin-top:5px}
-.experiencia-label{font-size:11px;color:#777;white-space:nowrap}
-.produtos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.produto{position:relative;overflow:hidden;background:var(--surface);border:1px solid rgba(0,0,0,.045);border-radius:var(--radius);box-shadow:var(--shadow);cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s}
-.produto:hover{transform:translateY(-3px);box-shadow:0 18px 42px rgba(0,0,0,.10);border-color:#dededb}
-.produto-media{position:relative;aspect-ratio:1.35/1;overflow:hidden;background:#e9e9e7}
-.produto img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s ease}
-.produto:hover img{transform:scale(1.025)}
-.produto-badges{position:absolute;left:13px;top:13px;display:flex;gap:7px;flex-wrap:wrap}
-.badge{padding:7px 9px;border-radius:999px;background:rgba(17,17,17,.82);color:#fff;font-size:10px;font-weight:750;backdrop-filter:blur(8px)}
-.badge-claro{background:rgba(255,255,255,.92);color:#111}
+.produtos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.produto{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 8px 25px rgba(28,23,18,.045);transition:.22s;cursor:pointer}
+.produto:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.produto-media{position:relative;aspect-ratio:1.28/1;overflow:hidden;background:#e9e4de}
+.produto-media img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.produto:hover img{transform:scale(1.035)}
+.produto-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18),transparent 35%,rgba(0,0,0,.2))}
+.produto-badges{position:absolute;left:13px;right:13px;top:13px;display:flex;justify-content:space-between;gap:7px}
+.badge{padding:7px 9px;border-radius:999px;background:rgba(17,17,17,.86);color:#fff;font-size:9px;font-weight:850;backdrop-filter:blur(8px)}
+.badge.light{background:rgba(255,255,255,.92);color:#171717}
+.badge.destaque{background:#fff;color:#171717}
 .produto-info{padding:17px 18px 18px}
-.produto-info h2{font-size:18px;letter-spacing:-.35px;margin-bottom:6px}
-.produto-info p{font-size:13px;line-height:1.48;color:var(--muted);min-height:38px;margin-bottom:14px}
-.produto-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.preco{font-size:17px;font-weight:800}
-.acao-produto{display:flex;align-items:center;gap:6px;color:#111;font-size:12px;font-weight:750}
-.acao-produto span{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:#111;color:#fff}
+.produto-info h3{font-family:Georgia,"Times New Roman",serif;font-size:21px;letter-spacing:-.35px;margin-bottom:6px}
+.produto-info p{font-size:12px;line-height:1.55;color:var(--muted);min-height:38px}
+.produto-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px}
+.preco{font-size:17px;font-weight:900}
+.produto-acao{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.4px}
+.produto-acao span{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:#171717;color:#fff;font-size:15px}
+.card-3d{margin-top:11px;display:inline-flex;align-items:center;gap:6px;color:#8d5839;font-size:10px;font-weight:850}
+.card-3d i{width:7px;height:7px;border-radius:50%;background:#c66b32}
 
-.carrinho-flutuante{position:fixed;right:18px;bottom:18px;z-index:800;display:flex;align-items:center;gap:9px;border:0;border-radius:999px;background:#111;color:#fff;padding:12px 14px 12px 16px;box-shadow:0 15px 35px rgba(0,0,0,.25);font-size:13px;font-weight:800;transition:.2s}
-.carrinho-flutuante:hover{transform:translateY(-2px)}
-.carrinho-contador{min-width:24px;height:24px;padding:0 6px;display:grid;place-items:center;border-radius:999px;background:#fff;color:#111;font-size:11px}
+.carrinho-flutuante{position:fixed;right:18px;bottom:18px;z-index:900;border:0;background:#171717;color:#fff;border-radius:999px;padding:12px 15px 12px 17px;display:flex;align-items:center;gap:9px;font-size:12px;font-weight:850;box-shadow:0 16px 40px rgba(0,0,0,.25)}
+.carrinho-contador{min-width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#171717;font-size:10px}
 
-.modal{display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}
+.modal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);backdrop-filter:blur(7px);padding:12px;align-items:center;justify-content:center}
 .modal.ativo{display:flex}
-.modal-conteudo{position:relative;width:min(520px,100%);max-height:94vh;overflow-y:auto;background:#fff;border-radius:26px;padding:27px;box-shadow:0 30px 80px rgba(0,0,0,.28);animation:aparecer .2s ease}
-@keyframes aparecer{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
-.fechar-modal{position:absolute;right:13px;top:11px;width:38px;height:38px;border:0;border-radius:50%;background:#f0f0ee;color:#222;font-size:23px;line-height:1;z-index:30}
-.modal-produto-top{padding-right:42px}
-.modal-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:800;color:#888;margin-bottom:7px}
-#modalNome{font-size:28px;line-height:1.05;letter-spacing:-1px;margin-bottom:9px}
-#modalDescricao{color:#666;line-height:1.55;font-size:14px;margin-bottom:13px}
-.modal-preco{font-size:22px;font-weight:850}
-.experiencia-card{margin:19px 0 15px;padding:15px;border:1px solid #e6e6e3;border-radius:17px;background:linear-gradient(145deg,#fafafa,#f1f1ef)}
-.experiencia-card strong{display:block;font-size:13px;margin-bottom:4px}
-.experiencia-card span{display:block;font-size:12px;color:#777;line-height:1.45}
-.botoes-produto{display:grid;gap:9px}
-.btn-principal,.btn-ar,.btn-secundario{width:100%;border:0;border-radius:14px;padding:14px 15px;font-size:14px;font-weight:800;transition:.2s}
-.btn-principal{background:#111;color:#fff}
-.btn-principal:hover{background:#2b2b2b}
-.btn-ar{background:#111;color:#fff}
-.btn-ar:hover{background:#2b2b2b}
-.btn-secundario{background:#f0f0ee;color:#111}
-.btn-secundario:hover{background:#e5e5e2}
-.btn-disabled{opacity:.48;cursor:not-allowed}
-.quantidade-box{display:flex;align-items:center;justify-content:center;gap:17px;margin:18px 0 14px}
-.btn-quantidade{width:38px;height:38px;border:0;border-radius:50%;background:#111;color:#fff;font-size:20px}
-.quantidade-numero{min-width:22px;text-align:center;font-weight:850}
+.modal-conteudo{position:relative;width:min(600px,100%);max-height:94vh;overflow:auto;background:#fff;border-radius:27px;padding:25px;box-shadow:0 35px 100px rgba(0,0,0,.3)}
+.fechar-modal{position:absolute;right:12px;top:12px;width:38px;height:38px;border:0;border-radius:50%;background:#f0ede8;font-size:22px;z-index:30}
+.kicker{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#9b8c7e;font-weight:900;margin-bottom:7px}
+#modalNome{font-family:Georgia,"Times New Roman",serif;font-size:32px;line-height:1.02;letter-spacing:-1px;padding-right:42px}
+#modalDescricao{font-size:13px;line-height:1.6;color:var(--muted);margin:9px 0}
+.modal-preco{font-size:21px;font-weight:900}
+.modal-experiencia{margin:18px 0;padding:15px;border:1px solid #eadfd5;background:#fbf6f1;border-radius:17px}
+.modal-experiencia strong{font-size:12px;display:block;margin-bottom:4px}
+.modal-experiencia span{font-size:11px;line-height:1.5;color:#756d65}
+.modal-acoes{display:grid;gap:8px}
+.btn{width:100%;border:0;border-radius:14px;padding:14px;font-size:13px;font-weight:850}
+.btn-dark{background:#171717;color:#fff}.btn-soft{background:#eeeae5;color:#171717}.btn-accent{background:var(--accent);color:#fff}
+.quantidade{display:flex;align-items:center;justify-content:center;gap:18px;margin:16px 0}
+.q-btn{width:37px;height:37px;border:0;border-radius:50%;background:#171717;color:#fff;font-size:20px}.q-num{font-weight:900;min-width:20px;text-align:center}
 
-.area-3d{position:relative;width:100%;height:350px;margin:17px 0 9px;border-radius:20px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#474747,#1d1d1d 55%,#080808)}
+.area3d{height:390px;margin:17px 0 10px;border-radius:20px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#5c554f,#282522 57%,#111);position:relative}
 #canvas3d{width:100%;height:100%;display:block;touch-action:none}
-.carregando-3d,.erro-3d{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;color:#fff;background:rgba(0,0,0,.25);text-align:center;padding:30px;pointer-events:none}
-.erro-3d{display:none;background:#111}
-.carregando-3d strong,.erro-3d strong{font-size:14px}
-.carregando-3d span,.erro-3d span{font-size:11px;color:#bbb}
-.produto-3d-nome{color:#888;font-size:12px;margin-top:-4px}
-.controle-3d{text-align:center;color:#888;font-size:11px}
-.modelo-real-badge{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 10px;border-radius:999px;background:#f1f1ef;color:#555;font-size:10px;font-weight:800}
+.loading3d{position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.18);font-size:12px;pointer-events:none}
+.info3d{font-size:10px;text-align:center;color:#8a837c;margin-bottom:11px}
+.personalizacao{border:1px solid var(--line);border-radius:17px;padding:14px;margin-top:12px}
+.personalizacao h4{font-size:12px;margin-bottom:9px}
+.adicionais{display:grid;gap:7px}
+.adicional{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f7f4f0;border-radius:11px;padding:10px 11px;font-size:11px}
+.adicional label{display:flex;gap:8px;align-items:center}.adicional input{accent-color:#171717}
+.hotspots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hotspot{border:1px solid #ded8d0;background:#fff;border-radius:999px;padding:7px 9px;font-size:9px;font-weight:800;color:#625a52}
 
-.ar-tela{position:fixed;inset:0;z-index:3000;display:none;background:#000;overflow:hidden}
+.ar-modal-copy{font-size:13px;color:#6d6862;line-height:1.6;margin:9px 0 17px}
+.ar-tela{position:fixed;inset:0;z-index:4000;background:#000;display:none;overflow:hidden}
 .ar-tela.ativo{display:block}
 #canvasAR{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
-.ar-topo{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:calc(16px + env(safe-area-inset-top)) 17px 17px;background:linear-gradient(rgba(0,0,0,.62),transparent);z-index:20;pointer-events:none}
-.ar-topo>*{pointer-events:auto}
-.ar-titulo{color:#fff;font-size:15px;font-weight:800;text-shadow:0 1px 5px rgba(0,0,0,.4)}
-.ar-subtitulo{color:#ccc;font-size:10px;font-weight:500;margin-top:2px}
-.ar-fechar{width:42px;height:42px;border:0;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font-size:24px}
-.ar-reticulo{position:absolute;left:50%;top:50%;width:76px;height:76px;transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,.85);border-radius:50%;z-index:10;pointer-events:none;opacity:.75;transition:.2s}
-.ar-reticulo.ancorado{border-color:#fff;box-shadow:0 0 0 7px rgba(255,255,255,.12)}
-.ar-instrucoes{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);width:calc(100% - 30px);max-width:450px;padding:14px 16px;border-radius:18px;background:rgba(0,0,0,.70);color:#fff;text-align:center;font-size:12px;line-height:1.45;z-index:20;backdrop-filter:blur(10px)}
-.ar-status{margin-top:5px;color:#c8c8c8;font-size:10px}
-.ar-acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
-.ar-acao{border:0;border-radius:12px;padding:10px;background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:800}
-.ar-acao.principal{background:#fff;color:#111}
-.ar-carregando{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:rgba(0,0,0,.88);color:#fff;z-index:40;text-align:center}
-.ar-carregando.esconder{display:none}
-.ar-ponto{width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 0 0 8px rgba(255,255,255,.1);animation:pulsar 1.1s infinite}
-@keyframes pulsar{50%{transform:scale(1.4);opacity:.65}}
+.ar-topo{position:absolute;top:0;left:0;right:0;z-index:20;padding:calc(18px + env(safe-area-inset-top)) 16px 28px;display:flex;justify-content:space-between;background:linear-gradient(rgba(0,0,0,.72),transparent);color:#fff}
+.ar-topo strong{font-size:14px}.ar-topo small{display:block;font-size:9px;color:#ccc;margin-top:3px}
+.ar-fechar{width:40px;height:40px;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:23px}
+.ar-guia{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);width:calc(100% - 28px);max-width:470px;background:rgba(17,17,17,.78);backdrop-filter:blur(12px);border-radius:18px;padding:14px;color:#fff;text-align:center;z-index:20}
+.ar-guia strong{font-size:12px}.ar-guia p{font-size:10px;line-height:1.45;color:#d3d3d3;margin-top:4px}.ar-guia button{margin-top:10px}
+.ar-reticulo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78px;height:78px;border:1.5px solid rgba(255,255,255,.8);border-radius:50%;z-index:10;pointer-events:none}
 
-.carrinho-lista{text-align:left;margin-top:14px}
-.carrinho-vazio{text-align:center;color:#777;padding:25px 0;font-size:13px}
-.item-carrinho{display:grid;grid-template-columns:1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid #eee}
-.item-carrinho-nome{font-weight:800;font-size:13px;margin-bottom:4px}
-.item-carrinho-preco{font-size:12px;color:#777}
-.item-controles{display:flex;align-items:center;gap:8px}
-.item-btn{width:28px;height:28px;border:0;border-radius:50%;background:#eee;font-weight:850}
-.item-qtd{min-width:16px;text-align:center;font-size:12px;font-weight:850}
-.carrinho-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0;font-size:18px;font-weight:850}
-.formulario-pedido{text-align:left}
-.formulario-pedido label{display:block;font-size:12px;font-weight:800;margin:11px 0 6px}
-.formulario-pedido input,.formulario-pedido textarea{width:100%;border:1px solid #ddd;border-radius:12px;padding:12px;font-size:13px;outline:none;font-family:inherit;background:#fff}
-.formulario-pedido input:focus,.formulario-pedido textarea:focus{border-color:#999}
-.formulario-pedido textarea{min-height:76px;resize:vertical}
+.carrinho-lista{margin-top:15px}.vazio{text-align:center;color:#777;padding:28px;font-size:12px}
+.item{display:grid;grid-template-columns:1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid #eee}
+.item strong{font-size:12px}.item small{display:block;color:#888;font-size:10px;margin-top:4px}
+.controles{display:flex;align-items:center;gap:7px}.item-btn{width:27px;height:27px;border:0;border-radius:50%;background:#eee}.item-qtd{font-size:11px;font-weight:850;min-width:13px;text-align:center}
+.total{display:flex;justify-content:space-between;font-weight:900;font-size:17px;padding:17px 0}
+.form label{display:block;font-size:10px;font-weight:850;margin:9px 0 5px}.form input,.form textarea{width:100%;border:1px solid #ddd;border-radius:11px;padding:11px;font-size:12px;outline:none}.form textarea{min-height:70px;resize:vertical}
+.cross-sell{margin-top:13px;padding:13px;border-radius:15px;background:#f5f0ea;border:1px solid #e6dbcf}
+.cross-sell strong{font-size:11px}.cross-sell p{font-size:10px;color:#756d65;margin-top:3px;line-height:1.4}
 
-.toast{position:fixed;left:50%;bottom:78px;transform:translate(-50%,18px);z-index:5000;opacity:0;pointer-events:none;background:#111;color:#fff;padding:11px 16px;border-radius:999px;font-size:12px;font-weight:750;box-shadow:0 10px 28px rgba(0,0,0,.22);transition:.22s;white-space:nowrap}
-.toast.ativo{opacity:1;transform:translate(-50%,0)}
-footer{text-align:center;padding:0 20px 90px;color:#999;font-size:11px}
+.admin{position:fixed;inset:0;z-index:5000;background:#f5f3ef;display:none;overflow:auto}.admin.ativo{display:block}
+.admin-wrap{width:min(900px,100%);margin:auto;padding:28px 16px 70px}.admin-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.admin-head h2{font-family:Georgia,serif;font-size:28px}.admin-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}.admin-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #eee;align-items:center}.admin-row:last-child{border-bottom:0}.admin-row strong{font-size:12px}.admin-row small{display:block;color:#888;margin-top:3px}.admin-actions{display:flex;gap:7px}.admin-actions button{border:0;border-radius:9px;padding:8px 10px;font-size:10px;font-weight:800}.admin-price{width:82px;border:1px solid #ddd;border-radius:8px;padding:7px;font-size:11px}
+.toast{position:fixed;left:50%;bottom:78px;transform:translate(-50%,15px);opacity:0;z-index:6000;background:#171717;color:#fff;border-radius:999px;padding:10px 15px;font-size:11px;font-weight:800;transition:.22s;pointer-events:none}.toast.ativo{opacity:1;transform:translate(-50%,0)}
+footer{text-align:center;padding:0 20px 90px;color:#999;font-size:10px}
 
 @media(max-width:700px){
-  header{padding:35px 16px 31px}
-  .conteudo{padding:27px 14px 95px}
-  .produtos{grid-template-columns:1fr;gap:14px}
-  .produto-media{aspect-ratio:1.55/1}
-  .produto-info{padding:15px}
-  .produto-info p{min-height:0}
-  .modal{padding:10px}
-  .modal-conteudo{padding:22px 18px;border-radius:23px}
-  #modalNome{font-size:24px}
-  .area-3d{height:310px}
-  .secao-intro{align-items:start;flex-direction:column;gap:4px}
-  .experiencia-label{display:none}
+ header{min-height:360px;padding:20px 16px 28px}.header-inner{min-height:310px}.hero-copy{padding-top:25px}header h1{font-size:48px}
+ .nicho-switch{width:calc(100% - 20px);margin-top:-20px}.conteudo{padding:30px 10px 100px}.barra-cardapio{align-items:flex-start;flex-direction:column;gap:5px}.selo-experiencia{display:none}
+ .produtos{grid-template-columns:1fr;gap:14px}.produto-media{aspect-ratio:1.45/1}.modal{padding:8px}.modal-conteudo{padding:21px 16px;border-radius:23px}.area3d{height:320px}
 }
-@media(max-width:380px){.area-3d{height:280px}.carrinho-flutuante{right:11px;bottom:11px}}
+@media(max-width:380px){header h1{font-size:42px}.area3d{height:285px}}
 </style>
 </head>
 <body>
+
 <header>
   <div class="header-inner">
-    <div class="header-eyebrow"><span class="status-ponto"></span> Cardápio digital</div>
-    <h1 id="restauranteNome">Restaurante</h1>
-    <p id="restauranteDescricao">Escolha seu próximo prato.</p>
-    <div class="header-meta"><span>Experiência 3D</span><span>Visualização na mesa</span><span>Pedido pelo WhatsApp</span></div>
+    <div class="header-top">
+      <div class="marca"><span class="marca-dot"></span><span id="marcaNome">MENU EXPERIENCE</span></div>
+      <div class="header-actions">
+        <button class="header-action" onclick="abrirCarrinho()">Meu pedido <span id="headerContador">0</span></button>
+      </div>
+    </div>
+    <div class="hero-copy">
+      <div class="hero-kicker" id="heroKicker">Experiência gastronômica digital</div>
+      <h1 id="restauranteNome">Brasa 180</h1>
+      <p id="restauranteDescricao">Hambúrguer artesanal, apresentação impecável e uma nova forma de escolher antes de pedir.</p>
+      <div class="hero-proof">
+        <span>3D nos destaques</span><span>Veja na sua mesa</span><span>Pedido direto</span>
+      </div>
+    </div>
   </div>
 </header>
 
-<nav class="categorias" id="categorias" aria-label="Categorias"></nav>
+<div class="nicho-switch">
+  <button id="btnHamburguer" class="nicho-btn ativo" onclick="trocarNicho('hamburguer')">
+    <small>Demonstração</small><strong>Brasa 180 · Hamburgueria</strong>
+  </button>
+  <button id="btnRestaurante" class="nicho-btn" onclick="trocarNicho('restaurante')">
+    <small>Demonstração</small><strong>Casa da Praça · Restaurante</strong>
+  </button>
+</div>
 
 <main class="conteudo">
-  <div class="secao-intro">
-    <div><h2>Escolha seu pedido</h2><p>Toque em um produto para conhecer todos os detalhes.</p></div>
-    <div class="experiencia-label">3D quando disponível</div>
+  <div class="barra-cardapio">
+    <div><h2 id="tituloSecao">Os mais pedidos</h2><p id="subtituloSecao">Escolha pelo visual, conheça os detalhes e peça em poucos toques.</p></div>
+    <div class="selo-experiencia">EXPERIÊNCIA 3D NOS PRODUTOS ESTRATÉGICOS</div>
   </div>
-  <section class="produtos" id="listaProdutos"></section>
+  <nav id="categorias" class="categorias"></nav>
+  <section id="listaProdutos" class="produtos"></section>
 </main>
 
-<button class="carrinho-flutuante" onclick="abrirCarrinho()" aria-label="Abrir pedido">
-  <span>🛒</span><span>Pedido</span><span id="carrinhoContador" class="carrinho-contador">0</span>
+<button class="carrinho-flutuante" onclick="abrirCarrinho()">
+  Pedido <span id="carrinhoContador" class="carrinho-contador">0</span>
 </button>
 
 <div id="modalProduto" class="modal">
   <div class="modal-conteudo">
-    <button class="fechar-modal" onclick="fecharModal()" aria-label="Fechar">×</button>
-    <div class="modal-produto-top">
-      <div class="modal-kicker">Experiência do produto</div>
-      <h2 id="modalNome"></h2>
-      <p id="modalDescricao"></p>
-      <div id="modalPreco" class="modal-preco"></div>
-    </div>
-    <div class="experiencia-card">
-      <strong>Conheça antes de pedir</strong>
-      <span id="experienciaTexto">Veja o produto em 3D e, quando houver modelo compatível, coloque-o na sua mesa.</span>
-    </div>
-    <div class="quantidade-box">
-      <button class="btn-quantidade" onclick="alterarQuantidadeProduto(-1)">−</button>
-      <span id="quantidadeProduto" class="quantidade-numero">1</span>
-      <button class="btn-quantidade" onclick="alterarQuantidadeProduto(1)">+</button>
-    </div>
-    <div class="botoes-produto">
-      <button id="btnAbrir3D" class="btn-ar" onclick="abrir3D()">Ver experiência 3D</button>
-      <button id="btnAbrirAR" class="btn-secundario" onclick="abrirAR()">Ver na minha mesa</button>
-      <button class="btn-principal" onclick="adicionarProdutoAtual()">Adicionar ao pedido</button>
+    <button class="fechar-modal" onclick="fecharModal()">×</button>
+    <div class="kicker" id="modalKicker">Produto em destaque</div>
+    <h2 id="modalNome"></h2><p id="modalDescricao"></p><div id="modalPreco" class="modal-preco"></div>
+    <div class="modal-experiencia"><strong id="experienciaTitulo">Conheça antes de pedir</strong><span id="experienciaTexto"></span></div>
+    <div id="personalizacaoProduto" class="personalizacao escondido"></div>
+    <div class="quantidade"><button class="q-btn" onclick="alterarQuantidadeProduto(-1)">−</button><span id="quantidadeProduto" class="q-num">1</span><button class="q-btn" onclick="alterarQuantidadeProduto(1)">+</button></div>
+    <div class="modal-acoes">
+      <button id="btn3D" class="btn btn-accent" onclick="abrir3D()">Conhecer em 3D</button>
+      <button id="btnAR" class="btn btn-dark" onclick="abrirAR()">Ver na minha mesa</button>
+      <button class="btn btn-soft" onclick="adicionarProdutoAtual()">Adicionar ao pedido</button>
     </div>
   </div>
 </div>
 
 <div id="modal3D" class="modal">
   <div class="modal-conteudo">
-    <button class="fechar-modal" onclick="fechar3D()" aria-label="Fechar">×</button>
-    <div class="modal-kicker">Experiência 3D</div>
-    <h2>Veja o produto por todos os lados</h2>
-    <div id="nomeProduto3D" class="produto-3d-nome"></div>
-    <div class="area-3d">
-      <canvas id="canvas3d"></canvas>
-      <div id="carregando3d" class="carregando-3d"><strong>Preparando o 3D...</strong><span>Carregando somente quando necessário.</span></div>
-      <div id="erro3d" class="erro-3d"><strong>Não foi possível carregar o 3D.</strong><span>Você ainda pode continuar pelo pedido.</span></div>
+    <button class="fechar-modal" onclick="fechar3D()">×</button>
+    <div class="kicker">Experiência 3D</div>
+    <h2 id="nomeProduto3D" style="font-family:Georgia,serif;font-size:27px"></h2>
+    <div class="area3d"><canvas id="canvas3d"></canvas><div id="loading3d" class="loading3d">Preparando a experiência…</div></div>
+    <p class="info3d">Arraste para girar · use o gesto de pinça para aproximar</p>
+    <div id="hotspots3d" class="hotspots"></div>
+    <div id="personalizacao3D" class="personalizacao escondido"></div>
+    <div id="crossSell3D" class="cross-sell"></div>
+    <div class="modal-acoes" style="margin-top:12px">
+      <button class="btn btn-dark" onclick="abrirAR()">Ver na minha mesa</button>
+      <button class="btn btn-soft" onclick="adicionarProdutoAtual()">Adicionar ao pedido</button>
     </div>
-    <p class="controle-3d">Arraste para girar • use o gesto de zoom para aproximar</p>
-    <div id="modeloRealBadge" class="modelo-real-badge" style="display:none">Modelo 3D real carregado</div>
-    <button class="btn-principal" style="margin-top:14px" onclick="abrirAR()">Ver na minha mesa</button>
-    <button class="btn-secundario" style="margin-top:9px" onclick="adicionarProdutoAtual()">Adicionar ao pedido</button>
   </div>
 </div>
 
 <div id="modalAR" class="modal">
   <div class="modal-conteudo">
-    <button class="fechar-modal" onclick="fecharAR()" aria-label="Fechar">×</button>
-    <div class="modal-kicker">Realidade aumentada</div>
-    <h2>Ver na minha mesa</h2>
-    <p style="color:#666;line-height:1.5;font-size:14px;margin:10px 0 18px">Em aparelhos compatíveis, a câmera encontra uma superfície real para você posicionar o produto no ambiente.</p>
-    <button id="btnIniciarAR" class="btn-principal" onclick="iniciarCameraAR()">Iniciar experiência AR</button>
-    <div class="ar-aviso" style="font-size:11px;color:#999;text-align:center;margin-top:12px">A experiência espacial depende do navegador e do aparelho.</div>
+    <button class="fechar-modal" onclick="fecharAR()">×</button>
+    <div class="kicker">Realidade aumentada</div>
+    <h2 style="font-family:Georgia,serif;font-size:28px">Ver na minha mesa</h2>
+    <p class="ar-modal-copy">Coloque o produto no ambiente em escala real para entender melhor a apresentação e o tamanho antes de pedir.</p>
+    <button class="btn btn-dark" onclick="iniciarCameraAR()">Iniciar experiência</button>
+    <p style="font-size:10px;color:#999;text-align:center;margin-top:10px">Disponibilidade depende do aparelho e navegador.</p>
   </div>
 </div>
 
 <div id="telaAR" class="ar-tela">
-  <canvas id="canvasAR"></canvas>
-  <div class="ar-reticulo" id="arReticulo"></div>
-  <div class="ar-topo">
-    <div><div id="arNomeProduto" class="ar-titulo">Produto</div><div class="ar-subtitulo">Experiência espacial</div></div>
-    <button class="ar-fechar" onclick="fecharCameraAR()" aria-label="Sair da AR">×</button>
-  </div>
-  <div class="ar-instrucoes">
-    <div id="arInstrucao">Mova o celular devagar para encontrar uma superfície.</div>
-    <div id="arStatus" class="ar-status">Procurando superfície...</div>
-    <div class="ar-acoes">
-      <button class="ar-acao" onclick="girarAR(-0.25)">Girar</button>
-      <button class="ar-acao principal" onclick="adicionarProdutoAtual()">Adicionar ao pedido</button>
-    </div>
-  </div>
-  <div id="arCarregando" class="ar-carregando"><div class="ar-ponto"></div><div>Preparando experiência espacial...</div></div>
+  <canvas id="canvasAR"></canvas><div class="ar-reticulo"></div>
+  <div class="ar-topo"><div><strong id="arNomeProduto">Produto</strong><small>Posicionamento em escala real</small></div><button class="ar-fechar" onclick="fecharCameraAR()">×</button></div>
+  <div class="ar-guia"><strong id="arStatus">Procurando uma superfície…</strong><p id="arInstrucao">Mova o celular devagar até encontrar a mesa. Toque para posicionar o produto.</p><button class="btn btn-dark" onclick="adicionarProdutoAtual()">Adicionar ao pedido</button></div>
 </div>
 
 <div id="modalCarrinho" class="modal">
   <div class="modal-conteudo">
-    <button class="fechar-modal" onclick="fecharCarrinho()" aria-label="Fechar">×</button>
-    <div class="modal-kicker">Seu pedido</div>
-    <h2>Confira antes de enviar</h2>
+    <button class="fechar-modal" onclick="fecharCarrinho()">×</button>
+    <div class="kicker">Seu pedido</div><h2 style="font-family:Georgia,serif;font-size:28px">Confira antes de enviar</h2>
     <div id="carrinhoLista" class="carrinho-lista"></div>
-    <div id="carrinhoFinalizacao" style="display:none">
-      <div class="carrinho-total"><span>Total</span><span id="carrinhoTotal">R$ 0,00</span></div>
-      <div class="formulario-pedido">
-        <label for="clienteNome">Seu nome</label>
-        <input id="clienteNome" type="text" placeholder="Digite seu nome" autocomplete="name">
-        <label for="clienteObs">Observações</label>
-        <textarea id="clienteObs" placeholder="Ex.: sem cebola, ponto da carne..."></textarea>
-      </div>
-      <button class="btn-principal" style="margin-top:15px" onclick="finalizarWhatsApp()">Finalizar pedido pelo WhatsApp</button>
+    <div id="carrinhoFinalizacao" class="escondido">
+      <div class="total"><span>Total</span><span id="carrinhoTotal">R$ 0,00</span></div>
+      <div class="form"><label>Seu nome</label><input id="clienteNome" placeholder="Como podemos chamar você?"><label>Observações</label><textarea id="clienteObs" placeholder="Ex.: sem cebola, ponto da carne…"></textarea></div>
+      <button class="btn btn-dark" style="margin-top:14px" onclick="finalizarWhatsApp()">Enviar pedido pelo WhatsApp</button>
     </div>
   </div>
 </div>
 
-<div id="toast" class="toast">Adicionado ao pedido</div>
-<footer><div id="rodapeNome">Restaurante</div>Cardápio digital</footer>
+<div id="admin" class="admin">
+  <div class="admin-wrap">
+    <div class="admin-head"><div><div class="kicker">Painel de demonstração</div><h2>Gestão do cardápio</h2></div><button class="btn btn-soft" style="width:auto" onclick="fecharAdmin()">Fechar</button></div>
+    <div class="admin-box"><p style="font-size:11px;color:#777;line-height:1.5">O comerciante pode alterar preço e disponibilidade sem editar código. Nesta demonstração, os dados ficam salvos neste navegador.</p></div>
+    <div id="adminLista"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<footer><div id="rodapeNome">Brasa 180</div> · Demonstração de cardápio digital</footer>
 
 <script type="module">
-let THREE = null;
-let OrbitControls = null;
-let GLTFLoader = null;
-let threePromise = null;
-let loaderPromise = null;
-let cena = null, camera = null, renderizador = null, controles = null, objetoAtual = null;
-let animacao3DAtiva = false;
-let cenaAR = null, cameraAR = null, renderizadorAR = null, objetoAR = null;
-let sessionAR = null, hitTestSource = null, localSpaceAR = null, hitTestSourceRequested = false, arColocado = false;
-let escalaAR = 1, rotacaoAR = 0, arrastandoAR = false, ultimoXAR = 0, distanciaInicialAR = null;
+let THREE=null,OrbitControls=null;
+let cena=null,camera=null,renderer=null,controls=null,objetoAtual=null,animando=false;
+let cenaAR=null,cameraAR=null,rendererAR=null,sessionAR=null,hitSource=null,hitRequested=false,objetoAR=null,arColocado=false;
+let produtoAtualId=null, quantidadeAtual=1, adicionaisSelecionados=[];
+
+const DADOS={
+ hamburguer:{
+  nome:"Brasa 180",descricao:"Hambúrguer artesanal, apresentação impecável e uma nova forma de escolher antes de pedir.",
+  kicker:"Hamburgueria artesanal · experiência digital",whatsapp:"5534999999999",
+  categorias:["Destaques","Lanches","Acompanhamentos","Bebidas"],
+  produtos:[
+   {id:"brasa",nome:"Brasa 180",descricao:"Blend bovino 180g, cheddar, cebola caramelizada, molho da casa e pão brioche.",preco:39.9,cat:"Destaques",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1100&q=84",modelo:true,destaque:true,tags:["180g de carne","Cheddar","Brioche"],cross:"Batata crocante + refrigerante combinam com este lanche."},
+   {id:"duplo",nome:"Duplo Defumado",descricao:"Dois burgers, queijo prato, bacon crocante e molho defumado.",preco:48.9,cat:"Destaques",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1100&q=84",modelo:true,destaque:true,tags:["2 carnes","Bacon","Molho defumado"],cross:"Adicione uma bebida por + R$ 7,00."},
+   {id:"crispy",nome:"Crispy Chicken",descricao:"Frango crocante, queijo, alface, picles e maionese temperada.",preco:36.9,cat:"Lanches",imagem:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"smash",nome:"Smash Bacon",descricao:"Duas carnes smash, cheddar, bacon e molho especial no pão selado.",preco:37.9,cat:"Lanches",imagem:"https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"veg",nome:"Veggie da Casa",descricao:"Burger vegetal, queijo, tomate, folhas e molho de ervas.",preco:34.9,cat:"Lanches",imagem:"https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"batata",nome:"Batata da Brasa",descricao:"Batata crocante com páprica e molho cremoso da casa.",preco:18.9,cat:"Acompanhamentos",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"refrigerante",nome:"Refrigerante",descricao:"Lata gelada para acompanhar seu pedido.",preco:7,cat:"Bebidas",imagem:"https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"agua",nome:"Água mineral",descricao:"Água mineral sem gás, 500 ml.",preco:5,cat:"Bebidas",imagem:"https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=1100&q=84",modelo:false}
+  ]
+ },
+ restaurante:{
+  nome:"Casa da Praça",descricao:"Cozinha contemporânea com pratos autorais, ingredientes selecionados e uma experiência digital feita para decidir melhor.",
+  kicker:"Restaurante · experiência digital",whatsapp:"5534999999999",
+  categorias:["Destaques","Pratos","Massas","Bebidas"],
+  produtos:[
+   {id:"file",nome:"Filé da Casa",descricao:"Filé grelhado, purê cremoso, legumes tostados e molho da casa.",preco:59.9,cat:"Destaques",imagem:"https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1100&q=84",modelo:true,destaque:true,tags:["Filé 200g","Purê","Legumes"],cross:"Uma bebida da casa completa a experiência."},
+   {id:"salmao",nome:"Salmão Grelhado",descricao:"Salmão, arroz cremoso, legumes frescos e molho cítrico.",preco:64.9,cat:"Destaques",imagem:"https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1100&q=84",modelo:true,destaque:true,tags:["Salmão","Molho cítrico","Legumes"],cross:"Combine com água com gás por + R$ 6,00."},
+   {id:"risoto",nome:"Risoto de Cogumelos",descricao:"Arroz arbóreo, cogumelos, parmesão e finalização de ervas.",preco:48.9,cat:"Pratos",imagem:"https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"massa",nome:"Pappardelle Ragu",descricao:"Massa fresca com ragu de carne cozido lentamente e parmesão.",preco:46.9,cat:"Massas",imagem:"https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"frango",nome:"Frango Crocante",descricao:"Peito de frango crocante, arroz cremoso e salada fresca.",preco:42.9,cat:"Pratos",imagem:"https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"soda",nome:"Soda da Casa",descricao:"Bebida artesanal refrescante com frutas e ervas.",preco:12,cat:"Bebidas",imagem:"https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"refrigerante",nome:"Refrigerante",descricao:"Lata gelada para acompanhar a refeição.",preco:7,cat:"Bebidas",imagem:"https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=1100&q=84",modelo:false},
+   {id:"agua",nome:"Água com gás",descricao:"Água mineral com gás, 500 ml.",preco:6,cat:"Bebidas",imagem:"https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=1100&q=84",modelo:false}
+  ]
+ }
+};
+
+let nicho="hamburguer", dados=DADOS[nicho], carrinho=[];
+let estadoLocal=JSON.parse(localStorage.getItem("menuExperienceEstado")||"{}");
+
+const adicionais={
+ hamburguer:[
+  {id:"cheddar",nome:"Cheddar extra",preco:4},
+  {id:"bacon",nome:"Bacon extra",preco:5},
+  {id:"molho",nome:"Molho da casa",preco:2}
+ ],
+ restaurante:[
+  {id:"parmesao",nome:"Parmesão extra",preco:4},
+  {id:"molho",nome:"Molho especial",preco:3}
+ ]
+};
 
 async function carregarThree(){
-  if(!threePromise){
-    threePromise = Promise.all([
-      import("https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"),
-      import("https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js")
-    ]).then(([three, controls])=>{ THREE=three; OrbitControls=controls.OrbitControls; return {THREE,OrbitControls}; });
-  }
-  return threePromise;
+ if(THREE)return;
+ const [t,o]=await Promise.all([
+  import("https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"),
+  import("https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js")
+ ]);
+ THREE=t;OrbitControls=o.OrbitControls;
 }
-async function carregarGLTFLoader(){
+function produtoAtual(){return dados.produtos.find(p=>p.id===produtoAtualId)}
+function precoAtual(p){return p.preco+(adicionaisSelecionados.reduce((s,id)=>s+(adicionais[nicho].find(a=>a.id===id)?.preco||0),0))}
+function moeda(v){return v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function produtoDisponivel(p){return estadoLocal[p.id]?.disponivel!==false}
+function precoSalvo(p){return typeof estadoLocal[p.id]?.preco==="number"?estadoLocal[p.id].preco:p.preco}
+
+function iniciar(){
+ dados=DADOS[nicho];
+ document.getElementById("marcaNome").textContent=dados.nome.toUpperCase();
+ document.getElementById("restauranteNome").textContent=dados.nome;
+ document.getElementById("restauranteDescricao").textContent=dados.descricao;
+ document.getElementById("heroKicker").textContent=dados.kicker;
+ document.getElementById("rodapeNome").textContent=dados.nome;
+ renderCategorias();
+ renderProdutos();
+ atualizarCarrinho();
+}
+function renderCategorias(){
+ document.getElementById("categorias").innerHTML=dados.categorias.map((c,i)=>`<button class="categoria ${i===0?"ativa":""}" onclick="filtrar('${c}',this)">${c}</button>`).join("");
+}
+function renderProdutos(filtro="Destaques"){
+ const lista=dados.produtos.filter(p=>p.cat===filtro||filtro==="Destaques"&&p.destaque);
+ document.getElementById("listaProdutos").innerHTML=lista.filter(produtoDisponivel).map(p=>`
+ <article class="produto" onclick="abrirProduto('${p.id}')">
+  <div class="produto-media"><img src="${p.imagem}" loading="lazy" decoding="async" alt="${p.nome}"><div class="produto-overlay"></div>
+   <div class="produto-badges">${p.destaque?'<span class="badge destaque">Mais pedido</span>':''}${p.modelo?'<span class="badge light">Experiência 3D</span>':''}</div>
+  </div>
+  <div class="produto-info"><h3>${p.nome}</h3><p>${p.descricao}</p>
+   <div class="produto-bottom"><span class="preco">${moeda(precoSalvo(p))}</span><span class="produto-acao">Conhecer <span>→</span></span></div>
+   ${p.modelo?'<div class="card-3d"><i></i> Veja em 3D e na sua mesa</div>':''}
+  </div>
+ </article>`).join("")||`<div style="grid-column:1/-1;text-align:center;padding:40px;color:#777;font-size:12px">Nenhum item disponível nesta categoria.</div>`;
+}
+function filtrar(cat,btn){document.querySelectorAll(".categoria").forEach(b=>b.classList.remove("ativa"));btn.classList.add("ativa");renderProdutos(cat)}
+function trocarNicho(n){
+ nicho=n;
+ document.getElementById("btnHamburguer").classList.toggle("ativo",n==="hamburguer");
+ document.getElementById("btnRestaurante").classList.toggle("ativo",n==="restaurante");
+ iniciar();
+ mostrarToast(n==="hamburguer"?"Demonstração Hamburgueria":"Demonstração Restaurante");
+}
+function abrirProduto(id){
+ const p=dados.produtos.find(x=>x.id===id);if(!p)return;
+ produtoAtualId=id;quantidadeAtual=1;adicionaisSelecionados=[];
+ document.getElementById("modalNome").textContent=p.nome;
+ document.getElementById("modalDescricao").textContent=p.descricao;
+ document.getElementById("modalPreco").textContent=moeda(precoSalvo(p));
+ document.getElementById("quantidadeProduto").textContent="1";
+ document.getElementById("experienciaTexto").textContent=p.modelo?"Este é um dos produtos estratégicos do cardápio. Veja detalhes em 3D, explore a apresentação e coloque o produto na sua mesa.":"Este item usa foto tradicional para manter o cardápio leve. Produtos estratégicos recebem a experiência 3D.";
+ document.getElementById("btn3D").classList.toggle("escondido",!p.modelo);
+ document.getElementById("btnAR").classList.toggle("escondido",!p.modelo);
+ renderPersonalizacao("personalizacaoProduto");
+ document.getElementById("modalProduto").classList.add("ativo");
+}
+function renderPersonalizacao(id){
+ const p=produtoAtual(), box=document.getElementById(id);
+ if(!p||!p.modelo){box.classList.add("escondido");return}
+ box.classList.remove("escondido");
+ box.innerHTML=`<h4>Personalize sua experiência</h4><div class="adicionais">${adicionais[nicho].map(a=>`<div class="adicional"><label><input type="checkbox" ${adicionaisSelecionados.includes(a.id)?"checked":""} onchange="toggleAdicional('${a.id}')"> ${a.nome}</label><strong>+ ${moeda(a.preco)}</strong></div>`).join("")}</div>`;
+}
+function toggleAdicional(id){
+ adicionaisSelecionados.includes(id)?adicionaisSelecionados=adicionaisSelecionados.filter(x=>x!==id):adicionaisSelecionados.push(id);
+ const p=produtoAtual();document.getElementById("modalPreco").textContent=moeda(precoAtual(p));renderPersonalizacao("personalizacaoProduto");if(cena)renderModeloAtual();
+}
+function alterarQuantidadeProduto(v){quantidadeAtual=Math.max(1,quantidadeAtual+v);document.getElementById("quantidadeProduto").textContent=quantidadeAtual}
+function adicionarProdutoAtual(){
+ const p=produtoAtual();if(!p)return;
+ const preco=precoAtual(p),extra=adicionaisSelecionados.map(id=>adicionais[nicho].find(a=>a.id===id)?.nome).filter(Boolean);
+ const chave=p.id+"|"+extra.join(",");
+ const item=carrinho.find(i=>i.chave===chave);
+ if(item)item.qtd+=quantidadeAtual;else carrinho.push({chave,id:p.id,nome:p.nome,preco,qtd:quantidadeAtual,extra});
+ atualizarCarrinho();fecharModal();fechar3D();fecharCameraAR();mostrarToast(p.nome+" adicionado ao pedido");quantidadeAtual=1;adicionaisSelecionados=[];
+}
+function atualizarCarrinho(){const qtd=carrinho.reduce((s,i)=>s+i.qtd,0);document.getElementById("carrinhoContador").textContent=qtd;document.getElementById("headerContador").textContent=qtd;renderCarrinho()}
+function renderCarrinho(){
+ const lista=document.getElementById("carrinhoLista"),final=document.getElementById("carrinhoFinalizacao");
+ if(!carrinho.length){lista.innerHTML='<div class="vazio">Seu pedido está vazio.<br><br>Escolha um produto para começar.</div>';final.classList.add("escondido");return}
+ lista.innerHTML=carrinho.map(i=>`<div class="item"><div><strong>${i.nome}</strong><small>${i.extra.length?i.extra.join(", ")+" · ":""}${moeda(i.preco)} cada</small></div><div class="controles"><button class="item-btn" onclick="alterarCarrinho('${i.chave}',-1)">−</button><span class="item-qtd">${i.qtd}</span><button class="item-btn" onclick="alterarCarrinho('${i.chave}',1)">+</button></div></div>`).join("");
+ document.getElementById("carrinhoTotal").textContent=moeda(carrinho.reduce((s,i)=>s+i.preco*i.qtd,0));final.classList.remove("escondido");
+}
+function alterarCarrinho(chave,v){const i=carrinho.find(x=>x.chave===chave);if(!i)return;i.qtd+=v;if(i.qtd<=0)carrinho=carrinho.filter(x=>x.chave!==chave);atualizarCarrinho()}
+function abrirCarrinho(){document.getElementById("modalCarrinho").classList.add("ativo");renderCarrinho()}
+function fecharCarrinho(){document.getElementById("modalCarrinho").classList.remove("ativo")}
+function fecharModal(){document.getElementById("modalProduto").classList.remove("ativo")}
+function mostrarToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("ativo");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove("ativo"),2200)}
+function finalizarWhatsApp(){
+ if(!carrinho.length)return;
+ const nome=document.getElementById("clienteNome").value.trim();if(!nome){alert("Digite seu nome para continuar.");return}
+ let msg=`Olá! Quero fazer um pedido pelo cardápio digital.\n\n*${dados.nome}*\n*Cliente:* ${nome}\n\n*Pedido:*\n`;
+ carrinho.forEach(i=>msg+=`${i.qtd}x ${i.nome}${i.extra.length?" ("+i.extra.join(", ")+")":""} — ${moeda(i.preco*i.qtd)}\n`);
+ msg+=`\n*Total: ${moeda(carrinho.reduce((s,i)=>s+i.preco*i.qtd,0))}*`;
+ const obs=document.getElementById("clienteObs").value.trim();if(obs)msg+=`\n\n*Observações:* ${obs}`;
+ const num=dados.whatsapp.replace(/\D/g,"");if(num==="5534999999999"){alert("Nesta demonstração o número de WhatsApp é fictício. No projeto comercial, o restaurante cadastra o próprio número.");return}
+ window.open("https://wa.me/"+num+"?text="+encodeURIComponent(msg),"_blank");
+}
+
+function criarModelo3D(){
+ const g=new THREE.Group();
+ if(nicho==="hamburguer"){
+  const pão=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.42,.38,64),new THREE.MeshStandardMaterial({color:0xc9833b,roughness:.7}));pão.position.y=-.75;g.add(pão);
+  const carne=new THREE.Mesh(new THREE.CylinderGeometry(1.43,1.43,.5,64),new THREE.MeshStandardMaterial({color:0x422016,roughness:.9}));carne.position.y=-.35;g.add(carne);
+  const queijo=new THREE.Mesh(new THREE.BoxGeometry(2.7,.12,2.7),new THREE.MeshStandardMaterial({color:0xf5bd2e,roughness:.5}));queijo.rotation.y=.78;queijo.position.y=.02;g.add(queijo);
+  const verde=new THREE.Mesh(new THREE.CylinderGeometry(1.47,1.47,.13,64),new THREE.MeshStandardMaterial({color:0x3f8737,roughness:.85}));verde.position.y=.16;g.add(verde);
+  const topo=new THREE.Mesh(new THREE.SphereGeometry(1.52,64,32,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0xd79447,roughness:.65}));topo.scale.y=.66;topo.position.y=.29;g.add(topo);
+  for(let i=0;i<20;i++){const s=new THREE.Mesh(new THREE.SphereGeometry(.05,8,6),new THREE.MeshStandardMaterial({color:0xffe0a0}));const a=Math.random()*6.28,r=.3+Math.random()*1;s.position.set(Math.cos(a)*r,.92+Math.random()*.12,Math.sin(a)*r);s.scale.y=.35;g.add(s)}
+  adicionaisSelecionados.forEach(id=>{if(id==="bacon"){for(let i=0;i<3;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(1.8,.09,.22),new THREE.MeshStandardMaterial({color:0x8b3f25,roughness:.75}));b.position.set(0,.23+i*.035,(i-1)*.38);b.rotation.y=(i-1)*.18;g.add(b)}}});
+ }else{
+  const prato=new THREE.Mesh(new THREE.CylinderGeometry(2.2,1.95,.18,64),new THREE.MeshStandardMaterial({color:0xf3f1ed,roughness:.28}));prato.position.y=-.95;g.add(prato);
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(1.55,1.55,.14,64),new THREE.MeshStandardMaterial({color:0xd38b3e,roughness:.8}));base.position.y=-.75;g.add(base);
+  for(let i=0;i<13;i++){const s=new THREE.Mesh(new THREE.SphereGeometry(.22+Math.random()*.12,16,12),new THREE.MeshStandardMaterial({color:i%3===0?0x5d7b39:0xb97837,roughness:.75}));const a=Math.random()*6.28,r=.25+Math.random()*1;s.position.set(Math.cos(a)*r,-.45+Math.random()*.28,Math.sin(a)*r);g.add(s)}
+  const proteina=new THREE.Mesh(new THREE.SphereGeometry(.85,32,20),new THREE.MeshStandardMaterial({color:0xd59a63,roughness:.7}));proteina.scale.set(1.25,.35,.7);proteina.position.set(.3,-.35,.15);g.add(proteina);
+ }
+ return g;
+}
+function prepararModelo(g,tamanho=3){
+ const box=new THREE.Box3().setFromObject(g),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3()),maior=Math.max(size.x,size.y,size.z)||1;
+ const f=tamanho/maior;g.scale.multiplyScalar(f);g.position.sub(center.multiplyScalar(f));const b2=new THREE.Box3().setFromObject(g);g.position.y-=b2.min.y;
+ g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});return g;
+}
+async function abrir3D(){
+ const p=produtoAtual();if(!p?.modelo)return;
+ fecharModal();document.getElementById("modal3D").classList.add("ativo");document.getElementById("nomeProduto3D").textContent=p.nome);document.getElementById("loading3d").style.display="grid";
+ document.getElementById("hotspots3d").innerHTML=(p.tags||[]).map(t=>`<button class="hotspot" onclick="mostrarToast('${t}')">${t}</button>`).join("");
+ document.getElementById("crossSell3D").innerHTML=`<strong>Sugestão para aumentar a experiência</strong><p>${p.cross||"Combine este produto com uma bebida."}</p>`;
+ await carregarThree();if(!cena)iniciarCena3D();renderModeloAtual();document.getElementById("loading3d").style.display="none";
+ renderPersonalizacao3D();
+}
+function iniciarCena3D(){
+ const canvas=document.getElementById("canvas3d");const w=canvas.clientWidth||500,h=canvas.clientHeight||350;
+ cena=new THREE.Scene();camera=new THREE.PerspectiveCamera(38,w/h,.1,100);camera.position.set(4,2.8,6);
+ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:"high-performance"});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(w,h,false);renderer.shadowMap.enabled=true;
+ controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=3;controls.maxDistance=9;controls.target.set(0,.3,0);
+ cena.add(new THREE.HemisphereLight(0xffffff,0x555555,2.4));const key=new THREE.DirectionalLight(0xffffff,4);key.position.set(4,6,4);cena.add(key);
+ const floor=new THREE.Mesh(new THREE.CircleGeometry(3,48),new THREE.MeshStandardMaterial({color:0x25211e,roughness:.85}));floor.rotation.x=-Math.PI/2;floor.position.y=-1.35;cena.add(floor);
+ animando=true;loop3D();window.addEventListener("resize",ajustar3D);
+}
+function renderModeloAtual(){
+ if(!cena)return;if(objetoAtual){cena.remove(objetoAtual);objetoAtual.traverse(o=>{o.geometry?.dispose();o.material?.dispose()})}
+ objetoAtual=prepararModelo(criarModelo3D(),3);cena.add(objetoAtual);
+}
+function loop3D(){if(!animando)return;requestAnimationFrame(loop3D);if(objetoAtual&&!window.usuarioGirando3D)objetoAtual.rotation.y+=.002;controls?.update();renderer?.render(cena,camera)}
+function ajustar3D(){if(!camera||!renderer)return;const c=document.getElementById("canvas3d");camera.aspect=c.clientWidth/c.clientHeight;camera.updateProjectionMatrix();renderer.setSize(c.clientWidth,c.clientHeight,false)}
+function renderPersonalizacao3D(){const p=produtoAtual(),box=document.getElementById("personalizacao3D");if(!p?.modelo){box.classList.add("escondido");return}box.classList.remove("escondido");box.innerHTML=`<h4>Montagem em tempo real</h4><div class="adicionais">${adicionais[nicho].map(a=>`<div class="adicional"><label><input type="checkbox" ${adicionaisSelecionados.includes(a.id)?"checked":""} onchange="toggleAdicional('${a.id}')"> ${a.nome}</label><strong>+ ${moeda(a.preco)}</strong></div>`).join("")}</div>`}
+
+async function iniciarCameraAR(){
+ const p=produtoAtual();if(!p?.modelo)return;
+ document.getElementById("modalAR").classList.remove("ativo");document.getElementById("telaAR").classList.add("ativo");
+ try{
   await carregarThree();
-  if(!loaderPromise){ loaderPromise=import("https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js").then(m=>{GLTFLoader=m.GLTFLoader;return GLTFLoader}); }
-  return loaderPromise;
+  if(!navigator.xr)throw new Error("no-webxr");
+  if(!(await navigator.xr.isSessionSupported("immersive-ar")))throw new Error("unsupported");
+  const canvas=document.getElementById("canvasAR");cenaAR=new THREE.Scene();cameraAR=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.01,100);
+  rendererAR=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});rendererAR.setPixelRatio(Math.min(devicePixelRatio||1,1.5));rendererAR.setSize(innerWidth,innerHeight,false);rendererAR.xr.enabled=true;
+  cenaAR.add(new THREE.HemisphereLight(0xffffff,0x555555,2.2));const l=new THREE.DirectionalLight(0xffffff,3);l.position.set(2,4,2);cenaAR.add(l);
+  sessionAR=await navigator.xr.requestSession("immersive-ar",{requiredFeatures:["hit-test"],optionalFeatures:["dom-overlay"],domOverlay:{root:document.getElementById("telaAR")}});
+  rendererAR.xr.setSession(sessionAR);sessionAR.addEventListener("end",limparAR);
+  objetoAR=prepararModelo(criarModelo3D(),1.15);objetoAR.visible=false;cenaAR.add(objetoAR);arColocado=false;hitRequested=false;hitSource=null;
+  rendererAR.setAnimationLoop(renderAR);document.getElementById("arStatus").textContent="Procure uma superfície plana.";document.getElementById("arInstrucao").textContent="Mova o celular devagar e toque quando a superfície for encontrada.";
+  canvas.onclick=colocarAR;
+ }catch(e){
+  limparAR();
+  mostrarToast("A experiência de mesa não está disponível neste aparelho.");
+  setTimeout(()=>alert("Este aparelho ou navegador não oferece AR espacial compatível. Em uma versão comercial, o sistema apresenta automaticamente uma alternativa adequada ao dispositivo."),100);
+ }
 }
-function material(cor,roughness=.7){return new THREE.MeshStandardMaterial({color:cor,roughness})}
-function limparObjeto3D(obj){
-  if(!obj)return;
-  obj.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose()})}});
+function renderAR(t,frame){
+ if(!frame||!sessionAR)return;const ref=rendererAR.xr.getReferenceSpace();
+ if(!hitRequested){sessionAR.requestReferenceSpace("viewer").then(v=>sessionAR.requestHitTestSource({space:v})).then(s=>hitSource=s);hitRequested=true}
+ if(hitSource&&ref){const r=frame.getHitTestResults(hitSource);if(r.length&&!arColocado){const pose=r[0].getPose(ref);objetoAR.userData.pose=pose;document.querySelector(".ar-reticulo").style.borderColor="#fff";document.getElementById("arStatus").textContent="Superfície encontrada. Toque para colocar."}}
+ rendererAR.render(cenaAR,cameraAR);
 }
-function criarHamburguer(){
-  const g=new THREE.Group();
-  const add=(mesh,y)=>{mesh.position.y=y;g.add(mesh)};
-  add(new THREE.Mesh(new THREE.CylinderGeometry(1.55,1.45,.42,64),material(0xc98232,.78)),-.82);
-  add(new THREE.Mesh(new THREE.CylinderGeometry(1.50,1.50,.52,64),material(0x4a2114,.92)),-.34);
-  const queijo=new THREE.Mesh(new THREE.BoxGeometry(2.8,.11,2.8),material(0xffc928,.52));queijo.rotation.y=Math.PI/4;add(queijo,-.02);
-  add(new THREE.Mesh(new THREE.CylinderGeometry(1.58,1.58,.16,64),material(0x3d8f35,.9)),.14);
-  const topo=new THREE.Mesh(new THREE.SphereGeometry(1.58,64,32,0,Math.PI*2,0,Math.PI/2),material(0xd8943c,.72));topo.scale.y=.66;add(topo,.27);
-  for(let i=0;i<24;i++){const s=new THREE.Mesh(new THREE.SphereGeometry(.055,10,7),material(0xffe4a3,.65));const a=Math.random()*Math.PI*2,r=.25+Math.random()*1.05;s.position.set(Math.cos(a)*r,.91+Math.random()*.14,Math.sin(a)*r);s.scale.y=.4;g.add(s)}
-  return g;
-}
-function criarFettuccine(){
-  const g=new THREE.Group();
-  const prato=new THREE.Mesh(new THREE.CylinderGeometry(2.2,1.9,.18,64),material(0xf0f0f0,.3));prato.position.y=-.96;g.add(prato);
-  const borda=new THREE.Mesh(new THREE.TorusGeometry(1.95,.08,16,64),material(0xffffff,.25));borda.position.y=-.84;g.add(borda);
-  const molho=new THREE.Mesh(new THREE.CylinderGeometry(1.65,1.65,.12,64),material(0xd48b3d,.82));molho.position.y=-.73;g.add(molho);
-  for(let i=0;i<22;i++){const c=new THREE.CatmullRomCurve3([new THREE.Vector3(-1.15+Math.random()*.5,-.55+Math.random()*.12,-.9+Math.random()*.5),new THREE.Vector3(-.4+Math.random()*.7,-.48+Math.random()*.2,-.2+Math.random()*.8),new THREE.Vector3(.2+Math.random()*.8,-.5+Math.random()*.15,.4+Math.random()*.5),new THREE.Vector3(.9-Math.random()*.5,-.52+Math.random()*.12,.9-Math.random()*.5)]);g.add(new THREE.Mesh(new THREE.TubeGeometry(c,24,.055,8,false),material(0xe6c06a,.7)))}
-  return g;
-}
-function criarRefrigerante(){const g=new THREE.Group();const lata=new THREE.Mesh(new THREE.CylinderGeometry(.72,.72,2.5,64),material(0xc92828,.3));lata.position.y=-.08;g.add(lata);const topo=new THREE.Mesh(new THREE.CylinderGeometry(.69,.69,.08,64),material(0xcfcfcf,.25));topo.position.y=1.17;g.add(topo);const base=new THREE.Mesh(new THREE.CylinderGeometry(.69,.69,.08,64),material(0xbdbdbd,.3));base.position.y=-1.38;g.add(base);return g}
-function criarBrownie(){const g=new THREE.Group();const b=new THREE.Mesh(new THREE.BoxGeometry(2.8,.7,2.2),material(0x3a1b0f,.85));b.position.y=-.5;g.add(b);const c=new THREE.Mesh(new THREE.BoxGeometry(2.75,.08,2.15),material(0x241008,.5));c.position.y=-.12;g.add(c);for(let i=0;i<15;i++){const p=new THREE.Mesh(new THREE.BoxGeometry(.12,.06,.12),material(0x6a351b,.8));p.position.set((Math.random()-.5)*2.3,-.04,(Math.random()-.5)*1.7);g.add(p)}return g}
-function criarModeloProcedural(tipo){if(tipo==='hamburguer')return criarHamburguer();if(tipo==='fettuccine')return criarFettuccine();if(tipo==='refrigerante')return criarRefrigerante();if(tipo==='brownie')return criarBrownie();return null}
-function prepararModelo(modelo,tamanho=3){
-  const box=new THREE.Box3().setFromObject(modelo);const size=box.getSize(new THREE.Vector3());const center=box.getCenter(new THREE.Vector3());const maior=Math.max(size.x,size.y,size.z)||1;const fator=tamanho/maior;modelo.scale.multiplyScalar(fator);modelo.position.sub(center.multiplyScalar(fator));
-  const box2=new THREE.Box3().setFromObject(modelo);modelo.position.y-=box2.min.y;
-  modelo.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material.needsUpdate=true}}});return modelo;
-}
-async function carregarModeloDoProduto(produto){
-  if(!produto?.modelo3d)return null;
-  try{const Loader=await carregarGLTFLoader();const loader=new Loader();const gltf=await new Promise((resolve,reject)=>loader.load(produto.modelo3d,resolve,undefined,reject));return prepararModelo(gltf.scene,3)}catch(e){console.error('Falha no GLB',e);return null}
-}
-function iniciar3D(){
-  const canvas=document.getElementById('canvas3d');const w=canvas.clientWidth||400,h=canvas.clientHeight||300;
-  cena=new THREE.Scene();camera=new THREE.PerspectiveCamera(40,w/h,.1,100);camera.position.set(4,2.7,6);
-  renderizador=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});renderizador.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));renderizador.setSize(w,h,false);renderizador.shadowMap.enabled=true;
-  controles=new OrbitControls(camera,renderizador.domElement);controles.enableDamping=true;controles.dampingFactor=.06;controles.minDistance=3;controles.maxDistance=9;controles.target.set(0,.3,0);
-  cena.add(new THREE.HemisphereLight(0xffffff,0x444444,2.6));const key=new THREE.DirectionalLight(0xffffff,4);key.position.set(4,6,5);key.castShadow=true;cena.add(key);const fill=new THREE.PointLight(0xffffff,2.2,20);fill.position.set(-4,3,4);cena.add(fill);
-  const floor=new THREE.Mesh(new THREE.CircleGeometry(3,48),new THREE.MeshStandardMaterial({color:0x222222,roughness:.85}));floor.rotation.x=-Math.PI/2;floor.position.y=-1.35;floor.receiveShadow=true;cena.add(floor);
-  animacao3DAtiva=true;animar3D();ajustar3D();
-}
-function animar3D(){if(!animacao3DAtiva)return;requestAnimationFrame(animar3D);if(objetoAtual&&!window.usuarioGirando3D)objetoAtual.rotation.y+=.0025;if(controles)controles.update();if(renderizador&&cena&&camera)renderizador.render(cena,camera)}
-function ajustar3D(){if(!camera||!renderizador)return;const canvas=document.getElementById('canvas3d'),w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderizador.setSize(w,h,false)}
-async function abrir3DReal(){
-  const produto=getProdutoSelecionado();if(!produto)return;document.getElementById('modalProduto').classList.remove('ativo');document.getElementById('modal3D').classList.add('ativo');document.getElementById('carregando3d').style.display='flex';document.getElementById('erro3d').style.display='none';document.getElementById('modeloRealBadge').style.display='none';document.getElementById('nomeProduto3D').textContent=produto.nome;
-  try{await carregarThree();if(!cena)iniciar3D();if(objetoAtual){cena.remove(objetoAtual);limparObjeto3D(objetoAtual);objetoAtual=null}
-    objetoAtual=await carregarModeloDoProduto(produto);if(objetoAtual){document.getElementById('modeloRealBadge').style.display='inline-flex'}else{objetoAtual=prepararModelo(criarModeloProcedural(produto.id)||new THREE.Group(),3)}
-    cena.add(objetoAtual);ajustar3D();document.getElementById('carregando3d').style.display='none';
-  }catch(e){console.error(e);document.getElementById('carregando3d').style.display='none';document.getElementById('erro3d').style.display='flex'}
-}
-function fechar3DReal(){document.getElementById('modal3D').classList.remove('ativo');if(renderizador)renderizador.setAnimationLoop(null)}
+function colocarAR(){if(!objetoAR||arColocado)return;const pose=objetoAR.userData.pose;if(!pose){mostrarToast("Continue movendo o celular para encontrar a mesa.");return}objetoAR.position.setFromMatrixPosition(new THREE.Matrix4().fromArray(pose.transform.matrix));objetoAR.quaternion.setFromRotationMatrix(new THREE.Matrix4().fromArray(pose.transform.matrix));objetoAR.visible=true;arColocado=true;document.getElementById("arStatus").textContent="Produto colocado na sua mesa.";document.getElementById("arInstrucao").textContent="A apresentação está em escala real. Gire o aparelho para observar."}
+function limparAR(){try{sessionAR?.end()}catch(e){}rendererAR?.setAnimationLoop(null);rendererAR?.dispose();sessionAR=null;rendererAR=null;cenaAR=null;cameraAR=null;objetoAR=null;hitSource=null;hitRequested=false;arColocado=false;document.getElementById("telaAR").classList.remove("ativo")}
+function fecharCameraAR(){limparAR()}function fecharAR(){document.getElementById("modalAR").classList.remove("ativo")}
+function fechar3D(){animando=false;document.getElementById("modal3D").classList.remove("ativo")}
 
-async function iniciarARWebXR(){
-  await carregarThree();
-  if(!navigator.xr)throw new Error('Seu navegador não disponibiliza WebXR.');
-  const suportado=await navigator.xr.isSessionSupported('immersive-ar');if(!suportado)throw new Error('Este aparelho ou navegador não oferece AR espacial WebXR.');
-  const canvas=document.getElementById('canvasAR');cenaAR=new THREE.Scene();cameraAR=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.01,100);renderizadorAR=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'high-performance'});renderizadorAR.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderizadorAR.setSize(innerWidth,innerHeight,false);renderizadorAR.xr.enabled=true;renderizadorAR.outputColorSpace=THREE.SRGBColorSpace;
-  cenaAR.add(new THREE.HemisphereLight(0xffffff,0x555555,2.2));const light=new THREE.DirectionalLight(0xffffff,3);light.position.set(2,4,2);cenaAR.add(light);
-  sessionAR=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay'],domOverlay:{root:document.getElementById('telaAR')}});renderizadorAR.xr.setSession(sessionAR);
-  sessionAR.addEventListener('end',limparAR);
-  escalaAR=.35;rotacaoAR=0;arColocado=false;hitTestSourceRequested=false;hitTestSource=null;localSpaceAR=null;
-  const reticulo=new THREE.Mesh(new THREE.RingGeometry(.08,.10,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff}));reticulo.matrixAutoUpdate=false;reticulo.visible=false;reticulo.name='reticulo';cenaAR.add(reticulo);
-  const produto=getProdutoSelecionado();objetoAR=await carregarModeloDoProduto(produto);if(!objetoAR)objetoAR=prepararModelo(criarModeloProcedural(produto.id)||new THREE.Group(),1.15);objetoAR.scale.multiplyScalar(escalaAR);objetoAR.visible=false;cenaAR.add(objetoAR);
-  renderizadorAR.setAnimationLoop(renderizarFrameAR);document.getElementById('arCarregando').classList.add('esconder');document.getElementById('arStatus').textContent='Procure uma superfície plana.';adicionarControlesAR();
+function abrirAdmin(){
+ document.getElementById("admin").classList.add("ativo");renderAdmin();
 }
-function renderizarFrameAR(timestamp,frame){
-  if(!frame||!sessionAR)return;
-  const refSpace=renderizadorAR.xr.getReferenceSpace();
-  if(!hitTestSourceRequested){sessionAR.requestReferenceSpace('viewer').then(viewerSpace=>sessionAR.requestHitTestSource({space:viewerSpace})).then(source=>{hitTestSource=source}).catch(e=>console.error(e));hitTestSourceRequested=true}
-  if(hitTestSource&&refSpace){const results=frame.getHitTestResults(hitTestSource);const reticulo=cenaAR.getObjectByName('reticulo');if(results.length){const pose=results[0].getPose(refSpace);reticulo.visible=!arColocado;reticulo.matrix.fromArray(pose.transform.matrix);if(!arColocado)document.getElementById('arStatus').textContent='Superfície encontrada. Toque para colocar.'}else if(!arColocado){reticulo.visible=false;document.getElementById('arStatus').textContent='Mova o celular devagar para encontrar uma superfície.'}}
-  if(objetoAR)objetoAR.rotation.y=rotacaoAR;renderizadorAR.render(cenaAR,cameraAR);
+function fecharAdmin(){document.getElementById("admin").classList.remove("ativo")}
+function renderAdmin(){
+ const box=document.getElementById("adminLista");
+ box.innerHTML=Object.entries(DADOS).map(([n,d])=>`<div class="admin-box"><strong style="font-size:13px">${d.nome}</strong>${d.produtos.map(p=>`<div class="admin-row"><div><strong>${p.nome}</strong><small>${p.cat} · ${p.modelo?"3D estratégico":"Foto tradicional"}</small></div><div class="admin-actions"><input class="admin-price" type="number" step=".01" value="${precoSalvo(p)}" onchange="salvarPreco('${n}','${p.id}',this.value)"><button onclick="alternarDisponibilidade('${n}','${p.id}')">${estadoLocal[p.id]?.disponivel===false?"Ativar":"Pausar"}</button></div></div>`).join("")}</div>`).join("");
 }
-function colocarAR(){
-  if(!sessionAR||!objetoAR)return;const reticulo=cenaAR.getObjectByName('reticulo');if(!reticulo?.visible)return;objetoAR.position.setFromMatrixPosition(reticulo.matrix);objetoAR.quaternion.setFromRotationMatrix(reticulo.matrix);objetoAR.visible=true;arColocado=true;reticulo.visible=false;document.getElementById('arInstrucao').textContent='Produto colocado. Arraste para girar e use dois dedos para ajustar.';document.getElementById('arStatus').textContent='Produto ancorado na superfície.';
-}
-function adicionarControlesAR(){const canvas=document.getElementById('canvasAR');canvas.onpointerdown=e=>{if(!arColocado){colocarAR();return}arrastandoAR=true;ultimoXAR=e.clientX;canvas.setPointerCapture?.(e.pointerId)};canvas.onpointermove=e=>{if(arrastandoAR&&objetoAR){rotacaoAR+=(e.clientX-ultimoXAR)*.008;ultimoXAR=e.clientX}};canvas.onpointerup=()=>arrastandoAR=false;canvas.onpointercancel=()=>arrastandoAR=false;canvas.ontouchstart=e=>{if(e.touches.length===2)distanciaInicialAR=distanciaToque(e.touches[0],e.touches[1])};canvas.ontouchmove=e=>{if(e.touches.length===2&&distanciaInicialAR&&objetoAR&&arColocado){const d=distanciaToque(e.touches[0],e.touches[1]);escalaAR=Math.max(.12,Math.min(1.4,escalaAR*(d/distanciaInicialAR)));const base=objetoAR.userData.escalaBase||.35;objetoAR.scale.setScalar((escalaAR/base)*base);distanciaInicialAR=d}};canvas.ontouchend=()=>distanciaInicialAR=null}
-function distanciaToque(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)}
-function girarAR(valor){rotacaoAR+=valor}
-function limparAR(){if(renderizadorAR)renderizadorAR.setAnimationLoop(null);if(sessionAR&&sessionAR.visibilityState!=='hidden'){try{sessionAR.end()}catch(e){}}if(objetoAR){limparObjeto3D(objetoAR)};sessionAR=null;hitTestSource=null;localSpaceAR=null;hitTestSourceRequested=false;arColocado=false;if(renderizadorAR){renderizadorAR.dispose();renderizadorAR=null}cenaAR=null;cameraAR=null;objetoAR=null;document.getElementById('telaAR').classList.remove('ativo');document.getElementById('arCarregando').classList.remove('esconder')}
-async function iniciarCameraAR(){const produto=getProdutoSelecionado();if(!produto)return;document.getElementById('modalAR').classList.remove('ativo');document.getElementById('telaAR').classList.add('ativo');document.getElementById('arNomeProduto').textContent=produto.nome;document.getElementById('arCarregando').classList.remove('esconder');try{await iniciarARWebXR()}catch(e){console.error(e);limparAR();alert('A AR espacial não está disponível neste aparelho ou navegador. No Android, use uma versão atual do Chrome compatível com WebXR. No iPhone, a experiência nativa dependerá de um modelo 3D real e do suporte correspondente.')}}
-window.abrir3D=abrir3DReal;window.fechar3D=fechar3DReal;window.iniciarCameraAR=iniciarCameraAR;window.fecharCameraAR=limparAR;window.girarAR=girarAR;
-window.addEventListener('resize',()=>{ajustar3D();if(renderizadorAR&&cameraAR){cameraAR.aspect=innerWidth/innerHeight;cameraAR.updateProjectionMatrix();renderizadorAR.setSize(innerWidth,innerHeight,false)}});
+function salvarPreco(n,id,v){estadoLocal[id]={...(estadoLocal[id]||{}),preco:Number(v)};localStorage.setItem("menuExperienceEstado",JSON.stringify(estadoLocal));if(n===nicho)iniciar();mostrarToast("Preço atualizado")}
+function alternarDisponibilidade(n,id){estadoLocal[id]={...(estadoLocal[id]||{}),disponivel:estadoLocal[id]?.disponivel===false};localStorage.setItem("menuExperienceEstado",JSON.stringify(estadoLocal));renderAdmin();if(n===nicho)iniciar();mostrarToast("Disponibilidade atualizada")}
+if(new URLSearchParams(location.search).get("admin")==="1")setTimeout(abrirAdmin,200);
 
-document.addEventListener('visibilitychange',()=>{if(document.hidden){animacao3DAtiva=false}else if(cena&&document.getElementById('modal3D').classList.contains('ativo')){animacao3DAtiva=true;animar3D()}});
-</script>
-
-<script>
-const RESTAURANTES={
- demo:{nome:'Restaurante Demo',descricao:'Uma experiência digital para escolher, conhecer e pedir.',whatsapp:'5534999999999',produtos:[
-  {id:'hamburguer',nome:'Hambúrguer da Casa',descricao:'Hambúrguer artesanal, queijo, molho especial e acompanhamentos.',preco:34.90,categoria:'pratos',imagem:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=78',modelo3d:null,destaque:true},
-  {id:'fettuccine',nome:'Fettuccine Especial',descricao:'Massa fresca ao molho cremoso com ingredientes selecionados.',preco:49.90,categoria:'pratos',imagem:'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=78',modelo3d:null,destaque:true},
-  {id:'refrigerante',nome:'Refrigerante',descricao:'Refrigerante gelado para acompanhar sua refeição.',preco:7.00,categoria:'bebidas',imagem:'https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=900&q=78',modelo3d:null},
-  {id:'brownie',nome:'Brownie de Chocolate',descricao:'Brownie de chocolate com textura macia e sabor intenso.',preco:19.90,categoria:'sobremesas',imagem:'https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&w=900&q=78',modelo3d:null}
- ]},
- 'sabor-da-casa':{nome:'Sabor da Casa',descricao:'Comida feita para você.',whatsapp:'5534999999999',produtos:[
-  {id:'hamburguer',nome:'Burger Sabor da Casa',descricao:'Hambúrguer artesanal especial da casa.',preco:39.90,categoria:'pratos',imagem:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=78',modelo3d:null,destaque:true},
-  {id:'refrigerante',nome:'Refrigerante',descricao:'Refrigerante gelado.',preco:7.00,categoria:'bebidas',imagem:'https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=900&q=78',modelo3d:null}
- ]}
-};
-const parametros=new URLSearchParams(window.location.search);const slugRestaurante=parametros.get('restaurante')||'demo';const restauranteAtual=RESTAURANTES[slugRestaurante]||RESTAURANTES.demo;
-let carrinho=[];let quantidadeProdutoAtual=1;window.produtoSelecionado=restauranteAtual.produtos[0]?.id||null;window.produtoSelecionadoNome=restauranteAtual.produtos[0]?.nome||'';
-function getProdutoSelecionado(){return restauranteAtual.produtos.find(p=>p.id===window.produtoSelecionado)}
-function iniciarRestaurante(){document.getElementById('restauranteNome').textContent=restauranteAtual.nome;document.getElementById('restauranteDescricao').textContent=restauranteAtual.descricao;document.getElementById('rodapeNome').textContent=restauranteAtual.nome;renderizarCategorias();renderizarProdutos();atualizarCarrinho()}
-function renderizarCategorias(){const c=document.getElementById('categorias');const categorias=[{id:'todos',nome:'Destaques'},{id:'pratos',nome:'Pratos'},{id:'bebidas',nome:'Bebidas'},{id:'sobremesas',nome:'Sobremesas'}];c.innerHTML=categorias.map(x=>`<button class="categoria ${x.id==='todos'?'ativa':''}" onclick="filtrarProdutos('${x.id}',this)">${x.nome}</button>`).join('')}
-function renderizarProdutos(){const c=document.getElementById('listaProdutos');c.innerHTML=restauranteAtual.produtos.map(p=>`<article class="produto" data-categoria="${p.categoria}" onclick="abrirProdutoPorId('${p.id}')"><div class="produto-media"><img src="${p.imagem}" alt="${p.nome}" loading="lazy" decoding="async"><div class="produto-badges">${p.destaque?'<span class="badge">Destaque</span>':''}${p.modelo3d?'<span class="badge badge-claro">3D real</span>':'<span class="badge badge-claro">Experiência 3D</span>'}</div></div><div class="produto-info"><h2>${p.nome}</h2><p>${p.descricao}</p><div class="produto-bottom"><div class="preco">${formatarPreco(p.preco)}</div><div class="acao-produto">Conhecer <span>→</span></div></div></div></article>`).join('')}
-function filtrarProdutos(cat,botao){document.querySelectorAll('.produto').forEach(p=>p.classList.toggle('escondido',cat!=='todos'&&p.dataset.categoria!==cat));document.querySelectorAll('.categoria').forEach(b=>b.classList.remove('ativa'));botao?.classList.add('ativa')}
-function abrirProdutoPorId(id){const p=restauranteAtual.produtos.find(x=>x.id===id);if(!p)return;window.produtoSelecionado=p.id;window.produtoSelecionadoNome=p.nome;quantidadeProdutoAtual=1;document.getElementById('modalNome').textContent=p.nome;document.getElementById('modalDescricao').textContent=p.descricao;document.getElementById('modalPreco').textContent=formatarPreco(p.preco);document.getElementById('quantidadeProduto').textContent='1';document.getElementById('experienciaTexto').textContent=p.modelo3d?'Este produto possui um modelo 3D real preparado para visualização e AR.':'A experiência 3D está pronta para receber o modelo realista deste produto.';document.getElementById('btnAbrirAR').disabled=!('xr' in navigator);document.getElementById('btnAbrirAR').classList.toggle('btn-disabled',!('xr' in navigator));document.getElementById('modalProduto').classList.add('ativo')}
-function alterarQuantidadeProduto(v){quantidadeProdutoAtual=Math.max(1,quantidadeProdutoAtual+v);document.getElementById('quantidadeProduto').textContent=quantidadeProdutoAtual}
-function adicionarProdutoAtual(){const p=getProdutoSelecionado();if(!p)return;const e=carrinho.find(x=>x.id===p.id);if(e)e.quantidade+=quantidadeProdutoAtual;else carrinho.push({id:p.id,nome:p.nome,preco:p.preco,quantidade:quantidadeProdutoAtual});atualizarCarrinho();fecharModal();fechar3D();fecharCameraAR();mostrarToast(p.nome+' adicionado ao pedido');quantidadeProdutoAtual=1}
-function atualizarCarrinho(){document.getElementById('carrinhoContador').textContent=carrinho.reduce((t,i)=>t+i.quantidade,0);renderizarCarrinho()}
-function renderizarCarrinho(){const lista=document.getElementById('carrinhoLista'),final=document.getElementById('carrinhoFinalizacao');if(!carrinho.length){lista.innerHTML='<div class="carrinho-vazio">Seu pedido está vazio.<br><br>Escolha um produto para começar.</div>';final.style.display='none';return}lista.innerHTML=carrinho.map(i=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.nome}</div><div class="item-carrinho-preco">${formatarPreco(i.preco)} cada</div></div><div class="item-controles"><button class="item-btn" onclick="alterarQuantidadeCarrinho('${i.id}',-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" onclick="alterarQuantidadeCarrinho('${i.id}',1)">+</button></div></div>`).join('');document.getElementById('carrinhoTotal').textContent=formatarPreco(calcularTotal());final.style.display='block'}
-function alterarQuantidadeCarrinho(id,v){const i=carrinho.find(x=>x.id===id);if(!i)return;i.quantidade+=v;if(i.quantidade<=0)carrinho=carrinho.filter(x=>x.id!==id);atualizarCarrinho()}
-function calcularTotal(){return carrinho.reduce((t,i)=>t+i.preco*i.quantidade,0)}
-function formatarPreco(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
-function fecharModal(){document.getElementById('modalProduto').classList.remove('ativo')}
-function abrirCarrinho(){document.getElementById('modalCarrinho').classList.add('ativo');renderizarCarrinho()}
-function fecharCarrinho(){document.getElementById('modalCarrinho').classList.remove('ativo')}
-function abrirAR(){document.getElementById('modalProduto').classList.remove('ativo');document.getElementById('modal3D').classList.remove('ativo');document.getElementById('modalAR').classList.add('ativo')}
-function fecharAR(){document.getElementById('modalAR').classList.remove('ativo')}
-function finalizarWhatsApp(){if(!carrinho.length)return;const nome=document.getElementById('clienteNome').value.trim(),obs=document.getElementById('clienteObs').value.trim();if(!nome){alert('Digite seu nome para continuar.');document.getElementById('clienteNome').focus();return}let msg=`Olá! Gostaria de fazer um pedido pelo cardápio digital.
-
-*Restaurante:* ${restauranteAtual.nome}
-*Cliente:* ${nome}
-
-*Pedido:*
-`;carrinho.forEach(i=>msg+=`${i.quantidade}x ${i.nome} — ${formatarPreco(i.preco*i.quantidade)}
-`);msg+=`
-*Total: ${formatarPreco(calcularTotal())}*`;if(obs)msg+=`
-
-*Observações:*
-${obs}`;const numero=restauranteAtual.whatsapp.replace(/\D/g,'');if(!numero||numero==='5534999999999'){alert('O WhatsApp deste restaurante ainda precisa ser configurado.');return}window.open('https://wa.me/'+numero+'?text='+encodeURIComponent(msg),'_blank')}
-let toastTimer=null;function mostrarToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('ativo');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('ativo'),2200)}
-['modalProduto','modal3D','modalAR','modalCarrinho'].forEach(id=>document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget){if(id==='modalProduto')fecharModal();if(id==='modal3D')fechar3D();if(id==='modalAR')fecharAR();if(id==='modalCarrinho')fecharCarrinho()}}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharModal();fechar3D();fecharAR();fecharCameraAR();fecharCarrinho()}});iniciarRestaurante();
+["modalProduto","modal3D","modalAR","modalCarrinho"].forEach(id=>document.getElementById(id).addEventListener("click",e=>{if(e.target!==e.currentTarget)return;if(id==="modalProduto")fecharModal();if(id==="modal3D")fechar3D();if(id==="modalAR")fecharAR();if(id==="modalCarrinho")fecharCarrinho()}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){fecharModal();fechar3D();fecharAR();fecharCarrinho();fecharCameraAR();}});
+window.addEventListener("visibilitychange",()=>{if(document.hidden)animando=false;else if(document.getElementById("modal3D").classList.contains("ativo")){animando=true;loop3D()}});
+window.trocarNicho=trocarNicho;window.filtrar=filtrar;window.abrirProduto=abrirProduto;window.alterarQuantidadeProduto=alterarQuantidadeProduto;window.toggleAdicional=toggleAdicional;window.adicionarProdutoAtual=adicionarProdutoAtual;window.abrir3D=abrir3D;window.fechar3D=fechar3D;window.abrirAR=()=>{document.getElementById("modal3D").classList.remove("ativo");document.getElementById("modalAR").classList.add("ativo")};window.iniciarCameraAR=iniciarCameraAR;window.fecharCameraAR=fecharCameraAR;window.abrirCarrinho=abrirCarrinho;window.fecharCarrinho=fecharCarrinho;window.alterarCarrinho=alterarCarrinho;window.finalizarWhatsApp=finalizarWhatsApp;window.fecharModal=fecharModal;window.fecharAR=fecharAR;window.salvarPreco=salvarPreco;window.alternarDisponibilidade=alternarDisponibilidade;window.fecharAdmin=fecharAdmin;
+iniciar();
 </script>
 </body>
 </html>
