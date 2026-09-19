@@ -186,7 +186,7 @@ header p{color:var(--text-muted); font-size: 15px; max-width: 500px; margin: 8px
 .btn-quantidade{width:42px; height:42px; border:none; border-radius:50%; background:#252836; color:#fff; font-size: 20px; font-weight: bold; cursor:pointer;}
 .quantidade-numero{font-size:20px; font-weight:bold; min-width:30px;}
 
-/* ÁREA 3D AMPLIAÇÃO AR */
+/* ÁREA 3D AMPLIADA AR */
 .area-3d{width:100%; height:360px; margin:16px 0; border-radius:18px; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 50%, #252836 0%, #0d0e12 100%); border: 1px solid var(--card-border);}
 model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 
@@ -220,6 +220,11 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 .box-pix p{font-size: 13px; color: var(--text-muted); margin-bottom: 8px;}
 .chave-pix-texto{font-family: monospace; font-size: 16px; font-weight: 800; color: var(--primary); letter-spacing: 1px; user-select: all;}
 .btn-copiar-pix{background: #252836; color: #fff; border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 10px; cursor: pointer;}
+
+/* PAINEL DE SUCESSO DO PEDIDO NO LOCAL */
+.box-sucesso-local{background: #14161f; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 18px; padding: 24px; text-align: center; margin-top: 15px;}
+.box-sucesso-local h3{color: var(--primary); font-size: 20px; margin-bottom: 8px;}
+.box-sucesso-local p{color: var(--text-muted); font-size: 14px; line-height: 1.5; margin-bottom: 16px;}
 
 .toast{position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px); background: var(--primary); color:#000; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 800; z-index:5000; opacity:0; pointer-events:none; transition:.25s;}
 .toast.ativo{opacity:1; transform:translateX(-50%) translateY(0);}
@@ -278,7 +283,6 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
         <div id="nomeProduto3D" style="color:var(--text-muted); font-size:13px; margin-top:4px;"></div>
         
         <div class="area-3d">
-            <!-- MODEL-VIEWER COM ESCALA AMPLIADA PARA AR -->
             <model-viewer 
                 id="viewer3D"
                 camera-controls 
@@ -305,7 +309,7 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
     </div>
 </div>
 
-<!-- MODAL CARRINHO COM ENDEREÇO E PAGAMENTO COMPLETO -->
+<!-- MODAL CARRINHO COM FLUXO DINÂMICO LOCAL vs DELIVERY -->
 <div id="modalCarrinho" class="modal">
     <div class="modal-conteudo">
         <button class="fechar-modal" onclick="fecharCarrinho()">×</button>
@@ -317,7 +321,7 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
                 <span id="carrinhoTotal">R$ 0,00</span>
             </div>
             
-            <div class="formulario-pedido">
+            <div class="formulario-pedido" id="painelFormulario">
                 <label for="clienteNome">Seu Nome *</label>
                 <input id="clienteNome" type="text" placeholder="Digite seu nome completo">
 
@@ -365,7 +369,11 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
                 <textarea id="clienteObs" placeholder="Ex.: Sem cebola, ponto da carne..."></textarea>
             </div>
 
-            <button class="btn-principal" style="margin-top:20px;" onclick="finalizarWhatsApp()">📱 Finalizar Pedido no WhatsApp</button>
+            <!-- PAINEL DE MENSAGEM DE CONFIRMAÇÃO DO CONSUMO NO LOCAL -->
+            <div id="painelSucessoLocal" style="display:none;"></div>
+
+            <!-- BOTÃO DINÂMICO DE AÇÃO -->
+            <button id="btnAcaoFinalizar" class="btn-principal" style="margin-top:20px;" onclick="processarCheckout()">📱 Finalizar Pedido no WhatsApp</button>
         </div>
     </div>
 </div>
@@ -575,6 +583,9 @@ function renderizarCarrinho(){
 
     document.getElementById("carrinhoTotal").textContent = formatarPreco(calcularTotal());
     finalizacao.style.display = "block";
+    
+    // Garante que o botão reflete o tipo selecionado
+    alternarCamposEndereco();
 }
 
 function alterarQuantidadeCarrinho(id, valor){
@@ -597,13 +608,16 @@ function alternarCamposEndereco(){
     const tipo = document.getElementById("tipoAtendimento").value;
     const boxEndereco = document.getElementById("boxEndereco");
     const boxMesa = document.getElementById("boxMesa");
+    const btnAcao = document.getElementById("btnAcaoFinalizar");
 
     if(tipo === "delivery"){
         boxEndereco.style.display = "block";
         boxMesa.style.display = "none";
+        btnAcao.innerHTML = "📱 Finalizar Pedido no WhatsApp";
     } else {
         boxEndereco.style.display = "none";
         boxMesa.style.display = "block";
+        btnAcao.innerHTML = "✅ Finalizar Pedido";
     }
 }
 
@@ -624,55 +638,101 @@ function copiarChavePix(){
 }
 
 function fecharModal(){ document.getElementById("modalProduto").classList.remove("ativo"); }
-function abrirCarrinho(){ document.getElementById("modalCarrinho").classList.add("ativo"); renderizarCarrinho(); }
+function abrirCarrinho(){ 
+    document.getElementById("modalCarrinho").classList.add("ativo"); 
+    document.getElementById("painelFormulario").style.display = "block";
+    document.getElementById("painelSucessoLocal").style.display = "none";
+    renderizarCarrinho(); 
+}
 function fecharCarrinho(){ document.getElementById("modalCarrinho").classList.remove("ativo"); }
 function fechar3D(){ document.getElementById("modal3D").classList.remove("ativo"); }
 
-function finalizarWhatsApp(){
+function processarCheckout(){
     if(carrinho.length===0) return;
     const nome = document.getElementById("clienteNome").value.trim();
     if(!nome){ alert("Por favor, digite seu nome."); return; }
 
     const tipoAtendimento = document.getElementById("tipoAtendimento").value;
-    let localTexto = "";
 
     if(tipoAtendimento === "delivery"){
+        // FLUXO DELIVERY -> WHATSAPP
         const endereco = document.getElementById("clienteEndereco").value.trim();
         if(!endereco){ alert("Por favor, informe seu endereço de entrega."); return; }
         const comp = document.getElementById("clienteComplemento").value.trim();
-        localTexto = `*Endereço:* ${endereco}` + (comp ? ` (${comp})` : "");
+        const localTexto = `*Endereço:* ${endereco}` + (comp ? ` (${comp})` : "");
+
+        const formaPagamento = document.getElementById("formaPagamento").value;
+        let pagtoTexto = "";
+        if(formaPagamento === "pix") pagtoTexto = "⚡ PIX (Chave Online)";
+        else if(formaPagamento === "credito") pagtoTexto = "💳 Cartão de Crédito (Na Entrega)";
+        else if(formaPagamento === "debito") pagtoTexto = "💳 Cartão de Débito (Na Entrega)";
+        else if(formaPagamento === "dinheiro") {
+            const troco = document.getElementById("valorTroco").value.trim();
+            pagtoTexto = "💵 Dinheiro" + (troco ? ` (${troco})` : " (Sem troco)");
+        }
+
+        const obs = document.getElementById("clienteObs").value.trim();
+        MenuAnalytics.trackWhatsAppOrder(carrinho);
+
+        let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital 3D.\n\n`;
+        mensagem += `*Cliente:* ${nome}\n`;
+        mensagem += `${localTexto}\n`;
+        mensagem += `*Forma de Pagamento:* ${pagtoTexto}\n`;
+        if(obs) mensagem += `*Observações:* ${obs}\n`;
+        
+        mensagem += `\n*Itens do Pedido:*\n`;
+        carrinho.forEach(item=>{ mensagem += `• ${item.quantidade}x ${item.nome} — ${formatarPreco(item.preco * item.quantidade)}\n`; });
+        mensagem += `\n*Total a Pagar: ${formatarPreco(calcularTotal())}*`;
+
+        const url = "https://wa.me/5534984252341?text=" + encodeURIComponent(mensagem);
+        window.open(url, "_blank");
+
     } else {
+        // FLUXO CONSUMIR NO LOCAL -> PROCESSAMENTO DIRETO
         const mesa = document.getElementById("numeroMesa").value.trim();
         if(!mesa){ alert("Por favor, informe o número da mesa."); return; }
-        localTexto = `*Mesa:* ${mesa}`;
+
+        const formaPagamento = document.getElementById("formaPagamento").value;
+        MenuAnalytics.trackWhatsAppOrder(carrinho);
+
+        const painelForm = document.getElementById("painelFormulario");
+        const painelSucesso = document.getElementById("painelSucessoLocal");
+        const btnAcao = document.getElementById("btnAcaoFinalizar");
+
+        painelForm.style.display = "none";
+        btnAcao.style.display = "none";
+
+        let htmlSucesso = `<div class="box-sucesso-local">
+            <h3>🎉 Pedido Confirmado!</h3>
+            <p>Seu pedido para a <strong>${mesa}</strong> foi enviado diretamente para a nossa cozinha!</p>`;
+
+        if(formaPagamento === "pix"){
+            htmlSucesso += `
+                <div class="box-pix" style="margin-bottom:15px;">
+                    <p>Efetue o PIX de <strong>${formatarPreco(calcularTotal())}</strong> na chave abaixo:</p>
+                    <div class="chave-pix-texto">5534984252341</div>
+                    <button type="button" class="btn-copiar-pix" onclick="copiarChavePix()">📋 Copiar Chave PIX</button>
+                    <p style="font-size:11px; margin-top:8px; color:var(--text-muted);">Apresente o comprovante ao garçom quando solicitar a conta.</p>
+                </div>`;
+        } else if(formaPagamento === "dinheiro"){
+            const troco = document.getElementById("valorTroco").value.trim();
+            htmlSucesso += `<p style="font-size:13px; color:var(--primary);">Pagamento em Dinheiro marcado${troco ? ` (${troco})` : ""}. O garçom levará a conta até sua mesa.</p>`;
+        } else {
+            htmlSucesso += `<p style="font-size:13px; color:var(--primary);">Pagamento no Cartão (${formaPagamento.toUpperCase()}). O garçom levará a maquineta até sua mesa.</p>`;
+        }
+
+        htmlSucesso += `<button class="btn-principal" onclick="concluirPedidoLocal()" style="margin-top:10px;">Entendido e Fechar</button></div>`;
+
+        painelSucesso.innerHTML = htmlSucesso;
+        painelSucesso.style.display = "block";
     }
+}
 
-    const formaPagamento = document.getElementById("formaPagamento").value;
-    let pagtoTexto = "";
-    if(formaPagamento === "pix") pagtoTexto = "⚡ PIX (Chave Online)";
-    else if(formaPagamento === "credito") pagtoTexto = "💳 Cartão de Crédito (Na Entrega/Mesa)";
-    else if(formaPagamento === "debito") pagtoTexto = "💳 Cartão de Débito (Na Entrega/Mesa)";
-    else if(formaPagamento === "dinheiro") {
-        const troco = document.getElementById("valorTroco").value.trim();
-        pagtoTexto = "💵 Dinheiro" + (troco ? ` (${troco})` : " (Sem troco)");
-    }
-
-    const obs = document.getElementById("clienteObs").value.trim();
-
-    MenuAnalytics.trackWhatsAppOrder(carrinho);
-
-    let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital 3D.\n\n`;
-    mensagem += `*Cliente:* ${nome}\n`;
-    mensagem += `${localTexto}\n`;
-    mensagem += `*Forma de Pagamento:* ${pagtoTexto}\n`;
-    if(obs) mensagem += `*Observações:* ${obs}\n`;
-    
-    mensagem += `\n*Itens do Pedido:*\n`;
-    carrinho.forEach(item=>{ mensagem += `• ${item.quantidade}x ${item.nome} — ${formatarPreco(item.preco * item.quantidade)}\n`; });
-    mensagem += `\n*Total a Pagar: ${formatarPreco(calcularTotal())}*`;
-
-    const url = "https://wa.me/5534984252341?text=" + encodeURIComponent(mensagem);
-    window.open(url, "_blank");
+function concluirPedidoLocal(){
+    carrinho = [];
+    atualizarCarrinho();
+    fecharCarrinho();
+    mostrarToast("Pedido concluído com sucesso!");
 }
 
 function mostrarToast(mensagem){
