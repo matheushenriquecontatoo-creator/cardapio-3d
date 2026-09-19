@@ -153,7 +153,7 @@ header p{color:#aaa;font-size:15px;}
 .produto-info p{color:#666;font-size:14px;line-height:1.5;margin-bottom:13px;}
 .produto-rodape{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .preco{font-size:18px;font-weight:bold;}
-.ver-3d-card{font-size:11px;font-weight:800;padding:7px 9px;border-radius:9px;background:#f1f1f1;}
+.ver-3d-card{font-size:11px;font-weight:800;padding:7px 9px;border-radius:999px;background:#f1f1f1;}
 
 .carrinho-flutuante{position:fixed;right:20px;bottom:20px;z-index:800;border:none;background:#111;color:#fff;padding:14px 18px;border-radius:50px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;align-items:center;gap:9px;transition:.2s;}
 .carrinho-flutuante:hover{transform:translateY(-2px);}
@@ -583,7 +583,7 @@ const RESTAURANTES = {
         nome:"Brasa 180",
         descricao:"Hambúrguer artesanal, experiência digital e pedido direto.",
         nicho:"Hamburgueria",
-        whatsapp:"5534999999999",
+        whatsapp:"5534984252341", // ATUALIZADO
         categorias:[
             {id:"todos",nome:"Destaques"},
             {id:"lanches",nome:"Lanches"},
@@ -598,7 +598,7 @@ const RESTAURANTES = {
         nome:"Casa da Praça",
         descricao:"Cozinha contemporânea com apresentação digital.",
         nicho:"Restaurante",
-        whatsapp:"5534999999999",
+        whatsapp:"5534984252341", // ATUALIZADO
         categorias:[
             {id:"todos",nome:"Destaques"},
             {id:"pratos",nome:"Pratos"}
@@ -770,14 +770,20 @@ function finalizarWhatsApp(){
     const nome = document.getElementById("clienteNome").value.trim();
     if(!nome){ alert("Digite seu nome para continuar."); return; }
 
+    const obs = document.getElementById("clienteObs").value.trim();
+
     // Rastreia pedido no Analytics
     MenuAnalytics.trackWhatsAppOrder(carrinho);
 
-    let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital.\n\n*Cliente:* ${nome}\n\n*Pedido:*\n`;
-    carrinho.forEach(item=>{ mensagem += `${item.quantidade}x ${item.nome} — ${formatarPreco(item.preco * item.quantidade)}\n`; });
+    let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital.\n\n*Cliente:* ${nome}\n`;
+    if(obs) mensagem += `*Observações:* ${obs}\n`;
+    mensagem += `\n*Pedido:*\n`;
+
+    carrinho.forEach(item=>{ mensagem += `• ${item.quantidade}x ${item.nome} — ${formatarPreco(item.preco * item.quantidade)}\n`; });
     mensagem += `\n*Total: ${formatarPreco(calcularTotal())}*`;
 
-    const url = "https://wa.me/" + restauranteAtual.whatsapp + "?text=" + encodeURIComponent(mensagem);
+    // Redireciona para o seu número
+    const url = "https://wa.me/5534984252341?text=" + encodeURIComponent(mensagem);
     window.open(url, "_blank");
 }
 
