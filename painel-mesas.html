@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Pedidos de Mesa - Cozinha & Caixa</title>
+<style>
+:root {
+  --primary: #f59e0b;
+  --bg-dark: #0d0e12;
+  --card-bg: #181920;
+  --card-border: rgba(255, 255, 255, 0.1);
+  --status-pendente: #ef4444;
+  --status-preparo: #3b82f6;
+  --status-concluido: #10b981;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-dark); color: var(--text-main); padding: 20px; }
+
+header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+header h1 { font-size: 24px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px; }
+.badge-ao-vivo { background: rgba(16, 185, 129, 0.2); color: var(--status-concluido); border: 1px solid var(--status-concluido); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+
+.controles-painel { display: flex; gap: 10px; }
+.btn-limpar { background: #252836; color: var(--text-muted); border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 12px; }
+.btn-limpar:hover { color: #fff; border-color: var(--status-pendente); }
+
+.grid-pedidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+.card-pedido { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 20px; position: relative; display: flex; flex-direction: column; transition: transform .2s, border-color .2s; }
+.card-pedido.novo-pedido { border-color: var(--primary); animation: pulsarBorda 1.5s infinite; }
+
+@keyframes pulsarBorda {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.numero-mesa { font-size: 22px; font-weight: 800; color: var(--primary); }
+.hora-pedido { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+.cliente-info { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); }
+
+.lista-itens { margin-bottom: 16px; flex-grow: 1; }
+.item-linha { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; color: var(--text-main); }
+.item-qtd { font-weight: 800; color: var(--primary); margin-right: 6px; }
+
+.pagamento-tag { background: #121318; border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 16px; display: flex; justify-content: space-between; }
+.pagamento-valor { color: #fff; font-weight: 800; }
+
+.botoes-status { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn-status { padding: 10px; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; color: #fff; transition: opacity .2s; }
+.btn-preparo { background: var(--status-preparo); }
+.btn-concluir { background: var(--status-concluido); }
+.btn-cancelar { background: #252836; color: var(--status-pendente); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
+.status-badge.pendente { background: rgba(239, 68, 68, 0.2); color: var(--status-pendente); border: 1px solid var(--status-pendente); }
+.status-badge.em_preparo { background: rgba(59, 130, 246, 0.2); color: var(--status-preparo); border: 1px solid var(--status-preparo); }
+.status-badge.concluido { background: rgba(16, 185, 129, 0.2); color: var(--status-concluido); border: 1px solid var(--status-concluido); }
+
+.sem-pedidos { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted); background: var(--card-bg); border-radius: 20px; border: 1px solid var(--card-border); }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>🍽️ Gestão de Mesas em Tempo Real <span class="badge-ao-vivo">● Ao Vivo</span></h1>
+    <div class="controles-painel">
+        <button class="btn-limpar" onclick="limparTodosPedidos()">🗑️ Limpar Histórico</button>
+    </div>
+</header>
+
+<main class="grid-pedidos" id="gridPedidos"></main>
+
+<script>
+let ultimoTotalPedidos = 0;
+
+function tocarSinalSonoro() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+    } catch(e){}
+}
+
+function carregarPedidos() {
+    const pedidosRaw = localStorage.getItem('pedidos_mesas');
+    const pedidos = pedidosRaw ? JSON.parse(pedidosRaw) : [];
+    const grid = document.getElementById('gridPedidos');
+
+    if (pedidos.length > ultimoTotalPedidos) {
+        tocarSinalSonoro();
+    }
+    ultimoTotalPedidos = pedidos.length;
+
+    if (pedidos.length === 0) {
+        grid.innerHTML = `<div class="sem-pedidos">
+            <h2>Nenhum pedido de mesa ativo no momento</h2>
+            <p style="margin-top:8px;">Aguardando chamadas do Cardápio Digital 3D...</p>
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = pedidos.slice().reverse().map(p => `
+        <div class="card-pedido ${p.status === 'pendente' ? 'novo-pedido' : ''}">
+            <div class="card-top">
+                <div class="numero-mesa">${p.mesa}</div>
+                <div class="hora-pedido">🕒 ${p.hora}</div>
+            </div>
+            <div class="cliente-info">👤 Cliente: ${p.nome}</div>
+            <div class="status-badge ${p.status}">
+                ${p.status === 'pendente' ? '⚠️ NOVO PEDIDO' : (p.status === 'em_preparo' ? '🔥 EM PREPARO' : '✅ ENTREGUE')}
+            </div>
+            
+            <div class="lista-itens">
+                ${p.itens.map(i => `
+                    <div class="item-linha">
+                        <span><span class="item-qtd">${i.quantidade}x</span>${i.nome}</span>
+                        <span>${formatarPreco(i.preco * i.quantidade)}</span>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="pagamento-tag">
+                <span>Forma: ${p.pagamentoTexto}</span>
+                <span class="pagamento-valor">${formatarPreco(p.total)}</span>
+            </div>
+
+            <div class="botoes-status">
+                ${p.status === 'pendente' ? `<button class="btn-status btn-preparo" onclick="alterarStatus('${p.id}', 'em_preparo')">🔥 Iniciar Preparo</button>` : ''}
+                ${p.status !== 'concluido' ? `<button class="btn-status btn-concluir" onclick="alterarStatus('${p.id}', 'concluido')">✅ Marcar Entregue</button>` : ''}
+                <button class="btn-status btn-cancelar" style="grid-column: span ${p.status === 'concluido' ? '2' : '1'};" onclick="removerPedido('${p.id}')">🗑️ Excluir</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function alterarStatus(id, novoStatus) {
+    let pedidos = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
+    pedidos = pedidos.map(p => p.id == id ? { ...p, status: novoStatus } : p);
+    localStorage.setItem('pedidos_mesas', JSON.stringify(pedidos));
+    carregarPedidos();
+}
+
+function removerPedido(id) {
+    let pedidos = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
+    pedidos = pedidos.filter(p => p.id != id);
+    localStorage.setItem('pedidos_mesas', JSON.stringify(pedidos));
+    carregarPedidos();
+}
+
+function limparTodosPedidos() {
+    if (confirm('Deseja limpar todo o histórico de pedidos de mesa?')) {
+        localStorage.removeItem('pedidos_mesas');
+        carregarPedidos();
+    }
+}
+
+function formatarPreco(valor) {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+window.addEventListener('storage', carregarPedidos);
+setInterval(carregarPedidos, 2000);
+carregarPedidos();
+</script>
+</body>
+</html>
