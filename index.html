@@ -3170,8 +3170,9 @@ function criarObjetoAR(){
     }
 
 
+    const produtoAR = restauranteAtual.produtos.find(p=>p.id===window.produtoSelecionado);
+
     objetoAR =
-        const produtoAR = restauranteAtual.produtos.find(p=>p.id===window.produtoSelecionado);
         criarObjetoARPorTipo(produtoAR?.modelo3d || window.produtoSelecionado);
 
 
