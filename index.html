@@ -123,7 +123,7 @@ MenuAnalytics.init();
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background:var(--bg-dark); color:var(--text-main); -webkit-font-smoothing: antialiased;}
-button{font-family:inherit;}
+button, select, input, textarea{font-family:inherit;}
 .escondido{display:none!important;}
 
 header{
@@ -170,7 +170,7 @@ header p{color:var(--text-muted); font-size: 15px; max-width: 500px; margin: 8px
 
 .modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index:1000; align-items:center; justify-content:center; padding:20px;}
 .modal.ativo{display:flex;}
-.modal-conteudo{background: var(--card-bg); border: 1px solid var(--card-border); width:100%; max-width:480px; border-radius: 24px; padding: 28px; position:relative; text-align:center; color: #fff; max-height:92vh; overflow-y:auto;}
+.modal-conteudo{background: var(--card-bg); border: 1px solid var(--card-border); width:100%; max-width:520px; border-radius: 24px; padding: 28px; position:relative; text-align:center; color: #fff; max-height:92vh; overflow-y:auto;}
 .fechar-modal{position:absolute; top:16px; right:18px; border:none; background: rgba(255,255,255,0.08); width: 34px; height: 34px; border-radius: 50%; font-size:20px; cursor:pointer; color:#fff; z-index:10;}
 #modalNome{margin-bottom:8px; font-size: 22px; font-weight: 800;}
 #modalDescricao{color:var(--text-muted); line-height:1.5; margin-bottom:16px; font-size: 14px;}
@@ -186,14 +186,14 @@ header p{color:var(--text-muted); font-size: 15px; max-width: 500px; margin: 8px
 .btn-quantidade{width:42px; height:42px; border:none; border-radius:50%; background:#252836; color:#fff; font-size: 20px; font-weight: bold; cursor:pointer;}
 .quantidade-numero{font-size:20px; font-weight:bold; min-width:30px;}
 
-.area-3d{width:100%; height:340px; margin:16px 0; border-radius:18px; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 50%, #252836 0%, #0d0e12 100%); border: 1px solid var(--card-border);}
+/* ÁREA 3D AMPLIAÇÃO AR */
+.area-3d{width:100%; height:360px; margin:16px 0; border-radius:18px; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 50%, #252836 0%, #0d0e12 100%); border: 1px solid var(--card-border);}
 model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 
-/* ESTILIZAÇÃO BOTÃO REALIDADE AUMENTADA */
 .btn-ver-mesa {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-    color: #000; border: none; border-radius: 30px; padding: 12px 22px;
-    font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+    color: #000; border: none; border-radius: 30px; padding: 14px 24px;
+    font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
     position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
     display: flex; align-items: center; gap: 8px; white-space: nowrap; z-index: 20;
 }
@@ -207,9 +207,19 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 .item-btn{width:30px; height:30px; border:none; border-radius:50%; background:#252836; color: #fff; cursor:pointer; font-weight:bold;}
 .item-qtd{min-width:20px; text-align:center; font-weight:bold; font-size:14px;}
 .carrinho-total{display:flex; justify-content:space-between; align-items:center; padding: 20px 0; font-size: 20px; font-weight: 800; border-top: 1px solid var(--card-border); margin-top: 10px;}
+
+/* FORMULÁRIO DE PEDIDO E PAGAMENTO */
 .formulario-pedido{text-align:left; margin-top:10px;}
-.formulario-pedido label{display:block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 12px 0 6px;}
-.formulario-pedido input, .formulario-pedido textarea{width:100%; background: #121318; border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; font-size: 14px; outline:none; color: #fff; font-family:inherit;}
+.formulario-pedido label{display:block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 14px 0 6px;}
+.formulario-pedido input, .formulario-pedido textarea, .formulario-pedido select{
+    width:100%; background: #121318; border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; font-size: 14px; outline:none; color: #fff;
+}
+.formulario-pedido input:focus, .formulario-pedido textarea:focus, .formulario-pedido select:focus{ border-color: var(--primary); }
+
+.box-pix{background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 16px; border-radius: 14px; margin-top: 12px; text-align: center;}
+.box-pix p{font-size: 13px; color: var(--text-muted); margin-bottom: 8px;}
+.chave-pix-texto{font-family: monospace; font-size: 16px; font-weight: 800; color: var(--primary); letter-spacing: 1px; user-select: all;}
+.btn-copiar-pix{background: #252836; color: #fff; border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 10px; cursor: pointer;}
 
 .toast{position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px); background: var(--primary); color:#000; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 800; z-index:5000; opacity:0; pointer-events:none; transition:.25s;}
 .toast.ativo{opacity:1; transform:translateX(-50%) translateY(0);}
@@ -260,7 +270,7 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
     </div>
 </div>
 
-<!-- MODAL 3D + REALIDADE AUMENTADA -->
+<!-- MODAL 3D + REALIDADE AUMENTADA (AMPLIADO) -->
 <div id="modal3D" class="modal">
     <div class="modal-conteudo">
         <button class="fechar-modal" onclick="fechar3D()">×</button>
@@ -268,6 +278,7 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
         <div id="nomeProduto3D" style="color:var(--text-muted); font-size:13px; margin-top:4px;"></div>
         
         <div class="area-3d">
+            <!-- MODEL-VIEWER COM ESCALA AMPLIADA PARA AR -->
             <model-viewer 
                 id="viewer3D"
                 camera-controls 
@@ -275,25 +286,26 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
                 ar 
                 ar-modes="scene-viewer quick-look webxr" 
                 ar-scale="fixed"
-                shadow-intensity="1.5" 
-                shadow-softness="0.8"
-                exposure="1.2"
+                scale="2.2 2.2 2.2"
+                shadow-intensity="1.8" 
+                shadow-softness="0.5"
+                exposure="1.3"
                 environment-image="neutral"
                 interaction-prompt="auto"
                 alt="Modelo 3D Interativo do Prato">
                 
                 <button slot="ar-button" class="btn-ver-mesa" onclick="notificarAR()">
-                    📱 Ver em minha mesa (AR)
+                    📱 Ver em minha mesa (AR Ampliado)
                 </button>
             </model-viewer>
         </div>
         
-        <p style="font-size:12px; color:var(--text-muted)">Gire com o dedo para ver em 360° ou toque no botão para ver na mesa.</p>
+        <p style="font-size:12px; color:var(--text-muted)">Gire com o dedo para ver em 360° ou toque no botão para ver na mesa em tamanho real.</p>
         <button class="btn-principal" style="margin-top:16px;" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
     </div>
 </div>
 
-<!-- MODAL CARRINHO -->
+<!-- MODAL CARRINHO COM ENDEREÇO E PAGAMENTO COMPLETO -->
 <div id="modalCarrinho" class="modal">
     <div class="modal-conteudo">
         <button class="fechar-modal" onclick="fecharCarrinho()">×</button>
@@ -304,13 +316,56 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
                 <span>Total</span>
                 <span id="carrinhoTotal">R$ 0,00</span>
             </div>
+            
             <div class="formulario-pedido">
-                <label for="clienteNome">Seu Nome</label>
-                <input id="clienteNome" type="text" placeholder="Digite seu nome">
-                <label for="clienteObs">Observações</label>
+                <label for="clienteNome">Seu Nome *</label>
+                <input id="clienteNome" type="text" placeholder="Digite seu nome completo">
+
+                <label for="tipoAtendimento">Tipo de Pedido *</label>
+                <select id="tipoAtendimento" onchange="alternarCamposEndereco()">
+                    <option value="delivery">🛵 Entrega / Delivery</option>
+                    <option value="mesa">🍽️ Consumir no Local / Mesa</option>
+                </select>
+
+                <div id="boxEndereco">
+                    <label for="clienteEndereco">Endereço de Entrega *</label>
+                    <input id="clienteEndereco" type="text" placeholder="Rua, Número e Bairro">
+                    
+                    <label for="clienteComplemento">Complemento / Ponto de Referência</label>
+                    <input id="clienteComplemento" type="text" placeholder="Apto, Bloco, Próximo a...">
+                </div>
+
+                <div id="boxMesa" style="display:none;">
+                    <label for="numeroMesa">Número da Mesa *</label>
+                    <input id="numeroMesa" type="text" placeholder="Ex.: Mesa 04">
+                </div>
+
+                <label for="formaPagamento">Forma de Pagamento *</label>
+                <select id="formaPagamento" onchange="alternarOpcoesPagamento()">
+                    <option value="pix">⚡ PIX (Chave Online)</option>
+                    <option value="credito">💳 Cartão de Crédito (Na Entrega/Mesa)</option>
+                    <option value="debito">💳 Cartão de Débito (Na Entrega/Mesa)</option>
+                    <option value="dinheiro">💵 Dinheiro</option>
+                </select>
+
+                <!-- PAINEL CHAVE PIX -->
+                <div id="boxPixInfo" class="box-pix">
+                    <p>Chave PIX do Estabelecimento (CNPJ/Telefone):</p>
+                    <div class="chave-pix-texto" id="chavePixTexto">5534984252341</div>
+                    <button type="button" class="btn-copiar-pix" onclick="copiarChavePix()">📋 Copiar Chave PIX</button>
+                </div>
+
+                <!-- PAINEL TROCO -->
+                <div id="boxTroco" style="display:none;">
+                    <label for="valorTroco">Precisa de troco para quanto?</label>
+                    <input id="valorTroco" type="text" placeholder="Ex.: Troco para R$ 100,00">
+                </div>
+
+                <label for="clienteObs">Observações do Pedido</label>
                 <textarea id="clienteObs" placeholder="Ex.: Sem cebola, ponto da carne..."></textarea>
             </div>
-            <button class="btn-principal" style="margin-top:16px;" onclick="finalizarWhatsApp()">📱 Enviar via WhatsApp</button>
+
+            <button class="btn-principal" style="margin-top:20px;" onclick="finalizarWhatsApp()">📱 Finalizar Pedido no WhatsApp</button>
         </div>
     </div>
 </div>
@@ -324,7 +379,6 @@ footer{text-align:center; padding: 30px 20px 100px; color: var(--text-muted); fo
 
 <!-- DADOS DOS RESTAURANTES & PRODUTOS -->
 <script>
-// MODELO 3D DEMONSTRATIVO NA NUVEM PARA TESTE IMEDIATO DE AR
 const MODELO_DEMO_AR = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
 
 const RESTAURANTES = {
@@ -456,7 +510,6 @@ function abrir3D() {
     const viewer = document.getElementById("viewer3D");
     const fonteModelo = (produto && produto.modelo3d) ? produto.modelo3d : MODELO_DEMO_AR;
 
-    // Tenta carregar o modelo local, se falhar aplica a URL de reserva na nuvem
     viewer.setAttribute("src", fonteModelo);
     viewer.onerror = () => {
         viewer.setAttribute("src", MODELO_DEMO_AR);
@@ -540,6 +593,36 @@ function formatarPreco(valor){
     return valor.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
 }
 
+function alternarCamposEndereco(){
+    const tipo = document.getElementById("tipoAtendimento").value;
+    const boxEndereco = document.getElementById("boxEndereco");
+    const boxMesa = document.getElementById("boxMesa");
+
+    if(tipo === "delivery"){
+        boxEndereco.style.display = "block";
+        boxMesa.style.display = "none";
+    } else {
+        boxEndereco.style.display = "none";
+        boxMesa.style.display = "block";
+    }
+}
+
+function alternarOpcoesPagamento(){
+    const forma = document.getElementById("formaPagamento").value;
+    const boxPix = document.getElementById("boxPixInfo");
+    const boxTroco = document.getElementById("boxTroco");
+
+    boxPix.style.display = forma === "pix" ? "block" : "none";
+    boxTroco.style.display = forma === "dinheiro" ? "block" : "none";
+}
+
+function copiarChavePix(){
+    const chave = document.getElementById("chavePixTexto").textContent;
+    navigator.clipboard.writeText(chave).then(() => {
+        mostrarToast("Chave PIX copiada!");
+    });
+}
+
 function fecharModal(){ document.getElementById("modalProduto").classList.remove("ativo"); }
 function abrirCarrinho(){ document.getElementById("modalCarrinho").classList.add("ativo"); renderizarCarrinho(); }
 function fecharCarrinho(){ document.getElementById("modalCarrinho").classList.remove("ativo"); }
@@ -548,16 +631,43 @@ function fechar3D(){ document.getElementById("modal3D").classList.remove("ativo"
 function finalizarWhatsApp(){
     if(carrinho.length===0) return;
     const nome = document.getElementById("clienteNome").value.trim();
-    if(!nome){ alert("Digite seu nome para continuar."); return; }
+    if(!nome){ alert("Por favor, digite seu nome."); return; }
+
+    const tipoAtendimento = document.getElementById("tipoAtendimento").value;
+    let localTexto = "";
+
+    if(tipoAtendimento === "delivery"){
+        const endereco = document.getElementById("clienteEndereco").value.trim();
+        if(!endereco){ alert("Por favor, informe seu endereço de entrega."); return; }
+        const comp = document.getElementById("clienteComplemento").value.trim();
+        localTexto = `*Endereço:* ${endereco}` + (comp ? ` (${comp})` : "");
+    } else {
+        const mesa = document.getElementById("numeroMesa").value.trim();
+        if(!mesa){ alert("Por favor, informe o número da mesa."); return; }
+        localTexto = `*Mesa:* ${mesa}`;
+    }
+
+    const formaPagamento = document.getElementById("formaPagamento").value;
+    let pagtoTexto = "";
+    if(formaPagamento === "pix") pagtoTexto = "⚡ PIX (Chave Online)";
+    else if(formaPagamento === "credito") pagtoTexto = "💳 Cartão de Crédito (Na Entrega/Mesa)";
+    else if(formaPagamento === "debito") pagtoTexto = "💳 Cartão de Débito (Na Entrega/Mesa)";
+    else if(formaPagamento === "dinheiro") {
+        const troco = document.getElementById("valorTroco").value.trim();
+        pagtoTexto = "💵 Dinheiro" + (troco ? ` (${troco})` : " (Sem troco)");
+    }
 
     const obs = document.getElementById("clienteObs").value.trim();
 
     MenuAnalytics.trackWhatsAppOrder(carrinho);
 
-    let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital 3D.\n\n*Cliente:* ${nome}\n`;
+    let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital 3D.\n\n`;
+    mensagem += `*Cliente:* ${nome}\n`;
+    mensagem += `${localTexto}\n`;
+    mensagem += `*Forma de Pagamento:* ${pagtoTexto}\n`;
     if(obs) mensagem += `*Observações:* ${obs}\n`;
+    
     mensagem += `\n*Itens do Pedido:*\n`;
-
     carrinho.forEach(item=>{ mensagem += `• ${item.quantidade}x ${item.nome} — ${formatarPreco(item.preco * item.quantidade)}\n`; });
     mensagem += `\n*Total a Pagar: ${formatarPreco(calcularTotal())}*`;
 
