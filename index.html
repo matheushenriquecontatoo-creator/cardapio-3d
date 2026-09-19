@@ -3,18 +3,10 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cardápio 3D + Analytics</title>
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
->
-
-<title>Cardápio 3D</title>
-
-<!-- =====================================================
-     THREE.JS
-===================================================== -->
-
+<!-- THREE.JS -->
 <script type="importmap">
 {
     "imports": {
@@ -23,1146 +15,239 @@
 }
 </script>
 
+<!-- SCRIPT DE ANALYTICS EMBUTIDO -->
+<script>
+const MenuAnalytics = {
+  STORAGE_KEY: 'cardapio_analytics_data',
+
+  init() {
+    if (!localStorage.getItem(this.STORAGE_KEY)) {
+      const dadosIniciais = {
+        visualizacoesGerais: 0,
+        interacoes3D: 0,
+        interacoesAR: 0,
+        adicionouCarrinho: 0,
+        pedidosWhatsApp: 0,
+        produtos: {}
+      };
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dadosIniciais));
+    }
+  },
+
+  getMetrics() {
+    this.init();
+    try {
+      return JSON.parse(localStorage.getItem(this.STORAGE_KEY));
+    } catch (e) {
+      return {};
+    }
+  },
+
+  saveMetrics(data) {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+  },
+
+  getProdutoStats(data, produtoId, produtoNome) {
+    if (!data.produtos[produtoId]) {
+      data.produtos[produtoId] = {
+        id: produtoId,
+        nome: produtoNome || produtoId,
+        visualizacoes: 0,
+        views3d: 0,
+        viewsAR: 0,
+        carrinho: 0,
+        pedidos: 0
+      };
+    }
+    return data.produtos[produtoId];
+  },
+
+  trackProductView(produto) {
+    if (!produto || !produto.id) return;
+    const data = this.getMetrics();
+    data.visualizacoesGerais++;
+    const pStats = this.getProdutoStats(data, produto.id, produto.nome);
+    pStats.visualizacoes++;
+    this.saveMetrics(data);
+  },
+
+  track3DView(produto) {
+    if (!produto || !produto.id) return;
+    const data = this.getMetrics();
+    data.interacoes3D++;
+    const pStats = this.getProdutoStats(data, produto.id, produto.nome);
+    pStats.views3d++;
+    this.saveMetrics(data);
+  },
+
+  trackARView(produto) {
+    if (!produto || !produto.id) return;
+    const data = this.getMetrics();
+    data.interacoesAR++;
+    const pStats = this.getProdutoStats(data, produto.id, produto.nome);
+    pStats.viewsAR++;
+    this.saveMetrics(data);
+  },
+
+  trackAddToCart(produto) {
+    if (!produto || !produto.id) return;
+    const data = this.getMetrics();
+    data.adicionouCarrinho++;
+    const pStats = this.getProdutoStats(data, produto.id, produto.nome);
+    pStats.carrinho++;
+    this.saveMetrics(data);
+  },
+
+  trackWhatsAppOrder(carrinho) {
+    const data = this.getMetrics();
+    data.pedidosWhatsApp++;
+
+    if (Array.isArray(carrinho)) {
+      carrinho.forEach(item => {
+        const pStats = this.getProdutoStats(data, item.id, item.nome);
+        pStats.pedidos += (item.quantidade || 1);
+      });
+    }
+
+    this.saveMetrics(data);
+  }
+};
+MenuAnalytics.init();
+</script>
+
 <style>
-
-/* =====================================================
-   RESET
-===================================================== */
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-html{
-    scroll-behavior:smooth;
-}
-
-body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f4f4f4;
-    color:#111;
-}
-
-button{
-    font-family:inherit;
-}
-
-.escondido{
-    display:none!important;
-}
-
-/* =====================================================
-   HEADER
-===================================================== */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;color:#111;}
+button{font-family:inherit;}
+.escondido{display:none!important;}
 
 header{
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            #383838 0%,
-            #111 48%,
-            #050505 100%
-        );
-
-    color:#fff;
-
-    padding:
-        42px
-        20px
-        35px;
-
-    text-align:center;
-
-    position:relative;
-}
-
-header h1{
-    font-size:32px;
-    margin-bottom:8px;
-    letter-spacing:-.5px;
-}
-
-header p{
-    color:#aaa;
-    font-size:15px;
-}
-
-.header-status{
-    margin-top:14px;
-    display:inline-flex;
-    align-items:center;
-    gap:7px;
-    padding:7px 12px;
-    border-radius:30px;
-    background:rgba(255,255,255,.08);
-    color:#bbb;
-    font-size:11px;
-}
-
-.status-ponto{
-    width:7px;
-    height:7px;
-    border-radius:50%;
-    background:#58d68d;
-}
-
-/* =====================================================
-   CATEGORIAS
-===================================================== */
-
-.categorias{
-    display:flex;
-    gap:10px;
-
-    overflow-x:auto;
-
-    padding:18px 20px;
-
-    background:#fff;
-
-    position:sticky;
-    top:0;
-
-    z-index:50;
-
-    box-shadow:
-        0 3px 15px rgba(0,0,0,.06);
-}
-
-.categorias::-webkit-scrollbar{
-    display:none;
-}
-
-.categoria{
-    border:none;
-
-    background:#eee;
-
-    padding:
-        12px
-        19px;
-
-    border-radius:30px;
-
-    cursor:pointer;
-
-    white-space:nowrap;
-
-    font-size:14px;
-
-    transition:.2s;
-}
-
-.categoria:hover{
-    background:#ddd;
-}
-
-.categoria.ativa{
-    background:#111;
-    color:#fff;
-}
-
-/* =====================================================
-   PRODUTOS
-===================================================== */
-
-.produtos{
-    max-width:1050px;
-
-    margin:
-        30px
-        auto
-        100px;
-
-    padding:
-        0
-        20px;
-
-    display:grid;
-
-    grid-template-columns:
-        repeat(2,1fr);
-
-    gap:22px;
-}
-
-.produto{
-    background:#fff;
-
-    border-radius:20px;
-
-    overflow:hidden;
-
-    cursor:pointer;
-
-    box-shadow:
-        0 5px 22px rgba(0,0,0,.08);
-
-    transition:
-        transform .25s,
-        box-shadow .25s;
-}
-
-.produto:hover{
-    transform:translateY(-5px);
-
-    box-shadow:
-        0 14px 35px rgba(0,0,0,.14);
-}
-
-.produto img{
-    width:100%;
-    height:240px;
-
-    object-fit:cover;
-
-    display:block;
-}
-
-.produto-info{
-    padding:19px;
-}
-
-.produto-info h2{
-    font-size:20px;
-    margin-bottom:8px;
-}
-
-.produto-info p{
-    color:#666;
-
-    font-size:14px;
-
-    line-height:1.5;
-
-    margin-bottom:13px;
-}
-
-.preco{
-    font-size:18px;
-    font-weight:bold;
-}
-
-/* =====================================================
-   BOTÃO CARRINHO FLUTUANTE
-===================================================== */
-
-.carrinho-flutuante{
-    position:fixed;
-
-    right:20px;
-    bottom:20px;
-
-    z-index:800;
-
-    border:none;
-
-    background:#111;
-    color:#fff;
-
-    padding:
-        14px
-        18px;
-
-    border-radius:50px;
-
-    font-size:14px;
-    font-weight:bold;
-
-    cursor:pointer;
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.25);
-
-    display:flex;
-    align-items:center;
-    gap:9px;
-
-    transition:.2s;
-}
-
-.carrinho-flutuante:hover{
-    transform:translateY(-2px);
-}
-
-.carrinho-contador{
-    min-width:22px;
-    height:22px;
-
-    padding:0 6px;
-
-    border-radius:20px;
-
-    background:#fff;
-    color:#111;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:11px;
-}
-
-/* =====================================================
-   MODAIS
-===================================================== */
-
-.modal{
-    display:none;
-
-    position:fixed;
-
-    inset:0;
-
-    background:rgba(0,0,0,.80);
-
-    z-index:1000;
-
-    align-items:center;
-    justify-content:center;
-
-    padding:20px;
-}
-
-.modal.ativo{
-    display:flex;
-}
-
-.modal-conteudo{
-    background:#fff;
-
-    width:100%;
-    max-width:470px;
-
-    border-radius:24px;
-
-    padding:28px;
-
-    position:relative;
-
-    text-align:center;
-
-    animation:
-        aparecer .2s ease;
-
-    max-height:94vh;
-
-    overflow-y:auto;
-}
-
-@keyframes aparecer{
-
-    from{
-        opacity:0;
-        transform:scale(.95);
-    }
-
-    to{
-        opacity:1;
-        transform:scale(1);
-    }
-
-}
-
-.fechar-modal{
-    position:absolute;
-
-    top:8px;
-    right:13px;
-
-    border:none;
-
-    background:transparent;
-
-    font-size:28px;
-
-    cursor:pointer;
-
-    color:#222;
-
-    z-index:20;
-}
-
-#modalNome{
-    margin-bottom:10px;
-    padding-right:20px;
-}
-
-#modalDescricao{
-    color:#666;
-
-    line-height:1.5;
-
-    margin-bottom:14px;
-}
-
-.modal-preco{
-    font-size:22px;
-
-    font-weight:bold;
-
-    margin-bottom:20px;
-}
-
-/* =====================================================
-   BOTÕES
-===================================================== */
-
-.botoes-produto{
-    display:grid;
-    gap:10px;
-}
-
-.btn-principal,
-.btn-ar,
-.btn-secundario{
-    width:100%;
-
-    border:none;
-
-    border-radius:14px;
-
-    padding:15px;
-
-    font-size:15px;
-
-    font-weight:bold;
-
-    cursor:pointer;
-
-    transition:.2s;
-}
-
-.btn-principal{
-    background:#111;
-    color:#fff;
-}
-
-.btn-principal:hover{
-    background:#333;
-}
-
-.btn-ar{
-    background:#eee;
-    color:#111;
-}
-
-.btn-ar:hover{
-    background:#ddd;
-}
-
-.btn-secundario{
-    background:#f1f1f1;
-    color:#111;
-}
-
-/* =====================================================
-   QUANTIDADE
-===================================================== */
-
-.quantidade-box{
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    gap:18px;
-
-    margin:
-        18px
-        0;
-}
-
-.btn-quantidade{
-    width:40px;
-    height:40px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:#111;
-    color:#fff;
-
-    font-size:22px;
-
-    cursor:pointer;
-}
-
-.quantidade-numero{
-    font-size:19px;
-    font-weight:bold;
-
-    min-width:25px;
-}
-
-/* =====================================================
-   3D
-===================================================== */
-
-.area-3d{
-    width:100%;
-    height:340px;
-
-    margin:20px 0;
-
-    border-radius:19px;
-
-    overflow:hidden;
-
-    position:relative;
-
-    background:
-        radial-gradient(
-            circle at 50% 40%,
-            #404040 0%,
-            #1c1c1c 52%,
-            #080808 100%
-        );
-}
-
-#canvas3d{
-    width:100%;
-    height:100%;
-
-    display:block;
-
-    touch-action:none;
-}
-
-.carregando-3d{
-    position:absolute;
-
-    inset:0;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    color:#fff;
-
-    font-size:14px;
-
-    background:rgba(0,0,0,.25);
-
-    pointer-events:none;
-}
-
-.erro-3d{
-    position:absolute;
-
-    inset:0;
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    flex-direction:column;
-
-    gap:10px;
-
-    color:#fff;
-
-    text-align:center;
-
-    padding:30px;
-
-    background:#111;
-}
-
-.erro-3d strong{
-    font-size:17px;
-}
-
-.controle-3d{
-    color:#777;
-
-    font-size:13px;
-
-    margin-top:8px;
-}
-
-.produto-3d-nome{
-    color:#888;
-
-    font-size:13px;
-
-    margin-top:-5px;
-}
-
-/* =====================================================
-   CARRINHO
-===================================================== */
-
-.carrinho-lista{
-    text-align:left;
-
-    margin-top:15px;
-}
-
-.carrinho-vazio{
-    color:#777;
-
-    padding:
-        25px
-        0;
-
-    text-align:center;
-}
-
-.item-carrinho{
-    display:grid;
-
-    grid-template-columns:
-        1fr
-        auto;
-
-    gap:12px;
-
-    padding:
-        15px
-        0;
-
-    border-bottom:
-        1px solid #eee;
-}
-
-.item-carrinho-nome{
-    font-weight:bold;
-
-    margin-bottom:5px;
-}
-
-.item-carrinho-preco{
-    color:#777;
-
-    font-size:13px;
-}
-
-.item-controles{
-    display:flex;
-
-    align-items:center;
-
-    gap:8px;
-}
-
-.item-btn{
-    width:28px;
-    height:28px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:#eee;
-
-    cursor:pointer;
-
-    font-weight:bold;
-}
-
-.item-qtd{
-    min-width:18px;
-
-    text-align:center;
-
-    font-weight:bold;
-
-    font-size:13px;
-}
-
-.carrinho-total{
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:
-        20px
-        0;
-
-    font-size:19px;
-
-    font-weight:bold;
-}
-
-.formulario-pedido{
-    text-align:left;
-
-    margin-top:8px;
-}
-
-.formulario-pedido label{
-    display:block;
-
-    font-size:13px;
-
-    font-weight:bold;
-
-    margin:
-        12px
-        0
-        6px;
-}
-
-.formulario-pedido input,
-.formulario-pedido textarea{
-    width:100%;
-
-    border:
-        1px solid #ddd;
-
-    border-radius:12px;
-
-    padding:13px;
-
-    font-size:14px;
-
-    outline:none;
-
-    font-family:inherit;
-}
-
-.formulario-pedido textarea{
-    min-height:80px;
-
-    resize:vertical;
-}
-
-/* =====================================================
-   AR
-===================================================== */
-
-.ar-tela{
-    position:fixed;
-
-    inset:0;
-
-    display:none;
-
-    background:#000;
-
-    z-index:3000;
-
-    overflow:hidden;
-}
-
-.ar-tela.ativo{
-    display:block;
-}
-
-#videoCamera{
-    position:absolute;
-
-    inset:0;
-
-    width:100%;
-    height:100%;
-
-    object-fit:cover;
-
-    background:#000;
-}
-
-#canvasAR{
-    position:absolute;
-
-    inset:0;
-
-    width:100%;
-    height:100%;
-
-    touch-action:none;
-}
-
-.ar-topo{
-    position:absolute;
-
-    top:0;
-    left:0;
-    right:0;
-
-    padding:
-        calc(18px + env(safe-area-inset-top))
-        18px
-        18px;
-
-    display:flex;
-
-    justify-content:space-between;
-    align-items:center;
-
-    z-index:10;
-
-    background:
-        linear-gradient(
-            rgba(0,0,0,.65),
-            transparent
-        );
-}
-
-.ar-titulo{
-    color:#fff;
-
-    font-size:16px;
-
-    font-weight:bold;
-}
-
-.ar-fechar{
-    width:42px;
-    height:42px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:rgba(0,0,0,.65);
-
-    color:#fff;
-
-    font-size:25px;
-
-    cursor:pointer;
-}
-
-.ar-instrucoes{
-    position:absolute;
-
-    left:50%;
-
-    bottom:
-        calc(
-            30px +
-            env(safe-area-inset-bottom)
-        );
-
-    transform:
-        translateX(-50%);
-
-    width:
-        calc(100% - 36px);
-
-    max-width:430px;
-
-    padding:
-        14px
-        18px;
-
-    border-radius:17px;
-
-    background:
-        rgba(0,0,0,.68);
-
-    color:#fff;
-
-    text-align:center;
-
-    font-size:13px;
-
-    line-height:1.5;
-
-    z-index:10;
-
-    backdrop-filter:blur(10px);
-}
-
-.ar-status{
-    margin-top:6px;
-
-    color:#bbb;
-
-    font-size:11px;
-}
-
-.ar-carregando{
-    position:absolute;
-
-    inset:0;
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    flex-direction:column;
-
-    gap:12px;
-
-    color:#fff;
-
-    background:
-        rgba(0,0,0,.85);
-
-    z-index:20;
-
-    text-align:center;
-}
-
-.ar-carregando.ativo{
-    display:flex;
-}
-
-.ar-ponto{
-    width:12px;
-    height:12px;
-
-    border-radius:50%;
-
-    background:#fff;
-
-    box-shadow:
-        0 0 0 8px rgba(255,255,255,.12),
-        0 0 30px rgba(255,255,255,.5);
-
-    animation:
-        pulsar 1.2s infinite;
-}
-
-@keyframes pulsar{
-
-    0%,100%{
-        transform:scale(1);
-        opacity:.7;
-    }
-
-    50%{
-        transform:scale(1.35);
-        opacity:1;
-    }
-
-}
-
-/* =====================================================
-   MODAL AR
-===================================================== */
-
-.ar-conteudo{
-    text-align:center;
-}
-
-.ar-icone{
-    width:72px;
-    height:72px;
-
-    border-radius:50%;
-
-    margin:
-        5px
-        auto
-        18px;
-
-    background:#111;
-
-    color:#fff;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    font-size:29px;
-}
-
-.ar-conteudo h2{
-    margin-bottom:10px;
-}
-
-.ar-conteudo p{
-    color:#666;
-
-    line-height:1.5;
-
-    margin-bottom:20px;
-}
-
-.ar-aviso{
-    font-size:12px;
-
-    color:#999;
-
-    margin-top:14px;
-}
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-.toast{
-    position:fixed;
-
-    left:50%;
-
-    bottom:85px;
-
-    transform:
-        translateX(-50%)
-        translateY(20px);
-
-    background:#111;
-
-    color:#fff;
-
-    padding:
-        13px
-        18px;
-
-    border-radius:30px;
-
-    font-size:13px;
-
-    z-index:5000;
-
-    opacity:0;
-
-    pointer-events:none;
-
-    transition:.25s;
-
-    white-space:nowrap;
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,.25);
-}
-
-.toast.ativo{
-    opacity:1;
-
-    transform:
-        translateX(-50%)
-        translateY(0);
-}
-
-/* =====================================================
-   RODAPÉ
-===================================================== */
-
-footer{
-    text-align:center;
-
-    padding:
-        25px
-        20px
-        100px;
-
-    color:#999;
-
-    font-size:12px;
-}
-
-/* =====================================================
-   RESPONSIVO
-===================================================== */
-
-@media(max-width:700px){
-
-    header{
-        padding:
-            30px
-            15px;
-    }
-
-    header h1{
-        font-size:26px;
-    }
-
-    .produtos{
-        grid-template-columns:1fr;
-
-        padding:
-            0
-            15px;
-
-        margin-top:22px;
-    }
-
-    .produto img{
-        height:215px;
-    }
-
-    .modal{
-        padding:12px;
-    }
-
-    .modal-conteudo{
-        padding:22px;
-    }
-
-    .area-3d{
-        height:300px;
-    }
-
-}
-
-@media(max-width:380px){
-
-    .area-3d{
-        height:270px;
-    }
-
-    .modal-conteudo{
-        padding:19px;
-    }
-
-    .carrinho-flutuante{
-        right:12px;
-        bottom:12px;
-    }
-
-}
-
-
-/* ===== CAMADA COMERCIAL / APRESENTAÇÃO ===== */
-header{padding-top:34px;}
-header h1{font-weight:800;letter-spacing:-1px;}
-.produtos{max-width:1180px;gap:18px;}
-.produto{border:1px solid #ececec;box-shadow:0 8px 28px rgba(0,0,0,.06);}
+    background:radial-gradient(circle at 50% 0%,#383838 0%,#111 48%,#050505 100%);
+    color:#fff;padding:34px 20px 35px;text-align:center;position:relative;
+}
+header h1{font-size:32px;margin-bottom:8px;letter-spacing:-.5px;font-weight:800;}
+header p{color:#aaa;font-size:15px;}
+.header-status{margin-top:14px;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:30px;background:rgba(255,255,255,.08);color:#bbb;font-size:11px;}
+.status-ponto{width:7px;height:7px;border-radius:50%;background:#58d68d;}
+
+.nicho-bar{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:12px 15px;background:#111;color:#aaa;font-size:11px}
+.nicho-bar a{color:#fff;text-decoration:none;padding:7px 10px;border:1px solid #333;border-radius:999px}
+.nicho-bar a:hover{background:#222}
+
+.categorias{display:flex;gap:10px;overflow-x:auto;padding:18px 20px;background:#fff;position:sticky;top:0;z-index:50;box-shadow:0 3px 15px rgba(0,0,0,.06);}
+.categorias::-webkit-scrollbar{display:none;}
+.categoria{border:none;background:#eee;padding:12px 19px;border-radius:30px;cursor:pointer;white-space:nowrap;font-size:14px;transition:.2s;}
+.categoria:hover{background:#ddd;}
+.categoria.ativa{background:#111;color:#fff;}
+
+.produtos{max-width:1180px;margin:30px auto 100px;padding:0 20px;display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+.produto{background:#fff;border-radius:20px;overflow:hidden;cursor:pointer;border:1px solid #ececec;box-shadow:0 8px 28px rgba(0,0,0,.06);transition:transform .25s,box-shadow .25s;}
+.produto:hover{transform:translateY(-5px);box-shadow:0 14px 35px rgba(0,0,0,.14);}
 .produto-imagem-wrap{position:relative;}
 .produto-imagem-wrap img{width:100%;height:240px;object-fit:cover;display:block;}
 .badge-3d{position:absolute;top:14px;left:14px;background:#111;color:#fff;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.5px;}
+.produto-info{padding:19px;}
 .produto-kicker{font-size:10px;font-weight:800;letter-spacing:1px;color:#888;margin-bottom:7px;}
+.produto-info h2{font-size:20px;margin-bottom:8px;}
+.produto-info p{color:#666;font-size:14px;line-height:1.5;margin-bottom:13px;}
 .produto-rodape{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.preco{font-size:18px;font-weight:bold;}
 .ver-3d-card{font-size:11px;font-weight:800;padding:7px 9px;border-radius:9px;background:#f1f1f1;}
-@media(max-width:700px){.produto-imagem-wrap img{height:210px}.modal-conteudo{padding:18px}.area-3d{height:280px}.botoes-produto{position:sticky;bottom:0;background:#fff;padding-top:10px;z-index:5}}
 
-.nicho-bar{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:12px 15px;background:#111;color:#aaa;font-size:11px}.nicho-bar a{color:#fff;text-decoration:none;padding:7px 10px;border:1px solid #333;border-radius:999px}.nicho-bar a:hover{background:#222}
+.carrinho-flutuante{position:fixed;right:20px;bottom:20px;z-index:800;border:none;background:#111;color:#fff;padding:14px 18px;border-radius:50px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;align-items:center;gap:9px;transition:.2s;}
+.carrinho-flutuante:hover{transform:translateY(-2px);}
+.carrinho-contador{min-width:22px;height:22px;padding:0 6px;border-radius:20px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-size:11px;}
 
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.80);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal.ativo{display:flex;}
+.modal-conteudo{background:#fff;width:100%;max-width:470px;border-radius:24px;padding:28px;position:relative;text-align:center;animation:aparecer .2s ease;max-height:94vh;overflow-y:auto;}
+@keyframes aparecer{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.fechar-modal{position:absolute;top:8px;right:13px;border:none;background:transparent;font-size:28px;cursor:pointer;color:#222;z-index:20;}
+#modalNome{margin-bottom:10px;padding-right:20px;}
+#modalDescricao{color:#666;line-height:1.5;margin-bottom:14px;}
+.modal-preco{font-size:22px;font-weight:bold;margin-bottom:20px;}
+
+.botoes-produto{display:grid;gap:10px;}
+.btn-principal,.btn-ar,.btn-secundario{width:100%;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:bold;cursor:pointer;transition:.2s;}
+.btn-principal{background:#111;color:#fff;}
+.btn-principal:hover{background:#333;}
+.btn-ar{background:#eee;color:#111;}
+.btn-ar:hover{background:#ddd;}
+.btn-secundario{background:#f1f1f1;color:#111;}
+
+.quantidade-box{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0;}
+.btn-quantidade{width:40px;height:40px;border:none;border-radius:50%;background:#111;color:#fff;font-size:22px;cursor:pointer;}
+.quantidade-numero{font-size:19px;font-weight:bold;min-width:25px;}
+
+.area-3d{width:100%;height:340px;margin:20px 0;border-radius:19px;overflow:hidden;position:relative;background:radial-gradient(circle at 50% 40%,#404040 0%,#1c1c1c 52%,#080808 100%);}
+#canvas3d{width:100%;height:100%;display:block;touch-action:none;}
+.carregando-3d{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;background:rgba(0,0,0,.25);pointer-events:none;}
+.erro-3d{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#fff;text-align:center;padding:30px;background:#111;}
+.controle-3d{color:#777;font-size:13px;margin-top:8px;}
+.produto-3d-nome{color:#888;font-size:13px;margin-top:-5px;}
+
+.carrinho-lista{text-align:left;margin-top:15px;}
+.carrinho-vazio{color:#777;padding:25px 0;text-align:center;}
+.item-carrinho{display:grid;grid-template-columns:1fr auto;gap:12px;padding:15px 0;border-bottom:1px solid #eee;}
+.item-carrinho-nome{font-weight:bold;margin-bottom:5px;}
+.item-carrinho-preco{color:#777;font-size:13px;}
+.item-controles{display:flex;align-items:center;gap:8px;}
+.item-btn{width:28px;height:28px;border:none;border-radius:50%;background:#eee;cursor:pointer;font-weight:bold;}
+.item-qtd{min-width:18px;text-align:center;font-weight:bold;font-size:13px;}
+.carrinho-total{display:flex;justify-content:space-between;align-items:center;padding:20px 0;font-size:19px;font-weight:bold;}
+.formulario-pedido{text-align:left;margin-top:8px;}
+.formulario-pedido label{display:block;font-size:13px;font-weight:bold;margin:12px 0 6px;}
+.formulario-pedido input,.formulario-pedido textarea{width:100%;border:1px solid #ddd;border-radius:12px;padding:13px;font-size:14px;outline:none;font-family:inherit;}
+.formulario-pedido textarea{min-height:80px;resize:vertical;}
+
+.ar-tela{position:fixed;inset:0;display:none;background:#000;z-index:3000;overflow:hidden;}
+.ar-tela.ativo{display:block;}
+#videoCamera{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;}
+#canvasAR{position:absolute;inset:0;width:100%;height:100%;touch-action:none;}
+.ar-topo{position:absolute;top:0;left:0;right:0;padding:calc(18px + env(safe-area-inset-top)) 18px 18px;display:flex;justify-content:space-between;align-items:center;z-index:10;background:linear-gradient(rgba(0,0,0,.65),transparent);}
+.ar-titulo{color:#fff;font-size:16px;font-weight:bold;}
+.ar-fechar{width:42px;height:42px;border:none;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:25px;cursor:pointer;}
+.ar-instrucoes{position:absolute;left:50%;bottom:calc(30px + env(safe-area-inset-bottom));transform:translateX(-50%);width:calc(100% - 36px);max-width:430px;padding:14px 18px;border-radius:17px;background:rgba(0,0,0,.68);color:#fff;text-align:center;font-size:13px;line-height:1.5;z-index:10;backdrop-filter:blur(10px);}
+.ar-status{margin-top:6px;color:#bbb;font-size:11px;}
+.ar-carregando{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff;background:rgba(0,0,0,.85);z-index:20;text-align:center;}
+.ar-carregando.ativo{display:flex;}
+.ar-ponto{width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 8px rgba(255,255,255,.12),0 0 30px rgba(255,255,255,.5);animation:pulsar 1.2s infinite;}
+@keyframes pulsar{0%,100%{transform:scale(1);opacity:.7;}50%{transform:scale(1.35);opacity:1;}}
+
+.ar-conteudo{text-align:center;}
+.ar-icone{width:72px;height:72px;border-radius:50%;margin:5px auto 18px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:29px;}
+.ar-conteudo h2{margin-bottom:10px;}
+.ar-conteudo p{color:#666;line-height:1.5;margin-bottom:20px;}
+.ar-aviso{font-size:12px;color:#999;margin-top:14px;}
+
+.toast{position:fixed;left:50%;bottom:85px;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:13px 18px;border-radius:30px;font-size:13px;z-index:5000;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+.toast.ativo{opacity:1;transform:translateX(-50%) translateY(0);}
+
+footer{text-align:center;padding:25px 20px 100px;color:#999;font-size:12px;}
+
+@media(max-width:700px){
+    header{padding:30px 15px;}
+    header h1{font-size:26px;}
+    .produtos{grid-template-columns:1fr;padding:0 15px;margin-top:22px;}
+    .produto-imagem-wrap img{height:210px;}
+    .modal{padding:12px;}
+    .modal-conteudo{padding:18px;}
+    .area-3d{height:280px;}
+    .botoes-produto{position:sticky;bottom:0;background:#fff;padding-top:10px;z-index:5;}
+}
 </style>
 </head>
 
 <body>
 
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
 <header>
-
-    <h1 id="restauranteNome">
-        Restaurante Demo
-    </h1>
-
-    <p id="restauranteDescricao">
-        Escolha seu prato favorito
-    </p>
-
+    <h1 id="restauranteNome">Restaurante Demo</h1>
+    <p id="restauranteDescricao">Escolha seu prato favorito</p>
     <div class="header-status">
-
-        <span class="status-ponto"></span>
-
-        Cardápio digital
-
+        <span class="status-ponto"></span> Cardápio digital
     </div>
-
 </header>
-
-
 
 <div class="nicho-bar">
     <span>Experiência digital</span>
@@ -1170,2601 +255,330 @@ header h1{font-weight:800;letter-spacing:-1px;}
     <a href="?restaurante=restaurante">Restaurante</a>
 </div>
 
-<!-- =====================================================
-     CATEGORIAS
-===================================================== -->
+<div class="categorias" id="categorias"></div>
 
-<div
-    class="categorias"
-    id="categorias"
-></div>
+<main class="produtos" id="listaProdutos"></main>
 
-
-<!-- =====================================================
-     PRODUTOS
-===================================================== -->
-
-<main
-    class="produtos"
-    id="listaProdutos"
-></main>
-
-
-<!-- =====================================================
-     CARRINHO FLUTUANTE
-===================================================== -->
-
-<button
-    class="carrinho-flutuante"
-    onclick="abrirCarrinho()"
->
-
-    🛒
-
-    <span>
-        Pedido
-    </span>
-
-    <span
-        id="carrinhoContador"
-        class="carrinho-contador"
-    >
-        0
-    </span>
-
+<button class="carrinho-flutuante" onclick="abrirCarrinho()">
+    🛒 <span>Pedido</span>
+    <span id="carrinhoContador" class="carrinho-contador">0</span>
 </button>
 
-
-<!-- =====================================================
-     MODAL PRODUTO
-===================================================== -->
-
-<div
-    id="modalProduto"
-    class="modal"
->
-
+<!-- MODAL PRODUTO -->
+<div id="modalProduto" class="modal">
     <div class="modal-conteudo">
-
-        <button
-            class="fechar-modal"
-            onclick="fecharModal()"
-        >
-            ×
-        </button>
-
+        <button class="fechar-modal" onclick="fecharModal()">×</button>
         <h2 id="modalNome"></h2>
-
         <p id="modalDescricao"></p>
-
-        <div
-            id="modalPreco"
-            class="modal-preco"
-        ></div>
-
+        <div id="modalPreco" class="modal-preco"></div>
         <div class="quantidade-box">
-
-            <button
-                class="btn-quantidade"
-                onclick="alterarQuantidadeProduto(-1)"
-            >
-                −
-            </button>
-
-            <span
-                id="quantidadeProduto"
-                class="quantidade-numero"
-            >
-                1
-            </span>
-
-            <button
-                class="btn-quantidade"
-                onclick="alterarQuantidadeProduto(1)"
-            >
-                +
-            </button>
-
+            <button class="btn-quantidade" onclick="alterarQuantidadeProduto(-1)">−</button>
+            <span id="quantidadeProduto" class="quantidade-numero">1</span>
+            <button class="btn-quantidade" onclick="alterarQuantidadeProduto(1)">+</button>
         </div>
-
         <div class="botoes-produto">
-
-            <button
-                class="btn-principal"
-                onclick="adicionarProdutoAtual()"
-            >
-                Adicionar ao pedido
-            </button>
-
-            <button
-                class="btn-ar"
-                id="botao3dProduto"
-                onclick="abrir3D()"
-            >
-                Explorar em 3D
-            </button>
-
-            <button
-                class="btn-secundario"
-                id="botaoARProduto"
-                onclick="abrirAR()"
-            >
-                Ver na minha mesa
-            </button>
-
+            <button class="btn-principal" onclick="adicionarProdutoAtual()">Adicionar ao pedido</button>
+            <button class="btn-ar" id="botao3dProduto" onclick="abrir3D()">Explorar em 3D</button>
+            <button class="btn-secundario" id="botaoARProduto" onclick="abrirAR()">Ver na minha mesa</button>
         </div>
-
     </div>
-
 </div>
 
-
-<!-- =====================================================
-     MODAL 3D
-===================================================== -->
-
-<div
-    id="modal3D"
-    class="modal"
->
-
+<!-- MODAL 3D -->
+<div id="modal3D" class="modal">
     <div class="modal-conteudo">
-
-        <button
-            class="fechar-modal"
-            onclick="fechar3D()"
-        >
-            ×
-        </button>
-
-        <h2>
-            Visualização 3D
-        </h2>
-
-        <div
-            id="nomeProduto3D"
-            class="produto-3d-nome"
-        ></div>
-
+        <button class="fechar-modal" onclick="fechar3D()">×</button>
+        <h2>Visualização 3D</h2>
+        <div id="nomeProduto3D" class="produto-3d-nome"></div>
         <div class="area-3d">
-
             <canvas id="canvas3d"></canvas>
-
-            <div
-                id="carregando3d"
-                class="carregando-3d"
-            >
-                Preparando visualização 3D...
+            <div id="carregando3d" class="carregando-3d">Preparando visualização 3D...</div>
+            <div id="erro3d" class="erro-3d">
+                <strong>Não foi possível carregar o 3D.</strong>
+                <span>Verifique sua conexão e tente novamente.</span>
             </div>
-
-            <div
-                id="erro3d"
-                class="erro-3d"
-            >
-
-                <strong>
-                    Não foi possível carregar o 3D.
-                </strong>
-
-                <span>
-                    Verifique sua conexão e tente novamente.
-                </span>
-
-            </div>
-
         </div>
-
-        <p class="controle-3d">
-            Arraste para girar • Use o scroll para aproximar
-        </p>
-
-        <button
-            class="btn-principal"
-            style="margin-top:16px;"
-            onclick="abrirAR()"
-        >
-            Ver na minha mesa
-        </button>
-
-        <button
-            class="btn-secundario"
-            style="margin-top:10px;"
-            onclick="adicionarProdutoAtual()"
-        >
-            Adicionar ao pedido
-        </button>
-
+        <p class="controle-3d">Arraste para girar • Use o scroll para aproximar</p>
+        <button class="btn-principal" style="margin-top:16px;" onclick="abrirAR()">Ver na minha mesa</button>
+        <button class="btn-secundario" style="margin-top:10px;" onclick="adicionarProdutoAtual()">Adicionar ao pedido</button>
     </div>
-
 </div>
 
-
-<!-- =====================================================
-     MODAL AR
-===================================================== -->
-
-<div
-    id="modalAR"
-    class="modal"
->
-
+<!-- MODAL AR -->
+<div id="modalAR" class="modal">
     <div class="modal-conteudo ar-conteudo">
-
-        <button
-            class="fechar-modal"
-            onclick="fecharAR()"
-        >
-            ×
-        </button>
-
-        <div class="ar-icone">
-            AR
-        </div>
-
-        <h2>
-            Ver na minha mesa
-        </h2>
-
-        <p>
-            Ative a câmera para visualizar
-            o produto no ambiente real.
-        </p>
-
-        <button
-            class="btn-principal"
-            onclick="iniciarCameraAR()"
-        >
-            Ativar câmera
-        </button>
-
-        <div class="ar-aviso">
-            Permita o acesso à câmera quando solicitado.
-        </div>
-
+        <button class="fechar-modal" onclick="fecharAR()">×</button>
+        <div class="ar-icone">AR</div>
+        <h2>Ver na minha mesa</h2>
+        <p>Ative a câmera para visualizar o produto no ambiente real.</p>
+        <button class="btn-principal" onclick="iniciarCameraAR()">Ativar câmera</button>
+        <div class="ar-aviso">Permita o acesso à câmera quando solicitado.</div>
     </div>
-
 </div>
 
-
-<!-- =====================================================
-     TELA AR
-===================================================== -->
-
-<div
-    id="telaAR"
-    class="ar-tela"
->
-
-    <video
-        id="videoCamera"
-        autoplay
-        muted
-        playsinline
-    ></video>
-
-    <canvas
-        id="canvasAR"
-    ></canvas>
-
+<!-- TELA AR -->
+<div id="telaAR" class="ar-tela">
+    <video id="videoCamera" autoplay muted playsinline></video>
+    <canvas id="canvasAR"></canvas>
     <div class="ar-topo">
-
-        <div class="ar-titulo">
-
-            <span id="arNomeProduto">
-                Produto
-            </span>
-
-        </div>
-
-        <button
-            class="ar-fechar"
-            onclick="fecharCameraAR()"
-        >
-            ×
-        </button>
-
+        <div class="ar-titulo"><span id="arNomeProduto">Produto</span></div>
+        <button class="ar-fechar" onclick="fecharCameraAR()">×</button>
     </div>
-
     <div class="ar-instrucoes">
-
-        Arraste o produto para girar.
-
-        <br>
-
-        Use dois dedos para aumentar ou diminuir.
-
-        <div class="ar-status">
-            Modo câmera ativo
-        </div>
-
+        Arraste o produto para girar.<br>Use dois dedos para aumentar ou diminuir.
+        <div class="ar-status">Modo câmera ativo</div>
     </div>
-
-    <div
-        id="arCarregando"
-        class="ar-carregando ativo"
-    >
-
+    <div id="arCarregando" class="ar-carregando ativo">
         <div class="ar-ponto"></div>
-
-        <div>
-            Preparando experiência...
-        </div>
-
+        <div>Preparando experiência...</div>
     </div>
-
 </div>
 
-
-<!-- =====================================================
-     MODAL CARRINHO
-===================================================== -->
-
-<div
-    id="modalCarrinho"
-    class="modal"
->
-
+<!-- MODAL CARRINHO -->
+<div id="modalCarrinho" class="modal">
     <div class="modal-conteudo">
-
-        <button
-            class="fechar-modal"
-            onclick="fecharCarrinho()"
-        >
-            ×
-        </button>
-
-        <h2>
-            Seu pedido
-        </h2>
-
-        <div
-            id="carrinhoLista"
-            class="carrinho-lista"
-        ></div>
-
-        <div
-            id="carrinhoFinalizacao"
-            style="display:none;"
-        >
-
+        <button class="fechar-modal" onclick="fecharCarrinho()">×</button>
+        <h2>Seu pedido</h2>
+        <div id="carrinhoLista" class="carrinho-lista"></div>
+        <div id="carrinhoFinalizacao" style="display:none;">
             <div class="carrinho-total">
-
-                <span>
-                    Total
-                </span>
-
-                <span id="carrinhoTotal">
-                    R$ 0,00
-                </span>
-
+                <span>Total</span>
+                <span id="carrinhoTotal">R$ 0,00</span>
             </div>
-
             <div class="formulario-pedido">
-
-                <label for="clienteNome">
-                    Seu nome
-                </label>
-
-                <input
-                    id="clienteNome"
-                    type="text"
-                    placeholder="Digite seu nome"
-                >
-
-                <label for="clienteObs">
-                    Observações
-                </label>
-
-                <textarea
-                    id="clienteObs"
-                    placeholder="Ex.: sem cebola, ponto da carne..."
-                ></textarea>
-
+                <label for="clienteNome">Seu nome</label>
+                <input id="clienteNome" type="text" placeholder="Digite seu nome">
+                <label for="clienteObs">Observações</label>
+                <textarea id="clienteObs" placeholder="Ex.: sem cebola, ponto da carne..."></textarea>
             </div>
-
-            <button
-                class="btn-principal"
-                style="margin-top:16px;"
-                onclick="finalizarWhatsApp()"
-            >
-                Finalizar pedido pelo WhatsApp
-            </button>
-
+            <button class="btn-principal" style="margin-top:16px;" onclick="finalizarWhatsApp()">Finalizar pedido pelo WhatsApp</button>
         </div>
-
     </div>
-
 </div>
 
-
-<!-- =====================================================
-     TOAST
-===================================================== -->
-
-<div
-    id="toast"
-    class="toast"
->
-    Adicionado ao pedido
-</div>
-
+<div id="toast" class="toast">Adicionado ao pedido</div>
 
 <footer>
-
-    <div id="rodapeNome">
-        Restaurante Demo
-    </div>
-
+    <div id="rodapeNome">Restaurante Demo</div>
     Cardápio digital
-
 </footer>
 
-
-<!-- =====================================================
-     THREE.JS + 3D + AR
-===================================================== -->
-
+<!-- THREE.JS + LÓGICA 3D/AR -->
 <script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
 
-import * as THREE from
-"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+let cena = null, camera = null, renderizador = null, controles = null, objetoAtual = null, animacaoAtiva = false;
 
-import {
-    OrbitControls
+function material(cor, roughness=.7){
+    return new THREE.MeshStandardMaterial({ color:cor, roughness:roughness });
 }
-from
-"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js";
-
-
-/* =====================================================
-   VARIÁVEIS 3D
-===================================================== */
-
-let cena = null;
-
-let camera = null;
-
-let renderizador = null;
-
-let controles = null;
-
-let objetoAtual = null;
-
-let animacaoAtiva = false;
-
-
-/* =====================================================
-   MATERIAL
-===================================================== */
-
-function material(
-    cor,
-    roughness=.7
-){
-
-    return new THREE.MeshStandardMaterial({
-
-        color:cor,
-
-        roughness:roughness
-
-    });
-
-}
-
-
-/* =====================================================
-   INICIAR 3D
-===================================================== */
 
 function iniciar3D(){
+    const canvas = document.getElementById("canvas3d");
+    const largura = canvas.clientWidth || 400;
+    const altura = canvas.clientHeight || 300;
 
-    const canvas =
-        document.getElementById("canvas3d");
+    cena = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(45, largura / altura, .1, 100);
+    camera.position.set(4, 2.7, 6);
 
-    const largura =
-        canvas.clientWidth || 400;
-
-    const altura =
-        canvas.clientHeight || 300;
-
-
-    cena =
-        new THREE.Scene();
-
-
-    camera =
-        new THREE.PerspectiveCamera(
-            45,
-            largura / altura,
-            .1,
-            100
-        );
-
-
-    camera.position.set(
-        4,
-        2.7,
-        6
-    );
-
-
-    renderizador =
-        new THREE.WebGLRenderer({
-
-            canvas:canvas,
-
-            antialias:true,
-
-            alpha:true
-
-        });
-
-
-    renderizador.setPixelRatio(
-
-        Math.min(
-            window.devicePixelRatio || 1,
-            2
-        )
-
-    );
-
-
-    renderizador.setSize(
-        largura,
-        altura,
-        false
-    );
-
-
+    renderizador = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true });
+    renderizador.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderizador.setSize(largura, altura, false);
     renderizador.shadowMap.enabled = true;
 
-
-    controles =
-        new OrbitControls(
-            camera,
-            renderizador.domElement
-        );
-
-
+    controles = new OrbitControls(camera, renderizador.domElement);
     controles.enableDamping = true;
-
     controles.dampingFactor = .06;
-
     controles.minDistance = 3;
-
     controles.maxDistance = 9;
+    controles.target.set(0, -.1, 0);
 
-
-    controles.target.set(
-        0,
-        -.1,
-        0
-    );
-
-
-    const ambiente =
-        new THREE.HemisphereLight(
-            0xffffff,
-            0x444444,
-            2.8
-        );
-
+    const ambiente = new THREE.HemisphereLight(0xffffff, 0x444444, 2.8);
     cena.add(ambiente);
 
-
-    const principal =
-        new THREE.DirectionalLight(
-            0xffffff,
-            4
-        );
-
-    principal.position.set(
-        4,
-        6,
-        5
-    );
-
+    const principal = new THREE.DirectionalLight(0xffffff, 4);
+    principal.position.set(4, 6, 5);
     principal.castShadow = true;
-
     cena.add(principal);
 
-
-    const frontal =
-        new THREE.PointLight(
-            0xffffff,
-            3,
-            20
-        );
-
-    frontal.position.set(
-        -4,
-        3,
-        4
-    );
-
+    const frontal = new THREE.PointLight(0xffffff, 3, 20);
+    frontal.position.set(-4, 3, 4);
     cena.add(frontal);
 
-
-    const lateral =
-        new THREE.PointLight(
-            0xffffff,
-            2,
-            20
-        );
-
-    lateral.position.set(
-        4,
-        1,
-        -4
-    );
-
+    const lateral = new THREE.PointLight(0xffffff, 2, 20);
+    lateral.position.set(4, 1, -4);
     cena.add(lateral);
 
-
-    const geometriaChao =
-        new THREE.CircleGeometry(
-            3,
-            64
-        );
-
-
-    const materialChao =
-        new THREE.MeshStandardMaterial({
-
-            color:0x222222,
-
-            roughness:.8
-
-        });
-
-
-    const chao =
-        new THREE.Mesh(
-            geometriaChao,
-            materialChao
-        );
-
-
-    chao.rotation.x =
-        -Math.PI / 2;
-
-    chao.position.y =
-        -1.3;
-
-    chao.receiveShadow =
-        true;
-
+    const chao = new THREE.Mesh(
+        new THREE.CircleGeometry(3, 64),
+        new THREE.MeshStandardMaterial({ color:0x222222, roughness:.8 })
+    );
+    chao.rotation.x = -Math.PI / 2;
+    chao.position.y = -1.3;
+    chao.receiveShadow = true;
     cena.add(chao);
 
-
     animacaoAtiva = true;
-
     animar();
-
     ajustar3D();
-
 }
-
-
-/* =====================================================
-   HAMBÚRGUER
-===================================================== */
 
 function criarHamburguer(){
-
     limparObjeto();
+    const grupo = new THREE.Group();
+    const paoInferior = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.45, .45, 64), material(0xc98232, .75));
+    paoInferior.position.y = -.85; grupo.add(paoInferior);
 
+    const carne = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, .55, 64), material(0x4a2114, .9));
+    carne.position.y = -.35; grupo.add(carne);
 
-    const grupo =
-        new THREE.Group();
+    const queijo = new THREE.Mesh(new THREE.BoxGeometry(2.8, .12, 2.8), material(0xffc928, .5));
+    queijo.position.y = .02; queijo.rotation.y = Math.PI / 4; grupo.add(queijo);
 
+    const alface = new THREE.Mesh(new THREE.CylinderGeometry(1.58, 1.58, .18, 64), material(0x3d8f35, .9));
+    alface.position.y = .17; grupo.add(alface);
 
-    const paoInferior =
-        new THREE.Mesh(
+    const paoSuperior = new THREE.Mesh(new THREE.SphereGeometry(1.58, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2), material(0xd8943c, .7));
+    paoSuperior.position.y = .25; paoSuperior.scale.y = .65; grupo.add(paoSuperior);
 
-            new THREE.CylinderGeometry(
-                1.55,
-                1.45,
-                .45,
-                64
-            ),
-
-            material(
-                0xc98232,
-                .75
-            )
-
-        );
-
-
-    paoInferior.position.y =
-        -.85;
-
-    grupo.add(paoInferior);
-
-
-    const carne =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                1.5,
-                1.5,
-                .55,
-                64
-            ),
-
-            material(
-                0x4a2114,
-                .9
-            )
-
-        );
-
-
-    carne.position.y =
-        -.35;
-
-    grupo.add(carne);
-
-
-    const queijo =
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                2.8,
-                .12,
-                2.8
-            ),
-
-            material(
-                0xffc928,
-                .5
-            )
-
-        );
-
-
-    queijo.position.y =
-        .02;
-
-    queijo.rotation.y =
-        Math.PI / 4;
-
-    grupo.add(queijo);
-
-
-    const alface =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                1.58,
-                1.58,
-                .18,
-                64
-            ),
-
-            material(
-                0x3d8f35,
-                .9
-            )
-
-        );
-
-
-    alface.position.y =
-        .17;
-
-    grupo.add(alface);
-
-
-    const paoSuperior =
-        new THREE.Mesh(
-
-            new THREE.SphereGeometry(
-                1.58,
-                64,
-                32,
-                0,
-                Math.PI * 2,
-                0,
-                Math.PI / 2
-            ),
-
-            material(
-                0xd8943c,
-                .7
-            )
-
-        );
-
-
-    paoSuperior.position.y =
-        .25;
-
-    paoSuperior.scale.y =
-        .65;
-
-    grupo.add(paoSuperior);
-
-
-    for(
-        let i=0;
-        i<22;
-        i++
-    ){
-
-        const semente =
-            new THREE.Mesh(
-
-                new THREE.SphereGeometry(
-                    .06,
-                    12,
-                    8
-                ),
-
-                material(
-                    0xffe4a3
-                )
-
-            );
-
-
-        const angulo =
-            Math.random() *
-            Math.PI *
-            2;
-
-
-        const raio =
-            Math.random() *
-            1.1;
-
-
-        semente.position.set(
-
-            Math.cos(angulo) *
-            raio,
-
-            .9 +
-            Math.random() *
-            .15,
-
-            Math.sin(angulo) *
-            raio
-
-        );
-
-
-        semente.scale.y =
-            .4;
-
-        grupo.add(semente);
-
-    }
-
-
-    objetoAtual =
-        grupo;
-
-    cena.add(grupo);
-
+    objetoAtual = grupo; cena.add(grupo);
 }
-
-
-/* =====================================================
-   FETTUCCINE
-===================================================== */
 
 function criarFettuccine(){
-
     limparObjeto();
-
-
-    const grupo =
-        new THREE.Group();
-
-
-    const prato =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                2.2,
-                1.9,
-                .18,
-                64
-            ),
-
-            material(
-                0xf0f0f0,
-                .3
-            )
-
-        );
-
-
-    prato.position.y =
-        -.95;
-
-    grupo.add(prato);
-
-
-    const borda =
-        new THREE.Mesh(
-
-            new THREE.TorusGeometry(
-                1.95,
-                .08,
-                16,
-                64
-            ),
-
-            material(
-                0xffffff,
-                .25
-            )
-
-        );
-
-
-    borda.position.y =
-        -.83;
-
-    grupo.add(borda);
-
-
-    const molho =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                1.65,
-                1.65,
-                .12,
-                64
-            ),
-
-            material(
-                0xd48b3d,
-                .8
-            )
-
-        );
-
-
-    molho.position.y =
-        -.72;
-
-    grupo.add(molho);
-
-
-    for(
-        let i=0;
-        i<22;
-        i++
-    ){
-
-        const curva =
-            new THREE.CatmullRomCurve3([
-
-                new THREE.Vector3(
-                    -1.15 + Math.random()*.5,
-                    -.55 + Math.random()*.12,
-                    -.9 + Math.random()*.5
-                ),
-
-                new THREE.Vector3(
-                    -.4 + Math.random()*.7,
-                    -.48 + Math.random()*.2,
-                    -.2 + Math.random()*.8
-                ),
-
-                new THREE.Vector3(
-                    .2 + Math.random()*.8,
-                    -.5 + Math.random()*.15,
-                    .4 + Math.random()*.5
-                ),
-
-                new THREE.Vector3(
-                    .9 - Math.random()*.5,
-                    -.52 + Math.random()*.12,
-                    .9 - Math.random()*.5
-                )
-
-            ]);
-
-
-        const geometria =
-            new THREE.TubeGeometry(
-                curva,
-                24,
-                .055,
-                8,
-                false
-            );
-
-
-        const massa =
-            new THREE.Mesh(
-
-                geometria,
-
-                material(
-                    0xe6c06a,
-                    .7
-                )
-
-            );
-
-
-        grupo.add(massa);
-
-    }
-
-
-    objetoAtual =
-        grupo;
-
-    cena.add(grupo);
-
+    const grupo = new THREE.Group();
+    const prato = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 1.9, .18, 64), material(0xf0f0f0, .3));
+    prato.position.y = -.95; grupo.add(prato);
+    const molho = new THREE.Mesh(new THREE.CylinderGeometry(1.65, 1.65, .12, 64), material(0xd48b3d, .8));
+    molho.position.y = -.72; grupo.add(molho);
+    objetoAtual = grupo; cena.add(grupo);
 }
-
-
-/* =====================================================
-   REFRIGERANTE
-===================================================== */
 
 function criarRefrigerante(){
-
     limparObjeto();
-
-
-    const grupo =
-        new THREE.Group();
-
-
-    const lata =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                .72,
-                .72,
-                2.5,
-                64
-            ),
-
-            material(
-                0xc92828,
-                .3
-            )
-
-        );
-
-
-    lata.position.y =
-        -.1;
-
-    grupo.add(lata);
-
-
-    const topo =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                .69,
-                .69,
-                .08,
-                64
-            ),
-
-            material(
-                0xcfcfcf,
-                .25
-            )
-
-        );
-
-
-    topo.position.y =
-        1.18;
-
-    grupo.add(topo);
-
-
-    const base =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                .69,
-                .69,
-                .08,
-                64
-            ),
-
-            material(
-                0xbdbdbd,
-                .3
-            )
-
-        );
-
-
-    base.position.y =
-        -1.36;
-
-    grupo.add(base);
-
-
-    const logo =
-        new THREE.Mesh(
-
-            new THREE.TorusGeometry(
-                .32,
-                .1,
-                16,
-                40
-            ),
-
-            material(
-                0xffffff,
-                .25
-            )
-
-        );
-
-
-    logo.rotation.x =
-        Math.PI / 2;
-
-    logo.position.z =
-        .73;
-
-    logo.position.y =
-        -.05;
-
-    grupo.add(logo);
-
-
-    const anel =
-        new THREE.Mesh(
-
-            new THREE.TorusGeometry(
-                .2,
-                .045,
-                12,
-                32
-            ),
-
-            material(
-                0xaaaaaa,
-                .3
-            )
-
-        );
-
-
-    anel.rotation.x =
-        Math.PI / 2;
-
-    anel.position.y =
-        1.23;
-
-    grupo.add(anel);
-
-
-    objetoAtual =
-        grupo;
-
-    cena.add(grupo);
-
+    const grupo = new THREE.Group();
+    const lata = new THREE.Mesh(new THREE.CylinderGeometry(.72, .72, 2.5, 64), material(0xc92828, .3));
+    lata.position.y = -.1; grupo.add(lata);
+    objetoAtual = grupo; cena.add(grupo);
 }
-
-
-/* =====================================================
-   BROWNIE
-===================================================== */
 
 function criarBrownie(){
-
     limparObjeto();
-
-
-    const grupo =
-        new THREE.Group();
-
-
-    const brownie =
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                2.8,
-                .7,
-                2.2
-            ),
-
-            material(
-                0x3a1b0f,
-                .85
-            )
-
-        );
-
-
-    brownie.position.y =
-        -.5;
-
-    grupo.add(brownie);
-
-
-    const cobertura =
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                2.75,
-                .08,
-                2.15
-            ),
-
-            material(
-                0x241008,
-                .5
-            )
-
-        );
-
-
-    cobertura.position.y =
-        -.12;
-
-    grupo.add(cobertura);
-
-
-    for(
-        let i=0;
-        i<15;
-        i++
-    ){
-
-        const pedaco =
-            new THREE.Mesh(
-
-                new THREE.BoxGeometry(
-                    .12,
-                    .06,
-                    .12
-                ),
-
-                material(
-                    0x6a351b,
-                    .8
-                )
-
-            );
-
-
-        pedaco.position.set(
-
-            (Math.random()-.5)*2.3,
-
-            -.04,
-
-            (Math.random()-.5)*1.7
-
-        );
-
-
-        grupo.add(pedaco);
-
-    }
-
-
-    objetoAtual =
-        grupo;
-
-    cena.add(grupo);
-
+    const grupo = new THREE.Group();
+    const brownie = new THREE.Mesh(new THREE.BoxGeometry(2.8, .7, 2.2), material(0x3a1b0f, .85));
+    brownie.position.y = -.5; grupo.add(brownie);
+    objetoAtual = grupo; cena.add(grupo);
 }
-
-
-/* =====================================================
-   MODELO
-===================================================== */
 
 function criarModelo(produto){
-
-    if(!cena){
-        return;
-    }
-
+    if(!cena) return;
     const tipo = restauranteAtual?.produtos?.find(p=>p.id===produto)?.modelo3d || produto;
-
-    if(tipo==="hamburguer"){
-        criarHamburguer();
-    }
-
-    else if(tipo==="fettuccine"){
-        criarFettuccine();
-    }
-
-    else if(tipo==="refrigerante"){
-        criarRefrigerante();
-    }
-
-    else if(tipo==="brownie"){
-        criarBrownie();
-    }
-
+    if(tipo==="hamburguer") criarHamburguer();
+    else if(tipo==="fettuccine") criarFettuccine();
+    else if(tipo==="refrigerante") criarRefrigerante();
+    else if(tipo==="brownie") criarBrownie();
 }
-
-
-/* =====================================================
-   LIMPAR OBJETO
-===================================================== */
 
 function limparObjeto(){
-
-    if(!objetoAtual){
-        return;
-    }
-
-
+    if(!objetoAtual) return;
     cena.remove(objetoAtual);
-
-
-    objetoAtual.traverse(
-        objeto=>{
-
-            if(objeto.geometry){
-                objeto.geometry.dispose();
-            }
-
-
-            if(objeto.material){
-
-                if(
-                    Array.isArray(
-                        objeto.material
-                    )
-                ){
-
-                    objeto.material.forEach(
-                        m=>m.dispose()
-                    );
-
-                }
-
-                else{
-                    objeto.material.dispose();
-                }
-
-            }
-
+    objetoAtual.traverse(objeto=>{
+        if(objeto.geometry) objeto.geometry.dispose();
+        if(objeto.material){
+            if(Array.isArray(objeto.material)) objeto.material.forEach(m=>m.dispose());
+            else objeto.material.dispose();
         }
-    );
-
-
-    objetoAtual =
-        null;
-
+    });
+    objetoAtual = null;
 }
-
-
-/* =====================================================
-   ANIMAÇÃO
-===================================================== */
 
 function animar(){
-
-    if(!animacaoAtiva){
-        return;
-    }
-
-
+    if(!animacaoAtiva) return;
     requestAnimationFrame(animar);
-
-
-    if(
-        objetoAtual &&
-        !window.usuarioGirando3D
-    ){
-
-        objetoAtual.rotation.y += .003;
-
-    }
-
-
-    if(controles){
-        controles.update();
-    }
-
-
-    if(
-        renderizador &&
-        cena &&
-        camera
-    ){
-
-        renderizador.render(
-            cena,
-            camera
-        );
-
-    }
-
+    if(objetoAtual && !window.usuarioGirando3D) objetoAtual.rotation.y += .003;
+    if(controles) controles.update();
+    if(renderizador && cena && camera) renderizador.render(cena, camera);
 }
-
-
-/* =====================================================
-   AJUSTAR 3D
-===================================================== */
 
 function ajustar3D(){
-
-    if(!camera || !renderizador){
-        return;
-    }
-
-
-    const canvas =
-        document.getElementById(
-            "canvas3d"
-        );
-
-
-    const largura =
-        canvas.clientWidth;
-
-
-    const altura =
-        canvas.clientHeight;
-
-
-    if(
-        largura<=0 ||
-        altura<=0
-    ){
-        return;
-    }
-
-
-    camera.aspect =
-        largura / altura;
-
-
+    if(!camera || !renderizador) return;
+    const canvas = document.getElementById("canvas3d");
+    const largura = canvas.clientWidth;
+    const altura = canvas.clientHeight;
+    if(largura<=0 || altura<=0) return;
+    camera.aspect = largura / altura;
     camera.updateProjectionMatrix();
-
-
-    renderizador.setSize(
-        largura,
-        altura,
-        false
-    );
-
+    renderizador.setSize(largura, altura, false);
 }
 
+window.abrir3DReal = function(){
+    document.getElementById("modalProduto").classList.remove("ativo");
+    document.getElementById("modal3D").classList.add("ativo");
+    document.getElementById("carregando3d").style.display="flex";
+    document.getElementById("erro3d").style.display="none";
+    document.getElementById("nomeProduto3D").textContent = window.produtoSelecionadoNome;
 
-/* =====================================================
-   ABRIR 3D
-===================================================== */
-
-window.abrir3DReal =
-function(){
-
-    document
-        .getElementById("modalProduto")
-        .classList.remove("ativo");
-
-
-    document
-        .getElementById("modal3D")
-        .classList.add("ativo");
-
-
-    document
-        .getElementById("carregando3d")
-        .style.display="flex";
-
-
-    document
-        .getElementById("erro3d")
-        .style.display="none";
-
-
-    document
-        .getElementById("nomeProduto3D")
-        .textContent =
-        window.produtoSelecionadoNome;
-
+    // Rastreia no Analytics
+    MenuAnalytics.track3DView({ id: window.produtoSelecionado, nome: window.produtoSelecionadoNome });
 
     setTimeout(()=>{
-
         try{
-
-            if(!cena){
-                iniciar3D();
-            }
-
-
+            if(!cena) iniciar3D();
             const produto3D = restauranteAtual.produtos.find(p=>p.id===window.produtoSelecionado);
             criarModelo(produto3D?.id || window.produtoSelecionado);
-
-
             ajustar3D();
-
-
-            document
-                .getElementById("carregando3d")
-                .style.display="none";
-
+            document.getElementById("carregando3d").style.display="none";
+        }catch(erro){
+            document.getElementById("carregando3d").style.display="none";
+            document.getElementById("erro3d").style.display="flex";
         }
-
-        catch(erro){
-
-            console.error(erro);
-
-
-            document
-                .getElementById("carregando3d")
-                .style.display="none";
-
-
-            document
-                .getElementById("erro3d")
-                .style.display="flex";
-
-        }
-
     },100);
-
 };
 
-
-/* =====================================================
-   FECHAR 3D
-===================================================== */
-
-window.fechar3DReal =
-function(){
-
-    document
-        .getElementById("modal3D")
-        .classList.remove("ativo");
-
+window.fechar3DReal = function(){
+    document.getElementById("modal3D").classList.remove("ativo");
 };
 
-
-/* =====================================================
-   AR
-===================================================== */
-
-let cameraAR = null;
-
-let renderizadorAR = null;
-
-let objetoAR = null;
-
-let cenaAR = null;
-
-let streamCamera = null;
-
-let escalaAR = .9;
-
-let rotacaoAR = 0;
-
-let arrastandoAR = false;
-
-let ultimoXAR = 0;
-
-let distanciaInicialAR = null;
-
-
-/* =====================================================
-   CRIAR OBJETO AR
-===================================================== */
-
-function criarObjetoARPorTipo(tipo){
-
-    const grupo =
-        new THREE.Group();
-
-
-    if(tipo==="hamburguer"){
-
-        const pao =
-            new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    1.1,
-                    1.05,
-                    .35,
-                    48
-                ),
-
-                material(
-                    0xc98232,
-                    .75
-                )
-
-            );
-
-
-        pao.position.y =
-            -.55;
-
-        grupo.add(pao);
-
-
-        const carne =
-            new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    1.05,
-                    1.05,
-                    .4,
-                    48
-                ),
-
-                material(
-                    0x4a2114,
-                    .9
-                )
-
-            );
-
-
-        carne.position.y =
-            -.18;
-
-        grupo.add(carne);
-
-
-        const queijo =
-            new THREE.Mesh(
-
-                new THREE.BoxGeometry(
-                    2,
-                    .1,
-                    2
-                ),
-
-                material(
-                    0xffc928,
-                    .5
-                )
-
-            );
-
-
-        queijo.position.y =
-            .05;
-
-        queijo.rotation.y =
-            Math.PI/4;
-
-        grupo.add(queijo);
-
-
-        const alface =
-            new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    1.08,
-                    1.08,
-                    .12,
-                    48
-                ),
-
-                material(
-                    0x3d8f35,
-                    .9
-                )
-
-            );
-
-
-        alface.position.y =
-            .18;
-
-        grupo.add(alface);
-
-
-        const topo =
-            new THREE.Mesh(
-
-                new THREE.SphereGeometry(
-                    1.08,
-                    48,
-                    24,
-                    0,
-                    Math.PI*2,
-                    0,
-                    Math.PI/2
-                ),
-
-                material(
-                    0xd8943c,
-                    .7
-                )
-
-            );
-
-
-        topo.position.y =
-            .25;
-
-        topo.scale.y =
-            .65;
-
-        grupo.add(topo);
-
-    }
-
-
-    else if(tipo==="fettuccine"){
-
-        const prato =
-            new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    1.7,
-                    1.5,
-                    .12,
-                    48
-                ),
-
-                material(
-                    0xf0f0f0,
-                    .3
-                )
-
-            );
-
-
-        prato.position.y =
-            -.55;
-
-        grupo.add(prato);
-
-
-        const molho =
-            new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    1.25,
-                    1.25,
-                    .08,
-                    48
-                ),
-
-                material(
-                    0xd48b3d,
-                    .8
-                )
-
-            );
-
-
-        molho.position.y =
-            -.47;
-
-        grupo.add(molho);
-
-
-        for(
-            let i=0;
-            i<15;
-            i++
-        ){
-
-            const curva =
-                new THREE.CatmullRomCurve3([
-
-                    new THREE.Vector3(
-                        -1+Math.random()*.5,
-                        -.35,
-                        -.7+Math.random()*.4
-                    ),
-
-                    new THREE.Vector3(
-                        -.3+Math.random()*.6,
-                        -.3,
-                        -.1+Math.random()*.7
-                    ),
-
-                    new THREE.Vector3(
-                        .2+Math.random()*.6,
-                        -.32,
-                        .4+Math.random()*.4
-                    ),
-
-                    new THREE.Vector3(
-                        .8-Math.random()*.4,
-                        -.34,
-                        .7-Math.random()*.4
-                    )
-
-                ]);
-
-
-            const tubo =
-                new THREE.TubeGeometry(
-                    curva,
-                    20,
-                    .045,
-                    8,
-                    false
-                );
-
-
-            grupo.add(
-
-                new THREE.Mesh(
-                    tubo,
-                    material(
-                        0xe6c06a,
-                        .7
-                    )
-                )
-
-            );
-
-        }
-
-    }
-
-
-    else if(tipo==="refrigerante"){
-
-        const lata =
-            new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    .58,
-                    .58,
-                    2,
-                    48
-                ),
-
-                material(
-                    0xc92828,
-                    .3
-                )
-
-            );
-
-
-        grupo.add(lata);
-
-
-        const topo =
-            new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    .55,
-                    .55,
-                    .06,
-                    48
-                ),
-
-                material(
-                    0xcfcfcf,
-                    .25
-                )
-
-            );
-
-
-        topo.position.y =
-            1.03;
-
-        grupo.add(topo);
-
-    }
-
-
-    else if(tipo==="brownie"){
-
-        const brownie =
-            new THREE.Mesh(
-
-                new THREE.BoxGeometry(
-                    2.1,
-                    .55,
-                    1.7
-                ),
-
-                material(
-                    0x3a1b0f,
-                    .85
-                )
-
-            );
-
-
-        brownie.position.y =
-            -.25;
-
-        grupo.add(brownie);
-
-
-        const cobertura =
-            new THREE.Mesh(
-
-                new THREE.BoxGeometry(
-                    2.05,
-                    .07,
-                    1.65
-                ),
-
-                material(
-                    0x241008,
-                    .5
-                )
-
-            );
-
-
-        cobertura.position.y =
-            .04;
-
-        grupo.add(cobertura);
-
-    }
-
-
-    return grupo;
-
-}
-
-
-/* =====================================================
-   CRIAR OBJETO AR
-===================================================== */
-
-function criarObjetoAR(){
-
-    if(
-        !cenaAR
-    ){
-        return;
-    }
-
-
-    if(objetoAR){
-
-        cenaAR.remove(
-            objetoAR
-        );
-
-        objetoAR.traverse(
-            obj=>{
-
-                if(obj.geometry){
-                    obj.geometry.dispose();
-                }
-
-
-                if(obj.material){
-
-                    if(
-                        Array.isArray(
-                            obj.material
-                        )
-                    ){
-
-                        obj.material.forEach(
-                            m=>m.dispose()
-                        );
-
-                    }
-
-                    else{
-                        obj.material.dispose();
-                    }
-
-                }
-
-            }
-        );
-
-    }
-
-
-    const produtoAR = restauranteAtual.produtos.find(p=>p.id===window.produtoSelecionado);
-
-    objetoAR =
-        criarObjetoARPorTipo(produtoAR?.modelo3d || window.produtoSelecionado);
-
-
-    if(objetoAR){
-
-        objetoAR.position.set(
-            0,
-            -.6,
-            0
-        );
-
-        objetoAR.scale.set(
-            escalaAR,
-            escalaAR,
-            escalaAR
-        );
-
-        cenaAR.add(
-            objetoAR
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   INICIAR CAMERA AR
-===================================================== */
+let cameraAR = null, renderizadorAR = null, objetoAR = null, cenaAR = null, streamCamera = null, escalaAR = .9, rotacaoAR = 0;
 
 async function iniciarCameraAR(){
+    document.getElementById("modalAR").classList.remove("ativo");
+    document.getElementById("telaAR").classList.add("ativo");
+    document.getElementById("arCarregando").classList.add("ativo");
+    document.getElementById("arNomeProduto").textContent = window.produtoSelecionadoNome;
 
-    document
-        .getElementById("modalAR")
-        .classList.remove("ativo");
-
-
-    document
-        .getElementById("telaAR")
-        .classList.add("ativo");
-
-
-    document
-        .getElementById("arCarregando")
-        .classList.add("ativo");
-
-
-    document
-        .getElementById("arNomeProduto")
-        .textContent =
-        window.produtoSelecionadoNome;
-
+    // Rastreia AR
+    MenuAnalytics.trackARView({ id: window.produtoSelecionado, nome: window.produtoSelecionadoNome });
 
     try{
-
-        if(
-            !navigator.mediaDevices ||
-            !navigator.mediaDevices.getUserMedia
-        ){
-
-            throw new Error(
-                "Câmera não suportada."
-            );
-
-        }
-
-
-        streamCamera =
-            await navigator
-                .mediaDevices
-                .getUserMedia({
-
-                    video:{
-                        facingMode:{
-                            ideal:"environment"
-                        }
-                    },
-
-                    audio:false
-
-                });
-
-
-        const video =
-            document.getElementById(
-                "videoCamera"
-            );
-
-
-        video.srcObject =
-            streamCamera;
-
-
+        if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("Câmera não suportada.");
+        streamCamera = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:"environment" } }, audio:false });
+        const video = document.getElementById("videoCamera");
+        video.srcObject = streamCamera;
         await video.play();
-
-
-        escalaAR =
-            .9;
-
-        rotacaoAR =
-            0;
-
-
-        iniciarCenaAR();
-
-
-        document
-            .getElementById("arCarregando")
-            .classList.remove("ativo");
-
-    }
-
-    catch(erro){
-
-        console.error(erro);
-
-
+        document.getElementById("arCarregando").classList.remove("ativo");
+    }catch(erro){
         fecharCameraAR();
-
-
-        alert(
-            "Não foi possível acessar a câmera. Verifique a permissão do navegador."
-        );
-
+        alert("Não foi possível acessar a câmera.");
     }
-
 }
-
-
-/* =====================================================
-   CENA AR
-===================================================== */
-
-function iniciarCenaAR(){
-
-    const canvas =
-        document.getElementById(
-            "canvasAR"
-        );
-
-
-    const largura =
-        window.innerWidth;
-
-
-    const altura =
-        window.innerHeight;
-
-
-    cenaAR =
-        new THREE.Scene();
-
-
-    cameraAR =
-        new THREE.PerspectiveCamera(
-            45,
-            largura/altura,
-            .01,
-            100
-        );
-
-
-    cameraAR.position.set(
-        0,
-        0,
-        6
-    );
-
-
-    renderizadorAR =
-        new THREE.WebGLRenderer({
-
-            canvas:canvas,
-
-            alpha:true,
-
-            antialias:true
-
-        });
-
-
-    renderizadorAR.setPixelRatio(
-
-        Math.min(
-            window.devicePixelRatio||1,
-            2
-        )
-
-    );
-
-
-    renderizadorAR.setSize(
-        largura,
-        altura,
-        false
-    );
-
-
-    renderizadorAR.setClearColor(
-        0x000000,
-        0
-    );
-
-
-    const luz =
-        new THREE.HemisphereLight(
-            0xffffff,
-            0x444444,
-            3
-        );
-
-
-    cenaAR.add(luz);
-
-
-    const luz2 =
-        new THREE.DirectionalLight(
-            0xffffff,
-            3
-        );
-
-
-    luz2.position.set(
-        2,
-        4,
-        4
-    );
-
-
-    cenaAR.add(luz2);
-
-
-    criarObjetoAR();
-
-
-    adicionarControlesAR();
-
-
-    renderizarAR();
-
-}
-
-
-/* =====================================================
-   RENDER AR
-===================================================== */
-
-function renderizarAR(){
-
-    if(
-        !renderizadorAR ||
-        !cenaAR ||
-        !cameraAR
-    ){
-
-        return;
-
-    }
-
-
-    requestAnimationFrame(
-        renderizarAR
-    );
-
-
-    if(objetoAR){
-
-        objetoAR.rotation.y =
-            rotacaoAR;
-
-    }
-
-
-    renderizadorAR.render(
-        cenaAR,
-        cameraAR
-    );
-
-}
-
-
-/* =====================================================
-   CONTROLES AR
-===================================================== */
-
-function adicionarControlesAR(){
-
-    const canvas =
-        document.getElementById(
-            "canvasAR"
-        );
-
-
-    canvas.onpointerdown =
-    function(evento){
-
-        arrastandoAR = true;
-
-        ultimoXAR =
-            evento.clientX;
-
-        canvas.setPointerCapture(
-            evento.pointerId
-        );
-
-    };
-
-
-    canvas.onpointermove =
-    function(evento){
-
-        if(
-            !arrastandoAR ||
-            !objetoAR
-        ){
-
-            return;
-
-        }
-
-
-        const diferenca =
-            evento.clientX -
-            ultimoXAR;
-
-
-        rotacaoAR +=
-            diferenca * .01;
-
-
-        ultimoXAR =
-            evento.clientX;
-
-    };
-
-
-    canvas.onpointerup =
-    function(){
-
-        arrastandoAR =
-            false;
-
-    };
-
-
-    canvas.onpointercancel =
-    function(){
-
-        arrastandoAR =
-            false;
-
-    };
-
-
-    canvas.ontouchstart =
-    function(evento){
-
-        if(
-            evento.touches.length===2
-        ){
-
-            distanciaInicialAR =
-                distanciaDoToque(
-                    evento.touches[0],
-                    evento.touches[1]
-                );
-
-        }
-
-    };
-
-
-    canvas.ontouchmove =
-    function(evento){
-
-        if(
-            evento.touches.length===2 &&
-            objetoAR &&
-            distanciaInicialAR
-        ){
-
-            const distancia =
-                distanciaDoToque(
-                    evento.touches[0],
-                    evento.touches[1]
-                );
-
-
-            const proporcao =
-                distancia /
-                distanciaInicialAR;
-
-
-            escalaAR =
-                Math.max(
-                    .35,
-                    Math.min(
-                        1.8,
-                        escalaAR *
-                        proporcao
-                    )
-                );
-
-
-            objetoAR.scale.set(
-                escalaAR,
-                escalaAR,
-                escalaAR
-            );
-
-
-            distanciaInicialAR =
-                distancia;
-
-        }
-
-    };
-
-
-    canvas.ontouchend =
-    function(){
-
-        distanciaInicialAR =
-            null;
-
-    };
-
-}
-
-
-function distanciaDoToque(
-    toque1,
-    toque2
-){
-
-    const dx =
-        toque1.clientX -
-        toque2.clientX;
-
-
-    const dy =
-        toque1.clientY -
-        toque2.clientY;
-
-
-    return Math.sqrt(
-        dx*dx +
-        dy*dy
-    );
-
-}
-
-
-/* =====================================================
-   FECHAR CAMERA AR
-===================================================== */
 
 function fecharCameraAR(){
-
-    const tela =
-        document.getElementById(
-            "telaAR"
-        );
-
-
-    tela.classList.remove(
-        "ativo"
-    );
-
-
-    if(streamCamera){
-
-        streamCamera
-            .getTracks()
-            .forEach(
-                track=>{
-                    track.stop();
-                }
-            );
-
-
-        streamCamera =
-            null;
-
-    }
-
-
-    if(renderizadorAR){
-
-        renderizadorAR.dispose();
-
-        renderizadorAR =
-            null;
-
-    }
-
-
-    cenaAR =
-        null;
-
-    cameraAR =
-        null;
-
-    objetoAR =
-        null;
-
+    document.getElementById("telaAR").classList.remove("ativo");
+    if(streamCamera){ streamCamera.getTracks().forEach(track=>track.stop()); streamCamera = null; }
 }
 
-
-/* =====================================================
-   EXPOR FUNÇÕES
-===================================================== */
-
-window.abrir3D =
-function(){
-
-    window.abrir3DReal();
-
-};
-
-
-window.fechar3D =
-function(){
-
-    window.fechar3DReal();
-
-};
-
-
-window.iniciarCameraAR =
-    iniciarCameraAR;
-
-
-window.fecharCameraAR =
-    fecharCameraAR;
-
-
-window.addEventListener(
-    "resize",
-    function(){
-
-        ajustar3D();
-
-        if(
-            cameraAR &&
-            renderizadorAR
-        ){
-
-            cameraAR.aspect =
-                window.innerWidth /
-                window.innerHeight;
-
-            cameraAR.updateProjectionMatrix();
-
-            renderizadorAR.setSize(
-                window.innerWidth,
-                window.innerHeight,
-                false
-            );
-
-        }
-
-    }
-);
-
+window.abrir3D = window.abrir3DReal;
+window.fechar3D = window.fechar3DReal;
+window.iniciarCameraAR = iniciarCameraAR;
+window.fecharCameraAR = fecharCameraAR;
 </script>
 
-
-<!-- =====================================================
-     SISTEMA DO CARDÁPIO
-===================================================== -->
-
+<!-- SISTEMA PRINCIPAL DO CARDÁPIO -->
 <script>
-
-/* =====================================================
-   CONFIGURAÇÃO DOS RESTAURANTES
-=====================================================
-
-   Cada restaurante terá seu próprio "slug".
-
-   Exemplos:
-
-   ?restaurante=demo
-
-   ?restaurante=sabor-da-casa
-
-   ?restaurante=burger-house
-
-===================================================== */
-
 const RESTAURANTES = {
-
     "hamburgueria":{
         nome:"Brasa 180",
         descricao:"Hambúrguer artesanal, experiência digital e pedido direto.",
@@ -3773,163 +587,57 @@ const RESTAURANTES = {
         categorias:[
             {id:"todos",nome:"Destaques"},
             {id:"lanches",nome:"Lanches"},
-            {id:"acompanhamentos",nome:"Acompanhamentos"},
             {id:"bebidas",nome:"Bebidas"}
         ],
         produtos:[
-            {id:"hamburguer",nome:"Brasa 180",descricao:"Pão brioche, blend artesanal, queijo, molho da casa e cebola caramelizada.",preco:39.90,categoria:"lanches",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85",modelo3d:"hamburguer",estrategico:true,destaque:true,tags:["Blend artesanal","Queijo","Molho da casa"],upsell:"Refrigerante + R$ 7,00"},
-            {id:"duplo-defumado",nome:"Duplo Defumado",descricao:"Dois blends, queijo cheddar, bacon crocante e molho defumado.",preco:48.90,categoria:"lanches",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1000&q=85",modelo3d:"hamburguer",estrategico:true,destaque:true,tags:["2 blends","Cheddar","Bacon"],upsell:"Batata da Brasa + R$ 18,90"},
-            {id:"crispy-chicken",nome:"Crispy Chicken",descricao:"Frango crocante, queijo, alface e maionese especial.",preco:36.90,categoria:"lanches",imagem:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=1000&q=85",destaque:true},
-            {id:"smash-bacon",nome:"Smash Bacon",descricao:"Smash duplo, queijo, bacon e molho especial no pão tostado.",preco:37.90,categoria:"lanches",imagem:"https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=1000&q=85",tags:["Bacon"]},
-            {id:"veggie-casa",nome:"Veggie da Casa",descricao:"Hambúrguer vegetal, queijo, folhas frescas e molho da casa.",preco:34.90,categoria:"lanches",imagem:"https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=1000&q=85",tags:["Vegetariano"]},
-            {id:"batata-brasa",nome:"Batata da Brasa",descricao:"Batatas crocantes com tempero da casa.",preco:18.90,categoria:"acompanhamentos",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85"},
-            {id:"refrigerante",nome:"Refrigerante",descricao:"Refrigerante gelado para acompanhar seu pedido.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=1000&q=85"},
-            {id:"agua",nome:"Água Mineral",descricao:"Água mineral gelada.",preco:5.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1000&q=85"}
+            {id:"hamburguer",nome:"Brasa 180",descricao:"Pão brioche, blend artesanal, queijo e molho.",preco:39.90,categoria:"lanches",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85",modelo3d:"hamburguer",estrategico:true,destaque:true},
+            {id:"refrigerante",nome:"Refrigerante",descricao:"Refrigerante gelado.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=1000&q=85"}
         ]
     },
-
     "restaurante":{
         nome:"Casa da Praça",
-        descricao:"Cozinha contemporânea com apresentação, escolha e pedido digital.",
+        descricao:"Cozinha contemporânea com apresentação digital.",
         nicho:"Restaurante",
         whatsapp:"5534999999999",
         categorias:[
             {id:"todos",nome:"Destaques"},
-            {id:"pratos",nome:"Pratos"},
-            {id:"massas",nome:"Massas"},
-            {id:"bebidas",nome:"Bebidas"}
+            {id:"pratos",nome:"Pratos"}
         ],
         produtos:[
-            {id:"file-da-casa",nome:"Filé da Casa",descricao:"Filé grelhado, molho da casa, legumes e acompanhamento do dia.",preco:59.90,categoria:"pratos",imagem:"https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85",modelo3d:"fettuccine",estrategico:true,destaque:true,tags:["Filé grelhado","Molho da casa","Acompanhamento"],upsell:"Refrigerante + R$ 7,00"},
-            {id:"salmao-grelhado",nome:"Salmão Grelhado",descricao:"Salmão grelhado com legumes, ervas e molho cítrico.",preco:64.90,categoria:"pratos",imagem:"https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1000&q=85",modelo3d:"fettuccine",estrategico:true,destaque:true,tags:["Salmão","Molho cítrico"]},
-            {id:"risoto-cogumelos",nome:"Risoto de Cogumelos",descricao:"Arroz arbóreo cremoso, cogumelos frescos e parmesão.",preco:48.90,categoria:"pratos",imagem:"https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=1000&q=85",destaque:true},
-            {id:"pappardelle-ragu",nome:"Pappardelle ao Ragu",descricao:"Massa fresca, ragu cozido lentamente e parmesão.",preco:46.90,categoria:"massas",imagem:"https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=1000&q=85"},
-            {id:"frango-crocante",nome:"Frango Crocante",descricao:"Frango crocante, purê cremoso e molho especial.",preco:42.90,categoria:"pratos",imagem:"https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1000&q=85"},
-            {id:"soda-casa",nome:"Soda da Casa",descricao:"Soda artesanal refrescante com frutas e ervas.",preco:12.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1000&q=85"},
-            {id:"refrigerante",nome:"Refrigerante",descricao:"Refrigerante gelado.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1581636625402-29b2a704ef13?auto=format&fit=crop&w=1000&q=85"},
-            {id:"agua-gas",nome:"Água com Gás",descricao:"Água com gás gelada.",preco:6.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1000&q=85"}
+            {id:"file-da-casa",nome:"Filé da Casa",descricao:"Filé grelhado com molho especial.",preco:59.90,categoria:"pratos",imagem:"https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85",modelo3d:"fettuccine",estrategico:true,destaque:true}
         ]
     }
 };
 
-
-/* =====================================================
-   IDENTIFICAR RESTAURANTE PELA URL
-===================================================== */
-
-const parametros =
-    new URLSearchParams(
-        window.location.search
-    );
-
-
-const slugRestaurante =
-    parametros.get(
-        "restaurante"
-    ) || "hamburgueria";
-
-
-const restauranteAtual =
-    RESTAURANTES[
-        slugRestaurante
-    ] || RESTAURANTES.demo;
-
-
-/* =====================================================
-   CARRINHO
-===================================================== */
+const parametros = new URLSearchParams(window.location.search);
+const slugRestaurante = parametros.get("restaurante") || "hamburgueria";
+const restauranteAtual = RESTAURANTES[slugRestaurante] || RESTAURANTES["hamburgueria"];
 
 let carrinho = [];
-
-
-/* =====================================================
-   PRODUTO SELECIONADO
-===================================================== */
-
-window.produtoSelecionado =
-    restauranteAtual.produtos[0]?.id || null;
-
-
-window.produtoSelecionadoNome =
-    restauranteAtual.produtos[0]?.nome || "";
-
-
-let quantidadeProdutoAtual =
-    1;
-
-
-/* =====================================================
-   INICIALIZAR RESTAURANTE
-===================================================== */
+window.produtoSelecionado = restauranteAtual.produtos[0]?.id || null;
+window.produtoSelecionadoNome = restauranteAtual.produtos[0]?.nome || "";
+let quantidadeProdutoAtual = 1;
 
 function iniciarRestaurante(){
-
-    document
-        .getElementById(
-            "restauranteNome"
-        )
-        .textContent =
-        restauranteAtual.nome;
-
-
-    document
-        .getElementById(
-            "restauranteDescricao"
-        )
-        .textContent =
-        restauranteAtual.descricao;
-
-
-    document
-        .getElementById(
-            "rodapeNome"
-        )
-        .textContent =
-        restauranteAtual.nome;
-
-
+    document.getElementById("restauranteNome").textContent = restauranteAtual.nome;
+    document.getElementById("restauranteDescricao").textContent = restauranteAtual.descricao;
+    document.getElementById("rodapeNome").textContent = restauranteAtual.nome;
     renderizarCategorias();
-
     renderizarProdutos();
-
     atualizarCarrinho();
-
 }
-
-
-/* =====================================================
-   CATEGORIAS
-===================================================== */
 
 function renderizarCategorias(){
-
     const container = document.getElementById("categorias");
-
-    const categorias = restauranteAtual.categorias || [
-        {id:"todos",nome:"Destaques"},
-        {id:"bebidas",nome:"Bebidas"}
-    ];
-
-    container.innerHTML = categorias.map(categoria=>`
-        <button class="categoria ${categoria.id==="todos" ? "ativa" : ""}" onclick="filtrarProdutos('${categoria.id}',this)">
-            ${categoria.nome}
-        </button>
+    container.innerHTML = (restauranteAtual.categorias || []).map(cat=>`
+        <button class="categoria ${cat.id==="todos" ? "ativa" : ""}" onclick="filtrarProdutos('${cat.id}',this)">${cat.nome}</button>
     `).join("");
-
 }
 
-/* =====================================================
-   PRODUTOS
-===================================================== */
-
 function renderizarProdutos(){
-
     const container = document.getElementById("listaProdutos");
-
-    const produtos = restauranteAtual.produtos.filter(p=>p.destaque || p.categoria!=="bebidas");
-
-    container.innerHTML = produtos.map(produto=>`
-        <div class="produto ${produto.estrategico ? "produto-estrategico" : ""}" data-categoria="${produto.categoria}" onclick="abrirProdutoPorId('${produto.id}')">
+    container.innerHTML = restauranteAtual.produtos.map(produto=>`
+        <div class="produto" data-categoria="${produto.categoria}" onclick="abrirProdutoPorId('${produto.id}')">
             <div class="produto-imagem-wrap">
                 <img loading="lazy" src="${produto.imagem}" alt="${produto.nome}">
                 ${produto.estrategico ? '<span class="badge-3d">3D + AR</span>' : ''}
@@ -3945,884 +653,142 @@ function renderizarProdutos(){
             </div>
         </div>
     `).join("");
-
 }
 
-/* =====================================================
-   FILTRO
-===================================================== */
-
-function filtrarProdutos(
-    categoria,
-    botao
-){
-
-    const produtos =
-        document.querySelectorAll(
-            ".produto"
-        );
-
-
-    produtos.forEach(
-        produto=>{
-
-            const categoriaProduto =
-                produto.dataset.categoria;
-
-
-            if(
-                categoria==="todos" ||
-                categoriaProduto===categoria
-            ){
-
-                produto.classList.remove(
-                    "escondido"
-                );
-
-            }
-
-            else{
-
-                produto.classList.add(
-                    "escondido"
-                );
-
-            }
-
-        }
-    );
-
-
-    document
-        .querySelectorAll(
-            ".categoria"
-        )
-        .forEach(
-            b=>{
-                b.classList.remove(
-                    "ativa"
-                );
-            }
-        );
-
-
-    if(botao){
-
-        botao.classList.add(
-            "ativa"
-        );
-
-    }
-
+function filtrarProdutos(categoria, botao){
+    document.querySelectorAll(".produto").forEach(p=>{
+        if(categoria==="todos" || p.dataset.categoria===categoria) p.classList.remove("escondido");
+        else p.classList.add("escondido");
+    });
+    document.querySelectorAll(".categoria").forEach(b=>b.classList.remove("ativa"));
+    if(botao) botao.classList.add("ativa");
 }
-
-
-/* =====================================================
-   ABRIR PRODUTO
-===================================================== */
 
 function abrirProdutoPorId(id){
+    const produto = restauranteAtual.produtos.find(item=>item.id===id);
+    if(!produto) return;
 
-    const produto =
-        restauranteAtual.produtos.find(
-            item=>item.id===id
-        );
+    window.produtoSelecionado = produto.id;
+    window.produtoSelecionadoNome = produto.nome;
+    quantidadeProdutoAtual = 1;
 
+    // Rastreia visualização
+    MenuAnalytics.trackProductView(produto);
 
-    if(!produto){
-        return;
-    }
+    document.getElementById("modalNome").textContent = produto.nome;
+    document.getElementById("modalDescricao").textContent = produto.descricao;
+    document.getElementById("modalPreco").textContent = formatarPreco(produto.preco);
+    document.getElementById("quantidadeProduto").textContent = quantidadeProdutoAtual;
 
-
-    window.produtoSelecionado =
-        produto.id;
-
-
-    window.produtoSelecionadoNome =
-        produto.nome;
-
-
-    quantidadeProdutoAtual =
-        1;
-
-
-    document
-        .getElementById(
-            "modalNome"
-        )
-        .textContent =
-        produto.nome;
-
-
-    document
-        .getElementById(
-            "modalDescricao"
-        )
-        .textContent =
-        produto.descricao;
-
-
-    document
-        .getElementById(
-            "modalPreco"
-        )
-        .textContent =
-        formatarPreco(
-            produto.preco
-        );
-
-
-    document
-        .getElementById(
-            "quantidadeProduto"
-        )
-        .textContent =
-        quantidadeProdutoAtual;
-
-
-    const botao3d = document.getElementById("botao3dProduto");
-    const botaoAR = document.getElementById("botaoARProduto");
-    if(botao3d){ botao3d.style.display = produto.estrategico ? "block" : "none"; }
-    if(botaoAR){ botaoAR.style.display = produto.estrategico ? "block" : "none"; }
+    document.getElementById("botao3dProduto").style.display = produto.estrategico ? "block" : "none";
+    document.getElementById("botaoARProduto").style.display = produto.estrategico ? "block" : "none";
 
     document.getElementById("modalProduto").classList.add("ativo");
-
 }
 
-
-/* =====================================================
-   QUANTIDADE PRODUTO
-===================================================== */
-
-function alterarQuantidadeProduto(
-    valor
-){
-
-    quantidadeProdutoAtual +=
-        valor;
-
-
-    if(
-        quantidadeProdutoAtual<1
-    ){
-
-        quantidadeProdutoAtual =
-            1;
-
-    }
-
-
-    document
-        .getElementById(
-            "quantidadeProduto"
-        )
-        .textContent =
-        quantidadeProdutoAtual;
-
+function alterarQuantidadeProduto(valor){
+    quantidadeProdutoAtual += valor;
+    if(quantidadeProdutoAtual<1) quantidadeProdutoAtual = 1;
+    document.getElementById("quantidadeProduto").textContent = quantidadeProdutoAtual;
 }
-
-
-/* =====================================================
-   ADICIONAR PRODUTO
-===================================================== */
 
 function adicionarProdutoAtual(){
+    const produto = restauranteAtual.produtos.find(item=>item.id === window.produtoSelecionado);
+    if(!produto) return;
 
-    const produto =
-        restauranteAtual.produtos.find(
-            item=>
-                item.id ===
-                window.produtoSelecionado
-        );
+    const existente = carrinho.find(item=>item.id === produto.id);
+    if(existente) existente.quantidade += quantidadeProdutoAtual;
+    else carrinho.push({ id: produto.id, nome: produto.nome, preco: produto.preco, quantidade: quantidadeProdutoAtual });
 
-
-    if(!produto){
-        return;
-    }
-
-
-    const existente =
-        carrinho.find(
-            item=>
-                item.id ===
-                produto.id
-        );
-
-
-    if(existente){
-
-        existente.quantidade +=
-            quantidadeProdutoAtual;
-
-    }
-
-    else{
-
-        carrinho.push({
-
-            id:
-                produto.id,
-
-            nome:
-                produto.nome,
-
-            preco:
-                produto.preco,
-
-            quantidade:
-                quantidadeProdutoAtual
-
-        });
-
-    }
-
+    // Rastreia adição ao carrinho
+    MenuAnalytics.trackAddToCart(produto);
 
     atualizarCarrinho();
-
-
     fecharModal();
-
     fechar3D();
-
-
-    mostrarToast(
-        produto.nome +
-        " adicionado ao pedido"
-    );
-
+    mostrarToast(produto.nome + " adicionado ao pedido");
 }
-
-
-/* =====================================================
-   ATUALIZAR CARRINHO
-===================================================== */
 
 function atualizarCarrinho(){
-
-    const quantidade =
-        carrinho.reduce(
-            (
-                total,
-                item
-            )=>
-                total +
-                item.quantidade,
-            0
-        );
-
-
-    document
-        .getElementById(
-            "carrinhoContador"
-        )
-        .textContent =
-        quantidade;
-
-
+    const quantidade = carrinho.reduce((total, item)=>total + item.quantidade, 0);
+    document.getElementById("carrinhoContador").textContent = quantidade;
     renderizarCarrinho();
-
 }
-
-
-/* =====================================================
-   RENDERIZAR CARRINHO
-===================================================== */
 
 function renderizarCarrinho(){
-
-    const lista =
-        document.getElementById(
-            "carrinhoLista"
-        );
-
-
-    const finalizacao =
-        document.getElementById(
-            "carrinhoFinalizacao"
-        );
-
+    const lista = document.getElementById("carrinhoLista");
+    const finalizacao = document.getElementById("carrinhoFinalizacao");
 
     if(carrinho.length===0){
+        lista.innerHTML = `<div class="carrinho-vazio">Seu pedido está vazio.</div>`;
+        finalizacao.style.display = "none";
+        return;
+    }
 
-        lista.innerHTML = `
-
-            <div class="carrinho-vazio">
-
-                Seu pedido está vazio.
-
-                <br><br>
-
-                Escolha um produto para começar.
-
+    lista.innerHTML = carrinho.map(item=>`
+        <div class="item-carrinho">
+            <div>
+                <div class="item-carrinho-nome">${item.nome}</div>
+                <div class="item-carrinho-preco">${formatarPreco(item.preco)}</div>
             </div>
+            <div class="item-controles">
+                <button class="item-btn" onclick="alterarQuantidadeCarrinho('${item.id}',-1)">−</button>
+                <span class="item-qtd">${item.quantidade}</span>
+                <button class="item-btn" onclick="alterarQuantidadeCarrinho('${item.id}',1)">+</button>
+            </div>
+        </div>
+    `).join("");
 
-        `;
-
-
-        finalizacao.style.display =
-            "none";
-
-
-        return;
-
-    }
-
-
-    lista.innerHTML =
-        carrinho
-            .map(
-                item=>`
-
-                    <div class="item-carrinho">
-
-                        <div>
-
-                            <div class="item-carrinho-nome">
-                                ${item.nome}
-                            </div>
-
-                            <div class="item-carrinho-preco">
-                                ${formatarPreco(item.preco)}
-                            </div>
-
-                        </div>
-
-                        <div class="item-controles">
-
-                            <button
-                                class="item-btn"
-                                onclick="alterarQuantidadeCarrinho('${item.id}',-1)"
-                            >
-                                −
-                            </button>
-
-                            <span class="item-qtd">
-                                ${item.quantidade}
-                            </span>
-
-                            <button
-                                class="item-btn"
-                                onclick="alterarQuantidadeCarrinho('${item.id}',1)"
-                            >
-                                +
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                `
-            )
-            .join("");
-
-
-    const total =
-        calcularTotal();
-
-
-    document
-        .getElementById(
-            "carrinhoTotal"
-        )
-        .textContent =
-        formatarPreco(total);
-
-
-    finalizacao.style.display =
-        "block";
-
+    document.getElementById("carrinhoTotal").textContent = formatarPreco(calcularTotal());
+    finalizacao.style.display = "block";
 }
 
-
-/* =====================================================
-   ALTERAR CARRINHO
-===================================================== */
-
-function alterarQuantidadeCarrinho(
-    id,
-    valor
-){
-
-    const item =
-        carrinho.find(
-            produto=>
-                produto.id===id
-        );
-
-
-    if(!item){
-        return;
-    }
-
-
-    item.quantidade +=
-        valor;
-
-
-    if(
-        item.quantidade<=0
-    ){
-
-        carrinho =
-            carrinho.filter(
-                produto=>
-                    produto.id!==id
-            );
-
-    }
-
-
+function alterarQuantidadeCarrinho(id, valor){
+    const item = carrinho.find(p=>p.id===id);
+    if(!item) return;
+    item.quantidade += valor;
+    if(item.quantidade<=0) carrinho = carrinho.filter(p=>p.id!==id);
     atualizarCarrinho();
-
 }
-
-
-/* =====================================================
-   TOTAL
-===================================================== */
 
 function calcularTotal(){
-
-    return carrinho.reduce(
-        (
-            total,
-            item
-        )=>
-            total +
-            (
-                item.preco *
-                item.quantidade
-            ),
-        0
-    );
-
+    return carrinho.reduce((total, item)=>total + (item.preco * item.quantidade), 0);
 }
 
-
-/* =====================================================
-   FORMATAR PREÇO
-===================================================== */
-
-function formatarPreco(
-    valor
-){
-
-    return valor.toLocaleString(
-        "pt-BR",
-        {
-            style:"currency",
-            currency:"BRL"
-        }
-    );
-
+function formatarPreco(valor){
+    return valor.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
 }
 
-
-/* =====================================================
-   MODAL PRODUTO
-===================================================== */
-
-function fecharModal(){
-
-    document
-        .getElementById(
-            "modalProduto"
-        )
-        .classList.remove(
-            "ativo"
-        );
-
-}
-
-
-/* =====================================================
-   MODAL CARRINHO
-===================================================== */
-
-function abrirCarrinho(){
-
-    document
-        .getElementById(
-            "modalCarrinho"
-        )
-        .classList.add(
-            "ativo"
-        );
-
-
-    renderizarCarrinho();
-
-}
-
-
-function fecharCarrinho(){
-
-    document
-        .getElementById(
-            "modalCarrinho"
-        )
-        .classList.remove(
-            "ativo"
-        );
-
-}
-
-
-/* =====================================================
-   AR
-===================================================== */
-
-function abrirAR(){
-
-    document
-        .getElementById(
-            "modalProduto"
-        )
-        .classList.remove(
-            "ativo"
-        );
-
-
-    document
-        .getElementById(
-            "modal3D"
-        )
-        .classList.remove(
-            "ativo"
-        );
-
-
-    document
-        .getElementById(
-            "modalAR"
-        )
-        .classList.add(
-            "ativo"
-        );
-
-}
-
-
-function fecharAR(){
-
-    document
-        .getElementById(
-            "modalAR"
-        )
-        .classList.remove(
-            "ativo"
-        );
-
-}
-
-
-/* =====================================================
-   WHATSAPP
-===================================================== */
+function fecharModal(){ document.getElementById("modalProduto").classList.remove("ativo"); }
+function abrirCarrinho(){ document.getElementById("modalCarrinho").classList.add("ativo"); renderizarCarrinho(); }
+function fecharCarrinho(){ document.getElementById("modalCarrinho").classList.remove("ativo"); }
+function abrirAR(){ document.getElementById("modalProduto").classList.remove("ativo"); document.getElementById("modal3D").classList.remove("ativo"); document.getElementById("modalAR").classList.add("ativo"); }
+function fecharAR(){ document.getElementById("modalAR").classList.remove("ativo"); }
 
 function finalizarWhatsApp(){
+    if(carrinho.length===0) return;
+    const nome = document.getElementById("clienteNome").value.trim();
+    if(!nome){ alert("Digite seu nome para continuar."); return; }
 
-    if(
-        carrinho.length===0
-    ){
+    // Rastreia pedido no Analytics
+    MenuAnalytics.trackWhatsAppOrder(carrinho);
 
-        return;
+    let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital.\n\n*Cliente:* ${nome}\n\n*Pedido:*\n`;
+    carrinho.forEach(item=>{ mensagem += `${item.quantidade}x ${item.nome} — ${formatarPreco(item.preco * item.quantidade)}\n`; });
+    mensagem += `\n*Total: ${formatarPreco(calcularTotal())}*`;
 
-    }
-
-
-    const nome =
-        document
-            .getElementById(
-                "clienteNome"
-            )
-            .value
-            .trim();
-
-
-    const observacoes =
-        document
-            .getElementById(
-                "clienteObs"
-            )
-            .value
-            .trim();
-
-
-    if(!nome){
-
-        alert(
-            "Digite seu nome para continuar."
-        );
-
-        document
-            .getElementById(
-                "clienteNome"
-            )
-            .focus();
-
-        return;
-
-    }
-
-
-    let mensagem =
-        "Olá! Gostaria de fazer um pedido pelo cardápio digital.\n\n";
-
-
-    mensagem +=
-        "*Restaurante:* " +
-        restauranteAtual.nome +
-        "\n";
-
-
-    mensagem +=
-        "*Cliente:* " +
-        nome +
-        "\n\n";
-
-
-    mensagem +=
-        "*Pedido:*\n";
-
-
-    carrinho.forEach(
-        item=>{
-
-            mensagem +=
-                item.quantidade +
-                "x " +
-                item.nome +
-                " — " +
-                formatarPreco(
-                    item.preco *
-                    item.quantidade
-                ) +
-                "\n";
-
-        }
-    );
-
-
-    mensagem +=
-        "\n*Total: " +
-        formatarPreco(
-            calcularTotal()
-        ) +
-        "*";
-
-
-    if(observacoes){
-
-        mensagem +=
-            "\n\n*Observações:*\n" +
-            observacoes;
-
-    }
-
-
-    const numero =
-        restauranteAtual.whatsapp
-            .replace(
-                /\D/g,
-                ""
-            );
-
-
-    if(
-        !numero ||
-        numero==="5534999999999"
-    ){
-
-        alert(
-            "O WhatsApp deste restaurante ainda precisa ser configurado."
-        );
-
-        return;
-
-    }
-
-
-    const url =
-        "https://wa.me/" +
-        numero +
-        "?text=" +
-        encodeURIComponent(
-            mensagem
-        );
-
-
-    window.open(
-        url,
-        "_blank"
-    );
-
+    const url = "https://wa.me/" + restauranteAtual.whatsapp + "?text=" + encodeURIComponent(mensagem);
+    window.open(url, "_blank");
 }
 
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-let toastTimer = null;
-
-
-function mostrarToast(
-    mensagem
-){
-
-    const toast =
-        document.getElementById(
-            "toast"
-        );
-
-
-    toast.textContent =
-        mensagem;
-
-
-    toast.classList.add(
-        "ativo"
-    );
-
-
-    clearTimeout(
-        toastTimer
-    );
-
-
-    toastTimer =
-        setTimeout(
-            ()=>{
-                toast.classList.remove(
-                    "ativo"
-                );
-            },
-            2200
-        );
-
+function mostrarToast(mensagem){
+    const toast = document.getElementById("toast");
+    toast.textContent = mensagem;
+    toast.classList.add("ativo");
+    setTimeout(()=>toast.classList.remove("ativo"), 2200);
 }
-
-
-/* =====================================================
-   CLIQUE FORA
-===================================================== */
-
-document
-    .getElementById(
-        "modalProduto"
-    )
-    .addEventListener(
-        "click",
-        function(evento){
-
-            if(
-                evento.target===this
-            ){
-
-                fecharModal();
-
-            }
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "modal3D"
-    )
-    .addEventListener(
-        "click",
-        function(evento){
-
-            if(
-                evento.target===this
-            ){
-
-                fechar3D();
-
-            }
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "modalAR"
-    )
-    .addEventListener(
-        "click",
-        function(evento){
-
-            if(
-                evento.target===this
-            ){
-
-                fecharAR();
-
-            }
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "modalCarrinho"
-    )
-    .addEventListener(
-        "click",
-        function(evento){
-
-            if(
-                evento.target===this
-            ){
-
-                fecharCarrinho();
-
-            }
-
-        }
-    );
-
-
-/* =====================================================
-   ESC
-===================================================== */
-
-document.addEventListener(
-    "keydown",
-    function(evento){
-
-        if(
-            evento.key==="Escape"
-        ){
-
-            fecharModal();
-
-            fechar3D();
-
-            fecharAR();
-
-            fecharCameraAR();
-
-            fecharCarrinho();
-
-        }
-
-    }
-);
-
-
-/* =====================================================
-   INICIALIZAR
-===================================================== */
 
 iniciarRestaurante();
-
 </script>
-
 </body>
 </html>
