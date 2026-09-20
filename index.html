@@ -11,7 +11,7 @@
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
 <!-- SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <!-- ANALYTICS INTEGRADO -->
 <script>
@@ -159,6 +159,37 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 .toast.ativo{opacity:1; transform:translateX(-50%) translateY(0);}
 
 footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--card-border);}
+
+.escala-3d-box{margin:12px 0 4px;padding:12px;border:1px solid var(--card-border);border-radius:14px;background:#121318;text-align:left;}
+.escala-3d-topo{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:8px;}
+.escala-3d-topo span{color:var(--primary);font-weight:900;}
+#escala3D{width:100%;accent-color:var(--primary);cursor:pointer;}
+.escala-3d-legenda{display:flex;justify-content:space-between;color:var(--text-muted);font-size:9px;margin-top:3px;}
+.dimensoes-3d{text-align:center;color:var(--text-muted);font-size:10px;margin-top:9px;}
+.painel-admin{display:none;position:fixed;inset:0;background:#0b0c10;color:#fff;z-index:9000;overflow:auto;padding:22px;}
+.painel-admin.ativo{display:block;}
+.painel-admin-topo{max-width:1200px;margin:0 auto 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;}
+.painel-admin-topo h2{font-size:24px;}
+.painel-admin-topo p{color:var(--text-muted);font-size:12px;margin-top:4px;}
+.admin-fechar{border:1px solid var(--card-border);background:#181920;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:800;}
+.admin-grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.admin-card{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
+.admin-card small{display:block;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;margin-bottom:6px;}
+.admin-card strong{font-size:24px;color:var(--primary);}
+.admin-section{max-width:1200px;margin:18px auto;background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
+.admin-section h3{font-size:15px;margin-bottom:12px;}
+.mesas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;}
+.mesa-admin{padding:12px;border-radius:10px;background:#101116;border:1px solid var(--card-border);font-size:12px;font-weight:800;}
+.mesa-admin.ocupada{border-color:var(--primary);background:rgba(245,158,11,.08);}
+.pedido-admin{padding:12px 0;border-bottom:1px solid var(--card-border);display:grid;grid-template-columns:1fr auto;gap:12px;}
+.pedido-admin:last-child{border-bottom:0;}
+.pedido-admin small{color:var(--text-muted);font-size:10px;}
+.status-pedido{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
+.status-pedido button{border:1px solid var(--card-border);background:#20222b;color:#fff;border-radius:8px;padding:6px 9px;font-size:10px;cursor:pointer;}
+.status-pedido button.ativo{background:var(--primary);color:#000;border-color:var(--primary);font-weight:800;}
+.admin-vazio{color:var(--text-muted);font-size:12px;padding:10px 0;}
+@media(max-width:800px){.admin-grid{grid-template-columns:repeat(2,1fr)}.mesas-grid{grid-template-columns:repeat(3,1fr)}.painel-admin{padding:14px}}
+@media(max-width:480px){.admin-grid{grid-template-columns:1fr 1fr}.mesas-grid{grid-template-columns:repeat(2,1fr)}.pedido-admin{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -170,11 +201,7 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
     <p id="restauranteDescricao">Gastronomia artesanal com apresentação 3D e pedidos diretos no WhatsApp.</p>
 </header>
 
-<div class="nicho-bar">
-    <span>Nicho Comercial:</span>
-    <a href="?restaurante=hamburgueria" id="linkHamburgueria">🍔 Hamburgueria Premium</a>
-    <a href="?restaurante=restaurante" id="linkRestaurante">🍷 Restaurante Executive</a>
-</div>
+
 
 <div class="categorias" id="categorias"></div>
 
@@ -199,7 +226,7 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
         </div>
         <div class="botoes-produto">
             <button class="btn-principal" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
-            <button class="btn-ar" onclick="abrir3D()">🧊 Explorar em 3D Interativo</button>
+            <button id="btnAbrir3DProduto" class="btn-ar" onclick="abrir3D()">🧊 Explorar em 3D + AR</button>
         </div>
     </div>
 </div>
@@ -219,7 +246,7 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
                 ar 
                 ar-modes="scene-viewer quick-look webxr" 
                 ar-scale="fixed"
-                scale="3.5 3.5 3.5"
+                scale="1 1 1"
                 shadow-intensity="2.0" 
                 shadow-softness="0.4"
                 exposure="1.45"
@@ -234,7 +261,16 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
             </model-viewer>
         </div>
         
-        <p style="font-size:11px; color:var(--text-muted)">Gire 360° no ecrã ou toque no botão para ver na sua mesa em tamanho real.</p>
+        <div class="escala-3d-box">
+            <div class="escala-3d-topo">
+                <strong>Escala do produto</strong>
+                <span id="valorEscala3D">1,00×</span>
+            </div>
+            <input id="escala3D" type="range" min="0.50" max="2.50" step="0.05" value="1" oninput="atualizarEscala3D()">
+            <div class="escala-3d-legenda"><span>0,50×</span><span id="statusEscala3D">1,00× = tamanho real</span><span>2,50×</span></div>
+            <div id="dimensoes3D" class="dimensoes-3d">Tamanho físico de referência</div>
+        </div>
+        <p style="font-size:11px; color:var(--text-muted)">A escala começa em tamanho real. Ajuste manualmente quando quiser ampliar ou reduzir a visualização.</p>
         <button class="btn-principal" style="margin-top:12px;" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
     </div>
 </div>
@@ -297,110 +333,72 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
     </div>
 </div>
 
+<div id="painelAdmin" class="painel-admin">
+    <div class="painel-admin-topo">
+        <div><h2>Painel da Operação</h2><p>Dashboard demonstrativo da Brasa 180° • pedidos e mesas do navegador.</p></div>
+        <button class="admin-fechar" onclick="fecharPainelAdmin()">Voltar ao cardápio</button>
+    </div>
+    <div class="admin-grid">
+        <div class="admin-card"><small>Pedidos na mesa</small><strong id="adminTotalPedidos">0</strong></div>
+        <div class="admin-card"><small>Pedidos pendentes</small><strong id="adminPendentes">0</strong></div>
+        <div class="admin-card"><small>Mesas ocupadas</small><strong id="adminMesasOcupadas">0</strong></div>
+        <div class="admin-card"><small>Faturamento local</small><strong id="adminFaturamento">R$ 0,00</strong></div>
+    </div>
+    <section class="admin-section"><h3>Mapa de mesas</h3><div id="adminMesas" class="mesas-grid"></div></section>
+    <section class="admin-section"><h3>Pedidos recentes</h3><div id="adminPedidos"></div></section>
+</div>
+
 <div id="toast" class="toast">Adicionado ao pedido</div>
 
 <footer>
-    <div id="rodapeNome">Brasa 180° Gourmet</div>
+    <div id="rodapeNome">Brasa 180° Smash & Grill</div>
+    <button onclick="abrirPainelAdmin()" style="margin-top:10px;background:none;border:1px solid var(--card-border);color:var(--text-muted);padding:7px 12px;border-radius:20px;font-size:10px;cursor:pointer;">Painel da operação</button>
     SaaS de Cardápio Interativo 3D & AR
 </footer>
 
 <script>
-/* =====================================================
-   SUPABASE — CONEXÃO INICIAL
-   Nesta primeira etapa, o Supabase entra sem substituir
-   o catálogo visual atual.
-===================================================== */
-const SUPABASE_URL = "https://simcmxcroggzuwmhzmjhc.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_h6cxVSK_vH78I_HPNRGZUg_JoggyXx-";
+/* SUPABASE: será conectado ao novo projeto após esta etapa visual. */
+const menuSupabase = null;
+window.menuSupabase = null;
+window.supabaseConnectionStatus = "aguardando_novo_projeto";
 
-const menuSupabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
 
-window.menuSupabase = menuSupabase;
-window.supabaseConnectionStatus = "iniciando";
-
-async function testarConexaoSupabase(){
-    try{
-        const { data, error } = await menuSupabase
-            .from("restaurants")
-            .select("id,name,slug,active")
-            .eq("slug", "brasa-180")
-            .eq("active", true)
-            .maybeSingle();
-
-        if(error){
-            window.supabaseConnectionStatus = "erro";
-            console.error("[Mesa360/Supabase] Erro na consulta:", error);
-            return false;
-        }
-
-        if(!data){
-            window.supabaseConnectionStatus = "conectado_sem_restaurante";
-            console.warn("[Mesa360/Supabase] Conexão funcionando, mas o restaurante brasa-180 não foi encontrado.");
-            return false;
-        }
-
-        window.supabaseConnectionStatus = "conectado";
-        window.restauranteSupabase = data;
-        console.log("[Mesa360/Supabase] CONECTADO:", data);
-        return true;
-    }catch(error){
-        window.supabaseConnectionStatus = "erro";
-        console.error("[Mesa360/Supabase] Falha inesperada:", error);
-        return false;
-    }
-}
-
-testarConexaoSupabase();
-
-const MODELO_DEMO_AR = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
 
 const RESTAURANTES = {
     "hamburgueria":{
         nome:"Brasa 180° Smash & Grill",
-        descricao:"Hambúrgueres artesanais na brasa, ingredientes selecionados e experiência 3D exclusiva.",
-        nicho:"Hamburgueria Gourmet",
+        descricao:"Hambúrgueres artesanais na brasa, acompanhamentos e bebidas geladas. Uma experiência digital pensada para vender.",
+        nicho:"Hamburgueria Premium",
         whatsapp:"5534984252341",
         categorias:[
             {id:"todos",nome:"Ver Todos"},
             {id:"burgers",nome:"Hambúrgueres"},
-            {id:"porcoes",nome:"Porções & Acompanhamentos"}
-        ],
-        produtos:[
-            {id:"hamburguer-brasa",nome:"Brasa Smash Double",descricao:"2x Blends de 100g prensados na chapa, queijo cheddar inglês derretido, bacon crocante e molho da casa.",preco:38.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/hamburguer-brasa.glb"},
-            {id:"hamburguer-bacon",nome:"Brasa Bacon Supreme",descricao:"Blend 180g assado na brasa, geleia de bacon defumado, queijo gouda e cebola crispy no pão brioche.",preco:42.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/hamburguer-bacon.glb"},
-            {id:"hamburguer-monster",nome:"Monster Trufado 3D",descricao:"3x Blends 120g, queijo ementhal, maionese trufada e picles artesanal.",preco:49.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/hamburguer-monster.glb"},
-            {id:"chicken-crispy",nome:"Chicken Crispy Gold",descricao:"Sobrecoxa empanada super crocante, salada coleslaw, queijo prato e maionese de pimenta defumada.",preco:34.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/chicken-crispy.glb"},
-            {id:"veggie-gourmet",nome:"Veggie Cogumelos",descricao:"Burger de cogumelos paris e grão de bico, queijo de búfala, rúcula e tomate seco.",preco:36.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/veggie-gourmet.glb"},
-            {id:"batata-supreme",nome:"Batata Frita Supreme",descricao:"Porção generosa de batatas rústicas com cheddar cremoso e farofa de bacon crocante.",preco:26.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/batata-supreme.glb"}
-        ]
-    },
-    "restaurante":{
-        nome:"Casa da Praça Executive",
-        descricao:"Cozinha contemporânea, cortes nobres e pratos elaborados com apresentação interativa.",
-        nicho:"Restaurante Contemporâneo",
-        whatsapp:"5534984252341",
-        categorias:[
-            {id:"todos",nome:"Ver Todos"},
-            {id:"carnes",nome:"Pratos Principais"},
+            {id:"porcoes",nome:"Porções"},
+            {id:"bebidas",nome:"Bebidas"},
             {id:"sobremesas",nome:"Sobremesas"}
         ],
         produtos:[
-            {id:"file-poivre",nome:"Filé Mignon ao Poivre",descricao:"Medalhão de filé mignon com molho de pimenta verde, acompanhado de aligot de batata.",preco:68.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/file-poivre.glb"},
-            {id:"picanha-chapa",nome:"Picanha Premium na Chapa",descricao:"Picanha fatiada ao alho, arroz biro-biro, farofa da casa e vinagrete especial.",preco:74.00,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/picanha-chapa.glb"},
-            {id:"salmao-ervas",nome:"Salmão Grelhado com Ervas",descricao:"Posta de salmão fresco grelhado com manteiga de ervas e risoto de limão siciliano.",preco:72.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/salmao-ervas.glb"},
-            {id:"fettuccine-alfredo",nome:"Fettuccine Alfredo Mignon",descricao:"Massa artesanal ao molho cremoso de parmesão com tiras de filé mignon grelhado.",preco:59.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1621996346565-e3d5d6281288?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/fettuccine-alfredo.glb"},
-            {id:"risoto-cogumelos",nome:"Risoto de Cogumelos Trufados",descricao:"Arroz arbóreo com mix de cogumelos frescos, azeite trufado e grana padano.",preco:54.90,categoria:"carnes",imagem:"https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/risoto-cogumelos.glb"},
-            {id:"brownie-gelato",nome:"Grand Brownie com Gelato",descricao:"Brownie de chocolate belga aquecido com bola de gelato de baunilha e calda quente.",preco:28.90,categoria:"sobremesas",imagem:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1000&q=85", modelo3d:"models/brownie-gelato.glb"}
+            {id:"hamburguer-brasa",nome:"Brasa Smash Double",descricao:"2 blends de 100g prensados na chapa, cheddar derretido, bacon crocante e molho da casa no pão brioche.",preco:38.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85"},
+            {id:"hamburguer-bacon",nome:"Brasa Bacon Supreme",descricao:"Blend de 180g, bacon crocante, queijo gouda, cebola crispy e molho especial no pão brioche.",preco:42.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1000&q=85"},
+            {id:"hamburguer-monster",nome:"Monster Trufado",descricao:"3 blends de 120g, queijo, maionese trufada e picles artesanal para quem quer um hambúrguer de respeito.",preco:49.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=1000&q=85"},
+            {id:"chicken-crispy",nome:"Chicken Crispy Gold",descricao:"Frango crocante, coleslaw, queijo e maionese de pimenta defumada.",preco:34.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=1000&q=85"},
+            {id:"veggie-gourmet",nome:"Veggie Cogumelos",descricao:"Burger de cogumelos e grão-de-bico, rúcula, tomate seco e queijo de búfala.",preco:36.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&w=1000&q=85"},
+            {id:"batata-supreme",nome:"Batata Frita Supreme",descricao:"Batata crocante com cheddar cremoso e farofa de bacon.",preco:26.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85"},
+            {id:"onion-rings",nome:"Onion Rings",descricao:"Anéis de cebola empanados e crocantes com molho especial da casa.",preco:24.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=1000&q=85"},
+            {id:"coca-cola-350",nome:"Coca-Cola 350ml",descricao:"Lata de Coca-Cola bem gelada. Experimente também a apresentação 3D em escala realista.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/coca-cola.glb",dimensoes:{largura:0.066,altura:0.122,profundidade:0.066}},
+            {id:"coca-cola-zero-350",nome:"Coca-Cola Zero 350ml",descricao:"Coca-Cola Zero bem gelada, sem açúcar.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=1000&q=85"},
+            {id:"guarana-350",nome:"Guaraná Antarctica 350ml",descricao:"Refrigerante de guaraná bem gelado.",preco:6.50,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1629203849820-fdd70d49c38e?auto=format&fit=crop&w=1000&q=85"},
+            {id:"agua-sem-gas",nome:"Água Mineral 500ml",descricao:"Água mineral sem gás, servida gelada.",preco:4.50,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=1000&q=85"},
+            {id:"agua-com-gas",nome:"Água com Gás 500ml",descricao:"Água mineral com gás, servida gelada.",preco:5.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1000&q=85"},
+            {id:"suco-laranja",nome:"Suco de Laranja",descricao:"Suco de laranja servido gelado.",preco:9.90,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1000&q=85"},
+            {id:"milkshake-chocolate",nome:"Milkshake de Chocolate",descricao:"Milkshake cremoso de chocolate com cobertura especial.",preco:18.90,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=1000&q=85"},
+            {id:"brownie-gelato",nome:"Brownie com Gelato",descricao:"Brownie de chocolate servido quente com gelato de baunilha.",preco:28.90,categoria:"sobremesas",imagem:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1000&q=85"},
+            {id:"churros-mini",nome:"Mini Churros",descricao:"Mini churros crocantes com doce de leite.",preco:16.90,categoria:"sobremesas",imagem:"https://images.unsplash.com/photo-1624371414361-e670edf4898d?auto=format&fit=crop&w=1000&q=85"}
         ]
     }
 };
 
-const parametros = new URLSearchParams(window.location.search);
-const slugRestaurante = parametros.get("restaurante") || "hamburgueria";
-const restauranteAtual = RESTAURANTES[slugRestaurante] || RESTAURANTES["hamburgueria"];
+const restauranteAtual = RESTAURANTES["hamburgueria"];
 
 let carrinho = [];
 let tipoAtendimentoSelecionado = 'delivery';
@@ -413,9 +411,6 @@ function iniciarRestaurante(){
     document.getElementById("restauranteDescricao").textContent = restauranteAtual.descricao;
     document.getElementById("rodapeNome").textContent = restauranteAtual.nome;
     
-    if(slugRestaurante === "hamburgueria") document.getElementById("linkHamburgueria").classList.add("ativo");
-    else document.getElementById("linkRestaurante").classList.add("ativo");
-
     renderizarCategorias();
     renderizarProdutos();
     atualizarCarrinho();
@@ -434,7 +429,7 @@ function renderizarProdutos(){
         <div class="produto" data-categoria="${produto.categoria}" onclick="abrirProdutoPorId('${produto.id}')">
             <div class="produto-imagem-wrap">
                 <img loading="lazy" src="${produto.imagem}" alt="${produto.nome}">
-                <span class="badge-3d">🧊 Ver em 3D</span>
+                ${produto.modelo3d ? '<span class="badge-3d">🧊 3D + AR</span>' : ''}
             </div>
             <div class="produto-info">
                 <div class="produto-kicker">${restauranteAtual.nicho}</div>
@@ -442,7 +437,7 @@ function renderizarProdutos(){
                 <p>${produto.descricao}</p>
                 <div class="produto-rodape">
                     <div class="preco">${formatarPreco(produto.preco)}</div>
-                    <span class="ver-3d-card">Detalhes 3D</span>
+                    <span class="ver-3d-card">${produto.modelo3d ? '3D + AR' : 'Ver detalhes'}</span>
                 </div>
             </div>
         </div>
@@ -472,25 +467,44 @@ function abrirProdutoPorId(id){
     document.getElementById("modalDescricao").textContent = produto.descricao;
     document.getElementById("modalPreco").textContent = formatarPreco(produto.preco);
     document.getElementById("quantidadeProduto").textContent = quantidadeProdutoAtual;
+    const btn3D = document.getElementById("btnAbrir3DProduto");
+    if(btn3D){
+        btn3D.style.display = produto.modelo3d ? "flex" : "none";
+    }
 
     document.getElementById("modalProduto").classList.add("ativo");
 }
 
 function abrir3D() {
+    const produto = restauranteAtual.produtos.find(item => item.id === window.produtoSelecionado);
+    if(!produto || !produto.modelo3d) return;
+
     document.getElementById("modalProduto").classList.remove("ativo");
     document.getElementById("modal3D").classList.add("ativo");
-    document.getElementById("nomeProduto3D").textContent = window.produtoSelecionadoNome;
-    
-    const produto = restauranteAtual.produtos.find(item => item.id === window.produtoSelecionado);
+    document.getElementById("nomeProduto3D").textContent = produto.nome;
     MenuAnalytics.track3DView(produto);
 
     const viewer = document.getElementById("viewer3D");
-    const fonteModelo = (produto && produto.modelo3d) ? produto.modelo3d : MODELO_DEMO_AR;
+    viewer.setAttribute("src", produto.modelo3d);
+    viewer.setAttribute("scale", "1 1 1");
+    document.getElementById("escala3D").value = "1";
+    atualizarEscala3D();
 
-    viewer.setAttribute("src", fonteModelo);
+    const d = produto.dimensoes || {};
+    document.getElementById("dimensoes3D").textContent = d.altura ? `Tamanho físico de referência: ${(d.largura*100).toFixed(1)} × ${(d.altura*100).toFixed(1)} × ${(d.profundidade*100).toFixed(1)} cm` : "Escala real configurada no modelo";
+
     viewer.onerror = () => {
-        viewer.setAttribute("src", MODELO_DEMO_AR);
+        mostrarToast("Modelo 3D da Coca-Cola ainda não foi colocado na pasta models.");
     };
+}
+
+function atualizarEscala3D(){
+    const valor = Number(document.getElementById("escala3D").value || 1);
+    const viewer = document.getElementById("viewer3D");
+    viewer.setAttribute("scale", `${valor} ${valor} ${valor}`);
+    document.getElementById("valorEscala3D").textContent = `${valor.toFixed(2)}×`;
+    const aviso = document.getElementById("statusEscala3D");
+    if(aviso) aviso.textContent = valor === 1 ? "1,00× = tamanho real" : "Escala manual para visualização";
 }
 
 function notificarAR() {
@@ -714,6 +728,51 @@ function mostrarToast(mensagem){
 }
 
 iniciarRestaurante();
+
+function abrirPainelAdmin(){
+    const painel=document.getElementById("painelAdmin");
+    if(!painel)return;
+    painel.classList.add("ativo");
+    renderizarPainelAdmin();
+}
+
+function fecharPainelAdmin(){
+    document.getElementById("painelAdmin")?.classList.remove("ativo");
+}
+
+function pedidosMesa(){
+    try{return JSON.parse(localStorage.getItem("pedidos_mesas")||"[]");}catch(e){return [];}
+}
+
+function renderizarPainelAdmin(){
+    const pedidos=pedidosMesa();
+    const pendentes=pedidos.filter(p=>p.status!=="entregue"&&p.status!=="concluido");
+    const faturamento=pedidos.reduce((s,p)=>s+Number(p.total||0),0);
+    const mesas=[...new Set(pedidos.filter(p=>p.status!=="entregue"&&p.status!=="concluido").map(p=>String(p.mesa)))];
+    document.getElementById("adminTotalPedidos").textContent=pedidos.length;
+    document.getElementById("adminPendentes").textContent=pendentes.length;
+    document.getElementById("adminMesasOcupadas").textContent=mesas.length;
+    document.getElementById("adminFaturamento").textContent=formatarPreco(faturamento);
+    const mesaEl=document.getElementById("adminMesas");
+    mesaEl.innerHTML=Array.from({length:12},(_,i)=>{const n=String(i+1).padStart(2,"0");const ocupada=mesas.includes(n)||mesas.includes(String(i+1));return `<div class="mesa-admin ${ocupada?"ocupada":""}">Mesa ${n}<br><small>${ocupada?"Pedido ativo":"Livre"}</small></div>`}).join("");
+    const pedidosEl=document.getElementById("adminPedidos");
+    if(!pedidos.length){pedidosEl.innerHTML='<div class="admin-vazio">Nenhum pedido na mesa registrado neste navegador.</div>';return;}
+    pedidosEl.innerHTML=[...pedidos].reverse().map(p=>`<div class="pedido-admin"><div><strong>Pedido #${p.id}</strong> • Mesa ${p.mesa}</div><div>${formatarPreco(p.total)}<br><small>${p.hora||""} • ${p.nome||"Cliente"}</small></div><div class="status-pedido">${["pendente","preparo","pronto","entregue"].map(st=>`<button class="${p.status===st?"ativo":""}" onclick="alterarStatusPedido(${p.id},'${st}')">${st}</button>`).join("")}</div></div>`).join("");
+}
+
+function alterarStatusPedido(id,status){
+    const pedidos=pedidosMesa();
+    const pedido=pedidos.find(p=>Number(p.id)===Number(id));
+    if(!pedido)return;
+    pedido.status=status;
+    localStorage.setItem("pedidos_mesas",JSON.stringify(pedidos));
+    renderizarPainelAdmin();
+}
+
+if(new URLSearchParams(window.location.search).get("painel")==="admin"){
+    window.addEventListener("load",abrirPainelAdmin);
+}
+
 </script>
 </body>
 </html>
