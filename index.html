@@ -203,12 +203,11 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
                 camera-controls 
                 auto-rotate 
                 ar 
-                ar-modes="scene-viewer quick-look webxr" 
-                ar-scale="fixed"
-                scale="1 1 1"
-                shadow-intensity="2.0" 
-                shadow-softness="0.4"
-                exposure="1.45"
+                ar-modes="webxr scene-viewer quick-look" 
+                ar-scale="auto"
+                shadow-intensity="1.5" 
+                shadow-softness="0.5"
+                exposure="1.2"
                 loading="eager"
                 environment-image="neutral"
                 interaction-prompt="auto"
@@ -290,7 +289,6 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
 </footer>
 
 <script>
-// MODELO 3D PADRÃO DE FEEDBACK SE O MODELO LOCAL AINDA NÃO FOR CARREGADO
 const MODELO_DEMO_AR = "https://modelviewer.dev/shared-assets/models/Burger.glb";
 
 const RESTAURANTE = {
