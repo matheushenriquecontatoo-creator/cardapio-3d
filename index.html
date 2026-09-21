@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cardápio Digital 3D & AR - Experiência Gastronômica</title>
+
+<!-- PRELOAD E MODEL-VIEWER GOOGLE -->
+<link rel="dns-prefetch" href="https://ajax.googleapis.com">
+<link rel="dns-prefetch" href="https://modelviewer.dev">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+<!-- ANALYTICS INTEGRADO -->
+<script>
+const MenuAnalytics = {
+  STORAGE_KEY: 'cardapio_analytics_data',
+  init() {
+    if (!localStorage.getItem(this.STORAGE_KEY)) {
+      const dadosIniciais = { visualizacoesGerais: 0, interacoes3D: 0, interacoesAR: 0, adicionouCarrinho: 0, pedidosWhatsApp: 0, produtos: {} };
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dadosIniciais));
+    }
+  },
+  getMetrics() { this.init(); try { return JSON.parse(localStorage.getItem(this.STORAGE_KEY)); } catch (e) { return {}; } },
+  saveMetrics(data) { localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data)); },
+  getProdutoStats(data, produtoId, produtoNome) {
+    if (!data.produtos[produtoId]) {
+      data.produtos[produtoId] = { id: produtoId, nome: produtoNome || produtoId, visualizacoes: 0, views3d: 0, viewsAR: 0, carrinho: 0, pedidos: 0 };
+    }
+    return data.produtos[produtoId];
+  },
+  trackProductView(produto) { if (!produto?.id) return; const d = this.getMetrics(); d.visualizacoesGerais++; this.getProdutoStats(d, produto.id, produto.nome).visualizacoes++; this.saveMetrics(d); },
+  track3DView(produto) { if (!produto?.id) return; const d = this.getMetrics(); d.interacoes3D++; this.getProdutoStats(d, produto.id, produto.nome).views3d++; this.saveMetrics(d); },
+  trackARView(produto) { if (!produto?.id) return; const d = this.getMetrics(); d.interacoesAR++; this.getProdutoStats(d, produto.id, produto.nome).viewsAR++; this.saveMetrics(d); },
+  trackAddToCart(produto) { if (!produto?.id) return; const d = this.getMetrics(); d.adicionouCarrinho++; this.getProdutoStats(d, produto.id, produto.nome).carrinho++; this.saveMetrics(d); },
+  trackWhatsAppOrder(carrinho) {
+    const d = this.getMetrics(); d.pedidosWhatsApp++;
+    if (Array.isArray(carrinho)) carrinho.forEach(i => { this.getProdutoStats(d, i.id, i.nome).pedidos += (i.quantidade || 1); });
+    this.saveMetrics(d);
+  }
+};
+MenuAnalytics.init();
+</script>
+
+<style>
+:root {
+  --primary: #f59e0b;
+  --primary-hover: #d97706;
+  --bg-dark: #0f1015;
+  --card-bg: #181920;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:var(--bg-dark); color:var(--text-main); -webkit-font-smoothing: antialiased;}
+button, select, input, textarea{font-family:inherit;}
+.escondido{display:none!important;}
+
+header{background: linear-gradient(180deg, rgba(15,16,21,0.95) 0%, rgba(15,16,21,1) 100%), radial-gradient(circle at 50% -20%, #3b2a1a 0%, #0f1015 80%); color:#fff; padding: 36px 20px 26px; text-align:center; position:relative; border-bottom: 1px solid var(--card-border);}
+.brand-badge {display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--primary); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;}
+header h1{font-size: 32px; font-weight: 800; letter-spacing: -0.5px;}
+header p{color:var(--text-muted); font-size: 14px; max-width: 500px; margin: 6px auto 0;}
+
+.categorias{display:flex; gap:10px; overflow-x:auto; padding: 14px 20px; background: rgba(15,16,21,0.92); backdrop-filter: blur(12px); position:sticky; top:0; z-index:50; border-bottom: 1px solid var(--card-border);}
+.categorias::-webkit-scrollbar{display:none;}
+.categoria{border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-muted); padding: 8px 18px; border-radius: 30px; cursor:pointer; white-space:nowrap; font-size:13px; font-weight: 600; transition:.15s;}
+.categoria:hover{background:#222530; color: #fff;}
+.categoria.ativa{background: var(--primary); color:#000; border-color: var(--primary); font-weight: 800;}
+
+.produtos{max-width:1180px; margin: 24px auto 100px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;}
+.produto{background: var(--card-bg); border-radius: 18px; overflow:hidden; cursor:pointer; border: 1px solid var(--card-border); transition: transform .2s ease, box-shadow .2s ease; display: flex; flex-direction: column;}
+.produto:active{transform: scale(0.98);}
+.produto-imagem-wrap{position:relative; width: 100%; height: 200px; overflow: hidden; background: #1a1b22;}
+.produto-imagem-wrap img{width:100%; height:100%; object-fit:cover; display:block; transition: transform .4s ease;}
+.produto:hover .produto-imagem-wrap img{transform: scale(1.05);}
+
+.badge-3d{position:absolute; top:10px; left:10px; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); color: var(--primary); border: 1px solid rgba(245,158,11,0.5); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800;}
+.produto-info{padding: 18px; display: flex; flex-direction: column; flex-grow: 1;}
+.produto-kicker{font-size: 10px; font-weight: 800; letter-spacing: 1px; color: var(--primary); text-transform: uppercase; margin-bottom: 4px;}
+.produto-info h2{font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #fff;}
+.produto-info p{color: var(--text-muted); font-size: 13px; line-height: 1.4; margin-bottom: 14px; flex-grow: 1;}
+.produto-rodape{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top: auto;}
+.preco{font-size: 19px; font-weight: 800; color: #fff;}
+.ver-3d-card{font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); color: var(--primary); border: 1px solid rgba(245, 158, 11, 0.3);}
+
+.carrinho-flutuante{position:fixed; right:20px; bottom:20px; z-index:800; border:none; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color:#000; padding: 12px 20px; border-radius: 50px; font-size: 14px; font-weight: 800; cursor:pointer; box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4); display:flex; align-items:center; gap:8px;}
+.carrinho-contador{min-width:22px; height:22px; padding: 0 6px; border-radius: 20px; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight: 800;}
+
+.modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index:1000; align-items:center; justify-content:center; padding:16px;}
+.modal.ativo{display:flex;}
+.modal-conteudo{background: var(--card-bg); border: 1px solid var(--card-border); width:100%; max-width:480px; border-radius: 20px; padding: 22px; position:relative; text-align:center; color: #fff; max-height:90vh; overflow-y:auto;}
+.fechar-modal{position:absolute; top:14px; right:14px; border:none; background: rgba(255,255,255,0.08); width: 32px; height: 32px; border-radius: 50%; font-size:18px; cursor:pointer; color:#fff; z-index:10;}
+#modalNome{margin-bottom:6px; font-size: 20px; font-weight: 800;}
+#modalDescricao{color:var(--text-muted); line-height:1.4; margin-bottom:14px; font-size: 13px;}
+.modal-preco{font-size:24px; font-weight:800; color:var(--primary); margin-bottom:16px;}
+
+.botoes-produto{display:grid; gap:10px;}
+.btn-principal,.btn-ar{width:100%; border:none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor:pointer; transition:.15s; display:flex; align-items:center; justify-content:center; gap: 8px;}
+.btn-principal{background: var(--primary); color:#000;}
+.btn-principal:hover{background: var(--primary-hover);}
+.btn-ar{background: #252836; color:#fff; border: 1px solid var(--card-border);}
+
+.quantidade-box{display:flex; align-items:center; justify-content:center; gap:16px; margin: 16px 0;}
+.btn-quantidade{width:38px; height:38px; border:none; border-radius:50%; background:#252836; color:#fff; font-size: 18px; font-weight: bold; cursor:pointer;}
+.quantidade-numero{font-size:18px; font-weight:bold; min-width:26px;}
+
+.area-3d{width:100%; height:360px; margin:14px 0; border-radius:16px; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 50%, #252836 0%, #0d0e12 100%); border: 1px solid var(--card-border);}
+model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+
+.btn-ver-mesa {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: #000; border: none; border-radius: 30px; padding: 12px 24px;
+    font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.5);
+    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 8px; white-space: nowrap; z-index: 20;
+}
+
+.carrinho-lista{text-align:left; margin-top:10px;}
+.carrinho-vazio{color:var(--text-muted); padding:24px 0; text-align:center; font-size: 13px;}
+.item-carrinho{display:grid; grid-template-columns:1fr auto; gap:10px; padding: 10px 0; border-bottom: 1px solid var(--card-border);}
+.item-carrinho-nome{font-weight:700; margin-bottom:2px; font-size: 14px;}
+.item-carrinho-preco{color:var(--primary); font-size: 12px; font-weight: 700;}
+.item-controles{display:flex; align-items:center; gap:8px;}
+.item-btn{width:28px; height:28px; border:none; border-radius:50%; background:#252836; color: #fff; cursor:pointer; font-weight:bold;}
+.item-qtd{min-width:18px; text-align:center; font-weight:bold; font-size:13px;}
+.carrinho-total{display:flex; justify-content:space-between; align-items:center; padding: 14px 0; font-size: 18px; font-weight: 800; border-top: 1px solid var(--card-border); margin-top: 8px;}
+
+.seletor-atendimento{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;}
+.btn-opcao-tipo{padding:10px; border:1px solid var(--card-border); background:#121318; color:var(--text-muted); border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; text-align:center; transition:.15s;}
+.btn-opcao-tipo.ativo{background:var(--primary); color:#000; border-color:var(--primary);}
+
+.formulario-pedido{text-align:left;}
+.formulario-pedido label{display:block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin: 10px 0 4px;}
+.formulario-pedido input, .formulario-pedido select{
+    width:100%; background: #121318; border: 1px solid var(--card-border); border-radius: 10px; padding: 11px 12px; font-size: 13px; outline:none; color: #fff;
+}
+.formulario-pedido input:focus, .formulario-pedido select:focus{ border-color: var(--primary); }
+
+.box-pix{background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 12px; border-radius: 12px; margin-top: 8px; text-align: center;}
+.box-pix p{font-size: 11px; color: var(--text-muted); margin-bottom: 4px;}
+.chave-pix-texto{font-family: monospace; font-size: 15px; font-weight: 800; color: var(--primary); letter-spacing: 1px; user-select: all;}
+.btn-copiar-pix{background: #252836; color: #fff; border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 6px; cursor: pointer;}
+
+.box-sucesso-local{background: #14161f; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 16px; padding: 18px; text-align: center; margin-top: 10px;}
+.box-sucesso-local h3{color: var(--primary); font-size: 18px; margin-bottom: 4px;}
+.box-sucesso-local p{color: var(--text-muted); font-size: 12px; line-height: 1.4; margin-bottom: 12px;}
+
+.toast{position:fixed; left:50%; bottom:80px; transform:translateX(-50%) translateY(20px); background: var(--primary); color:#000; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 800; z-index:5000; opacity:0; pointer-events:none; transition:.2s;}
+.toast.ativo{opacity:1; transform:translateX(-50%) translateY(0);}
+
+footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--card-border);}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand-badge">✦ Cardápio Interativo SaaS</div>
+    <h1 id="restauranteNome">Brasa 180° Gourmet</h1>
+    <p id="restauranteDescricao">Gastronomia artesanal com apresentação 3D e pedidos diretos no WhatsApp.</p>
+</header>
+
+<div class="categorias" id="categorias"></div>
+
+<main class="produtos" id="listaProdutos"></main>
+
+<button class="carrinho-flutuante" onclick="abrirCarrinho()">
+    🛒 <span>Meu Pedido</span>
+    <span id="carrinhoContador" class="carrinho-contador">0</span>
+</button>
+
+<!-- MODAL PRODUTO -->
+<div id="modalProduto" class="modal">
+    <div class="modal-conteudo">
+        <button class="fechar-modal" onclick="fecharModal()">×</button>
+        <h2 id="modalNome"></h2>
+        <p id="modalDescricao"></p>
+        <div id="modalPreco" class="modal-preco"></div>
+        <div class="quantidade-box">
+            <button class="btn-quantidade" onclick="alterarQuantidadeProduto(-1)">−</button>
+            <span id="quantidadeProduto" class="quantidade-numero">1</span>
+            <button class="btn-quantidade" onclick="alterarQuantidadeProduto(1)">+</button>
+        </div>
+        <div class="botoes-produto">
+            <button class="btn-principal" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
+            <button class="btn-ar" onclick="abrir3D()">🧊 Explorar em 3D Interativo</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 3D REALISTA & AR AMPLIADO -->
+<div id="modal3D" class="modal">
+    <div class="modal-conteudo">
+        <button class="fechar-modal" onclick="fechar3D()">×</button>
+        <h2>Apresentação 3D Realista</h2>
+        <div id="nomeProduto3D" style="color:var(--text-muted); font-size:12px; margin-top:2px;"></div>
+        
+        <div class="area-3d">
+            <model-viewer 
+                id="viewer3D"
+                camera-controls 
+                auto-rotate 
+                ar 
+                ar-modes="webxr scene-viewer" 
+                ar-scale="auto"
+                shadow-intensity="1.5" 
+                shadow-softness="0.5"
+                exposure="1.2"
+                loading="eager"
+                environment-image="neutral"
+                interaction-prompt="auto"
+                alt="Modelo 3D Interativo do Prato">
+                
+                <button slot="ar-button" id="customArBtn" class="btn-ver-mesa">
+                    📱 Ver na minha mesa (AR Real)
+                </button>
+            </model-viewer>
+        </div>
+        
+        <p style="font-size:11px; color:var(--text-muted)">Gire 360° no ecrã ou toque no botão para ver na sua mesa em tamanho real.</p>
+        <button class="btn-principal" style="margin-top:12px;" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
+    </div>
+</div>
+
+<!-- MODAL CARRINHO -->
+<div id="modalCarrinho" class="modal">
+    <div class="modal-conteudo">
+        <button class="fechar-modal" onclick="fecharCarrinho()">×</button>
+        <h2>Seu Pedido</h2>
+        <div id="carrinhoLista" class="carrinho-lista"></div>
+        <div id="carrinhoFinalizacao" style="display:none;">
+            <div class="carrinho-total">
+                <span>Total</span>
+                <span id="carrinhoTotal">R$ 0,00</span>
+            </div>
+            
+            <div class="formulario-pedido" id="painelFormulario">
+                <label>Como deseja o seu pedido?</label>
+                <div class="seletor-atendimento">
+                    <button type="button" id="btnTipoDelivery" class="btn-opcao-tipo ativo" onclick="selecionarTipoAtendimento('delivery')">🛵 Delivery</button>
+                    <button type="button" id="btnTipoMesa" class="btn-opcao-tipo" onclick="selecionarTipoAtendimento('mesa')">🍽️ Comer na Mesa</button>
+                </div>
+
+                <label for="clienteNome">Seu Nome *</label>
+                <input id="clienteNome" type="text" placeholder="Nome para identificação">
+
+                <div id="boxEndereco">
+                    <label for="clienteEndereco">Endereço de Entrega *</label>
+                    <input id="clienteEndereco" type="text" placeholder="Rua, número e bairro">
+                </div>
+
+                <div id="boxMesa" style="display:none;">
+                    <label for="numeroMesa">Número da Mesa *</label>
+                    <input id="numeroMesa" type="text" placeholder="Ex.: Mesa 04">
+                </div>
+
+                <label for="formaPagamento">Pagamento *</label>
+                <select id="formaPagamento" onchange="alternarOpcoesPagamento()">
+                    <option value="pix">⚡ PIX (Online)</option>
+                    <option value="cartao">💳 Cartão Crédito/Débito</option>
+                    <option value="dinheiro">💵 Dinheiro</option>
+                </select>
+
+                <div id="boxPixInfo" class="box-pix">
+                    <p>Chave PIX do Estabelecimento:</p>
+                    <div class="chave-pix-texto" id="chavePixTexto">5534984252341</div>
+                    <button type="button" class="btn-copiar-pix" onclick="copiarChavePix()">📋 Copiar Chave PIX</button>
+                </div>
+
+                <div id="boxTroco" style="display:none; margin-top:6px;">
+                    <input id="valorTroco" type="text" placeholder="Troco para quanto? Ex.: R$ 100">
+                </div>
+            </div>
+
+            <div id="painelSucessoLocal" style="display:none;"></div>
+
+            <button id="btnAcaoFinalizar" class="btn-principal" style="margin-top:14px;" onclick="processarCheckout()">📱 Finalizar Pedido no WhatsApp</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast">Adicionado ao pedido</div>
+
+<footer>
+    <div id="rodapeNome">Brasa 180° Gourmet</div>
+    SaaS de Cardápio Interativo 3D & AR
+</footer>
+
+<script>
+const MODELO_DEMO_AR = "https://modelviewer.dev/shared-assets/models/Burger.glb";
+
+const RESTAURANTE = {
+    nome:"Brasa 180° Smash & Grill",
+    descricao:"Hambúrgueres artesanais na brasa, ingredientes selecionados e experiência 3D exclusiva.",
+    whatsapp:"5534984252341",
+    categorias:[
+        {id:"todos",nome:"Ver Todos"},
+        {id:"burgers",nome:"Hambúrgueres"},
+        {id:"porcoes",nome:"Porções & Acompanhamentos"}
+    ],
+    produtos:[
+        {id:"hamburguer-brasa",nome:"Brasa Smash Double",descricao:"2x Blends de 100g prensados na chapa, queijo cheddar inglês derretido, bacon crocante e molho da casa.",preco:38.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85", modelo3d:"https://modelviewer.dev/shared-assets/models/Burger.glb"},
+        {id:"hamburguer-bacon",nome:"Brasa Bacon Supreme",descricao:"Blend 180g assado na brasa, geleia de bacon defumado, queijo gouda e cebola crispy no pão brioche.",preco:42.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1000&q=85", modelo3d:"https://modelviewer.dev/shared-assets/models/Burger.glb"},
+        {id:"hamburguer-monster",nome:"Monster Trufado 3D",descricao:"3x Blends 120g, queijo ementhal, maionese trufada e picles artesanal.",preco:49.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=1000&q=85", modelo3d:"https://modelviewer.dev/shared-assets/models/Burger.glb"},
+        {id:"chicken-crispy",nome:"Chicken Crispy Gold",descricao:"Sobrecoxa empanada super crocante, salada coleslaw, queijo prato e maionese de pimenta defumada.",preco:34.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=1000&q=85", modelo3d:"https://modelviewer.dev/shared-assets/models/Burger.glb"},
+        {id:"batata-supreme",nome:"Batata Frita Supreme",descricao:"Porção generosa de batatas rústicas com cheddar cremoso e farofa de bacon crocante.",preco:26.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85", modelo3d:"https://modelviewer.dev/shared-assets/models/Fries.glb"}
+    ]
+};
+
+let carrinho = [];
+let tipoAtendimentoSelecionado = 'delivery';
+window.produtoSelecionado = RESTAURANTE.produtos[0]?.id || null;
+window.produtoSelecionadoNome = RESTAURANTE.produtos[0]?.nome || "";
+let quantidadeProdutoAtual = 1;
+
+function iniciarRestaurante(){
+    document.getElementById("restauranteNome").textContent = RESTAURANTE.nome;
+    document.getElementById("restauranteDescricao").textContent = RESTAURANTE.descricao;
+    document.getElementById("rodapeNome").textContent = RESTAURANTE.nome;
+    
+    renderizarCategorias();
+    renderizarProdutos();
+    atualizarCarrinho();
+}
+
+function renderizarCategorias(){
+    const container = document.getElementById("categorias");
+    container.innerHTML = RESTAURANTE.categorias.map(cat=>`
+        <button class="categoria ${cat.id==="todos" ? "ativa" : ""}" onclick="filtrarProdutos('${cat.id}',this)">${cat.nome}</button>
+    `).join("");
+}
+
+function renderizarProdutos(){
+    const container = document.getElementById("listaProdutos");
+    container.innerHTML = RESTAURANTE.produtos.map(produto=>`
+        <div class="produto" data-categoria="${produto.categoria}" onclick="abrirProdutoPorId('${produto.id}')">
+            <div class="produto-imagem-wrap">
+                <img loading="lazy" src="${produto.imagem}" alt="${produto.nome}">
+                <span class="badge-3d">🧊 Ver em 3D</span>
+            </div>
+            <div class="produto-info">
+                <div class="produto-kicker">Gourmet</div>
+                <h2>${produto.nome}</h2>
+                <p>${produto.descricao}</p>
+                <div class="produto-rodape">
+                    <div class="preco">${formatarPreco(produto.preco)}</div>
+                    <span class="ver-3d-card">Detalhes 3D</span>
+                </div>
+            </div>
+        </div>
+    `).join("");
+}
+
+function filtrarProdutos(categoria, botao){
+    document.querySelectorAll(".produto").forEach(p=>{
+        if(categoria==="todos" || p.dataset.categoria===categoria) p.classList.remove("escondido");
+        else p.classList.add("escondido");
+    });
+    document.querySelectorAll(".categoria").forEach(b=>b.classList.remove("ativa"));
+    if(botao) botao.classList.add("ativa");
+}
+
+function abrirProdutoPorId(id){
+    const produto = RESTAURANTE.produtos.find(item=>item.id===id);
+    if(!produto) return;
+
+    window.produtoSelecionado = produto.id;
+    window.produtoSelecionadoNome = produto.nome;
+    quantidadeProdutoAtual = 1;
+
+    MenuAnalytics.trackProductView(produto);
+
+    document.getElementById("modalNome").textContent = produto.nome;
+    document.getElementById("modalDescricao").textContent = produto.descricao;
+    document.getElementById("modalPreco").textContent = formatarPreco(produto.preco);
+    document.getElementById("quantidadeProduto").textContent = quantidadeProdutoAtual;
+
+    document.getElementById("modalProduto").classList.add("ativo");
+}
+
+function abrir3D() {
+    document.getElementById("modalProduto").classList.remove("ativo");
+    document.getElementById("modal3D").classList.add("ativo");
+    document.getElementById("nomeProduto3D").textContent = window.produtoSelecionadoNome;
+    
+    const produto = RESTAURANTE.produtos.find(item => item.id === window.produtoSelecionado);
+    MenuAnalytics.track3DView(produto);
+
+    const viewer = document.getElementById("viewer3D");
+    const fonteModelo = (produto && produto.modelo3d) ? produto.modelo3d : MODELO_DEMO_AR;
+
+    viewer.setAttribute("src", fonteModelo);
+
+    const arBtn = document.getElementById("customArBtn");
+    arBtn.onclick = function() {
+        notificarAR();
+        if (viewer.canActivateAR) {
+            viewer.activateAR();
+        } else {
+            alert("O seu dispositivo ou navegador não suporta Realidade Aumentada.");
+        }
+    };
+}
+
+function notificarAR() {
+    const produto = RESTAURANTE.produtos.find(item => item.id === window.produtoSelecionado);
+    MenuAnalytics.trackARView(produto);
+}
+
+function alterarQuantidadeProduto(valor){
+    quantidadeProdutoAtual += valor;
+    if(quantidadeProdutoAtual<1) quantidadeProdutoAtual = 1;
+    document.getElementById("quantidadeProduto").textContent = quantidadeProdutoAtual;
+}
+
+function adicionarProdutoAtual(){
+    const produto = RESTAURANTE.produtos.find(item=>item.id === window.produtoSelecionado);
+    if(!produto) return;
+
+    const existente = carrinho.find(item=>item.id === produto.id);
+    if(existente) existente.quantidade += quantidadeProdutoAtual;
+    else carrinho.push({ id: produto.id, nome: produto.nome, preco: produto.preco, quantidade: quantidadeProdutoAtual });
+
+    MenuAnalytics.trackAddToCart(produto);
+
+    atualizarCarrinho();
+    fecharModal();
+    fechar3D();
+    mostrarToast(produto.nome + " adicionado!");
+}
+
+function atualizarCarrinho(){
+    const quantidade = carrinho.reduce((total, item)=>total + item.quantidade, 0);
+    document.getElementById("carrinhoContador").textContent = quantidade;
+    renderizarCarrinho();
+}
+
+function renderizarCarrinho(){
+    const lista = document.getElementById("carrinhoLista");
+    const finalizacao = document.getElementById("carrinhoFinalizacao");
+
+    if(carrinho.length===0){
+        lista.innerHTML = `<div class="carrinho-vazio">Seu pedido está vazio. Navegue pelo cardápio para adicionar itens!</div>`;
+        finalizacao.style.display = "none";
+        return;
+    }
+
+    lista.innerHTML = carrinho.map(item=>`
+        <div class="item-carrinho">
+            <div>
+                <div class="item-carrinho-nome">${item.nome}</div>
+                <div class="item-carrinho-preco">${formatarPreco(item.preco)}</div>
+            </div>
+            <div class="item-controles">
+                <button class="item-btn" onclick="alterarQuantidadeCarrinho('${item.id}',-1)">−</button>
+                <span class="item-qtd">${item.quantidade}</span>
+                <button class="item-btn" onclick="alterarQuantidadeCarrinho('${item.id}',1)">+</button>
+            </div>
+        </div>
+    `).join("");
+
+    document.getElementById("carrinhoTotal").textContent = formatarPreco(calcularTotal());
+    finalizacao.style.display = "block";
+}
+
+function alterarQuantidadeCarrinho(id, valor){
+    const item = carrinho.find(p=>p.id===id);
+    if(!item) return;
+    item.quantidade += valor;
+    if(item.quantidade<=0) carrinho = carrinho.filter(p=>p.id!==id);
+    atualizarCarrinho();
+}
+
+function calcularTotal(){
+    return carrinho.reduce((total, item)=>total + (item.preco * item.quantidade), 0);
+}
+
+function formatarPreco(valor){
+    return valor.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+}
+
+function selecionarTipoAtendimento(tipo){
+    tipoAtendimentoSelecionado = tipo;
+    const btnDelivery = document.getElementById("btnTipoDelivery");
+    const btnMesa = document.getElementById("btnTipoMesa");
+    const boxEndereco = document.getElementById("boxEndereco");
+    const boxMesa = document.getElementById("boxMesa");
+    const btnAcao = document.getElementById("btnAcaoFinalizar");
+
+    if(tipo === 'delivery'){
+        btnDelivery.classList.add("ativo");
+        btnMesa.classList.remove("ativo");
+        boxEndereco.style.display = "block";
+        boxMesa.style.display = "none";
+        btnAcao.innerHTML = "📱 Finalizar Pedido no WhatsApp";
+    } else {
+        btnMesa.classList.add("ativo");
+        btnDelivery.classList.remove("ativo");
+        boxEndereco.style.display = "none";
+        boxMesa.style.display = "block";
+        btnAcao.innerHTML = "✅ Confirmar Pedido na Mesa";
+    }
+}
+
+function alternarOpcoesPagamento(){
+    const forma = document.getElementById("formaPagamento").value;
+    const boxPix = document.getElementById("boxPixInfo");
+    const boxTroco = document.getElementById("boxTroco");
+
+    boxPix.style.display = forma === "pix" ? "block" : "none";
+    boxTroco.style.display = forma === "dinheiro" ? "block" : "none";
+}
+
+function copiarChavePix(){
+    const chave = document.getElementById("chavePixTexto").textContent;
+    navigator.clipboard.writeText(chave).then(() => { mostrarToast("Chave PIX copiada!"); });
+}
+
+function fecharModal(){ document.getElementById("modalProduto").classList.remove("ativo"); }
+function abrirCarrinho(){ 
+    document.getElementById("modalCarrinho").classList.add("ativo"); 
+    document.getElementById("painelFormulario").style.display = "block";
+    document.getElementById("painelSucessoLocal").style.display = "none";
+    document.getElementById("btnAcaoFinalizar").style.display = "block";
+    renderizarCarrinho(); 
+}
+function fecharCarrinho(){ document.getElementById("modalCarrinho").classList.remove("ativo"); }
+function fechar3D(){ document.getElementById("modal3D").classList.remove("ativo"); }
+
+function processarCheckout(){
+    if(carrinho.length===0) return;
+    const nome = document.getElementById("clienteNome").value.trim();
+    if(!nome){ alert("Por favor, informe o seu nome."); return; }
+
+    if(tipoAtendimentoSelecionado === "delivery"){
+        const endereco = document.getElementById("clienteEndereco").value.trim();
+        if(!endereco){ alert("Por favor, informe o seu endereço de entrega."); return; }
+
+        const formaPagamento = document.getElementById("formaPagamento").value;
+        let pagtoTexto = formaPagamento === "pix" ? "⚡ PIX" : (formaPagamento === "dinheiro" ? "💵 Dinheiro" : "💳 Cartão");
+
+        if(formaPagamento === "dinheiro") {
+            const troco = document.getElementById("valorTroco").value.trim();
+            if(troco) pagtoTexto += ` (${troco})`;
+        }
+
+        MenuAnalytics.trackWhatsAppOrder(carrinho);
+
+        let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital 3D.\n\n`;
+        mensagem += `*Cliente:* ${nome}\n`;
+        mensagem += `*Endereço:* ${endereco}\n`;
+        mensagem += `*Pagamento:* ${pagtoTexto}\n\n`;
+        mensagem += `*Itens do Pedido:*\n`;
+        carrinho.forEach(item=>{ mensagem += `• ${item.quantidade}x ${item.nome} — ${formatarPreco(item.preco * item.quantidade)}\n`; });
+        mensagem += `\n*Total a Pagar: ${formatarPreco(calcularTotal())}*`;
+
+        const url = "https://wa.me/5534984252341?text=" + encodeURIComponent(mensagem);
+        window.open(url, "_blank");
+
+    } else {
+        const mesa = document.getElementById("numeroMesa").value.trim();
+        if(!mesa){ alert("Por favor, informe o número da mesa."); return; }
+
+        const formaPagamento = document.getElementById("formaPagamento").value;
+        let pagtoTexto = formaPagamento === "pix" ? "⚡ PIX" : (formaPagamento === "dinheiro" ? "💵 Dinheiro" : "💳 Cartão");
+
+        const novoPedidoMesa = {
+            id: Date.now(),
+            mesa: mesa,
+            nome: nome,
+            itens: [...carrinho],
+            total: calcularTotal(),
+            formaPagamento: formaPagamento,
+            pagamentoTexto: pagtoTexto,
+            status: 'pendente',
+            hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        };
+
+        const pedidosExistentes = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
+        pedidosExistentes.push(novoPedidoMesa);
+        localStorage.setItem('pedidos_mesas', JSON.stringify(pedidosExistentes));
+
+        MenuAnalytics.trackWhatsAppOrder(carrinho);
+
+        document.getElementById("painelFormulario").style.display = "none";
+        document.getElementById("btnAcaoFinalizar").style.display = "none";
+
+        const painelSucesso = document.getElementById("painelSucessoLocal");
+        let htmlSucesso = `<div class="box-sucesso-local">
+            <h3>🎉 Pedido Confirmado na ${mesa}!</h3>
+            <p>O seu pedido já apareceu na tela da cozinha e o preparo vai começar!</p>`;
+
+        if(formaPagamento === "pix"){
+            htmlSucesso += `
+                <div class="box-pix" style="margin-bottom:12px;">
+                    <p>Total: <strong>${formatarPreco(calcularTotal())}</strong></p>
+                    <div class="chave-pix-texto">5534984252341</div>
+                    <button type="button" class="btn-copiar-pix" onclick="copiarChavePix()">📋 Copiar Chave PIX</button>
+                </div>`;
+        }
+
+        htmlSucesso += `<button class="btn-principal" onclick="concluirPedidoLocal()" style="margin-top:10px;">Concluir e Fechar</button></div>`;
+
+        painelSucesso.innerHTML = htmlSucesso;
+        painelSucesso.style.display = "block";
+    }
+}
+
+function concluirPedidoLocal(){
+    carrinho = [];
+    atualizarCarrinho();
+    fecharCarrinho();
+    mostrarToast("Pedido concluído com sucesso!");
+}
+
+function mostrarToast(mensagem){
+    const toast = document.getElementById("toast");
+    toast.textContent = mensagem;
+    toast.classList.add("ativo");
+    setTimeout(()=>toast.classList.remove("ativo"), 2200);
+}
+
+iniciarRestaurante();
+</script>
+</body>
+</html>
