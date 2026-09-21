@@ -1,1008 +1,174 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Cardápio Digital 3D & AR - Experiência Gastronômica</title>
-
-<!-- PRELOAD E MODEL-VIEWER GOOGLE -->
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f1015">
+<title>Brasa 180° Smash & Grill — Cardápio</title>
 <link rel="dns-prefetch" href="https://ajax.googleapis.com">
-<link rel="dns-prefetch" href="https://modelviewer.dev">
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-
-<!-- SUPABASE -->
-
-<!-- ANALYTICS INTEGRADO -->
-
-<script>
-const MenuAnalytics = {
-  STORAGE_KEY: 'cardapio_analytics_data',
-  init() {
-    if (!localStorage.getItem(this.STORAGE_KEY)) {
-      const dadosIniciais = { visualizacoesGerais: 0, interacoes3D: 0, interacoesAR: 0, adicionouCarrinho: 0, pedidosWhatsApp: 0, produtos: {} };
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dadosIniciais));
-    }
-  },
-  getMetrics() { this.init(); try { return JSON.parse(localStorage.getItem(this.STORAGE_KEY)); } catch (e) { return {}; } },
-  saveMetrics(data) { localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data)); },
-  getProdutoStats(data, produtoId, produtoNome) {
-    if (!data.produtos[produtoId]) {
-      data.produtos[produtoId] = { id: produtoId, nome: produtoNome || produtoId, visualizacoes: 0, views3d: 0, viewsAR: 0, carrinho: 0, pedidos: 0 };
-    }
-    return data.produtos[produtoId];
-  },
-  trackProductView(produto) { if (!produto?.id) return; const d = this.getMetrics(); d.visualizacoesGerais++; this.getProdutoStats(d, produto.id, produto.nome).visualizacoes++; this.saveMetrics(d); },
-  track3DView(produto) { if (!produto?.id) return; const d = this.getMetrics(); d.interacoes3D++; this.getProdutoStats(d, produto.id, produto.nome).views3d++; this.saveMetrics(d); },
-  trackARView(produto) { if (!produto?.id) return; const d = this.getMetrics(); d.interacoesAR++; this.getProdutoStats(d, produto.id, produto.nome).viewsAR++; this.saveMetrics(d); },
-  trackAddToCart(produto) { if (!produto?.id) return; const d = this.getMetrics(); d.adicionouCarrinho++; this.getProdutoStats(d, produto.id, produto.nome).carrinho++; this.saveMetrics(d); },
-  trackWhatsAppOrder(carrinho) {
-    const d = this.getMetrics(); d.pedidosWhatsApp++;
-    if (Array.isArray(carrinho)) carrinho.forEach(i => { this.getProdutoStats(d, i.id, i.nome).pedidos += (i.quantidade || 1); });
-    this.saveMetrics(d);
-  }
-};
-MenuAnalytics.init();
-</script>
-
 <style>
-:root {
-  --primary: #f59e0b;
-  --primary-hover: #d97706;
-  --bg-dark: #0f1015;
-  --card-bg: #181920;
-  --card-border: rgba(255, 255, 255, 0.08);
-  --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
-}
-
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{scroll-behavior:smooth;}
-body{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:var(--bg-dark); color:var(--text-main); -webkit-font-smoothing: antialiased;}
-button, select, input, textarea{font-family:inherit;}
-.escondido{display:none!important;}
-
-header{background: linear-gradient(180deg, rgba(15,16,21,0.95) 0%, rgba(15,16,21,1) 100%), radial-gradient(circle at 50% -20%, #3b2a1a 0%, #0f1015 80%); color:#fff; padding: 36px 20px 26px; text-align:center; position:relative; border-bottom: 1px solid var(--card-border);}
-.brand-badge {display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--primary); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;}
-header h1{font-size: 32px; font-weight: 800; letter-spacing: -0.5px;}
-header p{color:var(--text-muted); font-size: 14px; max-width: 500px; margin: 6px auto 0;}
-
-.nicho-bar{display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; padding: 12px 15px; background: #14151c; border-bottom: 1px solid var(--card-border);}
-.nicho-bar span { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
-.nicho-bar a{color:var(--text-main); text-decoration:none; padding: 5px 12px; border: 1px solid var(--card-border); border-radius: 999px; font-size: 12px; font-weight: 600; transition: background .15s;}
-.nicho-bar a:hover, .nicho-bar a.ativo{background: var(--primary); color: #000; border-color: var(--primary);}
-
-.categorias{display:flex; gap:10px; overflow-x:auto; padding: 14px 20px; background: rgba(15,16,21,0.92); backdrop-filter: blur(12px); position:sticky; top:0; z-index:50; border-bottom: 1px solid var(--card-border);}
-.categorias::-webkit-scrollbar{display:none;}
-.categoria{border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-muted); padding: 8px 18px; border-radius: 30px; cursor:pointer; white-space:nowrap; font-size:13px; font-weight: 600; transition:.15s;}
-.categoria:hover{background:#222530; color: #fff;}
-.categoria.ativa{background: var(--primary); color:#000; border-color: var(--primary); font-weight: 800;}
-
-.produtos{max-width:1180px; margin: 24px auto 100px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;}
-.produto{background: var(--card-bg); border-radius: 18px; overflow:hidden; cursor:pointer; border: 1px solid var(--card-border); transition: transform .2s ease, box-shadow .2s ease; display: flex; flex-direction: column;}
-.produto:active{transform: scale(0.98);}
-.produto-imagem-wrap{position:relative; width: 100%; height: 200px; overflow: hidden; background: #1a1b22;}
-.produto-imagem-wrap img{width:100%; height:100%; object-fit:cover; display:block; transition: transform .4s ease;}
-.produto:hover .produto-imagem-wrap img{transform: scale(1.05);}
-
-.badge-3d{position:absolute; top:10px; left:10px; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); color: var(--primary); border: 1px solid rgba(245,158,11,0.5); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800;}
-.produto-info{padding: 18px; display: flex; flex-direction: column; flex-grow: 1;}
-.produto-kicker{font-size: 10px; font-weight: 800; letter-spacing: 1px; color: var(--primary); text-transform: uppercase; margin-bottom: 4px;}
-.produto-info h2{font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #fff;}
-.produto-info p{color: var(--text-muted); font-size: 13px; line-height: 1.4; margin-bottom: 14px; flex-grow: 1;}
-.produto-rodape{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top: auto;}
-.preco{font-size: 19px; font-weight: 800; color: #fff;}
-.ver-3d-card{font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); color: var(--primary); border: 1px solid rgba(245, 158, 11, 0.3);}
-
-.carrinho-flutuante{position:fixed; right:20px; bottom:20px; z-index:800; border:none; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color:#000; padding: 12px 20px; border-radius: 50px; font-size: 14px; font-weight: 800; cursor:pointer; box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4); display:flex; align-items:center; gap:8px;}
-.carrinho-contador{min-width:22px; height:22px; padding: 0 6px; border-radius: 20px; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight: 800;}
-
-.modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index:1000; align-items:center; justify-content:center; padding:16px;}
-.modal.ativo{display:flex;}
-.modal-conteudo{background: var(--card-bg); border: 1px solid var(--card-border); width:100%; max-width:480px; border-radius: 20px; padding: 22px; position:relative; text-align:center; color: #fff; max-height:90vh; overflow-y:auto;}
-.fechar-modal{position:absolute; top:14px; right:14px; border:none; background: rgba(255,255,255,0.08); width: 32px; height: 32px; border-radius: 50%; font-size:18px; cursor:pointer; color:#fff; z-index:10;}
-#modalNome{margin-bottom:6px; font-size: 20px; font-weight: 800;}
-#modalDescricao{color:var(--text-muted); line-height:1.4; margin-bottom:14px; font-size: 13px;}
-.modal-preco{font-size:24px; font-weight:800; color:var(--primary); margin-bottom:16px;}
-
-.botoes-produto{display:grid; gap:10px;}
-.btn-principal,.btn-ar{width:100%; border:none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor:pointer; transition:.15s; display:flex; align-items:center; justify-content:center; gap: 8px;}
-.btn-principal{background: var(--primary); color:#000;}
-.btn-principal:hover{background: var(--primary-hover);}
-.btn-ar{background: #252836; color:#fff; border: 1px solid var(--card-border);}
-
-.quantidade-box{display:flex; align-items:center; justify-content:center; gap:16px; margin: 16px 0;}
-.btn-quantidade{width:38px; height:38px; border:none; border-radius:50%; background:#252836; color:#fff; font-size: 18px; font-weight: bold; cursor:pointer;}
-.quantidade-numero{font-size:18px; font-weight:bold; min-width:26px;}
-
-.area-3d{width:100%; height:360px; margin:14px 0; border-radius:16px; overflow:hidden; position:relative; background: radial-gradient(circle at 50% 50%, #252836 0%, #0d0e12 100%); border: 1px solid var(--card-border);}
-model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
-
-.btn-ver-mesa {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-    color: #000; border: none; border-radius: 30px; padding: 12px 24px;
-    font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.5);
-    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
-    display: flex; align-items: center; gap: 8px; white-space: nowrap; z-index: 20;
-}
-
-.carrinho-lista{text-align:left; margin-top:10px;}
-.carrinho-vazio{color:var(--text-muted); padding:24px 0; text-align:center; font-size: 13px;}
-.item-carrinho{display:grid; grid-template-columns:1fr auto; gap:10px; padding: 10px 0; border-bottom: 1px solid var(--card-border);}
-.item-carrinho-nome{font-weight:700; margin-bottom:2px; font-size: 14px;}
-.item-carrinho-preco{color:var(--primary); font-size: 12px; font-weight: 700;}
-.item-controles{display:flex; align-items:center; gap:8px;}
-.item-btn{width:28px; height:28px; border:none; border-radius:50%; background:#252836; color: #fff; cursor:pointer; font-weight:bold;}
-.item-qtd{min-width:18px; text-align:center; font-weight:bold; font-size:13px;}
-.carrinho-total{display:flex; justify-content:space-between; align-items:center; padding: 14px 0; font-size: 18px; font-weight: 800; border-top: 1px solid var(--card-border); margin-top: 8px;}
-
-.seletor-atendimento{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;}
-.btn-opcao-tipo{padding:10px; border:1px solid var(--card-border); background:#121318; color:var(--text-muted); border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; text-align:center; transition:.15s;}
-.btn-opcao-tipo.ativo{background:var(--primary); color:#000; border-color:var(--primary);}
-
-.formulario-pedido{text-align:left;}
-.formulario-pedido label{display:block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin: 10px 0 4px;}
-.formulario-pedido input, .formulario-pedido select{
-    width:100%; background: #121318; border: 1px solid var(--card-border); border-radius: 10px; padding: 11px 12px; font-size: 13px; outline:none; color: #fff;
-}
-.formulario-pedido input:focus, .formulario-pedido select:focus{ border-color: var(--primary); }
-
-.box-pix{background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 12px; border-radius: 12px; margin-top: 8px; text-align: center;}
-.box-pix p{font-size: 11px; color: var(--text-muted); margin-bottom: 4px;}
-.chave-pix-texto{font-family: monospace; font-size: 15px; font-weight: 800; color: var(--primary); letter-spacing: 1px; user-select: all;}
-.btn-copiar-pix{background: #252836; color: #fff; border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 6px; cursor: pointer;}
-
-.box-sucesso-local{background: #14161f; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 16px; padding: 18px; text-align: center; margin-top: 10px;}
-.box-sucesso-local h3{color: var(--primary); font-size: 18px; margin-bottom: 4px;}
-.box-sucesso-local p{color: var(--text-muted); font-size: 12px; line-height: 1.4; margin-bottom: 12px;}
-
-.toast{position:fixed; left:50%; bottom:80px; transform:translateX(-50%) translateY(20px); background: var(--primary); color:#000; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 800; z-index:5000; opacity:0; pointer-events:none; transition:.2s;}
-.toast.ativo{opacity:1; transform:translateX(-50%) translateY(0);}
-
-footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--card-border);}
-
-.escala-3d-box{margin:12px 0 4px;padding:12px;border:1px solid var(--card-border);border-radius:14px;background:#121318;text-align:left;}
-.escala-3d-topo{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:8px;}
-.escala-3d-topo span{color:var(--primary);font-weight:900;}
-#escala3D{width:100%;accent-color:var(--primary);cursor:pointer;}
-.escala-3d-legenda{display:flex;justify-content:space-between;color:var(--text-muted);font-size:9px;margin-top:3px;}
-.dimensoes-3d{text-align:center;color:var(--text-muted);font-size:10px;margin-top:9px;}
-.painel-admin{display:none;position:fixed;inset:0;background:#0b0c10;color:#fff;z-index:9000;overflow:auto;padding:22px;}
-.painel-admin.ativo{display:block;}
-.painel-admin-topo{max-width:1200px;margin:0 auto 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;}
-.painel-admin-topo h2{font-size:24px;}
-.painel-admin-topo p{color:var(--text-muted);font-size:12px;margin-top:4px;}
-.admin-fechar{border:1px solid var(--card-border);background:#181920;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:800;}
-.admin-grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.admin-card{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
-.admin-card small{display:block;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;margin-bottom:6px;}
-.admin-card strong{font-size:24px;color:var(--primary);}
-.admin-section{max-width:1200px;margin:18px auto;background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
-.admin-section h3{font-size:15px;margin-bottom:12px;}
-.mesas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;}
-.mesa-admin{padding:12px;border-radius:10px;background:#101116;border:1px solid var(--card-border);font-size:12px;font-weight:800;}
-.mesa-admin.ocupada{border-color:var(--primary);background:rgba(245,158,11,.08);}
-.pedido-admin{padding:12px 0;border-bottom:1px solid var(--card-border);display:grid;grid-template-columns:1fr auto;gap:12px;}
-.pedido-admin:last-child{border-bottom:0;}
-.pedido-admin small{color:var(--text-muted);font-size:10px;}
-.status-pedido{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
-.status-pedido button{border:1px solid var(--card-border);background:#20222b;color:#fff;border-radius:8px;padding:6px 9px;font-size:10px;cursor:pointer;}
-.status-pedido button.ativo{background:var(--primary);color:#000;border-color:var(--primary);font-weight:800;}
-.admin-vazio{color:var(--text-muted);font-size:12px;padding:10px 0;}
-@media(max-width:800px){.admin-grid{grid-template-columns:repeat(2,1fr)}.mesas-grid{grid-template-columns:repeat(3,1fr)}.painel-admin{padding:14px}}
-@media(max-width:480px){.admin-grid{grid-template-columns:1fr 1fr}.mesas-grid{grid-template-columns:repeat(2,1fr)}.pedido-admin{grid-template-columns:1fr}}
-
-
-/* PAINEL ADMINISTRATIVO */
-.painel-admin{display:none;position:fixed;inset:0;background:#0b0c10;color:#fff;z-index:9000;overflow:auto;padding:22px;}
-.painel-admin.ativo{display:block;}
-.painel-admin-topo{max-width:1200px;margin:0 auto 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;}
-.painel-admin-topo h2{font-size:24px;}
-.painel-admin-topo p{color:var(--text-muted);font-size:12px;margin-top:4px;}
-.admin-fechar{border:1px solid var(--card-border);background:#181920;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:800;}
-.admin-grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.admin-card{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
-.admin-card small{display:block;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;margin-bottom:6px;}
-.admin-card strong{font-size:24px;color:var(--primary);}
-.admin-section{max-width:1200px;margin:18px auto;background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
-.admin-section h3{font-size:15px;margin-bottom:12px;}
-.mesas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;}
-.mesa-admin{padding:12px;border-radius:10px;background:#101116;border:1px solid var(--card-border);font-size:12px;font-weight:800;}
-.mesa-admin.ocupada{border-color:var(--primary);background:rgba(245,158,11,.08);}
-.pedido-admin{padding:12px 0;border-bottom:1px solid var(--card-border);display:grid;grid-template-columns:1fr auto;gap:12px;}
-.pedido-admin:last-child{border-bottom:0;}
-.pedido-admin small{color:var(--text-muted);font-size:10px;}
-.status-pedido{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
-.status-pedido button{border:1px solid var(--card-border);background:#20222b;color:#fff;border-radius:8px;padding:6px 9px;font-size:10px;cursor:pointer;}
-.status-pedido button.ativo{background:var(--primary);color:#000;border-color:var(--primary);font-weight:800;}
-.admin-vazio{color:var(--text-muted);font-size:12px;padding:10px 0;}
-@media(max-width:800px){.admin-grid{grid-template-columns:repeat(2,1fr)}.mesas-grid{grid-template-columns:repeat(3,1fr)}.painel-admin{padding:14px}}
-@media(max-width:480px){.admin-grid{grid-template-columns:1fr 1fr}.mesas-grid{grid-template-columns:repeat(2,1fr)}.pedido-admin{grid-template-columns:1fr}}
-
-/* =====================================================
-   DASHBOARD COMERCIAL MESA360
-===================================================== */
-.admin-shell{display:grid;grid-template-columns:230px 1fr;min-height:100%;max-width:1400px;margin:0 auto;background:#0b0c10;border:1px solid var(--card-border);border-radius:18px;overflow:hidden}.admin-sidebar{background:#101116;border-right:1px solid var(--card-border);padding:18px 14px}.admin-brand{padding:6px 10px 18px;border-bottom:1px solid var(--card-border);margin-bottom:14px}.admin-brand strong{display:block;font-size:17px}.admin-brand span{display:block;color:var(--primary);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-top:4px}.admin-nav{display:grid;gap:6px}.admin-nav button{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:#b8bbc5;border-radius:10px;padding:11px 12px;font-weight:700;font-size:12px;cursor:pointer}.admin-nav button:hover,.admin-nav button.ativo{background:#1b1d25;color:#fff;border-color:var(--card-border)}.admin-nav button.ativo{color:var(--primary)}.admin-main{min-width:0;padding:20px}.admin-main-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.admin-main-top h2{font-size:24px}.admin-main-top p{color:var(--text-muted);font-size:12px;margin-top:4px}.admin-acoes{display:flex;gap:8px;flex-wrap:wrap}.admin-btn{border:1px solid var(--card-border);background:#181920;color:#fff;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:800;cursor:pointer}.admin-btn.principal{background:var(--primary);color:#000;border-color:var(--primary)}.admin-view{display:none}.admin-view.ativo{display:block}.admin-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.admin-kpi{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:15px}.admin-kpi small{display:block;color:var(--text-muted);font-size:9px;text-transform:uppercase;font-weight:800;margin-bottom:7px}.admin-kpi strong{display:block;font-size:24px}.admin-kpi span{display:block;color:#777;font-size:10px;margin-top:5px}.admin-grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}.admin-box{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:15px;margin-bottom:14px}.admin-box h3{font-size:14px;margin-bottom:12px}.admin-box-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.admin-box-header h3{margin:0}.admin-table-wrap{overflow:auto}.admin-table{width:100%;border-collapse:collapse;min-width:600px}.admin-table th,.admin-table td{padding:10px 8px;border-bottom:1px solid var(--card-border);text-align:left;font-size:11px}.admin-table th{color:var(--text-muted);font-size:9px;text-transform:uppercase}.admin-table td strong{font-size:11px}.admin-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#242631;color:#bbb;font-size:9px;font-weight:800;text-transform:uppercase}.admin-status.pendente{color:#f59e0b;background:rgba(245,158,11,.1)}.admin-status.preparo{color:#60a5fa;background:rgba(96,165,250,.1)}.admin-status.pronto{color:#34d399;background:rgba(52,211,153,.1)}.admin-status.entregue{color:#a7f3d0;background:rgba(52,211,153,.06)}.admin-status.cancelado{color:#f87171;background:rgba(248,113,113,.08)}.admin-order-actions{display:flex;gap:5px;flex-wrap:wrap}.admin-mini{border:1px solid var(--card-border);background:#20222b;color:#fff;border-radius:7px;padding:5px 7px;font-size:9px;cursor:pointer}.admin-mini:hover{border-color:var(--primary)}.admin-mesas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.admin-mesa{min-height:74px;padding:10px;border-radius:11px;background:#101116;border:1px solid var(--card-border);font-size:10px;font-weight:800}.admin-mesa strong{display:block;font-size:14px;margin-bottom:5px}.admin-mesa span{color:#777;font-size:9px}.admin-mesa.ocupada{border-color:var(--primary);background:rgba(245,158,11,.08)}.admin-mesa.preparo{border-color:#60a5fa;background:rgba(96,165,250,.08)}.admin-mesa.pronto{border-color:#34d399;background:rgba(52,211,153,.08)}.admin-product-list{display:grid;gap:8px}.admin-product{display:grid;grid-template-columns:1fr 110px 90px auto;align-items:center;gap:9px;padding:11px;border:1px solid var(--card-border);border-radius:10px;background:#101116}.admin-product strong{font-size:11px}.admin-product small{display:block;color:#777;font-size:9px;margin-top:3px}.admin-product input{width:100%;background:#181920;border:1px solid var(--card-border);color:#fff;border-radius:8px;padding:8px;font-size:11px}.admin-empty{padding:18px;text-align:center;color:var(--text-muted);font-size:11px}.admin-chart{height:170px;display:flex;align-items:flex-end;gap:8px;padding:10px 0}.admin-bar{flex:1;min-width:18px;background:linear-gradient(180deg,var(--primary),#8a4f00);border-radius:7px 7px 2px 2px;position:relative}.admin-bar span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:8px;color:#777}.admin-setting{display:grid;grid-template-columns:1fr 1fr;gap:10px}.admin-field label{display:block;color:#888;font-size:9px;text-transform:uppercase;font-weight:800;margin-bottom:5px}.admin-field input,.admin-field select{width:100%;background:#101116;color:#fff;border:1px solid var(--card-border);border-radius:9px;padding:10px;font-size:11px}.admin-note{padding:11px;border:1px dashed #3a3c45;border-radius:10px;color:#888;font-size:10px;line-height:1.5}.admin-mobile-back{display:none}.painel-admin .admin-fechar{display:none}
-@media(max-width:900px){.admin-shell{grid-template-columns:1fr}.admin-sidebar{border-right:0;border-bottom:1px solid var(--card-border)}.admin-nav{grid-template-columns:repeat(3,1fr)}.admin-grid-2{grid-template-columns:1fr}.admin-mesas-grid{grid-template-columns:repeat(4,1fr)}.admin-product{grid-template-columns:1fr 100px 80px}.admin-product .admin-mini{grid-column:1/-1}.admin-product .admin-disponibilidade{grid-column:3}.admin-kpis{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.painel-admin{padding:8px}.admin-main{padding:12px}.admin-main-top{align-items:flex-start;flex-direction:column}.admin-nav{grid-template-columns:repeat(2,1fr)}.admin-mesas-grid{grid-template-columns:repeat(3,1fr)}.admin-setting{grid-template-columns:1fr}.admin-kpi strong{font-size:20px}.admin-product{grid-template-columns:1fr}.admin-product .admin-mini,.admin-product .admin-disponibilidade{grid-column:auto}.admin-shell{border-radius:12px}}
-
-
+:root{--primary:#f59e0b;--primary-hover:#d97706;--bg:#0f1015;--surface:#181920;--surface-2:#20222b;--border:rgba(255,255,255,.08);--text:#f3f4f6;--muted:#9ca3af;--success:#34d399}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-width:320px;overflow-x:hidden;overscroll-behavior-x:none;touch-action:pan-y;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}button{touch-action:manipulation}img{max-width:100%}.escondido{display:none!important}
+header{padding:34px 18px 28px;text-align:center;background:radial-gradient(circle at 50% -25%,#4a2d10 0%,#19130c 30%,var(--bg) 72%);border-bottom:1px solid var(--border)}
+.brand-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.12);border-radius:999px;color:var(--primary);font-size:10px;font-weight:900;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:11px}
+header h1{font-size:clamp(27px,7vw,40px);line-height:1.05;letter-spacing:-.8px;font-weight:900}header p{max-width:560px;margin:9px auto 0;color:var(--muted);font-size:14px;line-height:1.5}
+.categorias{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;padding:13px 16px;background:rgba(15,16,21,.94);backdrop-filter:blur(14px);position:sticky;top:0;z-index:50;border-bottom:1px solid var(--border);overscroll-behavior-x:contain;touch-action:pan-x}
+.categorias::-webkit-scrollbar{display:none}.categoria{flex:0 0 auto;border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:9px 15px;border-radius:999px;white-space:nowrap;font-size:13px;font-weight:750;cursor:pointer}.categoria.ativa{background:var(--primary);color:#111;border-color:var(--primary)}
+.produtos{width:min(1180px,100%);margin:22px auto 110px;padding:0 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:16px}
+.produto{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;min-width:0;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.produto:active{transform:scale(.985)}
+.produto-imagem-wrap{position:relative;width:100%;height:205px;background:#1a1b22;overflow:hidden}.produto-imagem-wrap img{width:100%;height:100%;object-fit:cover;display:block}.badge-3d{position:absolute;top:10px;left:10px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.78);border:1px solid rgba(245,158,11,.55);color:var(--primary);font-size:10px;font-weight:900;backdrop-filter:blur(8px)}
+.produto-info{padding:16px;display:flex;flex-direction:column;gap:0;flex:1}.produto-kicker{font-size:9px;letter-spacing:1.1px;text-transform:uppercase;color:var(--primary);font-weight:900;margin-bottom:5px}.produto-info h2{font-size:18px;line-height:1.2;margin-bottom:6px}.produto-info p{color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:14px;flex:1}.produto-rodape{display:flex;align-items:center;justify-content:space-between;gap:10px}.preco{font-size:18px;font-weight:900}.ver-3d-card{padding:7px 10px;border-radius:10px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--primary);font-size:10px;font-weight:900;white-space:nowrap}
+.carrinho-flutuante{position:fixed;right:16px;bottom:16px;z-index:800;border:0;background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:#111;padding:12px 17px;border-radius:999px;font-size:13px;font-weight:900;display:flex;align-items:center;gap:8px;box-shadow:0 9px 28px rgba(245,158,11,.28);cursor:pointer}.carrinho-contador{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);backdrop-filter:blur(10px);z-index:1000;align-items:center;justify-content:center;padding:12px}.modal.ativo{display:flex}.modal-conteudo{position:relative;width:100%;max-width:500px;max-height:94vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:22px;color:#fff;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.fechar-modal{position:absolute;right:12px;top:12px;width:38px;height:38px;border:1px solid var(--border);border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:21px;cursor:pointer;z-index:20}.modal h2{font-size:21px;margin-right:42px}.modal-desc{color:var(--muted);line-height:1.5;font-size:13px;margin:7px 0 12px}.modal-preco{font-size:24px;font-weight:900;color:var(--primary);margin-bottom:14px}
+.quantidade-box{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0 17px}.btn-quantidade{width:42px;height:42px;border:1px solid var(--border);border-radius:50%;background:var(--surface-2);color:#fff;font-size:19px;font-weight:900;cursor:pointer}.quantidade-numero{font-size:18px;font-weight:900;min-width:24px;text-align:center}.botoes-produto{display:grid;gap:9px}.btn-principal,.btn-ar{width:100%;border:0;border-radius:13px;padding:14px;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}.btn-principal{background:var(--primary);color:#111}.btn-ar{background:var(--surface-2);border:1px solid var(--border);color:#fff}.btn-ar.destaque{background:linear-gradient(135deg,#f59e0b,#d97706);color:#111;border-color:transparent}
+.area-3d{width:100%;height:min(56vh,390px);min-height:300px;margin:14px 0 10px;border-radius:17px;overflow:hidden;position:relative;background:radial-gradient(circle at 50% 48%,#30333f,#0d0e12 75%);border:1px solid var(--border)}
+model-viewer{width:100%;height:100%;--poster-color:transparent;--progress-bar-color:var(--primary);touch-action:auto}.btn-ver-mesa{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:#111;border:0;border-radius:999px;padding:12px 20px;font-size:13px;font-weight:900;white-space:nowrap;box-shadow:0 10px 25px rgba(245,158,11,.35);cursor:pointer;z-index:20}.modelo-info{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:9px 0 4px;color:var(--muted);font-size:11px;line-height:1.45}.modelo-status{color:var(--success);font-weight:800}
+.carrinho-lista{text-align:left;margin-top:12px}.carrinho-vazio{color:var(--muted);padding:25px 0;text-align:center;font-size:13px}.item-carrinho{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}.item-carrinho-nome{font-size:13px;font-weight:800}.item-carrinho-preco{font-size:11px;color:var(--muted);margin-top:4px}.item-controles{display:flex;align-items:center;gap:9px}.item-btn{width:32px;height:32px;border:1px solid var(--border);background:var(--surface-2);color:#fff;border-radius:50%;cursor:pointer;font-size:17px}.item-qtd{min-width:18px;text-align:center;font-size:12px;font-weight:900}.carrinho-total{display:flex;justify-content:space-between;gap:10px;padding:16px 0;font-size:17px;font-weight:900;border-bottom:1px solid var(--border)}
+.formulario-pedido{display:grid;gap:8px;text-align:left;margin-top:14px}.formulario-pedido label{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.6px}.formulario-pedido input,.formulario-pedido select{width:100%;min-height:46px;padding:11px 12px;border-radius:11px;border:1px solid var(--border);background:#101116;color:#fff;outline:0}.formulario-pedido input:focus,.formulario-pedido select:focus{border-color:var(--primary)}.box-pix{margin-top:6px;padding:12px;border:1px dashed rgba(245,158,11,.35);border-radius:12px;background:rgba(245,158,11,.06)}.box-pix p{color:var(--muted);font-size:10px;margin-bottom:6px}.chave-pix-texto{font-weight:900;font-size:13px;word-break:break-all}.btn-copiar-pix{margin-top:9px;border:1px solid var(--border);background:var(--surface-2);color:#fff;border-radius:9px;padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer}.box-sucesso{margin-top:14px;padding:14px;border-radius:13px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25)}.box-sucesso h3{font-size:15px;margin-bottom:5px}.box-sucesso p{font-size:12px;color:var(--muted);line-height:1.45}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(15px);opacity:0;pointer-events:none;z-index:3000;background:#fff;color:#111;padding:10px 15px;border-radius:999px;font-size:12px;font-weight:900;transition:.2s;box-shadow:0 10px 30px rgba(0,0,0,.3)}.toast.ativo{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-height:1.5}footer strong{color:#b7bac3;display:block;font-size:12px;margin-bottom:3px}
+@media(max-width:700px){header{padding-top:28px}.produtos{grid-template-columns:1fr 1fr;gap:11px;padding:0 11px}.produto-imagem-wrap{height:170px}.produto-info{padding:13px}.produto-info h2{font-size:15px}.produto-info p{font-size:12px}.preco{font-size:16px}.ver-3d-card{font-size:9px;padding:6px 8px}.modal{padding:8px}.modal-conteudo{padding:18px;border-radius:18px;max-height:96vh}.area-3d{height:54vh;min-height:290px}}
+@media(max-width:390px){.produtos{grid-template-columns:1fr}.produto-imagem-wrap{height:205px}.produto-info h2{font-size:17px}.produto-info p{font-size:13px}.carrinho-flutuante{right:10px;bottom:10px}.categoria{padding:8px 13px}}
+@media(min-width:1100px){.produto:hover{transform:translateY(-3px);border-color:rgba(245,158,11,.22);box-shadow:0 16px 40px rgba(0,0,0,.18)}.produto-imagem-wrap img{transition:transform .35s ease}.produto:hover .produto-imagem-wrap img{transform:scale(1.035)}}
 </style>
-
 </head>
-
 <body>
-
 <header>
-    <div class="brand-badge">✦ Cardápio Interativo SaaS</div>
-    <h1 id="restauranteNome">Brasa 180° Gourmet</h1>
-    <p id="restauranteDescricao">Gastronomia artesanal com apresentação 3D e pedidos diretos no WhatsApp.</p>
+  <div class="brand-badge">✦ Hamburgueria artesanal</div>
+  <h1 id="restauranteNome">Brasa 180° Smash & Grill</h1>
+  <p id="restauranteDescricao">Hambúrgueres artesanais na brasa, ingredientes selecionados e acompanhamentos para completar seu pedido.</p>
 </header>
-
-
-
-<div class="categorias" id="categorias"></div>
-
+<nav class="categorias" id="categorias" aria-label="Categorias do cardápio"></nav>
 <main class="produtos" id="listaProdutos"></main>
+<button class="carrinho-flutuante" type="button" onclick="abrirCarrinho()" aria-label="Abrir meu pedido">🛒 <span>Meu Pedido</span><span id="carrinhoContador" class="carrinho-contador">0</span></button>
 
-<button class="carrinho-flutuante" onclick="abrirCarrinho()">
-    🛒 <span>Meu Pedido</span>
-    <span id="carrinhoContador" class="carrinho-contador">0</span>
-</button>
-
-<!-- MODAL PRODUTO -->
-
-<div id="modalProduto" class="modal">
-    <div class="modal-conteudo">
-        <button class="fechar-modal" onclick="fecharModal()">×</button>
-        <h2 id="modalNome"></h2>
-        <p id="modalDescricao"></p>
-        <div id="modalPreco" class="modal-preco"></div>
-        <div class="quantidade-box">
-            <button class="btn-quantidade" onclick="alterarQuantidadeProduto(-1)">−</button>
-            <span id="quantidadeProduto" class="quantidade-numero">1</span>
-            <button class="btn-quantidade" onclick="alterarQuantidadeProduto(1)">+</button>
-        </div>
-        <div class="botoes-produto">
-            <button class="btn-principal" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
-            <button id="btnAbrir3DProduto" class="btn-ar" onclick="abrir3D()">🧊 Explorar em 3D + AR</button>
-        </div>
+<div id="modalProduto" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalNome">
+  <div class="modal-conteudo">
+    <button class="fechar-modal" type="button" onclick="fecharModal()" aria-label="Fechar">×</button>
+    <h2 id="modalNome"></h2><p id="modalDescricao" class="modal-desc"></p><div id="modalPreco" class="modal-preco"></div>
+    <div class="quantidade-box"><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(-1)">−</button><span id="quantidadeProduto" class="quantidade-numero">1</span><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(1)">+</button></div>
+    <div class="botoes-produto">
+      <button class="btn-principal" type="button" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
+      <button id="btnVerMesaProduto" class="btn-ar destaque" type="button" onclick="abrirARDireto()" style="display:none">📱 Ver na minha mesa</button>
+      <button id="btnAbrir3DProduto" class="btn-ar" type="button" onclick="abrir3D()" style="display:none">🧊 Explorar em 3D</button>
     </div>
-</div>
-
-<!-- MODAL 3D REALISTA & AR AMPLIADO -->
-
-<div id="modal3D" class="modal">
-    <div class="modal-conteudo">
-        <button class="fechar-modal" onclick="fechar3D()">×</button>
-        <h2>Apresentação 3D Realista</h2>
-        <div id="nomeProduto3D" style="color:var(--text-muted); font-size:12px; margin-top:2px;"></div>
-
-    <div class="area-3d">
-        <model-viewer 
-            id="viewer3D"
-            camera-controls 
-            auto-rotate 
-            ar 
-            ar-modes="scene-viewer quick-look webxr" 
-            ar-scale="fixed"
-            scale="1 1 1"
-            shadow-intensity="2.0" 
-            shadow-softness="0.4"
-            exposure="1.45"
-            loading="eager"
-            environment-image="neutral"
-            interaction-prompt="auto"
-            alt="Modelo 3D Interativo do Prato em Tamanho Real">
-            
-            <button slot="ar-button" class="btn-ver-mesa" onclick="notificarAR()">
-                📱 Ver na minha mesa (AR Real)
-            </button>
-        </model-viewer>
-    </div>
-    
-    <div class="escala-3d-box">
-        <div class="escala-3d-topo">
-            <strong>Escala do produto</strong>
-            <span id="valorEscala3D">1,00×</span>
-        </div>
-        <input id="escala3D" type="range" min="0.50" max="2.50" step="0.05" value="1" oninput="atualizarEscala3D()">
-        <div class="escala-3d-legenda"><span>0,50×</span><span id="statusEscala3D">1,00× = tamanho real</span><span>2,50×</span></div>
-        <div id="dimensoes3D" class="dimensoes-3d">Tamanho físico de referência</div>
-    </div>
-    <p style="font-size:11px; color:var(--text-muted)">A escala começa em tamanho real. Ajuste manualmente quando quiser ampliar ou reduzir a visualização.</p>
-    <button class="btn-principal" style="margin-top:12px;" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
-</div>
-
-</div>
-
-<!-- MODAL CARRINHO ULTRARRÁPIDO -->
-
-<div id="modalCarrinho" class="modal">
-    <div class="modal-conteudo">
-        <button class="fechar-modal" onclick="fecharCarrinho()">×</button>
-        <h2>Seu Pedido</h2>
-        <div id="carrinhoLista" class="carrinho-lista"></div>
-        <div id="carrinhoFinalizacao" style="display:none;">
-            <div class="carrinho-total">
-                <span>Total</span>
-                <span id="carrinhoTotal">R$ 0,00</span>
-            </div>
-
-        <div class="formulario-pedido" id="painelFormulario">
-            <label>Como deseja o seu pedido?</label>
-            <div class="seletor-atendimento">
-                <button type="button" id="btnTipoDelivery" class="btn-opcao-tipo ativo" onclick="selecionarTipoAtendimento('delivery')">🛵 Delivery</button>
-                <button type="button" id="btnTipoMesa" class="btn-opcao-tipo" onclick="selecionarTipoAtendimento('mesa')">🍽️ Comer na Mesa</button>
-            </div>
-
-            <label for="clienteNome">Seu Nome *</label>
-            <input id="clienteNome" type="text" placeholder="Nome para identificação">
-
-            <div id="boxEndereco">
-                <label for="clienteEndereco">Endereço de Entrega *</label>
-                <input id="clienteEndereco" type="text" placeholder="Rua, número e bairro">
-            </div>
-
-            <div id="boxMesa" style="display:none;">
-                <label for="numeroMesa">Número da Mesa *</label>
-                <input id="numeroMesa" type="text" placeholder="Ex.: Mesa 04">
-            </div>
-
-            <label for="formaPagamento">Pagamento *</label>
-            <select id="formaPagamento" onchange="alternarOpcoesPagamento()">
-                <option value="pix">⚡ PIX (Online)</option>
-                <option value="cartao">💳 Cartão Crédito/Débito</option>
-                <option value="dinheiro">💵 Dinheiro</option>
-            </select>
-
-            <!-- PAINEL PIX INSTANTÂNEO -->
-            <div id="boxPixInfo" class="box-pix">
-                <p>Chave PIX do Estabelecimento:</p>
-                <div class="chave-pix-texto" id="chavePixTexto">5534984252341</div>
-                <button type="button" class="btn-copiar-pix" onclick="copiarChavePix()">📋 Copiar Chave PIX</button>
-            </div>
-
-            <div id="boxTroco" style="display:none; margin-top:6px;">
-                <input id="valorTroco" type="text" placeholder="Troco para quanto? Ex.: R$ 100">
-            </div>
-        </div>
-
-        <div id="painelSucessoLocal" style="display:none;"></div>
-
-        <button id="btnAcaoFinalizar" class="btn-principal" style="margin-top:14px;" onclick="processarCheckout()">📱 Finalizar Pedido no WhatsApp</button>
-    </div>
-</div>
-
-</div>
-
-<div id="painelAdmin" class="painel-admin">
-    <div class="painel-admin-topo">
-        <div><h2>Painel da Operação</h2><p>Dashboard demonstrativo da Brasa 180° • pedidos e mesas do navegador.</p></div>
-        <button class="admin-fechar" onclick="fecharPainelAdmin()">Voltar ao cardápio</button>
-    </div>
-    <div class="admin-grid">
-        <div class="admin-card"><small>Pedidos na mesa</small><strong id="adminTotalPedidos">0</strong></div>
-        <div class="admin-card"><small>Pedidos pendentes</small><strong id="adminPendentes">0</strong></div>
-        <div class="admin-card"><small>Mesas ocupadas</small><strong id="adminMesasOcupadas">0</strong></div>
-        <div class="admin-card"><small>Faturamento local</small><strong id="adminFaturamento">R$ 0,00</strong></div>
-    </div>
-    <section class="admin-section"><h3>Mapa de mesas</h3><div id="adminMesas" class="mesas-grid"></div></section>
-    <section class="admin-section"><h3>Pedidos recentes</h3><div id="adminPedidos"></div></section>
-</div>
-
-<div id="painelAdmin" class="painel-admin">
-  <div class="admin-shell">
-    <aside class="admin-sidebar">
-      <div class="admin-brand"><strong>Mesa360</strong><span>Brasa 180° • Operação</span></div>
-      <nav class="admin-nav">
-        <button class="ativo" data-admin-view="inicio" onclick="mudarAdminView('inicio')">Visão geral</button>
-        <button data-admin-view="pedidos" onclick="mudarAdminView('pedidos')">Pedidos</button>
-        <button data-admin-view="cozinha" onclick="mudarAdminView('cozinha')">Cozinha</button>
-        <button data-admin-view="mesas" onclick="mudarAdminView('mesas')">Mesas</button>
-        <button data-admin-view="produtos" onclick="mudarAdminView('produtos')">Produtos</button>
-        <button data-admin-view="categorias" onclick="mudarAdminView('categorias')">Categorias</button>
-        <button data-admin-view="relatorios" onclick="mudarAdminView('relatorios')">Relatórios</button>
-        <button data-admin-view="config" onclick="mudarAdminView('config')">Configurações</button>
-      </nav>
-    </aside>
-    <main class="admin-main">
-      <div class="admin-main-top">
-        <div><h2 id="adminTitulo">Visão geral</h2><p id="adminSubtitulo">Acompanhe a operação da Brasa 180° em um só lugar.</p></div>
-        <div class="admin-acoes"><button class="admin-btn" onclick="atualizarDashboard()">Atualizar</button><button class="admin-btn principal" onclick="fecharPainelAdmin()">Voltar ao cardápio</button></div>
-      </div>
-
-  <section id="adminViewInicio" class="admin-view ativo">
-    <div class="admin-kpis">
-      <div class="admin-kpi"><small>Pedidos hoje</small><strong id="dashPedidosHoje">0</strong><span>Pedidos registrados</span></div>
-      <div class="admin-kpi"><small>Em preparo</small><strong id="dashEmPreparo">0</strong><span>Precisam de atenção</span></div>
-      <div class="admin-kpi"><small>Mesas ocupadas</small><strong id="dashMesasOcupadas">0</strong><span>De 12 mesas</span></div>
-      <div class="admin-kpi"><small>Faturamento</small><strong id="dashFaturamento">R$ 0,00</strong><span>Pedidos locais</span></div>
-    </div>
-    <div class="admin-grid-2">
-      <section class="admin-box"><div class="admin-box-header"><h3>Pedidos recentes</h3><button class="admin-btn" onclick="mudarAdminView('pedidos')">Ver todos</button></div><div id="dashPedidosRecentes"></div></section>
-      <section class="admin-box"><div class="admin-box-header"><h3>Mesas</h3><button class="admin-btn" onclick="mudarAdminView('mesas')">Abrir mapa</button></div><div id="dashMesasResumo" class="admin-mesas-grid"></div></section>
-    </div>
-  </section>
-
-  <section id="adminViewPedidos" class="admin-view">
-    <section class="admin-box"><div class="admin-box-header"><h3>Todos os pedidos</h3><button class="admin-btn" onclick="limparPedidosDemo()">Limpar histórico</button></div><div id="adminPedidosTabela" class="admin-table-wrap"></div></section>
-  </section>
-
-  <section id="adminViewCozinha" class="admin-view">
-    <div class="admin-grid-2">
-      <section class="admin-box"><h3>Recebidos</h3><div id="cozinhaPendentes"></div></section>
-      <section class="admin-box"><h3>Em preparo</h3><div id="cozinhaPreparo"></div></section>
-    </div>
-    <section class="admin-box"><h3>Prontos para entregar</h3><div id="cozinhaProntos"></div></section>
-  </section>
-
-  <section id="adminViewMesas" class="admin-view">
-    <section class="admin-box"><div class="admin-box-header"><h3>Mapa de 12 mesas</h3><span style="font-size:10px;color:#777">Ocupação baseada nos pedidos ativos</span></div><div id="adminMesasCompleto" class="admin-mesas-grid"></div></section>
-  </section>
-
-  <section id="adminViewProdutos" class="admin-view">
-    <section class="admin-box"><div class="admin-box-header"><h3>Produtos</h3><button class="admin-btn principal" onclick="adicionarProdutoDemo()">+ Novo produto</button></div><div id="adminProdutosLista" class="admin-product-list"></div></section>
-  </section>
-
-  <section id="adminViewCategorias" class="admin-view">
-    <section class="admin-box"><div class="admin-box-header"><h3>Categorias do cardápio</h3></div><div id="adminCategoriasLista" class="admin-product-list"></div><div class="admin-note" style="margin-top:12px">Nesta etapa, as categorias ainda ficam no catálogo local. Quando conectarmos o Supabase, elas passarão a ser editáveis por restaurante e sincronizadas entre dispositivos.</div></section>
-  </section>
-
-  <section id="adminViewRelatorios" class="admin-view">
-    <div class="admin-kpis"><div class="admin-kpi"><small>Visualizações</small><strong id="relViews">0</strong></div><div class="admin-kpi"><small>Interações 3D</small><strong id="rel3d">0</strong></div><div class="admin-kpi"><small>Interações AR</small><strong id="relAr">0</strong></div><div class="admin-kpi"><small>Add ao carrinho</small><strong id="relCarrinho">0</strong></div></div>
-    <section class="admin-box"><h3>Pedidos por produto</h3><div id="relProdutos"></div></section>
-  </section>
-
-  <section id="adminViewConfig" class="admin-view">
-    <section class="admin-box"><h3>Configurações da operação</h3><div class="admin-setting"><div class="admin-field"><label>Nome do estabelecimento</label><input id="configNome" value="Brasa 180° Gourmet"></div><div class="admin-field"><label>WhatsApp</label><input id="configWhatsapp" value="5534984252341"></div><div class="admin-field"><label>Chave PIX</label><input id="configPix" value="5534984252341"></div><div class="admin-field"><label>Status do atendimento</label><select id="configStatus"><option>Aberto</option><option>Fechado</option><option>Pausado</option></select></div></div><button class="admin-btn principal" style="margin-top:12px" onclick="salvarConfigDemo()">Salvar configuração</button></section>
-    <section class="admin-box"><h3>Arquitetura do sistema</h3><div class="admin-note">Este painel está funcionando localmente para a demonstração. O próximo estágio será substituir o armazenamento local pelo Supabase: login do restaurante, dados por restaurant_id, pedidos em tempo real, RLS e sincronização entre celular, cozinha e dashboard.</div></section>
-  </section>
-</main>
-
   </div>
 </div>
 
-<div id="toast" class="toast">Adicionado ao pedido</div>
+<div id="modal3D" class="modal" role="dialog" aria-modal="true" aria-labelledby="nomeProduto3D">
+  <div class="modal-conteudo">
+    <button class="fechar-modal" type="button" onclick="fechar3D()" aria-label="Fechar visualização 3D">×</button>
+    <h2>Visualização 3D</h2><div id="nomeProduto3D" style="color:var(--muted);font-size:12px;margin-top:3px"></div>
+    <div class="area-3d">
+      <model-viewer id="viewer3D" camera-controls auto-rotate ar ar-modes="scene-viewer quick-look webxr" ar-scale="fixed" shadow-intensity="1.6" shadow-softness="0.45" exposure="1.15" loading="lazy" reveal="auto" environment-image="neutral" interaction-prompt="auto" alt="Modelo 3D interativo do produto">
+        <button slot="ar-button" class="btn-ver-mesa" type="button" onclick="notificarAR()">📱 Ver na minha mesa</button>
+      </model-viewer>
+    </div>
+    <div class="modelo-info"><span>Gire, aproxime e explore o produto.</span><span id="statusModelo" class="modelo-status">3D pronto</span></div>
+    <button class="btn-principal" type="button" onclick="adicionarProdutoAtual()" style="margin-top:8px">🛒 Adicionar ao Pedido</button>
+  </div>
+</div>
 
-<footer>
-    <div id="rodapeNome">Brasa 180° Smash & Grill</div>
-    <button onclick="abrirPainelAdmin()" style="margin-top:10px;background:none;border:1px solid var(--card-border);color:var(--text-muted);padding:7px 12px;border-radius:20px;font-size:10px;cursor:pointer;">Painel da operação</button>
-    SaaS de Cardápio Interativo 3D & AR
-</footer>
+<div id="modalCarrinho" class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloPedido">
+  <div class="modal-conteudo">
+    <button class="fechar-modal" type="button" onclick="fecharCarrinho()" aria-label="Fechar pedido">×</button>
+    <h2 id="tituloPedido">Seu Pedido</h2>
+    <div id="carrinhoLista" class="carrinho-lista"></div>
+    <div id="carrinhoFinalizacao" style="display:none">
+      <div class="carrinho-total"><span>Total</span><span id="carrinhoTotal">R$ 0,00</span></div>
+      <div class="formulario-pedido">
+        <label for="clienteNome">Seu nome *</label><input id="clienteNome" type="text" placeholder="Nome para identificação" autocomplete="name">
+        <label for="clienteEndereco">Endereço de entrega *</label><input id="clienteEndereco" type="text" placeholder="Rua, número e bairro" autocomplete="street-address">
+        <label for="formaPagamento">Pagamento *</label>
+        <select id="formaPagamento" onchange="alternarOpcoesPagamento()"><option value="pix">⚡ PIX</option><option value="cartao">💳 Cartão</option><option value="dinheiro">💵 Dinheiro</option></select>
+        <div id="boxPixInfo" class="box-pix"><p>Chave PIX do estabelecimento</p><div class="chave-pix-texto" id="chavePixTexto">5534984252341</div><button class="btn-copiar-pix" type="button" onclick="copiarChavePix()">📋 Copiar chave PIX</button></div>
+        <div id="boxTroco" style="display:none"><input id="valorTroco" type="text" placeholder="Troco para quanto? Ex.: R$ 100"></div>
+      </div>
+      <div id="painelSucessoLocal" style="display:none"></div>
+      <button id="btnAcaoFinalizar" class="btn-principal" type="button" onclick="processarCheckout()" style="margin-top:14px">📱 Finalizar Pedido no WhatsApp</button>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast" aria-live="polite"></div>
+<footer><strong id="rodapeNome">Brasa 180° Smash & Grill</strong>Cardápio digital com visualização 3D e realidade aumentada.</footer>
 
 <script>
-/* SUPABASE: será conectado ao novo projeto após esta etapa visual. */
-const menuSupabase = null;
-window.menuSupabase = null;
-window.supabaseConnectionStatus = "aguardando_novo_projeto";
-
-
-
-const RESTAURANTES = {
-    "hamburgueria":{
-        nome:"Brasa 180° Smash & Grill",
-        descricao:"Hambúrgueres artesanais na brasa, acompanhamentos e bebidas geladas. Uma experiência digital pensada para vender.",
-        nicho:"Hamburgueria Premium",
-        whatsapp:"5534984252341",
-        categorias:[
-            {id:"todos",nome:"Ver Todos"},
-            {id:"burgers",nome:"Hambúrgueres"},
-            {id:"porcoes",nome:"Porções"},
-            {id:"bebidas",nome:"Bebidas"},
-            {id:"sobremesas",nome:"Sobremesas"}
-        ],
-        produtos:[
-            {id:"hamburguer-brasa",nome:"Brasa Smash Double",descricao:"2 blends de 100g prensados na chapa, cheddar derretido, bacon crocante e molho da casa no pão brioche.",preco:38.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85"},
-            {id:"hamburguer-bacon",nome:"Brasa Bacon Supreme",descricao:"Blend de 180g, bacon crocante, queijo gouda, cebola crispy e molho especial no pão brioche.",preco:42.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1000&q=85"},
-            {id:"hamburguer-monster",nome:"Monster Trufado",descricao:"3 blends de 120g, queijo, maionese trufada e picles artesanal para quem quer um hambúrguer de respeito.",preco:49.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=1000&q=85"},
-            {id:"chicken-crispy",nome:"Chicken Crispy Gold",descricao:"Frango crocante, coleslaw, queijo e maionese de pimenta defumada.",preco:34.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=1000&q=85"},
-            {id:"veggie-gourmet",nome:"Veggie Cogumelos",descricao:"Burger de cogumelos e grão-de-bico, rúcula, tomate seco e queijo de búfala.",preco:36.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&w=1000&q=85"},
-            {id:"batata-supreme",nome:"Batata Frita Supreme",descricao:"Batata crocante com cheddar cremoso e farofa de bacon.",preco:26.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85"},
-            {id:"onion-rings",nome:"Onion Rings",descricao:"Anéis de cebola empanados e crocantes com molho especial da casa.",preco:24.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=1000&q=85"},
-            {id:"coca-cola-350",nome:"Coca-Cola 350ml",descricao:"Lata de Coca-Cola bem gelada. Experimente também a apresentação 3D em escala realista.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/coca-cola.glb",dimensoes:{largura:0.066,altura:0.122,profundidade:0.066}},
-            {id:"coca-cola-zero-350",nome:"Coca-Cola Zero 350ml",descricao:"Coca-Cola Zero bem gelada, sem açúcar.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=1000&q=85"},
-            {id:"guarana-350",nome:"Guaraná Antarctica 350ml",descricao:"Refrigerante de guaraná bem gelado.",preco:6.50,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1629203849820-fdd70d49c38e?auto=format&fit=crop&w=1000&q=85"},
-            {id:"agua-sem-gas",nome:"Água Mineral 500ml",descricao:"Água mineral sem gás, servida gelada.",preco:4.50,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=1000&q=85"},
-            {id:"agua-com-gas",nome:"Água com Gás 500ml",descricao:"Água mineral com gás, servida gelada.",preco:5.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1000&q=85"},
-            {id:"suco-laranja",nome:"Suco de Laranja",descricao:"Suco de laranja servido gelado.",preco:9.90,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1000&q=85"},
-            {id:"milkshake-chocolate",nome:"Milkshake de Chocolate",descricao:"Milkshake cremoso de chocolate com cobertura especial.",preco:18.90,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=1000&q=85"},
-            {id:"brownie-gelato",nome:"Brownie com Gelato",descricao:"Brownie de chocolate servido quente com gelato de baunilha.",preco:28.90,categoria:"sobremesas",imagem:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1000&q=85"},
-            {id:"churros-mini",nome:"Mini Churros",descricao:"Mini churros crocantes com doce de leite.",preco:16.90,categoria:"sobremesas",imagem:"https://images.unsplash.com/photo-1624371414361-e670edf4898d?auto=format&fit=crop&w=1000&q=85"}
-        ]
-    }
+const restauranteAtual={
+ nome:"Brasa 180° Smash & Grill",
+ descricao:"Hambúrgueres artesanais na brasa, ingredientes selecionados e acompanhamentos para completar seu pedido.",
+ nicho:"Hamburgueria",
+ whatsapp:"5534984252341",
+ categorias:[{id:"todos",nome:"Ver todos"},{id:"burgers",nome:"Hambúrgueres"},{id:"porcoes",nome:"Porções"},{id:"bebidas",nome:"Bebidas"}],
+ produtos:[
+  {id:"hamburguer-brasa",nome:"Brasa Smash Double",descricao:"Dois burgers prensados na chapa, cheddar derretido, bacon crocante e molho da casa no pão brioche.",preco:38.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/hamburguer-brasa.glb"},
+  {id:"hamburguer-bacon",nome:"Brasa Bacon Supreme",descricao:"Blend artesanal, bacon crocante, queijo gouda, cebola crispy e molho especial.",preco:42.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/hamburguer-bacon.glb"},
+  {id:"hamburguer-monster",nome:"Monster Trufado",descricao:"Burger triplo, queijo derretido, maionese trufada e picles artesanal.",preco:49.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/hamburguer-monster.glb"},
+  {id:"chicken-crispy",nome:"Chicken Crispy Gold",descricao:"Frango crocante, queijo, coleslaw e maionese de pimenta defumada.",preco:34.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/chicken-crispy.glb"},
+  {id:"veggie-gourmet",nome:"Veggie Cogumelos",descricao:"Burger vegetal de cogumelos e grão-de-bico, rúcula, tomate seco e queijo.",preco:36.00,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/veggie-gourmet.glb"},
+  {id:"classic-brasa",nome:"Classic Brasa",descricao:"Burger artesanal, cheddar, alface, tomate, cebola roxa e molho especial.",preco:32.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/classic-brasa.glb"},
+  {id:"smash-cheddar",nome:"Smash Cheddar",descricao:"Dois smash burgers, cheddar cremoso, cebola caramelizada e molho da casa.",preco:35.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/smash-cheddar.glb"},
+  {id:"bbq-crispy",nome:"BBQ Crispy",descricao:"Burger crocante, cheddar, bacon, cebola crispy e barbecue defumado.",preco:39.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/bbq-crispy.glb"},
+  {id:"jalapeno-brasa",nome:"Jalapeño Fire",descricao:"Burger artesanal, pepper jack, jalapeño, cebola grelhada e molho picante.",preco:41.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/jalapeno-brasa.glb"},
+  {id:"duplo-defumado",nome:"Duplo Defumado",descricao:"Dois burgers, queijo prato, bacon, cebola grelhada e molho defumado.",preco:43.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/duplo-defumado.glb"},
+  {id:"barbecue-bacon",nome:"Barbecue Bacon",descricao:"Blend artesanal, cheddar, bacon crocante, onion rings e barbecue da casa.",preco:44.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/barbecue-bacon.glb"},
+  {id:"frango-brasa",nome:"Frango da Brasa",descricao:"Filé de frango grelhado, queijo, alface, tomate e maionese de ervas.",preco:35.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/frango-brasa.glb"},
+  {id:"especial-casa",nome:"180° Especial",descricao:"Burger da casa com cheddar, bacon, cebola caramelizada e molho 180°.",preco:46.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/especial-casa.glb"},
+  {id:"smash-picles",nome:"Smash Pickles",descricao:"Dois smash burgers, queijo, picles, cebola e molho especial levemente ácido.",preco:36.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1596662951482-0c4ba74a6df6?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/smash-picles.glb"},
+  {id:"vegetariano-brasa",nome:"Vegetariano da Casa",descricao:"Burger vegetal, queijo, rúcula, tomate, cebola roxa e molho cremoso.",preco:36.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1550317138-10000687a72b?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/vegetariano-brasa.glb"},
+  {id:"batata-supreme",nome:"Batata Frita Supreme",descricao:"Batata crocante com cheddar cremoso e farofa de bacon.",preco:26.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85"},
+  {id:"batata-cheddar",nome:"Batata Cheddar & Bacon",descricao:"Batata dourada coberta com cheddar cremoso e bacon crocante.",preco:28.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1630431341973-02e1b662ec35?auto=format&fit=crop&w=1000&q=85"},
+  {id:"onion-rings",nome:"Onion Rings",descricao:"Anéis de cebola empanados e crocantes com molho especial da casa.",preco:24.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=1000&q=85"},
+  {id:"frango-empanado",nome:"Tiras de Frango Crispy",descricao:"Tiras de frango crocantes acompanhadas de molho especial.",preco:29.90,categoria:"porcoes",imagem:"https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=1000&q=85"},
+  {id:"coca-cola-350",nome:"Coca-Cola 350ml",descricao:"Lata de Coca-Cola bem gelada. Disponível também em visualização 3D e AR.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=1000&q=85",modelo3d:"models/coca-cola.glb"},
+  {id:"coca-cola-zero-350",nome:"Coca-Cola Zero 350ml",descricao:"Coca-Cola Zero bem gelada, sem açúcar.",preco:7.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=1000&q=85"},
+  {id:"guarana-350",nome:"Guaraná 350ml",descricao:"Refrigerante de guaraná bem gelado.",preco:6.50,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1629203849820-fdd70d49c38e?auto=format&fit=crop&w=1000&q=85"},
+  {id:"agua-sem-gas",nome:"Água Mineral 500ml",descricao:"Água mineral sem gás, servida gelada.",preco:4.50,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=1000&q=85"},
+  {id:"agua-com-gas",nome:"Água com Gás 500ml",descricao:"Água mineral com gás, servida gelada.",preco:5.00,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1000&q=85"},
+  {id:"suco-laranja",nome:"Suco de Laranja",descricao:"Suco de laranja servido gelado.",preco:9.90,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1000&q=85"},
+  {id:"milkshake-chocolate",nome:"Milkshake de Chocolate",descricao:"Milkshake cremoso de chocolate.",preco:18.90,categoria:"bebidas",imagem:"https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=1000&q=85"}
+ ]
 };
 
-const restauranteAtual = RESTAURANTES["hamburgueria"];
-
-let carrinho = [];
-let tipoAtendimentoSelecionado = 'delivery';
-window.produtoSelecionado = restauranteAtual.produtos[0]?.id || null;
-window.produtoSelecionadoNome = restauranteAtual.produtos[0]?.nome || "";
-let quantidadeProdutoAtual = 1;
-
-function iniciarRestaurante(){
-    document.getElementById("restauranteNome").textContent = restauranteAtual.nome;
-    document.getElementById("restauranteDescricao").textContent = restauranteAtual.descricao;
-    document.getElementById("rodapeNome").textContent = restauranteAtual.nome;
-    
-    renderizarCategorias();
-    renderizarProdutos();
-    atualizarCarrinho();
-}
-
-function renderizarCategorias(){
-    const container = document.getElementById("categorias");
-    container.innerHTML = (restauranteAtual.categorias || []).map(cat=>`
-        <button class="categoria ${cat.id==="todos" ? "ativa" : ""}" onclick="filtrarProdutos('${cat.id}',this)">${cat.nome}</button>
-    `).join("");
-}
-
-function renderizarProdutos(){
-    const container = document.getElementById("listaProdutos");
-    container.innerHTML = restauranteAtual.produtos.map(produto=>`
-        <div class="produto" data-categoria="${produto.categoria}" onclick="abrirProdutoPorId('${produto.id}')">
-            <div class="produto-imagem-wrap">
-                <img loading="lazy" src="${produto.imagem}" alt="${produto.nome}">
-                ${produto.modelo3d ? '<span class="badge-3d">🧊 3D + AR</span>' : ''}
-            </div>
-            <div class="produto-info">
-                <div class="produto-kicker">${restauranteAtual.nicho}</div>
-                <h2>${produto.nome}</h2>
-                <p>${produto.descricao}</p>
-                <div class="produto-rodape">
-                    <div class="preco">${formatarPreco(produto.preco)}</div>
-                    <span class="ver-3d-card">${produto.modelo3d ? '3D + AR' : 'Ver detalhes'}</span>
-                </div>
-            </div>
-        </div>
-    `).join("");
-}
-
-function filtrarProdutos(categoria, botao){
-    document.querySelectorAll(".produto").forEach(p=>{
-        if(categoria==="todos" || p.dataset.categoria===categoria) p.classList.remove("escondido");
-        else p.classList.add("escondido");
-    });
-    document.querySelectorAll(".categoria").forEach(b=>b.classList.remove("ativa"));
-    if(botao) botao.classList.add("ativa");
-}
-
-function abrirProdutoPorId(id){
-    const produto = restauranteAtual.produtos.find(item=>item.id===id);
-    if(!produto) return;
-
-    window.produtoSelecionado = produto.id;
-    window.produtoSelecionadoNome = produto.nome;
-    quantidadeProdutoAtual = 1;
-
-    MenuAnalytics.trackProductView(produto);
-
-    document.getElementById("modalNome").textContent = produto.nome;
-    document.getElementById("modalDescricao").textContent = produto.descricao;
-    document.getElementById("modalPreco").textContent = formatarPreco(produto.preco);
-    document.getElementById("quantidadeProduto").textContent = quantidadeProdutoAtual;
-    const btn3D = document.getElementById("btnAbrir3DProduto");
-    if(btn3D){
-        btn3D.style.display = produto.modelo3d ? "flex" : "none";
-    }
-
-    document.getElementById("modalProduto").classList.add("ativo");
-}
-
-function abrir3D() {
-    const produto = restauranteAtual.produtos.find(item => item.id === window.produtoSelecionado);
-    if(!produto || !produto.modelo3d) return;
-
-    document.getElementById("modalProduto").classList.remove("ativo");
-    document.getElementById("modal3D").classList.add("ativo");
-    document.getElementById("nomeProduto3D").textContent = produto.nome;
-    MenuAnalytics.track3DView(produto);
-
-    const viewer = document.getElementById("viewer3D");
-    viewer.setAttribute("src", produto.modelo3d);
-    viewer.setAttribute("scale", "1 1 1");
-    document.getElementById("escala3D").value = "1";
-    atualizarEscala3D();
-
-    const d = produto.dimensoes || {};
-    document.getElementById("dimensoes3D").textContent = d.altura ? `Tamanho físico de referência: ${(d.largura*100).toFixed(1)} × ${(d.altura*100).toFixed(1)} × ${(d.profundidade*100).toFixed(1)} cm` : "Escala real configurada no modelo";
-
-    viewer.onerror = () => {
-        mostrarToast("Modelo 3D da Coca-Cola ainda não foi colocado na pasta models.");
-    };
-}
-
-function atualizarEscala3D(){
-    const valor = Number(document.getElementById("escala3D").value || 1);
-    const viewer = document.getElementById("viewer3D");
-    viewer.setAttribute("scale", `${valor} ${valor} ${valor}`);
-    document.getElementById("valorEscala3D").textContent = `${valor.toFixed(2)}×`;
-    const aviso = document.getElementById("statusEscala3D");
-    if(aviso) aviso.textContent = valor === 1 ? "1,00× = tamanho real" : "Escala manual para visualização";
-}
-
-function notificarAR() {
-    const produto = restauranteAtual.produtos.find(item => item.id === window.produtoSelecionado);
-    MenuAnalytics.trackARView(produto);
-}
-
-function alterarQuantidadeProduto(valor){
-    quantidadeProdutoAtual += valor;
-    if(quantidadeProdutoAtual<1) quantidadeProdutoAtual = 1;
-    document.getElementById("quantidadeProduto").textContent = quantidadeProdutoAtual;
-}
-
-function adicionarProdutoAtual(){
-    const produto = restauranteAtual.produtos.find(item=>item.id === window.produtoSelecionado);
-    if(!produto) return;
-
-    const existente = carrinho.find(item=>item.id === produto.id);
-    if(existente) existente.quantidade += quantidadeProdutoAtual;
-    else carrinho.push({ id: produto.id, nome: produto.nome, preco: produto.preco, quantidade: quantidadeProdutoAtual });
-
-    MenuAnalytics.trackAddToCart(produto);
-
-    atualizarCarrinho();
-    fecharModal();
-    fechar3D();
-    mostrarToast(produto.nome + " adicionado!");
-}
-
-function atualizarCarrinho(){
-    const quantidade = carrinho.reduce((total, item)=>total + item.quantidade, 0);
-    document.getElementById("carrinhoContador").textContent = quantidade;
-    renderizarCarrinho();
-}
-
-function renderizarCarrinho(){
-    const lista = document.getElementById("carrinhoLista");
-    const finalizacao = document.getElementById("carrinhoFinalizacao");
-
-    if(carrinho.length===0){
-        lista.innerHTML = `<div class="carrinho-vazio">Seu pedido está vazio. Navegue pelo cardápio para adicionar itens!</div>`;
-        finalizacao.style.display = "none";
-        return;
-    }
-
-    lista.innerHTML = carrinho.map(item=>`
-        <div class="item-carrinho">
-            <div>
-                <div class="item-carrinho-nome">${item.nome}</div>
-                <div class="item-carrinho-preco">${formatarPreco(item.preco)}</div>
-            </div>
-            <div class="item-controles">
-                <button class="item-btn" onclick="alterarQuantidadeCarrinho('${item.id}',-1)">−</button>
-                <span class="item-qtd">${item.quantidade}</span>
-                <button class="item-btn" onclick="alterarQuantidadeCarrinho('${item.id}',1)">+</button>
-            </div>
-        </div>
-    `).join("");
-
-    document.getElementById("carrinhoTotal").textContent = formatarPreco(calcularTotal());
-    finalizacao.style.display = "block";
-}
-
-function alterarQuantidadeCarrinho(id, valor){
-    const item = carrinho.find(p=>p.id===id);
-    if(!item) return;
-    item.quantidade += valor;
-    if(item.quantidade<=0) carrinho = carrinho.filter(p=>p.id!==id);
-    atualizarCarrinho();
-}
-
-function calcularTotal(){
-    return carrinho.reduce((total, item)=>total + (item.preco * item.quantidade), 0);
-}
-
-function formatarPreco(valor){
-    return valor.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
-}
-
-function selecionarTipoAtendimento(tipo){
-    tipoAtendimentoSelecionado = tipo;
-    const btnDelivery = document.getElementById("btnTipoDelivery");
-    const btnMesa = document.getElementById("btnTipoMesa");
-    const boxEndereco = document.getElementById("boxEndereco");
-    const boxMesa = document.getElementById("boxMesa");
-    const btnAcao = document.getElementById("btnAcaoFinalizar");
-
-    if(tipo === 'delivery'){
-        btnDelivery.classList.add("ativo");
-        btnMesa.classList.remove("ativo");
-        boxEndereco.style.display = "block";
-        boxMesa.style.display = "none";
-        btnAcao.innerHTML = "📱 Finalizar Pedido no WhatsApp";
-    } else {
-        btnMesa.classList.add("ativo");
-        btnDelivery.classList.remove("ativo");
-        boxEndereco.style.display = "none";
-        boxMesa.style.display = "block";
-        btnAcao.innerHTML = "✅ Confirmar Pedido na Mesa";
-    }
-}
-
-function alternarOpcoesPagamento(){
-    const forma = document.getElementById("formaPagamento").value;
-    const boxPix = document.getElementById("boxPixInfo");
-    const boxTroco = document.getElementById("boxTroco");
-
-    boxPix.style.display = forma === "pix" ? "block" : "none";
-    boxTroco.style.display = forma === "dinheiro" ? "block" : "none";
-}
-
-function copiarChavePix(){
-    const chave = document.getElementById("chavePixTexto").textContent;
-    navigator.clipboard.writeText(chave).then(() => {
-        mostrarToast("Chave PIX copiada!");
-    });
-}
-
-function fecharModal(){ document.getElementById("modalProduto").classList.remove("ativo"); }
-function abrirCarrinho(){ 
-    document.getElementById("modalCarrinho").classList.add("ativo"); 
-    document.getElementById("painelFormulario").style.display = "block";
-    document.getElementById("painelSucessoLocal").style.display = "none";
-    document.getElementById("btnAcaoFinalizar").style.display = "block";
-    renderizarCarrinho(); 
-}
-function fecharCarrinho(){ document.getElementById("modalCarrinho").classList.remove("ativo"); }
-function fechar3D(){ document.getElementById("modal3D").classList.remove("ativo"); }
-
-function processarCheckout(){
-    if(carrinho.length===0) return;
-    const nome = document.getElementById("clienteNome").value.trim();
-    if(!nome){ alert("Por favor, informe o seu nome."); return; }
-
-    if(tipoAtendimentoSelecionado === "delivery"){
-        const endereco = document.getElementById("clienteEndereco").value.trim();
-        if(!endereco){ alert("Por favor, informe o seu endereço de entrega."); return; }
-
-        const formaPagamento = document.getElementById("formaPagamento").value;
-        let pagtoTexto = formaPagamento === "pix" ? "⚡ PIX" : (formaPagamento === "dinheiro" ? "💵 Dinheiro" : "💳 Cartão");
-
-        if(formaPagamento === "dinheiro") {
-            const troco = document.getElementById("valorTroco").value.trim();
-            if(troco) pagtoTexto += ` (${troco})`;
-        }
-
-        MenuAnalytics.trackWhatsAppOrder(carrinho);
-
-        let mensagem = `Olá! Gostaria de fazer um pedido pelo cardápio digital 3D.\n\n`;
-        mensagem += `*Cliente:* ${nome}\n`;
-        mensagem += `*Endereço:* ${endereco}\n`;
-        mensagem += `*Pagamento:* ${pagtoTexto}\n\n`;
-        mensagem += `*Itens do Pedido:*\n`;
-        carrinho.forEach(item=>{ mensagem += `• ${item.quantidade}x ${item.nome} — ${formatarPreco(item.preco * item.quantidade)}\n`; });
-        mensagem += `\n*Total a Pagar: ${formatarPreco(calcularTotal())}*`;
-
-        const url = "https://wa.me/5534984252341?text=" + encodeURIComponent(mensagem);
-        window.open(url, "_blank");
-
-    } else {
-        const mesa = document.getElementById("numeroMesa").value.trim();
-        if(!mesa){ alert("Por favor, informe o número da mesa."); return; }
-
-        const formaPagamento = document.getElementById("formaPagamento").value;
-        let pagtoTexto = formaPagamento === "pix" ? "⚡ PIX" : (formaPagamento === "dinheiro" ? "💵 Dinheiro" : "💳 Cartão");
-
-        const novoPedidoMesa = {
-            id: Date.now(),
-            mesa: mesa,
-            nome: nome,
-            itens: [...carrinho],
-            total: calcularTotal(),
-            formaPagamento: formaPagamento,
-            pagamentoTexto: pagtoTexto,
-            status: 'pendente',
-            hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        };
-
-        const pedidosExistentes = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
-        pedidosExistentes.push(novoPedidoMesa);
-        localStorage.setItem('pedidos_mesas', JSON.stringify(pedidosExistentes));
-
-        MenuAnalytics.trackWhatsAppOrder(carrinho);
-
-        document.getElementById("painelFormulario").style.display = "none";
-        document.getElementById("btnAcaoFinalizar").style.display = "none";
-
-        const painelSucesso = document.getElementById("painelSucessoLocal");
-        let htmlSucesso = `<div class="box-sucesso-local">
-            <h3>🎉 Pedido Confirmado na ${mesa}!</h3>
-            <p>O seu pedido já apareceu na tela da cozinha e o preparo vai começar!</p>`;
-
-        if(formaPagamento === "pix"){
-            htmlSucesso += `
-                <div class="box-pix" style="margin-bottom:12px;">
-                    <p>Total: <strong>${formatarPreco(calcularTotal())}</strong></p>
-                    <div class="chave-pix-texto">5534984252341</div>
-                    <button type="button" class="btn-copiar-pix" onclick="copiarChavePix()">📋 Copiar Chave PIX</button>
-                </div>`;
-        }
-
-        htmlSucesso += `<button class="btn-principal" onclick="concluirPedidoLocal()" style="margin-top:10px;">Concluir e Fechar</button></div>`;
-
-        painelSucesso.innerHTML = htmlSucesso;
-        painelSucesso.style.display = "block";
-    }
-}
-
-function concluirPedidoLocal(){
-    carrinho = [];
-    atualizarCarrinho();
-    fecharCarrinho();
-    mostrarToast("Pedido concluído com sucesso!");
-}
-
-function mostrarToast(mensagem){
-    const toast = document.getElementById("toast");
-    toast.textContent = mensagem;
-    toast.classList.add("ativo");
-    setTimeout(()=>toast.classList.remove("ativo"), 2200);
-}
-
+let carrinho=[];let produtoSelecionado=restauranteAtual.produtos[0]?.id||null;let quantidadeProdutoAtual=1;let tipoAtendimentoSelecionado='delivery';
+function $(id){return document.getElementById(id)}
+function formatarPreco(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function iniciarRestaurante(){ $('restauranteNome').textContent=restauranteAtual.nome;$('restauranteDescricao').textContent=restauranteAtual.descricao;$('rodapeNome').textContent=restauranteAtual.nome;renderizarCategorias();renderizarProdutos();atualizarCarrinho();alternarOpcoesPagamento() }
+function renderizarCategorias(){ $('categorias').innerHTML=restauranteAtual.categorias.map(c=>`<button type="button" class="categoria ${c.id==='todos'?'ativa':''}" onclick="filtrarProdutos('${c.id}',this)">${c.nome}</button>`).join('') }
+function renderizarProdutos(){ $('listaProdutos').innerHTML=restauranteAtual.produtos.map(p=>`<article class="produto" data-categoria="${p.categoria}" onclick="abrirProdutoPorId('${p.id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${p.imagem}" alt="${p.nome}">${p.modelo3d?'<span class="badge-3d">🧊 3D + AR</span>':''}</div><div class="produto-info"><div class="produto-kicker">${p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':'Bebida'}</div><h2>${p.nome}</h2><p>${p.descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-3d-card">${p.modelo3d?'3D + AR':'Ver detalhes'}</span></div></div></article>`).join('') }
+function filtrarProdutos(cat,btn){document.querySelectorAll('.produto').forEach(p=>p.classList.toggle('escondido',cat!=='todos'&&p.dataset.categoria!==cat));document.querySelectorAll('.categoria').forEach(b=>b.classList.remove('ativa'));btn?.classList.add('ativa')}
+function abrirProdutoPorId(id){const p=restauranteAtual.produtos.find(x=>x.id===id);if(!p)return;produtoSelecionado=p.id;quantidadeProdutoAtual=1;$('modalNome').textContent=p.nome;$('modalDescricao').textContent=p.descricao;$('modalPreco').textContent=formatarPreco(p.preco);$('quantidadeProduto').textContent='1';const tem3d=!!p.modelo3d;$('btnAbrir3DProduto').style.display=tem3d?'flex':'none';$('btnVerMesaProduto').style.display=tem3d?'flex':'none';$('modalProduto').classList.add('ativo');}
+function prepararViewer(){const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);const v=$('viewer3D');if(!p?.modelo3d)return false;$('nomeProduto3D').textContent=p.nome;$('statusModelo').textContent='Carregando modelo…';if(v.getAttribute('src')!==p.modelo3d)v.setAttribute('src',p.modelo3d);v.setAttribute('alt',`Modelo 3D interativo de ${p.nome}`);v.addEventListener('load',()=>{$('statusModelo').textContent='3D pronto'}, {once:true});v.addEventListener('error',()=>{$('statusModelo').textContent='Modelo indisponível';mostrarToast('O arquivo 3D ainda não está na pasta models.')},{once:true});return true}
+function abrir3D(){if(!prepararViewer())return;$('modalProduto').classList.remove('ativo');$('modal3D').classList.add('ativo')}
+async function abrirARDireto(){if(!prepararViewer())return;$('modalProduto').classList.remove('ativo');$('modal3D').classList.add('ativo');const v=$('viewer3D');try{await customElements.whenDefined('model-viewer');setTimeout(()=>{if(v.canActivateAR&&typeof v.activateAR==='function'){v.activateAR()}else{mostrarToast('AR não disponível neste aparelho ou navegador. A visualização 3D continua disponível.')}},180)}catch(e){mostrarToast('Não foi possível iniciar o AR neste aparelho.')}}
+function notificarAR(){mostrarToast('Abrindo a experiência na sua mesa…')}
+function alterarQuantidadeProduto(v){quantidadeProdutoAtual=Math.max(1,quantidadeProdutoAtual+v);$('quantidadeProduto').textContent=quantidadeProdutoAtual}
+function adicionarProdutoAtual(){const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);if(!p)return;const item=carrinho.find(x=>x.id===p.id);if(item)item.quantidade+=quantidadeProdutoAtual;else carrinho.push({id:p.id,nome:p.nome,preco:p.preco,quantidade:quantidadeProdutoAtual});atualizarCarrinho();fecharModal();fechar3D();mostrarToast(`${p.nome} adicionado ao pedido.`)}
+function atualizarCarrinho(){const qtd=carrinho.reduce((s,i)=>s+i.quantidade,0);$('carrinhoContador').textContent=qtd;renderizarCarrinho()}
+function renderizarCarrinho(){const lista=$('carrinhoLista'),fin=$('carrinhoFinalizacao');if(!carrinho.length){lista.innerHTML='<div class="carrinho-vazio">Seu pedido está vazio. Escolha seus favoritos no cardápio.</div>';fin.style.display='none';return}lista.innerHTML=carrinho.map(i=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.nome}</div><div class="item-carrinho-preco">${formatarPreco(i.preco)}</div></div><div class="item-controles"><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho('${i.id}',-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho('${i.id}',1)">+</button></div></div>`).join('');$('carrinhoTotal').textContent=formatarPreco(calcularTotal());fin.style.display='block'}
+function alterarQuantidadeCarrinho(id,v){const i=carrinho.find(x=>x.id===id);if(!i)return;i.quantidade+=v;if(i.quantidade<=0)carrinho=carrinho.filter(x=>x.id!==id);atualizarCarrinho()}
+function calcularTotal(){return carrinho.reduce((s,i)=>s+i.preco*i.quantidade,0)}
+function abrirCarrinho(){$('modalCarrinho').classList.add('ativo');$('painelSucessoLocal').style.display='none';$('btnAcaoFinalizar').style.display='flex';renderizarCarrinho()}
+function fecharCarrinho(){$('modalCarrinho').classList.remove('ativo')}
+function fecharModal(){$('modalProduto').classList.remove('ativo')}
+function fechar3D(){const v=$('viewer3D');$('modal3D').classList.remove('ativo');v.removeAttribute('src')}
+function alternarOpcoesPagamento(){const forma=$('formaPagamento').value;$('boxPixInfo').style.display=forma==='pix'?'block':'none';$('boxTroco').style.display=forma==='dinheiro'?'block':'none'}
+function copiarChavePix(){const chave=$('chavePixTexto').textContent;navigator.clipboard?.writeText(chave).then(()=>mostrarToast('Chave PIX copiada.')).catch(()=>mostrarToast('Selecione e copie a chave PIX.'))}
+function processarCheckout(){if(!carrinho.length)return;const nome=$('clienteNome').value.trim(),endereco=$('clienteEndereco').value.trim();if(!nome)return mostrarToast('Informe seu nome.');if(!endereco)return mostrarToast('Informe seu endereço de entrega.');const forma=$('formaPagamento').value;let pagto=forma==='pix'?'PIX':forma==='dinheiro'?'Dinheiro':'Cartão';if(forma==='dinheiro'){const troco=$('valorTroco').value.trim();if(troco)pagto+=` (troco para ${troco})`}let msg=`Olá! Gostaria de fazer um pedido pelo cardápio da Brasa 180° Smash & Grill.\n\n*Cliente:* ${nome}\n*Endereço:* ${endereco}\n*Pagamento:* ${pagto}\n\n*Itens:*\n`;carrinho.forEach(i=>msg+=`• ${i.quantidade}x ${i.nome} — ${formatarPreco(i.preco*i.quantidade)}\n`);msg+=`\n*Total:* ${formatarPreco(calcularTotal())}`;window.open(`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`,'_blank','noopener');mostrarToast('Pedido preparado para o WhatsApp.');}
+function mostrarToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('ativo');clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove('ativo'),2300)}
+function fecharModalAoClicarFora(e){if(e.target.classList.contains('modal'))e.target.classList.remove('ativo')}
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',fecharModalAoClicarFora));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.ativo').forEach(m=>m.classList.remove('ativo'))}});
+// Bloqueia zoom acidental da página, preservando a interação do model-viewer.
+document.addEventListener('touchmove',e=>{if(e.touches.length>1&&!e.target.closest('model-viewer'))e.preventDefault()},{passive:false});
+document.addEventListener('gesturestart',e=>{if(!e.target.closest('model-viewer'))e.preventDefault()},{passive:false});
+document.addEventListener('gesturechange',e=>{if(!e.target.closest('model-viewer'))e.preventDefault()},{passive:false});
+let ultimoToque=0;document.addEventListener('touchend',e=>{if(e.target.closest('model-viewer'))return;const agora=Date.now();if(agora-ultimoToque<300)e.preventDefault();ultimoToque=agora},{passive:false});
 iniciarRestaurante();
-
-// Referências públicas usadas pelo painel administrativo
-window.__restauranteAtual = restauranteAtual;
-window.restauranteSlug = "hamburgueria";
-window.iniciarRestaurante = iniciarRestaurante;
-
-function abrirPainelAdmin(){
-    const painel=document.getElementById("painelAdmin");
-    if(!painel)return;
-    painel.classList.add("ativo");
-    renderizarPainelAdmin();
-}
-
-function fecharPainelAdmin(){
-    document.getElementById("painelAdmin")?.classList.remove("ativo");
-}
-
-function pedidosMesa(){
-    try{return JSON.parse(localStorage.getItem("pedidos_mesas")||"[]");}catch(e){return [];}
-}
-
-function renderizarPainelAdmin(){
-    const pedidos=pedidosMesa();
-    const pendentes=pedidos.filter(p=>p.status!=="entregue"&&p.status!=="concluido");
-    const faturamento=pedidos.reduce((s,p)=>s+Number(p.total||0),0);
-    const mesas=[...new Set(pedidos.filter(p=>p.status!=="entregue"&&p.status!=="concluido").map(p=>String(p.mesa)))];
-    document.getElementById("adminTotalPedidos").textContent=pedidos.length;
-    document.getElementById("adminPendentes").textContent=pendentes.length;
-    document.getElementById("adminMesasOcupadas").textContent=mesas.length;
-    document.getElementById("adminFaturamento").textContent=formatarPreco(faturamento);
-    const mesaEl=document.getElementById("adminMesas");
-    mesaEl.innerHTML=Array.from({length:12},(_,i)=>{const n=String(i+1).padStart(2,"0");const ocupada=mesas.includes(n)||mesas.includes(String(i+1));return `<div class="mesa-admin ${ocupada?"ocupada":""}">Mesa ${n}<br><small>${ocupada?"Pedido ativo":"Livre"}</small></div>`}).join("");
-    const pedidosEl=document.getElementById("adminPedidos");
-    if(!pedidos.length){pedidosEl.innerHTML='<div class="admin-vazio">Nenhum pedido na mesa registrado neste navegador.</div>';return;}
-    pedidosEl.innerHTML=[...pedidos].reverse().map(p=>`<div class="pedido-admin"><div><strong>Pedido #${p.id}</strong> • Mesa ${p.mesa}</div><div>${formatarPreco(p.total)}<br><small>${p.hora||""} • ${p.nome||"Cliente"}</small></div><div class="status-pedido">${["pendente","preparo","pronto","entregue"].map(st=>`<button class="${p.status===st?"ativo":""}" onclick="alterarStatusPedido(${p.id},'${st}')">${st}</button>`).join("")}</div></div>`).join("");
-}
-
-function alterarStatusPedido(id,status){
-    const pedidos=pedidosMesa();
-    const pedido=pedidos.find(p=>Number(p.id)===Number(id));
-    if(!pedido)return;
-    pedido.status=status;
-    localStorage.setItem("pedidos_mesas",JSON.stringify(pedidos));
-    renderizarPainelAdmin();
-}
-
-if(new URLSearchParams(window.location.search).get("painel")==="admin"){
-    window.addEventListener("load",abrirPainelAdmin);
-}
-
-
-
-/* PAINEL ADMINISTRATIVO */
-function abrirPainelAdmin(){
-    const painel=document.getElementById("painelAdmin");
-    if(!painel)return;
-    painel.classList.add("ativo");
-    atualizarDashboard();
-}
-
-function fecharPainelAdmin(){
-    document.getElementById("painelAdmin")?.classList.remove("ativo");
-}
-
-function pedidosMesa(){
-    try{return JSON.parse(localStorage.getItem("pedidos_mesas")||"[]");}catch(e){return [];}
-}
-
-function salvarPedidosMesa(pedidos){
-    localStorage.setItem("pedidos_mesas",JSON.stringify(pedidos));
-}
-
-function statusLabel(st){
-    return {pendente:"Recebido",preparo:"Em preparo",pronto:"Pronto",entregue:"Entregue",cancelado:"Cancelado"}[st]||st;
-}
-
-function mudarAdminView(view){
-    document.querySelectorAll(".admin-view").forEach(el=>el.classList.remove("ativo"));
-    document.getElementById("adminView"+view.charAt(0).toUpperCase()+view.slice(1))?.classList.add("ativo");
-    document.querySelectorAll(".admin-nav button").forEach(btn=>btn.classList.toggle("ativo",btn.dataset.adminView===view));
-    const titulos={inicio:["Visão geral","Acompanhe a operação da Brasa 180° em um só lugar."],pedidos:["Pedidos","Controle todos os pedidos recebidos."],cozinha:["Cozinha","Fila de preparo organizada por status."],mesas:["Mesas","Visualize a ocupação das mesas."],produtos:["Produtos","Gerencie preços e disponibilidade do catálogo."],categorias:["Categorias","Organize a estrutura do cardápio."],relatorios:["Relatórios","Indicadores do uso do cardápio digital."],config:["Configurações","Dados básicos da operação e próxima arquitetura do sistema."]};
-    const t=titulos[view]||titulos.inicio;
-    document.getElementById("adminTitulo").textContent=t[0];
-    document.getElementById("adminSubtitulo").textContent=t[1];
-    atualizarDashboard();
-}
-
-function atualizarDashboard(){
-    const pedidos=pedidosMesa();
-    const ativos=pedidos.filter(p=>!['entregue','cancelado','concluido'].includes(p.status));
-    const preparo=pedidos.filter(p=>p.status==='preparo');
-    const mesas=[...new Set(ativos.map(p=>String(p.mesa)))];
-    const faturamento=pedidos.filter(p=>p.status!=='cancelado').reduce((s,p)=>s+Number(p.total||0),0);
-    const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
-    set('dashPedidosHoje',pedidos.length);set('dashEmPreparo',preparo.length);set('dashMesasOcupadas',mesas.length);set('dashFaturamento',formatarPreco(faturamento));
-    renderDashboardRecentes(pedidos);renderMesasAdmin('dashMesasResumo');renderMesasAdmin('adminMesasCompleto');renderPedidosTabela(pedidos);renderCozinha(pedidos);renderProdutosAdmin();renderCategoriasAdmin();renderRelatorios();
-}
-
-function renderDashboardRecentes(pedidos){
-    const el=document.getElementById('dashPedidosRecentes');if(!el)return;
-    if(!pedidos.length){el.innerHTML='<div class="admin-empty">Nenhum pedido registrado ainda.</div>';return;}
-    el.innerHTML=[...pedidos].reverse().slice(0,6).map(p=>`<div class="pedido-admin"><div><strong>#${p.id}</strong> • Mesa ${p.mesa}<br><small>${p.nome||'Cliente'} • ${p.hora||''}</small></div><div style="text-align:right"><strong>${formatarPreco(p.total)}</strong><br><span class="admin-status ${p.status}">${statusLabel(p.status)}</span></div></div>`).join('');
-}
-
-function renderMesasAdmin(id){
-    const el=document.getElementById(id);if(!el)return;
-    const ativos=pedidosMesa().filter(p=>!['entregue','cancelado','concluido'].includes(p.status));
-    el.innerHTML=Array.from({length:12},(_,i)=>{const n=String(i+1).padStart(2,'0');const p=ativos.find(x=>String(x.mesa)===n||String(x.mesa)===String(i+1));const st=p?.status||'';return `<div class="admin-mesa ${st?'ocupada '+st:''}"><strong>${n}</strong><span>${p?statusLabel(st):'Livre'}</span></div>`}).join('');
-}
-
-function renderPedidosTabela(pedidos){
-    const el=document.getElementById('adminPedidosTabela');if(!el)return;
-    if(!pedidos.length){el.innerHTML='<div class="admin-empty">Nenhum pedido na mesa registrado neste navegador.</div>';return;}
-    el.innerHTML=`<table class="admin-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Mesa</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>${[...pedidos].reverse().map(p=>`<tr><td><strong>#${p.id}</strong><br><small>${p.hora||''}</small></td><td>${p.nome||'Cliente'}</td><td>${p.mesa}</td><td>${(p.itens||[]).reduce((s,i)=>s+Number(i.quantidade||0),0)}</td><td>${formatarPreco(p.total)}</td><td><span class="admin-status ${p.status}">${statusLabel(p.status)}</span></td><td><div class="admin-order-actions">${['pendente','preparo','pronto','entregue'].map(st=>`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'${st}')">${statusLabel(st)}</button>`).join('')}<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'cancelado')">Cancelar</button></div></td></tr>`).join('')}</tbody></table>`;
-}
-
-function renderCozinha(pedidos){
-    const grupos={cozinhaPendentes:pedidos.filter(p=>p.status==='pendente'),cozinhaPreparo:pedidos.filter(p=>p.status==='preparo'),cozinhaProntos:pedidos.filter(p=>p.status==='pronto')};
-    Object.entries(grupos).forEach(([id,lista])=>{const el=document.getElementById(id);if(!el)return;if(!lista.length){el.innerHTML='<div class="admin-empty">Nenhum pedido nesta etapa.</div>';return;}el.innerHTML=lista.map(p=>`<div class="pedido-admin"><div><strong>Pedido #${p.id} • Mesa ${p.mesa}</strong><br><small>${p.nome||'Cliente'} • ${p.hora||''}</small><div style="margin-top:7px;color:#bbb;font-size:10px">${(p.itens||[]).map(i=>`${i.quantidade}x ${i.nome}`).join(' • ')}</div></div><div class="admin-order-actions">${p.status==='pendente'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'preparo')">Iniciar</button>`:''}${p.status==='preparo'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'pronto')">Pronto</button>`:''}${p.status==='pronto'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'entregue')">Entregar</button>`:''}</div></div>`).join('')});
-}
-
-function renderProdutosAdmin(){
-    const el=document.getElementById('adminProdutosLista');if(!el)return;const r=window.__restauranteAtual;if(!r?.produtos?.length){el.innerHTML='<div class="admin-empty">Nenhum produto cadastrado.</div>';return;}
-    el.innerHTML=r.produtos.map(p=>`<div class="admin-product"><div><strong>${p.nome}</strong><small>${p.categoria||'Produto'} ${p.tem3D?'• 3D/AR':''}</small></div><input data-admin-price="${p.id}" type="number" min="0" step="0.01" value="${Number(p.preco||0).toFixed(2)}"><label class="admin-disponibilidade" style="font-size:9px;color:#aaa"><input data-admin-disp="${p.id}" type="checkbox" ${p.disponivel!==false?'checked':''}> Disponível</label><button class="admin-mini" onclick="salvarProdutoAdmin('${p.id}')">Salvar</button></div>`).join('');
-}
-
-function salvarProdutoAdmin(id){
-    const r=window.__restauranteAtual;if(!r)return;const p=r.produtos.find(x=>String(x.id)===String(id));if(!p)return;const inp=document.querySelector(`[data-admin-price="${id}"]`);const disp=document.querySelector(`[data-admin-disp="${id}"]`);const n=Number(inp?.value);if(Number.isFinite(n)&&n>=0)p.preco=n;p.disponivel=!!disp?.checked;localStorage.setItem('menu3d-config-'+(window.restauranteSlug||'hamburgueria'),JSON.stringify(r));window.iniciarRestaurante?.();renderProdutosAdmin();mostrarToast('Produto atualizado.');
-}
-
-function adicionarProdutoDemo(){
-    const r=window.__restauranteAtual;if(!r)return;const id='produto-'+Date.now();r.produtos.push({id,nome:'Novo produto',descricao:'Descrição do produto.',preco:0,categoria:'lanches',imagem:'',tem3D:false,disponivel:true});localStorage.setItem('menu3d-config-'+(window.restauranteSlug||'hamburgueria'),JSON.stringify(r));window.iniciarRestaurante?.();renderProdutosAdmin();mostrarToast('Produto criado. Edite o preço e o catálogo.');
-}
-
-function renderCategoriasAdmin(){
-    const el=document.getElementById('adminCategoriasLista');if(!el)return;const r=window.__restauranteAtual;const cats=r?.categorias||[];el.innerHTML=cats.map(c=>`<div class="admin-product" style="grid-template-columns:1fr auto"><div><strong>${c.nome}</strong><small>ID: ${c.id}</small></div><span class="admin-status">Categoria ativa</span></div>`).join('');
-}
-
-function renderRelatorios(){
-    const m=MenuAnalytics.getMetrics();const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};set('relViews',m.visualizacoesGerais||0);set('rel3d',m.interacoes3D||0);set('relAr',m.interacoesAR||0);set('relCarrinho',m.adicionouCarrinho||0);
-    const el=document.getElementById('relProdutos');if(!el)return;const produtos=Object.values(m.produtos||{}).sort((a,b)=>(b.pedidos||0)-(a.pedidos||0));el.innerHTML=produtos.length?`<table class="admin-table"><thead><tr><th>Produto</th><th>Visualizações</th><th>3D</th><th>AR</th><th>Carrinho</th><th>Pedidos</th></tr></thead><tbody>${produtos.map(p=>`<tr><td><strong>${p.nome}</strong></td><td>${p.visualizacoes||0}</td><td>${p.views3d||0}</td><td>${p.viewsAR||0}</td><td>${p.carrinho||0}</td><td>${p.pedidos||0}</td></tr>`).join('')}</tbody></table>`:'<div class="admin-empty">Os indicadores aparecem conforme os clientes interagem com o cardápio.</div>';
-}
-
-function alterarStatusPedido(id,status){
-    const pedidos=pedidosMesa();const pedido=pedidos.find(p=>Number(p.id)===Number(id));if(!pedido)return;pedido.status=status;salvarPedidosMesa(pedidos);atualizarDashboard();
-}
-
-function limparPedidosDemo(){
-    if(!confirm('Limpar todos os pedidos deste navegador?'))return;localStorage.removeItem('pedidos_mesas');atualizarDashboard();mostrarToast('Histórico de pedidos limpo.');
-}
-
-function salvarConfigDemo(){
-    const r=window.__restauranteAtual;if(!r)return;r.nome=document.getElementById('configNome')?.value.trim()||r.nome;r.whatsapp=document.getElementById('configWhatsapp')?.value.trim()||r.whatsapp;r.pixChave=document.getElementById('configPix')?.value.trim()||r.pixChave;localStorage.setItem('menu3d-config-'+(window.restauranteSlug||'hamburgueria'),JSON.stringify(r));window.iniciarRestaurante?.();mostrarToast('Configuração salva neste navegador.');
-}
-
-if(new URLSearchParams(window.location.search).get('painel')==='admin'){window.addEventListener('load',abrirPainelAdmin);}
-
-
 </script>
-
 </body>
 </html>
