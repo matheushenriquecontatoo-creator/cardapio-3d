@@ -594,107 +594,6 @@ header p{
     margin-top:-5px;
 }
 
-
-/* =====================================================
-   SUPABASE — CATÁLOGO DO RESTAURANTE
-===================================================== */
-
-const MESA360_SUPABASE_URL = "https://simcmxcroggzuwmhzmjhc.supabase.co";
-const MESA360_SUPABASE_KEY = "sb_publishable_h6cxVSK_vH78I_HPNRGZUg_JoggyXx-";
-
-async function carregarCatalogoSupabase(){
-    try{
-        const headers = {
-            "apikey": MESA360_SUPABASE_KEY,
-            "Authorization": `Bearer ${MESA360_SUPABASE_KEY}`
-        };
-
-        const restauranteResp = await fetch(
-            `${MESA360_SUPABASE_URL}/rest/v1/restaurants?slug=eq.brasa-180&active=eq.true&select=*`,
-            {headers, cache:"no-store"}
-        );
-        if(!restauranteResp.ok) throw new Error(`restaurants ${restauranteResp.status}`);
-        const restaurantes = await restauranteResp.json();
-        const restaurante = restaurantes[0];
-        if(!restaurante) throw new Error("Brasa 180° não encontrado no Supabase");
-
-        const [categoriasResp, produtosResp] = await Promise.all([
-            fetch(`${MESA360_SUPABASE_URL}/rest/v1/categories?restaurant_id=eq.${restaurante.id}&active=eq.true&select=id,name,sort_order&order=sort_order.asc`,{headers,cache:"no-store"}),
-            fetch(`${MESA360_SUPABASE_URL}/rest/v1/products?restaurant_id=eq.${restaurante.id}&active=eq.true&select=*&order=sort_order.asc`,{headers,cache:"no-store"})
-        ]);
-        if(!categoriasResp.ok) throw new Error(`categories ${categoriasResp.status}`);
-        if(!produtosResp.ok) throw new Error(`products ${produtosResp.status}`);
-
-        const categoriasDB = await categoriasResp.json();
-        const produtosDB = await produtosResp.json();
-
-        const slugCategoria = nome => {
-            const n = String(nome||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
-            if(n.includes("lanche")) return "lanches";
-            if(n.includes("acompanh")) return "acompanhamentos";
-            if(n.includes("bebida")) return "bebidas";
-            if(n.includes("sobremesa")) return "sobremesas";
-            return n.replace(/[^a-z0-9]+/g,"-");
-        };
-
-        const normalizar = valor => String(valor||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
-        const produtosLocais = restauranteAtual.produtos || [];
-
-        const produtos = produtosDB.map(db => {
-            const local = produtosLocais.find(p => normalizar(p.nome) === normalizar(db.name));
-            const categoriaDB = categoriasDB.find(c => c.id === db.category_id);
-            return {
-                ...(local || {}),
-                id: local?.id || db.id,
-                nome: db.name,
-                descricao: db.description || local?.descricao || "",
-                preco: Number(db.price_cents || 0) / 100,
-                categoria: slugCategoria(categoriaDB?.name),
-                disponivel: !db.sold_out,
-                estrategico: Boolean(db.strategic_3d),
-                modelo3d: db.model_url || local?.modelo3d || null,
-                dimensoes: local?.dimensoes || (
-                    db.width_cm && db.height_cm && db.depth_cm
-                    ? `${db.width_cm} × ${db.depth_cm} × ${db.height_cm} cm`
-                    : undefined
-                ),
-                gluten_free: Boolean(db.gluten_free),
-                lactose_free: Boolean(db.lactose_free),
-                vegetarian: Boolean(db.vegetarian),
-                vegan: Boolean(db.vegan)
-            };
-        });
-
-        restauranteAtual = {
-            ...restauranteAtual,
-            id: restaurante.id,
-            nome: restaurante.name,
-            descricao: restaurante.settings?.description || restauranteAtual.descricao,
-            whatsapp: restaurante.whatsapp || restauranteAtual.whatsapp,
-            primaryColor: restaurante.primary_color || restauranteAtual.primaryColor,
-            categorias: [
-                {id:"todos",nome:"Destaques"},
-                ...categoriasDB.map(c => ({id:slugCategoria(c.name),nome:c.name}))
-            ],
-            produtos
-        };
-
-        window.__restauranteAtual = restauranteAtual;
-        window.__RESTAURANTES["hamburgueria"] = restauranteAtual;
-
-        if(typeof iniciarRestaurante === "function") iniciarRestaurante();
-        aplicarDisponibilidade?.();
-        atualizarSEO?.();
-        melhorarRodape?.();
-
-        console.log("Mesa360: catálogo carregado do Supabase.");
-        return true;
-    }catch(erro){
-        console.warn("Mesa360: não foi possível carregar o catálogo do Supabase. Mantendo catálogo local.",erro);
-        return false;
-    }
-}
-
 /* =====================================================
    CARRINHO
 ===================================================== */
@@ -1367,7 +1266,7 @@ body[data-theme="dark"] .tamanho-3d-box,body[data-theme="dark"] .modo-pedido-box
 
 <!-- Backend opcional: ative quando o projeto Supabase estiver configurado. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>window.MENU_BACKEND={enabled:false,supabaseUrl:"",supabaseKey:""};</script>
+<script>window.MENU_BACKEND={enabled:true,supabaseUrl:"https://simcmxcroggzuwmhzmjhc.supabase.co",supabaseKey:"sb_publishable_h6cxVSK_vH78I_HPNRGZUg_JoggyXx-"};</script>
 
 </head>
 
@@ -4930,13 +4829,149 @@ function fecharAR(){
 let modoPedidoAtual = new URLSearchParams(window.location.search).get("mesa") ? "local" : "whatsapp";
 const MENU_BACKEND = window.MENU_BACKEND || {enabled:false,supabaseUrl:"",supabaseKey:""};
 let menuSupabase = null;
+
 async function inicializarBackendMenu(){
     try{
         if(!MENU_BACKEND.enabled || !MENU_BACKEND.supabaseUrl || !MENU_BACKEND.supabaseKey || !window.supabase)return false;
         menuSupabase=window.supabase.createClient(MENU_BACKEND.supabaseUrl,MENU_BACKEND.supabaseKey);
         return true;
-    }catch(e){console.warn("Backend do menu indisponível; usando modo local.",e);return false;}
+    }catch(e){
+        console.warn("Supabase indisponível; mantendo o catálogo local.",e);
+        menuSupabase=null;
+        return false;
+    }
 }
+
+function slugLocal(texto){
+    return String(texto||"")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+        .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+}
+
+/*
+   Supabase entra como fonte de dados sem reconstruir a interface.
+   A apresentação atual continua sendo a base: imagens, textos visuais, IDs,
+   layout, 3D/AR e demais funções permanecem no index atual.
+   Do banco entram somente os dados operacionais/dinâmicos.
+*/
+async function carregarCatalogoSupabase(){
+    if(!menuSupabase)return false;
+
+    try{
+        const {data:restaurant,error:restaurantError}=await menuSupabase
+            .from("restaurants")
+            .select("id,name,slug,active,settings,whatsapp,phone")
+            .eq("slug","brasa-180")
+            .eq("active",true)
+            .maybeSingle();
+
+        if(restaurantError)throw restaurantError;
+        if(!restaurant)return false;
+
+        const [categoriesResult,productsResult]=await Promise.all([
+            menuSupabase
+                .from("categories")
+                .select("id,name,sort_order,active")
+                .eq("restaurant_id",restaurant.id)
+                .eq("active",true)
+                .order("sort_order",{ascending:true}),
+            menuSupabase
+                .from("products")
+                .select("id,category_id,name,description,price_cents,image_url,strategic_3d,model_url,width_cm,height_cm,depth_cm,gluten_free,lactose_free,vegetarian,vegan,active,sold_out,sort_order")
+                .eq("restaurant_id",restaurant.id)
+                .eq("active",true)
+                .order("sort_order",{ascending:true})
+        ]);
+
+        if(categoriesResult.error)throw categoriesResult.error;
+        if(productsResult.error)throw productsResult.error;
+
+        const categoriasDB=categoriesResult.data||[];
+        const produtosDB=productsResult.data||[];
+        const catalogoLocal=RESTAURANTES["hamburgueria"];
+
+        /* Categorias: mantém os IDs usados pela interface e sincroniza os nomes. */
+        const categoriasLocais=(catalogoLocal.categorias||[]).filter(c=>c.id!=="todos");
+        const categoriasSincronizadas=[{id:"todos",nome:"Destaques"}];
+        categoriasLocais.forEach((categoriaLocal,index)=>{
+            const categoriaDB=categoriasDB[index];
+            categoriasSincronizadas.push({
+                ...categoriaLocal,
+                ...(categoriaDB?.name ? {nome:categoriaDB.name} : {})
+            });
+        });
+
+        /*
+           Produtos: primeiro tenta casar pelo nome; se o nome tiver sido alterado
+           no banco, usa a posição/ordem do catálogo. Assim o banco controla preço,
+           disponibilidade e dados técnicos sem trocar a apresentação existente.
+        */
+        const produtosLocais=[...(catalogoLocal.produtos||[])];
+        const usados=new Set();
+
+        const produtosSincronizados=produtosLocais.map((produtoLocal,index)=>{
+            const nomeLocal=slugLocal(produtoLocal.nome);
+            let produtoDB=produtosDB.find(p=>!usados.has(p.id)&&slugLocal(p.name)===nomeLocal);
+
+            if(!produtoDB){
+                const candidatos=produtosDB.filter(p=>!usados.has(p.id));
+                produtoDB=candidatos.find(p=>Number(p.sort_order)===Number(index+1)) || candidatos[index];
+            }
+
+            if(!produtoDB)return {...produtoLocal};
+            usados.add(produtoDB.id);
+
+            const categoriaDB=categoriasDB.find(c=>c.id===produtoDB.category_id);
+            const categoriaLocal=categoriaDB
+                ? categoriasLocais[Math.max(0,categoriasDB.indexOf(categoriaDB))]
+                : null;
+
+            const dimensoes=[produtoDB.width_cm,produtoDB.depth_cm,produtoDB.height_cm]
+                .map(Number)
+                .filter(Number.isFinite);
+
+            return {
+                ...produtoLocal,
+                dbId:produtoDB.id,
+                preco:Number(produtoDB.price_cents)/100,
+                disponivel:produtoDB.sold_out!==true,
+                estrategico:typeof produtoDB.strategic_3d==="boolean" ? produtoDB.strategic_3d : produtoLocal.estrategico,
+                modelo3d:produtoDB.model_url || produtoLocal.modelo3d,
+                ...(produtoDB.description ? {descricao:produtoDB.description} : {}),
+                ...(produtoDB.image_url ? {imagem:produtoDB.image_url} : {}),
+                ...(dimensoes.length===3 ? {dimensoes:`${dimensoes[0]} × ${dimensoes[1]} × ${dimensoes[2]} cm`} : {}),
+                filtros:{
+                    glutenFree:!!produtoDB.gluten_free,
+                    lactoseFree:!!produtoDB.lactose_free,
+                    vegetarian:!!produtoDB.vegetarian,
+                    vegan:!!produtoDB.vegan
+                },
+                ...(categoriaLocal ? {categoria:categoriaLocal.id} : {})
+            };
+        });
+
+        const settings=restaurant.settings||{};
+        restauranteAtual={
+            ...catalogoLocal,
+            /* identidade visual e conteúdo estrutural continuam do index atual */
+            nome:restaurant.name || catalogoLocal.nome,
+            categorias:categoriasSincronizadas,
+            produtos:produtosSincronizados,
+            ...(restaurant.whatsapp ? {whatsapp:restaurant.whatsapp} : {}),
+            ...(settings.pixChave ? {pixChave:settings.pixChave} : {})
+        };
+
+        window.__restauranteAtual=restauranteAtual;
+        window.__RESTAURANTES["hamburgueria"]=restauranteAtual;
+        return true;
+    }catch(e){
+        console.warn("Não foi possível sincronizar o catálogo com o Supabase. O catálogo atual será mantido.",e);
+        restauranteAtual=RESTAURANTES["hamburgueria"];
+        window.__restauranteAtual=restauranteAtual;
+        return false;
+    }
+}
+
 function selecionarModoPedido(modo){
     modoPedidoAtual=modo;
     ["local","antecipado","whatsapp"].forEach(x=>document.getElementById("modo"+(x==="local"?"Local":x==="antecipado"?"Antecipado":"Whats")+"Btn")?.classList.toggle("ativo",x===modo));
@@ -5295,6 +5330,8 @@ document.addEventListener(
    INICIALIZAR
 ===================================================== */
 
+await inicializarBackendMenu();
+await carregarCatalogoSupabase();
 iniciarRestaurante();
 
 </script>
@@ -5670,9 +5707,7 @@ iniciarRestaurante();
   if(params.get('gestor')==='1')document.body.dataset.gestor='1';
 
   // Inicialização
-  inicializarBackendMenu();
   aplicarMesa(); aplicarTema();
-  carregarCatalogoSupabase();
   window.__restauranteAtual && (window.__restauranteAtual.produtos||[]).forEach(p=>{if(typeof p.disponivel!=='boolean')p.disponivel=true});
   aplicarConfigLocal();
   setTimeout(()=>{aplicarDisponibilidade();otimizarImagens();atualizarSEO();melhorarRodape();montarCrossSell();carregarConfigExterna();},80);
