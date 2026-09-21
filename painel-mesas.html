@@ -3,180 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Pedidos de Mesa - Cozinha & Caixa</title>
+<title>Painel da Cozinha & Mesas - Mesa360</title>
+
 <style>
 :root {
-  --primary: #f59e0b;
-  --bg-dark: #0d0e12;
+  --bg-dark: #0f1015;
   --card-bg: #181920;
-  --card-border: rgba(255, 255, 255, 0.1);
-  --status-pendente: #ef4444;
-  --status-preparo: #3b82f6;
-  --status-concluido: #10b981;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --primary: #f59e0b;
+  --primary-hover: #d97706;
   --text-main: #f3f4f6;
   --text-muted: #9ca3af;
+  --status-pendente: #f59e0b;
+  --status-preparo: #8b5cf6;
+  --status-pronto: #10b981;
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-dark); color: var(--text-main); padding: 20px; }
+* { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background: var(--bg-dark); color: var(--text-main); padding: 24px; }
 
-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-header h1 { font-size: 24px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px; }
-.badge-ao-vivo { background: rgba(16, 185, 129, 0.2); color: var(--status-concluido); border: 1px solid var(--status-concluido); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--card-border); flex-wrap:wrap; gap:16px; }
+header h1 { font-size: 24px; font-weight: 800; color: #fff; display:flex; align-items:center; gap:10px; }
+header h1 span { color: var(--primary); }
 
-.controles-painel { display: flex; gap: 10px; }
-.btn-limpar { background: #252836; color: var(--text-muted); border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 12px; }
-.btn-limpar:hover { color: #fff; border-color: var(--status-pendente); }
+.acoes-topo { display:flex; gap:10px; }
+.btn-top { background: #252836; color: #fff; border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 13px; display:inline-flex; align-items:center; gap:6px; }
+.btn-top:hover { background: #32364a; }
+.btn-limpar { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: rgba(239, 68, 68, 0.4); }
 
-.grid-pedidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+.grid-pedidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
-.card-pedido { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 20px; position: relative; display: flex; flex-direction: column; transition: transform .2s, border-color .2s; }
-.card-pedido.novo-pedido { border-color: var(--primary); animation: pulsarBorda 1.5s infinite; }
+.card-pedido { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; position: relative; animation: popIn 0.3s ease; }
+.card-pedido.pendente { border-left: 6px solid var(--status-pendente); }
+.card-pedido.preparo { border-left: 6px solid var(--status-preparo); }
+.card-pedido.pronto { border-left: 6px solid var(--status-pronto); }
 
-@keyframes pulsarBorda {
-  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-}
+@keyframes popIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
 
-.card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.numero-mesa { font-size: 22px; font-weight: 800; color: var(--primary); }
-.hora-pedido { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.topo-card { display: flex; justify-content: space-between; align-items: center; }
+.mesa-tag { background: rgba(245, 158, 11, 0.15); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 14px; border: 1px solid rgba(245, 158, 11, 0.3); }
+.hora-tag { font-size: 12px; color: var(--text-muted); font-weight: 600; }
 
-.cliente-info { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); }
+.cliente-nome { font-size: 15px; font-weight: 700; color: #fff; }
 
-.lista-itens { margin-bottom: 16px; flex-grow: 1; }
-.item-linha { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; color: var(--text-main); }
+.lista-itens { list-style: none; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border); padding: 12px 0; }
+.item-linha { display: flex; justify-content: space-between; font-size: 13px; }
 .item-qtd { font-weight: 800; color: var(--primary); margin-right: 6px; }
 
-.pagamento-tag { background: #121318; border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 16px; display: flex; justify-content: space-between; }
-.pagamento-valor { color: #fff; font-weight: 800; }
+.rodape-card { display: flex; justify-content: space-between; align-items: center; }
+.total-valor { font-size: 18px; font-weight: 800; color: #fff; }
+.pagto-tag { font-size: 11px; background: #252836; padding: 4px 8px; border-radius: 6px; color: var(--text-muted); font-weight: 600; }
 
-.botoes-status { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.btn-status { padding: 10px; border: none; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; color: #fff; transition: opacity .2s; }
-.btn-preparo { background: var(--status-preparo); }
-.btn-concluir { background: var(--status-concluido); }
-.btn-cancelar { background: #252836; color: var(--status-pendente); border: 1px solid rgba(239, 68, 68, 0.3); }
+.botoes-estado { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.btn-status { padding: 10px; border: none; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; text-align: center; }
+.btn-preparo { background: var(--status-preparo); color: #fff; }
+.btn-pronto { background: var(--status-pronto); color: #000; }
+.btn-concluir { background: #252836; color: var(--text-muted); grid-column: span 2; }
 
-.status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
-.status-badge.pendente { background: rgba(239, 68, 68, 0.2); color: var(--status-pendente); border: 1px solid var(--status-pendente); }
-.status-badge.em_preparo { background: rgba(59, 130, 246, 0.2); color: var(--status-preparo); border: 1px solid var(--status-preparo); }
-.status-badge.concluido { background: rgba(16, 185, 129, 0.2); color: var(--status-concluido); border: 1px solid var(--status-concluido); }
-
-.sem-pedidos { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted); background: var(--card-bg); border-radius: 20px; border: 1px solid var(--card-border); }
+.sem-pedidos { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted); background: var(--card-bg); border-radius: 16px; border: 1px dashed var(--card-border); }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>🍽️ Gestão de Mesas em Tempo Real <span class="badge-ao-vivo">● Ao Vivo</span></h1>
-    <div class="controles-painel">
-        <button class="btn-limpar" onclick="limparTodosPedidos()">🗑️ Limpar Histórico</button>
-    </div>
+  <h1>🍽️ Painel de Chamadas <span>Mesa360</span></h1>
+  <div class="acoes-topo">
+    <a href="index.html" class="btn-top">📖 Ver Cardápio</a>
+    <a href="admin.html" class="btn-top">📊 Dashboard Admin</a>
+    <button class="btn-top btn-limpar" onclick="limparHistorico()">🗑️ Limpar Pedidos</button>
+  </div>
 </header>
 
-<main class="grid-pedidos" id="gridPedidos"></main>
+<div class="grid-pedidos" id="gridPedidosMesas">
+  <!-- Pedidos injetados automaticamente via JS -->
+</div>
 
 <script>
-let ultimoTotalPedidos = 0;
+let totalPedidosAnterior = 0;
 
-function tocarSinalSonoro() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.5);
-    } catch(e){}
-}
+function carregarPedidosMesas() {
+  const container = document.getElementById('gridPedidosMesas');
+  const dados = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
 
-function carregarPedidos() {
-    const pedidosRaw = localStorage.getItem('pedidos_mesas');
-    const pedidos = pedidosRaw ? JSON.parse(pedidosRaw) : [];
-    const grid = document.getElementById('gridPedidos');
+  // Tocar som se entrar um novo pedido
+  if (dados.length > totalPedidosAnterior && totalPedidosAnterior !== 0) {
+    tocarSomBip();
+  }
+  totalPedidosAnterior = dados.length;
 
-    if (pedidos.length > ultimoTotalPedidos) {
-        tocarSinalSonoro();
-    }
-    ultimoTotalPedidos = pedidos.length;
+  if (dados.length === 0) {
+    container.innerHTML = `
+      <div class="sem-pedidos">
+        <h3>Nenhum pedido de mesa no momento</h3>
+        <p style="font-size:13px; margin-top:6px;">Quando os clientes realizarem pedidos nas mesas pelo cardápio digital, eles aparecerão aqui em tempo real.</p>
+      </div>`;
+    return;
+  }
 
-    if (pedidos.length === 0) {
-        grid.innerHTML = `<div class="sem-pedidos">
-            <h2>Nenhum pedido de mesa ativo no momento</h2>
-            <p style="margin-top:8px;">Aguardando chamadas do Cardápio Digital 3D...</p>
-        </div>`;
-        return;
-    }
+  container.innerHTML = dados.map(p => `
+    <div class="card-pedido ${p.status || 'pendente'}">
+      <div class="topo-card">
+        <span class="mesa-tag">${p.mesa}</span>
+        <span class="hora-tag">⏱️ ${p.hora}</span>
+      </div>
 
-    grid.innerHTML = pedidos.slice().reverse().map(p => `
-        <div class="card-pedido ${p.status === 'pendente' ? 'novo-pedido' : ''}">
-            <div class="card-top">
-                <div class="numero-mesa">${p.mesa}</div>
-                <div class="hora-pedido">🕒 ${p.hora}</div>
-            </div>
-            <div class="cliente-info">👤 Cliente: ${p.nome}</div>
-            <div class="status-badge ${p.status}">
-                ${p.status === 'pendente' ? '⚠️ NOVO PEDIDO' : (p.status === 'em_preparo' ? '🔥 EM PREPARO' : '✅ ENTREGUE')}
-            </div>
-            
-            <div class="lista-itens">
-                ${p.itens.map(i => `
-                    <div class="item-linha">
-                        <span><span class="item-qtd">${i.quantidade}x</span>${i.nome}</span>
-                        <span>${formatarPreco(i.preco * i.quantidade)}</span>
-                    </div>
-                `).join('')}
-            </div>
+      <div class="cliente-nome">👤 ${p.nome}</div>
 
-            <div class="pagamento-tag">
-                <span>Forma: ${p.pagamentoTexto}</span>
-                <span class="pagamento-valor">${formatarPreco(p.total)}</span>
-            </div>
+      <ul class="lista-itens">
+        ${p.itens.map(i => `
+          <li class="item-linha">
+            <span><span class="item-qtd">${i.quantidade}x</span>${i.nome}</span>
+            <strong>${(i.preco * i.quantidade).toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</strong>
+          </li>
+        `).join('')}
+      </ul>
 
-            <div class="botoes-status">
-                ${p.status === 'pendente' ? `<button class="btn-status btn-preparo" onclick="alterarStatus('${p.id}', 'em_preparo')">🔥 Iniciar Preparo</button>` : ''}
-                ${p.status !== 'concluido' ? `<button class="btn-status btn-concluir" onclick="alterarStatus('${p.id}', 'concluido')">✅ Marcar Entregue</button>` : ''}
-                <button class="btn-status btn-cancelar" style="grid-column: span ${p.status === 'concluido' ? '2' : '1'};" onclick="removerPedido('${p.id}')">🗑️ Excluir</button>
-            </div>
+      <div class="rodape-card">
+        <div>
+          <span class="pagto-tag">${p.pagamentoTexto || '⚡ PIX'}</span>
         </div>
-    `).join('');
+        <div class="total-valor">${p.total.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</div>
+      </div>
+
+      <div class="botoes-estado">
+        ${p.status !== 'preparo' && p.status !== 'pronto' ? `<button class="btn-status btn-preparo" onclick="alterarStatus('${p.id}', 'preparo')">🔥 Em Preparo</button>` : ''}
+        ${p.status !== 'pronto' ? `<button class="btn-status btn-pronto" onclick="alterarStatus('${p.id}', 'pronto')">✅ Marcar Pronto</button>` : ''}
+        <button class="btn-status btn-concluir" onclick="removerPedido('${p.id}')">🏁 Finalizar / Entregue</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 function alterarStatus(id, novoStatus) {
-    let pedidos = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
-    pedidos = pedidos.map(p => p.id == id ? { ...p, status: novoStatus } : p);
-    localStorage.setItem('pedidos_mesas', JSON.stringify(pedidos));
-    carregarPedidos();
+  let dados = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
+  const p = dados.find(i => i.id == id);
+  if (p) {
+    p.status = novoStatus;
+    localStorage.setItem('pedidos_mesas', JSON.stringify(dados));
+    carregarPedidosMesas();
+  }
 }
 
 function removerPedido(id) {
-    let pedidos = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
-    pedidos = pedidos.filter(p => p.id != id);
-    localStorage.setItem('pedidos_mesas', JSON.stringify(pedidos));
-    carregarPedidos();
+  let dados = JSON.parse(localStorage.getItem('pedidos_mesas') || '[]');
+  dados = dados.filter(i => i.id != id);
+  localStorage.setItem('pedidos_mesas', JSON.stringify(dados));
+  carregarPedidosMesas();
 }
 
-function limparTodosPedidos() {
-    if (confirm('Deseja limpar todo o histórico de pedidos de mesa?')) {
-        localStorage.removeItem('pedidos_mesas');
-        carregarPedidos();
-    }
+function limparHistorico() {
+  if (confirm('Deseja apagar todos os pedidos da tela?')) {
+    localStorage.removeItem('pedidos_mesas');
+    carregarPedidosMesas();
+  }
 }
 
-function formatarPreco(valor) {
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+function tocarSomBip() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch(e){}
 }
 
-window.addEventListener('storage', carregarPedidos);
-setInterval(carregarPedidos, 2000);
-carregarPedidos();
+// Atualização automática a cada 3 segundos
+setInterval(carregarPedidosMesas, 3000);
+carregarPedidosMesas();
 </script>
 </body>
 </html>
