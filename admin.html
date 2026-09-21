@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mesa360 - Dashboard Administrativo SaaS</title>
+
+<!-- GOOGLE FONTS & MODEL-VIEWER -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+<style>
+:root {
+  --bg-dark: #0f0f0f;
+  --bg-surface: #141414;
+  --card-bg: #1c1c1c;
+  --card-hover: #242424;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --primary: #f59e0b;
+  --primary-hover: #d97706;
+  --primary-glow: rgba(245, 158, 11, 0.15);
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
+  
+  --status-pendente: #f59e0b;
+  --status-confirmado: #3b82f6;
+  --status-preparo: #8b5cf6;
+  --status-pronto: #10b981;
+  --status-entregue: #059669;
+  --status-cancelado: #ef4444;
+
+  --sidebar-width: 260px;
+  --header-height: 70px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; display: flex; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+
+.escondido { display: none !important; }
+
+.app-container { display: flex; width: 100vw; min-height: 100vh; }
+
+/* 1. SIDEBAR */
+aside.sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  z-index: 100;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand-header {
+  height: var(--header-height);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--card-border);
+}
+.brand-logo {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-logo span { color: var(--primary); }
+.brand-badge-saas {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  background: var(--primary-glow);
+  color: var(--primary);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.sidebar-nav {
+  padding: 20px 12px;
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.nav-group-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0 12px 8px;
+}
+
+.nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+
+.nav-item button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.nav-item button:hover {
+  background: var(--card-bg);
+  color: var(--text-main);
+}
+
+.nav-item button.ativo {
+  background: var(--primary-glow);
+  color: var(--primary);
+  border-color: rgba(245, 158, 11, 0.2);
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--card-border);
+  background: rgba(0,0,0,0.2);
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+.profile-avatar {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: #2a1f10;
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px;
+  border: 1px solid rgba(245,158,11,0.3);
+}
+
+.profile-info { flex-grow: 1; overflow: hidden; }
+.profile-name { font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-status { font-size: 10px; color: var(--status-pronto); display: flex; align-items: center; gap: 4px; font-weight: 600; }
+.status-dot { width: 6px; height: 6px; background: var(--status-pronto); border-radius: 50%; box-shadow: 0 0 8px var(--status-pronto); }
+
+/* MAIN WRAPPER */
+main.main-wrapper {
+  flex-grow: 1;
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+}
+
+/* 2. TOPO DO DASHBOARD */
+header.top-header {
+  height: var(--header-height);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--card-border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  backdrop-filter: blur(8px);
+}
+
+.header-welcome h1 { font-size: 18px; font-weight: 800; color: #fff; }
+.header-welcome p { font-size: 12px; color: var(--text-muted); }
+
+.header-actions { display: flex; align-items: center; gap: 16px; }
+
+.btn-mobile-toggle {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.badge-online {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--status-pronto);
+}
+
+.btn-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+.btn-icon:hover { background: var(--card-hover); }
+.noti-badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
+
+/* CONTENT CONTAINERS */
+.content-body { padding: 32px; flex-grow: 1; }
+.tab-content { display: none; animation: fadeIn 0.25s ease-in-out; }
+.tab-content.ativo { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-title h2 { font-size: 22px; font-weight: 800; color: #fff; }
+.page-title p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.btn-primary-action {
+  background: var(--primary);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-primary-action:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+/* 3. VISÃO GERAL (INDICADORES) */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px; }
+
+.kpi-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.kpi-card:hover { border-color: rgba(255,255,255,0.15); }
+
+.kpi-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.kpi-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.kpi-trend { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 20px; }
+.kpi-trend.up { background: rgba(16, 185, 129, 0.15); color: var(--status-pronto); }
+.kpi-trend.down { background: rgba(239, 68, 68, 0.15); color: var(--status-cancelado); }
+
+.kpi-val { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px; }
+.kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+/* 4. PEDIDOS RECENTES & TABELA */
+.data-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.table-responsive { width: 100%; overflow-x: auto; }
+.custom-table { width: 100%; border-collapse: collapse; text-align: left; }
+.custom-table th { padding: 14px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--card-border); letter-spacing: 0.5px; }
+.custom-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid var(--card-border); color: var(--text-main); }
+.custom-table tr:last-child td { border-bottom: none; }
+.custom-table tr:hover td { background: var(--card-hover); }
+
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.badge-status.aguardando { background: rgba(245, 158, 11, 0.15); color: var(--status-pendente); border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-status.confirmado { background: rgba(59, 130, 246, 0.15); color: var(--status-confirmado); border: 1px solid rgba(59, 130, 246, 0.3); }
+.badge-status.preparo { background: rgba(139, 92, 246, 0.15); color: var(--status-preparo); border: 1px solid rgba(139, 92, 246, 0.3); }
+.badge-status.pronto { background: rgba(16, 185, 129, 0.15); color: var(--status-pronto); border: 1px solid rgba(16, 185, 129, 0.3); }
+.badge-status.entregue { background: rgba(5, 150, 105, 0.15); color: var(--status-entregue); border: 1px solid rgba(5, 150, 105, 0.3); }
+.badge-status.cancelado { background: rgba(239, 68, 68, 0.15); color: var(--status-cancelado); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.btn-sm-action {
+  padding: 6px 12px;
+  background: #2a2a2a;
+  border: 1px solid var(--card-border);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-sm-action:hover { background: #333; border-color: rgba(255,255,255,0.2); }
+
+/* 5. PAINEL DA COZINHA (KANBAN) */
+.kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; overflow-x: auto; padding-bottom: 12px; }
+.kanban-col { background: var(--bg-surface); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+.kanban-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--card-border); }
+.kanban-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+.kanban-count { background: var(--card-bg); padding: 2px 8px; border-radius: 12px; font-size: 11px; color: #fff; border: 1px solid var(--card-border); }
+
+.kanban-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.kanban-card.alerta { border-left: 4px solid var(--primary); }
+
+.kanban-card-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; }
+.kanban-card-items { font-size: 13px; color: var(--text-main); line-height: 1.5; }
+.kanban-obs { font-size: 11px; color: var(--status-pendente); background: rgba(245, 158, 11, 0.1); padding: 6px 10px; border-radius: 6px; font-weight: 600; }
+.kanban-timer { font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 4px; font-weight: 600; }
+
+/* PRODUTOS */
+.product-grid-list { display: grid; gap: 12px; }
+.product-item-row {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.product-main-info { display: flex; align-items: center; gap: 16px; }
+.product-thumb { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; background: #2a2a2a; }
+.product-badge-tech { display: flex; gap: 6px; margin-top: 4px; }
+.tech-tag { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: var(--primary); }
+
+/* SWITCH TOGGLE */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; inset: 0; background-color: #2a2a2a; border: 1px solid var(--card-border); transition: .2s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider:before { transform: translateX(20px); background-color: #000; }
+
+/* MESAS */
+.mesas-grid-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+.mesa-box {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  display: flex; flex-direction: column; gap: 12px; align-items: center;
+  position: relative;
+}
+.mesa-box.livre { border-top: 4px solid var(--status-pronto); }
+.mesa-box.ocupada { border-top: 4px solid var(--status-cancelado); }
+.mesa-box.pedido_feito { border-top: 4px solid var(--primary); }
+
+.mesa-number { font-size: 20px; font-weight: 800; color: #fff; }
+.mesa-status-text { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+
+/* MODAIS */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.ativo { display: flex; }
+.modal-card { background: var(--bg-surface); border: 1px solid var(--card-border); width: 100%; max-width: 560px; border-radius: 20px; padding: 28px; position: relative; max-height: 90vh; overflow-y: auto; }
+.modal-close { position: absolute; top: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--card-border); color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.form-control { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; color: #fff; font-size: 13px; outline: none; }
+.form-control:focus { border-color: var(--primary); }
+
+@media (max-width: 1024px) {
+  .kanban-board { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  aside.sidebar { transform: translateX(-100%); }
+  aside.sidebar.mobile-open { transform: translateX(0); }
+  main.main-wrapper { margin-left: 0; }
+  .btn-mobile-toggle { display: block; }
+  .kanban-board { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .content-body { padding: 16px; }
+  .header-welcome p { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- 1. SIDEBAR -->
+  <aside class="sidebar" id="sidebarNav">
+    <div class="brand-header">
+      <div class="brand-logo">Mesa<span>360</span></div>
+      <span class="brand-badge-saas">PRO</span>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-group">
+        <div class="nav-group-title">Menu Principal</div>
+        <ul class="nav-list">
+          <li class="nav-item"><button class="ativo" onclick="mudarTab('visao-geral', this)">📊 Visão Geral</button></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">Operação</div>
+        <ul class="nav-list">
+          <li class="nav-item"><button onclick="mudarTab('pedidos', this)">📋 Todos os Pedidos</button></li>
+          <li class="nav-item"><button onclick="mudarTab('cozinha', this)">🍳 Cozinha (Kanban)</button></li>
+          <li class="nav-item"><button onclick="mudarTab('mesas', this)">🍽️ Mesas & QR Codes</button></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">Cardápio 3D/AR</div>
+        <ul class="nav-list">
+          <li class="nav-item"><button onclick="mudarTab('produtos', this)">🍔 Produtos</button></li>
+          <li class="nav-item"><button onclick="mudarTab('disponibilidade', this)">⚡ Disponibilidade Rápida</button></li>
+        </ul>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">Gestão</div>
+        <ul class="nav-list">
+          <li class="nav-item"><button onclick="mudarTab('relatorios', this)">📈 Relatórios</button></li>
+          <li class="nav-item"><button onclick="mudarTab('configuracoes', this)">⚙️ Configurações</button></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="profile-card">
+        <div class="profile-avatar">B180</div>
+        <div class="profile-info">
+          <div class="profile-name">Brasa 180° Smash</div>
+          <div class="profile-status"><span class="status-dot"></span> Restaurante Online</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <main class="main-wrapper">
+
+    <!-- 2. TOPO DO DASHBOARD -->
+    <header class="top-header">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="btn-mobile-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="header-welcome">
+          <h1>Olá, Brasa 180° Smash & Grill</h1>
+          <p>Veja o que está acontecendo no seu restaurante hoje.</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="badge-online">● Operação Ativa</div>
+        <button class="btn-icon">🔔 <span class="noti-badge"></span></button>
+      </div>
+    </header>
+
+    <div class="content-body">
+
+      <!-- 3. TAB: VISÃO GERAL -->
+      <section id="tab-visao-geral" class="tab-content ativo">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon">💵</div>
+              <span class="kpi-trend up">+14.2%</span>
+            </div>
+            <div class="kpi-val">R$ 1.284,50</div>
+            <div class="kpi-label">Faturamento de hoje</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon">🛍️</div>
+              <span class="kpi-trend up">+8.5%</span>
+            </div>
+            <div class="kpi-val">47</div>
+            <div class="kpi-label">Pedidos realizados hoje</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon">📊</div>
+              <span class="kpi-trend down">-1.8%</span>
+            </div>
+            <div class="kpi-val">R$ 27,33</div>
+            <div class="kpi-label">Ticket médio por pedido</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon">🔥</div>
+              <span class="kpi-trend up">Ativo</span>
+            </div>
+            <div class="kpi-val">8</div>
+            <div class="kpi-label">Pedidos em andamento</div>
+          </div>
+        </div>
+
+        <div class="data-card">
+          <div class="page-header" style="margin-bottom:16px;">
+            <div class="page-title">
+              <h2>Últimos Pedidos em Tempo Real</h2>
+              <p>Acompanhamento das chamadas de mesas e entregas.</p>
+            </div>
+            <button class="btn-sm-action" onclick="mudarTab('pedidos', document.querySelectorAll('.nav-item button')[1])">Ver todos os pedidos</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Mesa / Local</th>
+                  <th>Itens</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaRecentesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: PEDIDOS -->
+      <section id="tab-pedidos" class="tab-content">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>Gerenciamento de Pedidos</h2>
+            <p>Histórico completo e alterações manuais de estado.</p>
+          </div>
+        </div>
+
+        <div class="data-card">
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th># ID</th>
+                  <th>Mesa / Cliente</th>
+                  <th>Resumo dos Produtos</th>
+                  <th>Valor Total</th>
+                  <th>Pagamento</th>
+                  <th>Status Operacional</th>
+                  <th>Detalhes</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaPedidosCompletaBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. TAB: PAINEL DA COZINHA (KANBAN) -->
+      <section id="tab-cozinha" class="tab-content">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>Painel da Cozinha (KDS / Kanban)</h2>
+            <p>Controle visual dos tempos de preparo da brigada.</p>
+          </div>
+        </div>
+
+        <div class="kanban-board">
+          <div class="kanban-col">
+            <div class="kanban-header">
+              <span class="kanban-title">🟡 Novos <span class="kanban-count" id="count-novos">0</span></span>
+            </div>
+            <div id="col-novos" class="kanban-cards-container"></div>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-header">
+              <span class="kanban-title">🔵 Confirmados <span class="kanban-count" id="count-confirmados">0</span></span>
+            </div>
+            <div id="col-confirmados" class="kanban-cards-container"></div>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-header">
+              <span class="kanban-title">🟣 Em Preparo <span class="kanban-count" id="count-preparo">0</span></span>
+            </div>
+            <div id="col-preparo" class="kanban-cards-container"></div>
+          </div>
+
+          <div class="kanban-col">
+            <div class="kanban-header">
+              <span class="kanban-title">🟢 Prontos <span class="kanban-count" id="count-prontos">0</span></span>
+            </div>
+            <div id="col-prontos" class="kanban-cards-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. TAB: GERENCIAMENTO DE PRODUTOS -->
+      <section id="tab-produtos" class="tab-content">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>Cardápio 3D & AR</h2>
+            <p>Gerencie o catálogo interativo exibido no celular do cliente.</p>
+          </div>
+          <button class="btn-primary-action" onclick="abrirModalNovoProduto()">+ Novo Produto</button>
+        </div>
+
+        <div class="product-grid-list" id="listaProdutosAdmin"></div>
+      </section>
+
+      <!-- 9. TAB: DISPONIBILIDADE RÁPIDA -->
+      <section id="tab-disponibilidade" class="tab-content">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>Disponibilidade Rápida de Estoque</h2>
+            <p>Ative ou desative itens instantaneamente no cardápio.</p>
+          </div>
+        </div>
+
+        <div class="data-card" id="listaDisponibilidadeSwitches"></div>
+      </section>
+
+      <!-- 10 & 11. TAB: MESAS E QR CODES -->
+      <section id="tab-mesas" class="tab-content">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>Mapa de Mesas & QR Codes</h2>
+            <p>Acompanhamento de consumo presencial em tempo real.</p>
+          </div>
+        </div>
+
+        <div class="mesas-grid-map" id="mapaMesasGrid"></div>
+      </section>
+
+      <!-- 12. TAB: RELATÓRIOS -->
+      <section id="tab-relatorios" class="tab-content">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>Relatórios de Desempenho</h2>
+            <p>Análise de vendas, pratos mais lucrativos e horários de pico.</p>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-val">Brasa Smash Double</div>
+            <div class="kpi-label">Produto Mais Vendido (142 un)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val">19:30 - 21:00</div>
+            <div class="kpi-label">Horário de Maior Movimento</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val">78% PIX</div>
+            <div class="kpi-label">Forma de Pagamento Preferida</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13. TAB: CONFIGURAÇÕES -->
+      <section id="tab-configuracoes" class="tab-content">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>Configurações do Restaurante</h2>
+            <p>Identidade do estabelecimento, PIX e horário de funcionamento.</p>
+          </div>
+        </div>
+
+        <div class="data-card" style="max-width:680px;">
+          <div class="form-group">
+            <label>Nome do Estabelecimento</label>
+            <input type="text" class="form-control" value="Brasa 180° Smash & Grill">
+          </div>
+          <div class="form-group">
+            <label>Chave PIX Comercial</label>
+            <input type="text" class="form-control" value="5534984252341">
+          </div>
+          <div class="form-group">
+            <label>WhatsApp de Recebimento</label>
+            <input type="text" class="form-control" value="5534984252341">
+          </div>
+          <button class="btn-primary-action" onclick="alert('Configurações salvas com sucesso!')">Salvar Alterações</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL: DETALHES DO PEDIDO -->
+<div class="modal-overlay" id="modalDetalhesPedido">
+  <div class="modal-card">
+    <button class="modal-close" onclick="fecharModal('modalDetalhesPedido')">×</button>
+    <div id="modalDetalhesConteudo"></div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO PRODUTO -->
+<div class="modal-overlay" id="modalNovoProduto">
+  <div class="modal-card">
+    <button class="modal-close" onclick="fecharModal('modalNovoProduto')">×</button>
+    <h2 style="font-size:18px; font-weight:800; margin-bottom:16px;">Adicionar Novo Produto 3D</h2>
+    
+    <form onsubmit="salvarNovoProduto(event)">
+      <div class="form-group">
+        <label>Nome do Produto *</label>
+        <input type="text" id="novoNome" class="form-control" required placeholder="Ex: Bacon Monster Smash">
+      </div>
+      <div class="form-group">
+        <label>Preço (R$) *</label>
+        <input type="number" step="0.01" id="novoPreco" class="form-control" required placeholder="39.90">
+      </div>
+      <div class="form-group">
+        <label>Categoria *</label>
+        <select id="novaCategoria" class="form-control">
+          <option value="Hambúrgueres">Hambúrgueres</option>
+          <option value="Porções">Porções</option>
+          <option value="Bebidas">Bebidas</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Link do Modelo 3D (.GLB)</label>
+        <input type="text" id="novoGLB" class="form-control" placeholder="https://.../modelo.glb">
+      </div>
+      <button type="submit" class="btn-primary-action" style="width:100%; justify-content:center; margin-top:10px;">Cadastrar Produto</button>
+    </form>
+  </div>
+</div>
+
+<script>
+let pedidosSaaS = [
+  { id: '1024', mesa: 'Mesa 04', cliente: 'Matheus Silva', itens: [{nome:'2x Brasa Smash Double', preco:38.9},{nome:'1x Coca-Cola', preco:9.0}], total: 47.90, status: 'aguardando', pagamento: '⚡ PIX', hora: '20:42', obs: 'Sem cebola no burger.' },
+  { id: '1025', mesa: 'Mesa 02', cliente: 'Ana Paula', itens: [{nome:'1x Brasa Bacon Supreme', preco:42.0}], total: 42.00, status: 'preparo', pagamento: '💳 Cartão', hora: '20:48', obs: 'Ponto da carne: ao ponto.' },
+  { id: '1026', mesa: 'Mesa 08', cliente: 'Lucas Costa', itens: [{nome:'1x Monster Trufado 3D', preco:49.9}], total: 49.90, status: 'pronto', pagamento: '⚡ PIX', hora: '20:30', obs: '' },
+  { id: '1027', mesa: 'Mesa 01', cliente: 'Carla Dias', itens: [{nome:'1x Batata Frita Supreme', preco:26.9}], total: 26.90, status: 'entregue', pagamento: '💵 Dinheiro', hora: '20:15', obs: '' }
+];
+
+let produtosSaaS = [
+  { id: 'p1', nome: 'Brasa Smash Double', categoria: 'Hambúrgueres', preco: 38.90, disponivel: true, has3D: true, hasAR: true, img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80' },
+  { id: 'p2', nome: 'Brasa Bacon Supreme', categoria: 'Hambúrgueres', preco: 42.00, disponivel: true, has3D: true, hasAR: true, img: 'https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=400&q=80' },
+  { id: 'p3', nome: 'Monster Trufado 3D', categoria: 'Hambúrgueres', preco: 49.90, disponivel: false, has3D: true, hasAR: true, img: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=400&q=80' },
+  { id: 'p4', nome: 'Batata Frita Supreme', categoria: 'Porções', preco: 26.90, disponivel: true, has3D: true, hasAR: false, img: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=400&q=80' }
+];
+
+let mesasSaaS = [
+  { id: '01', status: 'ocupada', total: 26.90, cliente: 'Carla Dias' },
+  { id: '02', status: 'pedido_feito', total: 42.00, cliente: 'Ana Paula' },
+  { id: '03', status: 'livre', total: 0, cliente: '-' },
+  { id: '04', status: 'pedido_feito', total: 47.90, cliente: 'Matheus Silva' },
+  { id: '05', status: 'livre', total: 0, cliente: '-' },
+  { id: '06', status: 'livre', total: 0, cliente: '-' }
+];
+
+function mudarTab(tabId, elBtn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('ativo'));
+  document.querySelectorAll('.nav-item button').forEach(b => b.classList.remove('ativo'));
+
+  document.getElementById(`tab-${tabId}`).classList.add('ativo');
+  if(elBtn) elBtn.classList.add('ativo');
+
+  if(window.innerWidth <= 768) {
+    document.getElementById('sidebarNav').classList.remove('mobile-open');
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebarNav').classList.toggle('mobile-open');
+}
+
+function renderizarTabelasPedidos() {
+  const local = localStorage.getItem('pedidos_mesas');
+  if(local) {
+    try {
+      const parsed = JSON.parse(local);
+      parsed.forEach(p => {
+        if(!pedidosSaaS.find(e => e.id == p.id)) {
+          pedidosSaaS.unshift({
+            id: p.id,
+            mesa: p.mesa,
+            cliente: p.nome,
+            itens: p.itens,
+            total: p.total,
+            status: p.status || 'aguardando',
+            pagamento: p.pagamentoTexto,
+            hora: p.hora,
+            obs: ''
+          });
+        }
+      });
+    } catch(e){}
+  }
+
+  const recBody = document.getElementById('tabelaRecentesBody');
+  const compBody = document.getElementById('tabelaPedidosCompletaBody');
+
+  recBody.innerHTML = pedidosSaaS.slice(0, 5).map(p => `
+    <tr>
+      <td><strong>#${p.id}</strong></td>
+      <td>${p.mesa}</td>
+      <td>${p.itens.map(i => i.nome || i.quantidade + 'x item').join(', ')}</td>
+      <td><strong>${formatarPreco(p.total)}</strong></td>
+      <td><span class="badge-status ${p.status}">${p.status}</span></td>
+      <td><button class="btn-sm-action" onclick="abrirDetalhesPedido('${p.id}')">Ver Pedido</button></td>
+    </tr>
+  `).join('');
+
+  compBody.innerHTML = pedidosSaaS.map(p => `
+    <tr>
+      <td><strong>#${p.id}</strong></td>
+      <td>${p.mesa}<br><small style="color:var(--text-muted);">${p.cliente}</small></td>
+      <td>${p.itens.map(i => i.nome || i.quantidade + 'x item').join('<br>')}</td>
+      <td><strong>${formatarPreco(p.total)}</strong></td>
+      <td>${p.pagamento}</td>
+      <td>
+        <select onchange="alterarStatusPedido('${p.id}', this.value)" style="background:var(--card-bg); color:#fff; border:1px solid var(--card-border); padding:4px; border-radius:6px; font-size:11px;">
+          <option value="aguardando" ${p.status==='aguardando'?'selected':''}>Aguardando</option>
+          <option value="confirmado" ${p.status==='confirmado'?'selected':''}>Confirmado</option>
+          <option value="preparo" ${p.status==='preparo'?'selected':''}>Em Preparo</option>
+          <option value="pronto" ${p.status==='pronto'?'selected':''}>Pronto</option>
+          <option value="entregue" ${p.status==='entregue'?'selected':''}>Entregue</option>
+        </select>
+      </td>
+      <td><button class="btn-sm-action" onclick="abrirDetalhesPedido('${p.id}')">Detalhes</button></td>
+    </tr>
+  `).join('');
+
+  renderizarKanbanCozinha();
+}
+
+function renderizarKanbanCozinha() {
+  const cols = {
+    aguardando: document.getElementById('col-novos'),
+    confirmado: document.getElementById('col-confirmados'),
+    preparo: document.getElementById('col-preparo'),
+    pronto: document.getElementById('col-prontos')
+  };
+
+  Object.keys(cols).forEach(k => { if(cols[k]) cols[k].innerHTML = ''; });
+
+  let counts = { aguardando: 0, confirmado: 0, preparo: 0, pronto: 0 };
+
+  pedidosSaaS.forEach(p => {
+    if(cols[p.status]) {
+      counts[p.status]++;
+      cols[p.status].innerHTML += `
+        <div class="kanban-card ${p.obs ? 'alerta' : ''}">
+          <div class="kanban-card-top">
+            <span>#${p.id} — ${p.mesa}</span>
+            <span style="color:var(--primary);">${p.hora}</span>
+          </div>
+          <div class="kanban-card-items">
+            ${p.itens.map(i => `• ${i.nome || i.quantidade + 'x item'}`).join('<br>')}
+          </div>
+          ${p.obs ? `<div class="kanban-obs">⚠️ ${p.obs}</div>` : ''}
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+            <span class="kanban-timer">⏱️ Há 08 min</span>
+            <button class="btn-sm-action" onclick="avancarStatusKanban('${p.id}', '${p.status}')">Avançar ➔</button>
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  document.getElementById('count-novos').textContent = counts.aguardando;
+  document.getElementById('count-confirmados').textContent = counts.confirmado;
+  document.getElementById('count-preparo').textContent = counts.preparo;
+  document.getElementById('count-prontos').textContent = counts.pronto;
+}
+
+function avancarStatusKanban(id, statusAtual) {
+  const fluxo = { aguardando: 'confirmado', confirmado: 'preparo', preparo: 'pronto', pronto: 'entregue' };
+  if(fluxo[statusAtual]) {
+    alterarStatusPedido(id, fluxo[statusAtual]);
+  }
+}
+
+function alterarStatusPedido(id, novoStatus) {
+  const p = pedidosSaaS.find(i => i.id == id);
+  if(p) {
+    p.status = novoStatus;
+    renderizarTabelasPedidos();
+  }
+}
+
+function renderizarProdutosAdmin() {
+  const container = document.getElementById('listaProdutosAdmin');
+  const swContainer = document.getElementById('listaDisponibilidadeSwitches');
+
+  container.innerHTML = produtosSaaS.map(p => `
+    <div class="product-item-row">
+      <div class="product-main-info">
+        <img src="${p.img}" class="product-thumb" alt="${p.nome}">
+        <div>
+          <strong style="color:#fff; font-size:14px;">${p.nome}</strong>
+          <div style="font-size:12px; color:var(--text-muted);">${p.categoria} — <span style="color:var(--primary); font-weight:800;">${formatarPreco(p.preco)}</span></div>
+          <div class="product-badge-tech">
+            ${p.has3D ? '<span class="tech-tag">🧊 3D ATIVO</span>' : ''}
+            ${p.hasAR ? '<span class="tech-tag">📱 AR DISPONÍVEL</span>' : ''}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <label class="switch">
+          <input type="checkbox" ${p.disponivel ? 'checked' : ''} onchange="toggleEstoque('${p.id}')">
+          <span class="slider"></span>
+        </label>
+        <button class="btn-sm-action" onclick="alert('Editar produto: ${p.nome}')">✏️ Editar</button>
+      </div>
+    </div>
+  `).join('');
+
+  swContainer.innerHTML = produtosSaaS.map(p => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--card-border);">
+      <div>
+        <strong style="color:#fff;">${p.nome}</strong>
+        <div style="font-size:11px; color:var(--text-muted);">${p.categoria}</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" ${p.disponivel ? 'checked' : ''} onchange="toggleEstoque('${p.id}')">
+        <span class="slider"></span>
+      </label>
+    </div>
+  `).join('');
+}
+
+function toggleEstoque(id) {
+  const p = produtosSaaS.find(i => i.id === id);
+  if(p) p.disponivel = !p.disponivel;
+  renderizarProdutosAdmin();
+}
+
+function renderizarMesas() {
+  const container = document.getElementById('mapaMesasGrid');
+  container.innerHTML = mesasSaaS.map(m => `
+    <div class="mesa-box ${m.status}">
+      <div class="mesa-number">Mesa ${m.id}</div>
+      <div class="mesa-status-text">${m.status.replace('_', ' ')}</div>
+      <div style="font-size:12px; color:var(--text-muted);">${m.cliente}</div>
+      ${m.total > 0 ? `<div style="font-weight:800; color:var(--primary);">${formatarPreco(m.total)}</div>` : ''}
+      <button class="btn-sm-action" style="width:100%; margin-top:8px;" onclick="gerarQRCodeMesa('${m.id}')">📱 QR Code</button>
+    </div>
+  `).join('');
+}
+
+function abrirDetalhesPedido(id) {
+  const p = pedidosSaaS.find(i => i.id == id);
+  if(!p) return;
+
+  const modal = document.getElementById('modalDetalhesPedido');
+  document.getElementById('modalDetalhesConteudo').innerHTML = `
+    <h2 style="font-size:18px; font-weight:800;">Pedido #${p.id} — ${p.mesa}</h2>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Cliente: ${p.cliente} | Horário: ${p.hora}</p>
+
+    <div style="background:var(--card-bg); padding:12px; border-radius:10px; margin-bottom:16px;">
+      ${p.itens.map(i => `<div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span>${i.nome \vert{}\vert{} i.quantidade + 'x item'}</span><strong>${formatarPreco(i.preco || 0)}</strong></div>`).join('')}
+      <div style="border-top:1px solid var(--card-border); margin-top:8px; padding-top:8px; display:flex; justify-content:space-between; font-weight:800;">
+        <span>Total:</span>
+        <span style="color:var(--primary);">${formatarPreco(p.total)}</span>
+      </div>
+    </div>
+
+    <p style="font-size:12px; color:var(--text-muted);">Forma de Pagamento: <strong>${p.pagamento}</strong></p>
+    ${p.obs ? `<div class="kanban-obs" style="margin-top:10px;">Observação: ${p.obs}</div>` : ''}
+  `;
+
+  modal.classList.add('ativo');
+}
+
+function gerarQRCodeMesa(mesaNum) {
+  const url = `https://cardapio.com/brasa180/mesa/${mesaNum}`;
+  alert(`Link do QR Code da Mesa ${mesaNum}:\n${url}\n\nO QR Code pode ser impresso e fixado no acrílico da mesa.`);
+}
+
+function abrirModalNovoProduto() {
+  document.getElementById('modalNovoProduto').classList.add('ativo');
+}
+
+function fecharModal(id) {
+  document.getElementById(id).classList.remove('ativo');
+}
+
+function salvarNovoProduto(e) {
+  e.preventDefault();
+  const nome = document.getElementById('novoNome').value;
+  const preco = parseFloat(document.getElementById('novoPreco').value);
+  const cat = document.getElementById('novaCategoria').value;
+
+  produtosSaaS.push({
+    id: 'p' + Date.now(),
+    nome: nome,
+    categoria: cat,
+    preco: preco,
+    disponivel: true,
+    has3D: true,
+    hasAR: true,
+    img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80'
+  });
+
+  renderizarProdutosAdmin();
+  fecharModal('modalNovoProduto');
+}
+
+function formatarPreco(val) {
+  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+renderizarTabelasPedidos();
+renderizarProdutosAdmin();
+renderizarMesas();
+</script>
+</body>
+</html>
