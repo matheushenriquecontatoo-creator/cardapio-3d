@@ -203,7 +203,7 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
                 camera-controls 
                 auto-rotate 
                 ar 
-                ar-modes="webxr scene-viewer quick-look" 
+                ar-modes="webxr scene-viewer" 
                 ar-scale="auto"
                 shadow-intensity="1.5" 
                 shadow-softness="0.5"
@@ -211,9 +211,9 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
                 loading="eager"
                 environment-image="neutral"
                 interaction-prompt="auto"
-                alt="Modelo 3D Interativo do Prato em Tamanho Real">
+                alt="Modelo 3D Interativo do Prato">
                 
-                <button slot="ar-button" class="btn-ver-mesa" onclick="notificarAR()">
+                <button slot="ar-button" id="customArBtn" class="btn-ver-mesa">
                     📱 Ver na minha mesa (AR Real)
                 </button>
             </model-viewer>
@@ -392,6 +392,16 @@ function abrir3D() {
     const fonteModelo = (produto && produto.modelo3d) ? produto.modelo3d : MODELO_DEMO_AR;
 
     viewer.setAttribute("src", fonteModelo);
+
+    const arBtn = document.getElementById("customArBtn");
+    arBtn.onclick = function() {
+        notificarAR();
+        if (viewer.canActivateAR) {
+            viewer.activateAR();
+        } else {
+            alert("O seu dispositivo ou navegador não suporta Realidade Aumentada.");
+        }
+    };
 }
 
 function notificarAR() {
