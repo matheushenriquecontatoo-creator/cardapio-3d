@@ -1264,15 +1264,9 @@ body[data-theme="dark"] .tamanho-3d-box,body[data-theme="dark"] .modo-pedido-box
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111'/%3E%3Cpath d='M18 21h28v7H18zm0 15h20v7H18z' fill='white'/%3E%3C/svg%3E">
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js">
 
-<!-- Supabase: somente chave pública (publishable). Nenhuma chave secreta fica no navegador. -->
+<!-- Backend opcional: ative quando o projeto Supabase estiver configurado. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-window.MENU_BACKEND={
-    enabled:true,
-    supabaseUrl:"https://simcmxcroggzuwmhzmjhc.supabase.co",
-    supabaseKey:"sb_publishable_h6cxVSK_vH78I_HPNRGZUg_JoggyXx-"
-};
-</script>
+<script>window.MENU_BACKEND={enabled:false,supabaseUrl:"",supabaseKey:""};</script>
 
 </head>
 
@@ -5201,108 +5195,6 @@ document.addEventListener(
 ===================================================== */
 
 iniciarRestaurante();
-
-/* =====================================================
-   SUPABASE — DADOS DINÂMICOS SEM ALTERAR A APRESENTAÇÃO
-===================================================== */
-
-async function sincronizarSupabase(){
-    try{
-        if(!window.MENU_BACKEND?.enabled || !window.supabase || !window.MENU_BACKEND.supabaseUrl || !window.MENU_BACKEND.supabaseKey){
-            return false;
-        }
-
-        const cliente=window.supabase.createClient(window.MENU_BACKEND.supabaseUrl,window.MENU_BACKEND.supabaseKey);
-
-        const {data:restauranteDB,error:restauranteErro}=await cliente
-            .from("restaurants")
-            .select("id,name,slug,active,settings,whatsapp,phone")
-            .eq("slug","brasa-180")
-            .eq("active",true)
-            .maybeSingle();
-
-        if(restauranteErro)throw restauranteErro;
-        if(!restauranteDB)return false;
-
-        /* O HTML continua sendo a fonte da apresentação. O banco não substitui o layout. */
-        if(restauranteDB.name)restauranteAtual.nome=restauranteDB.name;
-
-        if(restauranteDB.settings && typeof restauranteDB.settings==="object"){
-            const configuracoes=restauranteDB.settings;
-            if(configuracoes.descricao)restauranteAtual.descricao=configuracoes.descricao;
-            if(configuracoes.pixChave)restauranteAtual.pixChave=configuracoes.pixChave;
-            if(configuracoes.pix_chave)restauranteAtual.pixChave=configuracoes.pix_chave;
-        }
-
-        if(restauranteDB.whatsapp)restauranteAtual.whatsapp=String(restauranteDB.whatsapp);
-        else if(restauranteDB.phone)restauranteAtual.whatsapp=String(restauranteDB.phone);
-
-        const {data:produtosDB,error:produtosErro}=await cliente
-            .from("products")
-            .select("id,name,description,price_cents,image_url,strategic_3d,model_url,width_cm,height_cm,depth_cm,gluten_free,lactose_free,vegetarian,vegan,active,sold_out,sort_order")
-            .eq("restaurant_id",restauranteDB.id)
-            .eq("active",true)
-            .order("sort_order",{ascending:true});
-
-        if(produtosErro)throw produtosErro;
-
-        /* Vínculos explícitos: evita trocar produtos por semelhança de nome. */
-        const vinculos={
-            "Brasa 180°":"hamburguer",
-            "Bacon Brasa":"smash-bacon",
-            "Chicken Crispy":"crispy-chicken",
-            "Veggie Gourmet":"veggie-casa",
-            "Batata Supreme":"batata-brasa",
-            "Coca-Cola":"coca-cola"
-        };
-
-        const produtosVisuais=restauranteAtual.produtos||[];
-
-        (produtosDB||[]).forEach(produtoDB=>{
-            const idVisual=vinculos[produtoDB.name];
-            if(!idVisual)return;
-
-            const produto=produtosVisuais.find(item=>item.id===idVisual);
-            if(!produto)return;
-
-            if(Number.isFinite(Number(produtoDB.price_cents)))produto.preco=Number(produtoDB.price_cents)/100;
-            if(typeof produtoDB.description==="string" && produtoDB.description.trim())produto.descricao=produtoDB.description;
-            if(typeof produtoDB.image_url==="string" && produtoDB.image_url.trim())produto.imagem=produtoDB.image_url;
-            if(typeof produtoDB.sold_out==="boolean")produto.disponivel=!produtoDB.sold_out;
-
-            /* O banco pode desligar o 3D de um item estratégico, mas não cria 3D inesperado. */
-            if(produtoDB.strategic_3d===false)produto.estrategico=false;
-
-            if(Number.isFinite(Number(produtoDB.width_cm)) && Number.isFinite(Number(produtoDB.height_cm)) && Number.isFinite(Number(produtoDB.depth_cm))){
-                produto.dimensoes=`${Number(produtoDB.width_cm).toLocaleString("pt-BR")} × ${Number(produtoDB.height_cm).toLocaleString("pt-BR")} × ${Number(produtoDB.depth_cm).toLocaleString("pt-BR")} cm`;
-            }
-
-            produto.supabaseId=produtoDB.id;
-            produto.gluten_free=!!produtoDB.gluten_free;
-            produto.lactose_free=!!produtoDB.lactose_free;
-            produto.vegetarian=!!produtoDB.vegetarian;
-            produto.vegan=!!produtoDB.vegan;
-            produto.model_url=produtoDB.model_url||produto.model_url||"";
-        });
-
-        /* Re-renderiza somente depois da sincronização; CSS/HTML permanecem os mesmos. */
-        iniciarRestaurante();
-
-        setTimeout(()=>{
-            if(typeof aplicarDisponibilidade==="function")aplicarDisponibilidade();
-            if(typeof otimizarImagens==="function")otimizarImagens();
-            if(typeof atualizarSEO==="function")atualizarSEO();
-        },0);
-
-        console.info("Mesa360: catálogo sincronizado com Supabase.");
-        return true;
-    }catch(erro){
-        console.warn("Mesa360: Supabase indisponível. O catálogo local continua ativo.",erro);
-        return false;
-    }
-}
-
-sincronizarSupabase();
 
 </script>
 
