@@ -12,7 +12,6 @@
 
 <!-- SUPABASE -->
 
-
 <!-- ANALYTICS INTEGRADO -->
 <script>
 const MenuAnalytics = {
@@ -166,66 +165,15 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
 #escala3D{width:100%;accent-color:var(--primary);cursor:pointer;}
 .escala-3d-legenda{display:flex;justify-content:space-between;color:var(--text-muted);font-size:9px;margin-top:3px;}
 .dimensoes-3d{text-align:center;color:var(--text-muted);font-size:10px;margin-top:9px;}
-.painel-admin{display:none;position:fixed;inset:0;background:#0b0c10;color:#fff;z-index:9000;overflow:auto;padding:22px;}
-.painel-admin.ativo{display:block;}
-.painel-admin-topo{max-width:1200px;margin:0 auto 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;}
-.painel-admin-topo h2{font-size:24px;}
-.painel-admin-topo p{color:var(--text-muted);font-size:12px;margin-top:4px;}
-.admin-fechar{border:1px solid var(--card-border);background:#181920;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:800;}
-.admin-grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.admin-card{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
-.admin-card small{display:block;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;margin-bottom:6px;}
-.admin-card strong{font-size:24px;color:var(--primary);}
-.admin-section{max-width:1200px;margin:18px auto;background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
-.admin-section h3{font-size:15px;margin-bottom:12px;}
-.mesas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;}
-.mesa-admin{padding:12px;border-radius:10px;background:#101116;border:1px solid var(--card-border);font-size:12px;font-weight:800;}
-.mesa-admin.ocupada{border-color:var(--primary);background:rgba(245,158,11,.08);}
-.pedido-admin{padding:12px 0;border-bottom:1px solid var(--card-border);display:grid;grid-template-columns:1fr auto;gap:12px;}
-.pedido-admin:last-child{border-bottom:0;}
-.pedido-admin small{color:var(--text-muted);font-size:10px;}
-.status-pedido{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
-.status-pedido button{border:1px solid var(--card-border);background:#20222b;color:#fff;border-radius:8px;padding:6px 9px;font-size:10px;cursor:pointer;}
-.status-pedido button.ativo{background:var(--primary);color:#000;border-color:var(--primary);font-weight:800;}
-.admin-vazio{color:var(--text-muted);font-size:12px;padding:10px 0;}
-@media(max-width:800px){.admin-grid{grid-template-columns:repeat(2,1fr)}.mesas-grid{grid-template-columns:repeat(3,1fr)}.painel-admin{padding:14px}}
-@media(max-width:480px){.admin-grid{grid-template-columns:1fr 1fr}.mesas-grid{grid-template-columns:repeat(2,1fr)}.pedido-admin{grid-template-columns:1fr}}
-
-
-/* PAINEL ADMINISTRATIVO */
-.painel-admin{display:none;position:fixed;inset:0;background:#0b0c10;color:#fff;z-index:9000;overflow:auto;padding:22px;}
-.painel-admin.ativo{display:block;}
-.painel-admin-topo{max-width:1200px;margin:0 auto 18px;display:flex;justify-content:space-between;gap:12px;align-items:center;}
-.painel-admin-topo h2{font-size:24px;}
-.painel-admin-topo p{color:var(--text-muted);font-size:12px;margin-top:4px;}
-.admin-fechar{border:1px solid var(--card-border);background:#181920;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:800;}
-.admin-grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.admin-card{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
-.admin-card small{display:block;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:800;margin-bottom:6px;}
-.admin-card strong{font-size:24px;color:var(--primary);}
-.admin-section{max-width:1200px;margin:18px auto;background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:16px;}
-.admin-section h3{font-size:15px;margin-bottom:12px;}
-.mesas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;}
-.mesa-admin{padding:12px;border-radius:10px;background:#101116;border:1px solid var(--card-border);font-size:12px;font-weight:800;}
-.mesa-admin.ocupada{border-color:var(--primary);background:rgba(245,158,11,.08);}
-.pedido-admin{padding:12px 0;border-bottom:1px solid var(--card-border);display:grid;grid-template-columns:1fr auto;gap:12px;}
-.pedido-admin:last-child{border-bottom:0;}
-.pedido-admin small{color:var(--text-muted);font-size:10px;}
-.status-pedido{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
-.status-pedido button{border:1px solid var(--card-border);background:#20222b;color:#fff;border-radius:8px;padding:6px 9px;font-size:10px;cursor:pointer;}
-.status-pedido button.ativo{background:var(--primary);color:#000;border-color:var(--primary);font-weight:800;}
-.admin-vazio{color:var(--text-muted);font-size:12px;padding:10px 0;}
-@media(max-width:800px){.admin-grid{grid-template-columns:repeat(2,1fr)}.mesas-grid{grid-template-columns:repeat(3,1fr)}.painel-admin{padding:14px}}
-@media(max-width:480px){.admin-grid{grid-template-columns:1fr 1fr}.mesas-grid{grid-template-columns:repeat(2,1fr)}.pedido-admin{grid-template-columns:1fr}}
 
 /* =====================================================
-   DASHBOARD COMERCIAL MESA360
+   DASHBOARD COMERCIAL MESA360 & PAINEL ADMIN
 ===================================================== */
-.admin-shell{display:grid;grid-template-columns:230px 1fr;min-height:100%;max-width:1400px;margin:0 auto;background:#0b0c10;border:1px solid var(--card-border);border-radius:18px;overflow:hidden}.admin-sidebar{background:#101116;border-right:1px solid var(--card-border);padding:18px 14px}.admin-brand{padding:6px 10px 18px;border-bottom:1px solid var(--card-border);margin-bottom:14px}.admin-brand strong{display:block;font-size:17px}.admin-brand span{display:block;color:var(--primary);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-top:4px}.admin-nav{display:grid;gap:6px}.admin-nav button{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:#b8bbc5;border-radius:10px;padding:11px 12px;font-weight:700;font-size:12px;cursor:pointer}.admin-nav button:hover,.admin-nav button.ativo{background:#1b1d25;color:#fff;border-color:var(--card-border)}.admin-nav button.ativo{color:var(--primary)}.admin-main{min-width:0;padding:20px}.admin-main-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.admin-main-top h2{font-size:24px}.admin-main-top p{color:var(--text-muted);font-size:12px;margin-top:4px}.admin-acoes{display:flex;gap:8px;flex-wrap:wrap}.admin-btn{border:1px solid var(--card-border);background:#181920;color:#fff;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:800;cursor:pointer}.admin-btn.principal{background:var(--primary);color:#000;border-color:var(--primary)}.admin-view{display:none}.admin-view.ativo{display:block}.admin-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.admin-kpi{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:15px}.admin-kpi small{display:block;color:var(--text-muted);font-size:9px;text-transform:uppercase;font-weight:800;margin-bottom:7px}.admin-kpi strong{display:block;font-size:24px}.admin-kpi span{display:block;color:#777;font-size:10px;margin-top:5px}.admin-grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}.admin-box{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:15px;margin-bottom:14px}.admin-box h3{font-size:14px;margin-bottom:12px}.admin-box-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.admin-box-header h3{margin:0}.admin-table-wrap{overflow:auto}.admin-table{width:100%;border-collapse:collapse;min-width:600px}.admin-table th,.admin-table td{padding:10px 8px;border-bottom:1px solid var(--card-border);text-align:left;font-size:11px}.admin-table th{color:var(--text-muted);font-size:9px;text-transform:uppercase}.admin-table td strong{font-size:11px}.admin-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#242631;color:#bbb;font-size:9px;font-weight:800;text-transform:uppercase}.admin-status.pendente{color:#f59e0b;background:rgba(245,158,11,.1)}.admin-status.preparo{color:#60a5fa;background:rgba(96,165,250,.1)}.admin-status.pronto{color:#34d399;background:rgba(52,211,153,.1)}.admin-status.entregue{color:#a7f3d0;background:rgba(52,211,153,.06)}.admin-status.cancelado{color:#f87171;background:rgba(248,113,113,.08)}.admin-order-actions{display:flex;gap:5px;flex-wrap:wrap}.admin-mini{border:1px solid var(--card-border);background:#20222b;color:#fff;border-radius:7px;padding:5px 7px;font-size:9px;cursor:pointer}.admin-mini:hover{border-color:var(--primary)}.admin-mesas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.admin-mesa{min-height:74px;padding:10px;border-radius:11px;background:#101116;border:1px solid var(--card-border);font-size:10px;font-weight:800}.admin-mesa strong{display:block;font-size:14px;margin-bottom:5px}.admin-mesa span{color:#777;font-size:9px}.admin-mesa.ocupada{border-color:var(--primary);background:rgba(245,158,11,.08)}.admin-mesa.preparo{border-color:#60a5fa;background:rgba(96,165,250,.08)}.admin-mesa.pronto{border-color:#34d399;background:rgba(52,211,153,.08)}.admin-product-list{display:grid;gap:8px}.admin-product{display:grid;grid-template-columns:1fr 110px 90px auto;align-items:center;gap:9px;padding:11px;border:1px solid var(--card-border);border-radius:10px;background:#101116}.admin-product strong{font-size:11px}.admin-product small{display:block;color:#777;font-size:9px;margin-top:3px}.admin-product input{width:100%;background:#181920;border:1px solid var(--card-border);color:#fff;border-radius:8px;padding:8px;font-size:11px}.admin-empty{padding:18px;text-align:center;color:var(--text-muted);font-size:11px}.admin-chart{height:170px;display:flex;align-items:flex-end;gap:8px;padding:10px 0}.admin-bar{flex:1;min-width:18px;background:linear-gradient(180deg,var(--primary),#8a4f00);border-radius:7px 7px 2px 2px;position:relative}.admin-bar span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:8px;color:#777}.admin-setting{display:grid;grid-template-columns:1fr 1fr;gap:10px}.admin-field label{display:block;color:#888;font-size:9px;text-transform:uppercase;font-weight:800;margin-bottom:5px}.admin-field input,.admin-field select{width:100%;background:#101116;color:#fff;border:1px solid var(--card-border);border-radius:9px;padding:10px;font-size:11px}.admin-note{padding:11px;border:1px dashed #3a3c45;border-radius:10px;color:#888;font-size:10px;line-height:1.5}.admin-mobile-back{display:none}.painel-admin .admin-fechar{display:none}
+.painel-admin{display:none;position:fixed;inset:0;background:#0b0c10;color:#fff;z-index:9000;overflow:auto;padding:22px;}
+.painel-admin.ativo{display:block;}
+.admin-shell{display:grid;grid-template-columns:230px 1fr;min-height:100%;max-width:1400px;margin:0 auto;background:#0b0c10;border:1px solid var(--card-border);border-radius:18px;overflow:hidden}.admin-sidebar{background:#101116;border-right:1px solid var(--card-border);padding:18px 14px}.admin-brand{padding:6px 10px 18px;border-bottom:1px solid var(--card-border);margin-bottom:14px}.admin-brand strong{display:block;font-size:17px}.admin-brand span{display:block;color:var(--primary);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-top:4px}.admin-nav{display:grid;gap:6px}.admin-nav button{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:#b8bbc5;border-radius:10px;padding:11px 12px;font-weight:700;font-size:12px;cursor:pointer}.admin-nav button:hover,.admin-nav button.ativo{background:#1b1d25;color:#fff;border-color:var(--card-border)}.admin-nav button.ativo{color:var(--primary)}.admin-main{min-width:0;padding:20px}.admin-main-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.admin-main-top h2{font-size:24px}.admin-main-top p{color:var(--text-muted);font-size:12px;margin-top:4px}.admin-acoes{display:flex;gap:8px;flex-wrap:wrap}.admin-btn{border:1px solid var(--card-border);background:#181920;color:#fff;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:800;cursor:pointer}.admin-btn.principal{background:var(--primary);color:#000;border-color:var(--primary)}.admin-view{display:none}.admin-view.ativo{display:block}.admin-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.admin-kpi{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:15px}.admin-kpi small{display:block;color:var(--text-muted);font-size:9px;text-transform:uppercase;font-weight:800;margin-bottom:7px}.admin-kpi strong{display:block;font-size:24px}.admin-kpi span{display:block;color:#777;font-size:10px;margin-top:5px}.admin-grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}.admin-box{background:#15161d;border:1px solid var(--card-border);border-radius:14px;padding:15px;margin-bottom:14px}.admin-box h3{font-size:14px;margin-bottom:12px}.admin-box-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.admin-box-header h3{margin:0}.admin-table-wrap{overflow:auto}.admin-table{width:100%;border-collapse:collapse;min-width:600px}.admin-table th,.admin-table td{padding:10px 8px;border-bottom:1px solid var(--card-border);text-align:left;font-size:11px}.admin-table th{color:var(--text-muted);font-size:9px;text-transform:uppercase}.admin-table td strong{font-size:11px}.admin-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#242631;color:#bbb;font-size:9px;font-weight:800;text-transform:uppercase}.admin-status.pendente{color:#f59e0b;background:rgba(245,158,11,.1)}.admin-status.preparo{color:#60a5fa;background:rgba(96,165,250,.1)}.admin-status.pronto{color:#34d399;background:rgba(52,211,153,.1)}.admin-status.entregue{color:#a7f3d0;background:rgba(52,211,153,.06)}.admin-status.cancelado{color:#f87171;background:rgba(248,113,113,.08)}.admin-order-actions{display:flex;gap:5px;flex-wrap:wrap}.admin-mini{border:1px solid var(--card-border);background:#20222b;color:#fff;border-radius:7px;padding:5px 7px;font-size:9px;cursor:pointer}.admin-mini:hover{border-color:var(--primary)}.admin-mesas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.admin-mesa{min-height:74px;padding:10px;border-radius:11px;background:#101116;border:1px solid var(--card-border);font-size:10px;font-weight:800}.admin-mesa strong{display:block;font-size:14px;margin-bottom:5px}.admin-mesa span{color:#777;font-size:9px}.admin-mesa.ocupada{border-color:var(--primary);background:rgba(245,158,11,.08)}.admin-mesa.preparo{border-color:#60a5fa;background:rgba(96,165,250,.08)}.admin-mesa.pronto{border-color:#34d399;background:rgba(52,211,153,.08)}.admin-product-list{display:grid;gap:8px}.admin-product{display:grid;grid-template-columns:1fr 110px 90px auto;align-items:center;gap:9px;padding:11px;border:1px solid var(--card-border);border-radius:10px;background:#101116}.admin-product strong{font-size:11px}.admin-product small{display:block;color:#777;font-size:9px;margin-top:3px}.admin-product input{width:100%;background:#181920;border:1px solid var(--card-border);color:#fff;border-radius:8px;padding:8px;font-size:11px}.admin-empty{padding:18px;text-align:center;color:var(--text-muted);font-size:11px}.admin-chart{height:170px;display:flex;align-items:flex-end;gap:8px;padding:10px 0}.admin-bar{flex:1;min-width:18px;background:linear-gradient(180deg,var(--primary),#8a4f00);border-radius:7px 7px 2px 2px;position:relative}.admin-bar span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:8px;color:#777}.admin-setting{display:grid;grid-template-columns:1fr 1fr;gap:10px}.admin-field label{display:block;color:#888;font-size:9px;text-transform:uppercase;font-weight:800;margin-bottom:5px}.admin-field input,.admin-field select{width:100%;background:#101116;color:#fff;border:1px solid var(--card-border);border-radius:99px;padding:10px;font-size:11px}.admin-note{padding:11px;border:1px dashed #3a3c45;border-radius:10px;color:#888;font-size:10px;line-height:1.5}.admin-mobile-back{display:none}.painel-admin .admin-fechar{display:none}
 @media(max-width:900px){.admin-shell{grid-template-columns:1fr}.admin-sidebar{border-right:0;border-bottom:1px solid var(--card-border)}.admin-nav{grid-template-columns:repeat(3,1fr)}.admin-grid-2{grid-template-columns:1fr}.admin-mesas-grid{grid-template-columns:repeat(4,1fr)}.admin-product{grid-template-columns:1fr 100px 80px}.admin-product .admin-mini{grid-column:1/-1}.admin-product .admin-disponibilidade{grid-column:3}.admin-kpis{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.painel-admin{padding:8px}.admin-main{padding:12px}.admin-main-top{align-items:flex-start;flex-direction:column}.admin-nav{grid-template-columns:repeat(2,1fr)}.admin-mesas-grid{grid-template-columns:repeat(3,1fr)}.admin-setting{grid-template-columns:1fr}.admin-kpi strong{font-size:20px}.admin-product{grid-template-columns:1fr}.admin-product .admin-mini,.admin-product .admin-disponibilidade{grid-column:auto}.admin-shell{border-radius:12px}}
-
-
 </style>
 </head>
 
@@ -236,8 +184,6 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
     <h1 id="restauranteNome">Brasa 180° Gourmet</h1>
     <p id="restauranteDescricao">Gastronomia artesanal com apresentação 3D e pedidos diretos no WhatsApp.</p>
 </header>
-
-
 
 <div class="categorias" id="categorias"></div>
 
@@ -369,21 +315,7 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
     </div>
 </div>
 
-<div id="painelAdmin" class="painel-admin">
-    <div class="painel-admin-topo">
-        <div><h2>Painel da Operação</h2><p>Dashboard demonstrativo da Brasa 180° • pedidos e mesas do navegador.</p></div>
-        <button class="admin-fechar" onclick="fecharPainelAdmin()">Voltar ao cardápio</button>
-    </div>
-    <div class="admin-grid">
-        <div class="admin-card"><small>Pedidos na mesa</small><strong id="adminTotalPedidos">0</strong></div>
-        <div class="admin-card"><small>Pedidos pendentes</small><strong id="adminPendentes">0</strong></div>
-        <div class="admin-card"><small>Mesas ocupadas</small><strong id="adminMesasOcupadas">0</strong></div>
-        <div class="admin-card"><small>Faturamento local</small><strong id="adminFaturamento">R$ 0,00</strong></div>
-    </div>
-    <section class="admin-section"><h3>Mapa de mesas</h3><div id="adminMesas" class="mesas-grid"></div></section>
-    <section class="admin-section"><h3>Pedidos recentes</h3><div id="adminPedidos"></div></section>
-</div>
-
+<!-- PAINEL ADMINISTRATIVO MESA360 -->
 <div id="painelAdmin" class="painel-admin">
   <div class="admin-shell">
     <aside class="admin-sidebar">
@@ -455,7 +387,6 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
   </div>
 </div>
 
-
 <div id="toast" class="toast">Adicionado ao pedido</div>
 
 <footer>
@@ -469,8 +400,6 @@ footer{text-align:center; padding: 24px 20px 90px; color: var(--text-muted); fon
 const menuSupabase = null;
 window.menuSupabase = null;
 window.supabaseConnectionStatus = "aguardando_novo_projeto";
-
-
 
 const RESTAURANTES = {
     "hamburgueria":{
@@ -842,53 +771,7 @@ window.__restauranteAtual = restauranteAtual;
 window.restauranteSlug = "hamburgueria";
 window.iniciarRestaurante = iniciarRestaurante;
 
-function abrirPainelAdmin(){
-    const painel=document.getElementById("painelAdmin");
-    if(!painel)return;
-    painel.classList.add("ativo");
-    renderizarPainelAdmin();
-}
-
-function fecharPainelAdmin(){
-    document.getElementById("painelAdmin")?.classList.remove("ativo");
-}
-
-function pedidosMesa(){
-    try{return JSON.parse(localStorage.getItem("pedidos_mesas")||"[]");}catch(e){return [];}
-}
-
-function renderizarPainelAdmin(){
-    const pedidos=pedidosMesa();
-    const pendentes=pedidos.filter(p=>p.status!=="entregue"&&p.status!=="concluido");
-    const faturamento=pedidos.reduce((s,p)=>s+Number(p.total||0),0);
-    const mesas=[...new Set(pedidos.filter(p=>p.status!=="entregue"&&p.status!=="concluido").map(p=>String(p.mesa)))];
-    document.getElementById("adminTotalPedidos").textContent=pedidos.length;
-    document.getElementById("adminPendentes").textContent=pendentes.length;
-    document.getElementById("adminMesasOcupadas").textContent=mesas.length;
-    document.getElementById("adminFaturamento").textContent=formatarPreco(faturamento);
-    const mesaEl=document.getElementById("adminMesas");
-    mesaEl.innerHTML=Array.from({length:12},(_,i)=>{const n=String(i+1).padStart(2,"0");const ocupada=mesas.includes(n)||mesas.includes(String(i+1));return `<div class="mesa-admin ${ocupada?"ocupada":""}">Mesa ${n}<br><small>${ocupada?"Pedido ativo":"Livre"}</small></div>`}).join("");
-    const pedidosEl=document.getElementById("adminPedidos");
-    if(!pedidos.length){pedidosEl.innerHTML='<div class="admin-vazio">Nenhum pedido na mesa registrado neste navegador.</div>';return;}
-    pedidosEl.innerHTML=[...pedidos].reverse().map(p=>`<div class="pedido-admin"><div><strong>Pedido #${p.id}</strong> • Mesa ${p.mesa}</div><div>${formatarPreco(p.total)}<br><small>${p.hora||""} • ${p.nome||"Cliente"}</small></div><div class="status-pedido">${["pendente","preparo","pronto","entregue"].map(st=>`<button class="${p.status===st?"ativo":""}" onclick="alterarStatusPedido(${p.id},'${st}')">${st}</button>`).join("")}</div></div>`).join("");
-}
-
-function alterarStatusPedido(id,status){
-    const pedidos=pedidosMesa();
-    const pedido=pedidos.find(p=>Number(p.id)===Number(id));
-    if(!pedido)return;
-    pedido.status=status;
-    localStorage.setItem("pedidos_mesas",JSON.stringify(pedidos));
-    renderizarPainelAdmin();
-}
-
-if(new URLSearchParams(window.location.search).get("painel")==="admin"){
-    window.addEventListener("load",abrirPainelAdmin);
-}
-
-
-
-/* PAINEL ADMINISTRATIVO */
+/* FUNÇÕES UNIFICADAS DO DASHBOARD MESA360 */
 function abrirPainelAdmin(){
     const painel=document.getElementById("painelAdmin");
     if(!painel)return;
@@ -949,17 +832,17 @@ function renderMesasAdmin(id){
 function renderPedidosTabela(pedidos){
     const el=document.getElementById('adminPedidosTabela');if(!el)return;
     if(!pedidos.length){el.innerHTML='<div class="admin-empty">Nenhum pedido na mesa registrado neste navegador.</div>';return;}
-    el.innerHTML=`<table class="admin-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Mesa</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>${[...pedidos].reverse().map(p=>`<tr><td><strong>#${p.id}</strong><br><small>${p.hora||''}</small></td><td>${p.nome||'Cliente'}</td><td>${p.mesa}</td><td>${(p.itens||[]).reduce((s,i)=>s+Number(i.quantidade||0),0)}</td><td>${formatarPreco(p.total)}</td><td><span class="admin-status ${p.status}">${statusLabel(p.status)}</span></td><td><div class="admin-order-actions">${['pendente','preparo','pronto','entregue'].map(st=>`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'${st}')">${statusLabel(st)}</button>`).join('')}<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'cancelado')">Cancelar</button></div></td></tr>`).join('')}</tbody></table>`;
+    el.innerHTML=`<table class="admin-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Mesa</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>${[...pedidos].reverse().map(p=>`<tr><td><strong>#${p.id}</strong><br><small>${p.hora||''}</small></td><td>${p.nome\vert{}\vert{}'Cliente'}</td><td>${p.mesa}</td><td>${(p.itens\vert{}\vert{}[]).reduce((s,i)=>s+Number(i.quantidade\vert{}\vert{}0),0)}</td><td>${formatarPreco(p.total)}</td><td><span class="admin-status ${p.status}">${statusLabel(p.status)}</span></td><td><div class="admin-order-actions">${['pendente','preparo','pronto','entregue'].map(st=>`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'${st}')">${statusLabel(st)}</button>`).join('')}<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'cancelado')">Cancelar</button></div></td></tr>`).join('')}</tbody></table>`;
 }
 
 function renderCozinha(pedidos){
     const grupos={cozinhaPendentes:pedidos.filter(p=>p.status==='pendente'),cozinhaPreparo:pedidos.filter(p=>p.status==='preparo'),cozinhaProntos:pedidos.filter(p=>p.status==='pronto')};
-    Object.entries(grupos).forEach(([id,lista])=>{const el=document.getElementById(id);if(!el)return;if(!lista.length){el.innerHTML='<div class="admin-empty">Nenhum pedido nesta etapa.</div>';return;}el.innerHTML=lista.map(p=>`<div class="pedido-admin"><div><strong>Pedido #${p.id} • Mesa ${p.mesa}</strong><br><small>${p.nome||'Cliente'} • ${p.hora||''}</small><div style="margin-top:7px;color:#bbb;font-size:10px">${(p.itens||[]).map(i=>`${i.quantidade}x ${i.nome}`).join(' • ')}</div></div><div class="admin-order-actions">${p.status==='pendente'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'preparo')">Iniciar</button>`:''}${p.status==='preparo'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'pronto')">Pronto</button>`:''}${p.status==='pronto'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'entregue')">Entregar</button>`:''}</div></div>`).join('')});
+    Object.entries(grupos).forEach(([id,lista])=>{const el=document.getElementById(id);if(!el)return;if(!lista.length){el.innerHTML='<div class="admin-empty">Nenhum pedido nesta etapa.</div>';return;}el.innerHTML=lista.map(p=>`<div class="pedido-admin"><div><strong>Pedido #${p.id} • Mesa ${p.mesa}</strong><br><small>${p.nome||'Cliente'} • ${p.hora||''}</small><div style="margin-top:7px;color:#bbb;font-size:10px">${(p.itens||[]).map(i=>`${i.quantidade}x${i.nome}`).join(' • ')}</div></div><div class="admin-order-actions">${p.status==='pendente'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'preparo')">Iniciar</button>`:''}${p.status==='preparo'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'pronto')">Pronto</button>`:''}${p.status==='pronto'?`<button class="admin-mini" onclick="alterarStatusPedido(${p.id},'entregue')">Entregar</button>`:''}</div></div>`).join('')});
 }
 
 function renderProdutosAdmin(){
     const el=document.getElementById('adminProdutosLista');if(!el)return;const r=window.__restauranteAtual;if(!r?.produtos?.length){el.innerHTML='<div class="admin-empty">Nenhum produto cadastrado.</div>';return;}
-    el.innerHTML=r.produtos.map(p=>`<div class="admin-product"><div><strong>${p.nome}</strong><small>${p.categoria||'Produto'} ${p.tem3D?'• 3D/AR':''}</small></div><input data-admin-price="${p.id}" type="number" min="0" step="0.01" value="${Number(p.preco||0).toFixed(2)}"><label class="admin-disponibilidade" style="font-size:9px;color:#aaa"><input data-admin-disp="${p.id}" type="checkbox" ${p.disponivel!==false?'checked':''}> Disponível</label><button class="admin-mini" onclick="salvarProdutoAdmin('${p.id}')">Salvar</button></div>`).join('');
+    el.innerHTML=r.produtos.map(p=>`<div class="admin-product"><div><strong>${p.nome}</strong><small>${p.categoria||'Produto'} ${p.modelo3d?'• 3D/AR':''}</small></div><input data-admin-price="${p.id}" type="number" min="0" step="0.01" value="${Number(p.preco||0).toFixed(2)}"><label class="admin-disponibilidade" style="font-size:9px;color:#aaa"><input data-admin-disp="${p.id}" type="checkbox" ${p.disponivel!==false?'checked':''}> Disponível</label><button class="admin-mini" onclick="salvarProdutoAdmin('${p.id}')">Salvar</button></div>`).join('');
 }
 
 function salvarProdutoAdmin(id){
@@ -967,7 +850,7 @@ function salvarProdutoAdmin(id){
 }
 
 function adicionarProdutoDemo(){
-    const r=window.__restauranteAtual;if(!r)return;const id='produto-'+Date.now();r.produtos.push({id,nome:'Novo produto',descricao:'Descrição do produto.',preco:0,categoria:'lanches',imagem:'',tem3D:false,disponivel:true});localStorage.setItem('menu3d-config-'+(window.restauranteSlug||'hamburgueria'),JSON.stringify(r));window.iniciarRestaurante?.();renderProdutosAdmin();mostrarToast('Produto criado. Edite o preço e o catálogo.');
+    const r=window.__restauranteAtual;if(!r)return;const id='produto-'+Date.now();r.produtos.push({id,nome:'Novo produto',descricao:'Descrição do produto.',preco:0,categoria:'burgers',imagem:'',disponivel:true});localStorage.setItem('menu3d-config-'+(window.restauranteSlug||'hamburgueria'),JSON.stringify(r));window.iniciarRestaurante?.();renderProdutosAdmin();mostrarToast('Produto criado. Edite o preço e o catálogo.');
 }
 
 function renderCategoriasAdmin(){
@@ -976,7 +859,7 @@ function renderCategoriasAdmin(){
 
 function renderRelatorios(){
     const m=MenuAnalytics.getMetrics();const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};set('relViews',m.visualizacoesGerais||0);set('rel3d',m.interacoes3D||0);set('relAr',m.interacoesAR||0);set('relCarrinho',m.adicionouCarrinho||0);
-    const el=document.getElementById('relProdutos');if(!el)return;const produtos=Object.values(m.produtos||{}).sort((a,b)=>(b.pedidos||0)-(a.pedidos||0));el.innerHTML=produtos.length?`<table class="admin-table"><thead><tr><th>Produto</th><th>Visualizações</th><th>3D</th><th>AR</th><th>Carrinho</th><th>Pedidos</th></tr></thead><tbody>${produtos.map(p=>`<tr><td><strong>${p.nome}</strong></td><td>${p.visualizacoes||0}</td><td>${p.views3d||0}</td><td>${p.viewsAR||0}</td><td>${p.carrinho||0}</td><td>${p.pedidos||0}</td></tr>`).join('')}</tbody></table>`:'<div class="admin-empty">Os indicadores aparecem conforme os clientes interagem com o cardápio.</div>';
+    const el=document.getElementById('relProdutos');if(!el)return;const produtos=Object.values(m.produtos||{}).sort((a,b)=>(b.pedidos||0)-(a.pedidos||0));el.innerHTML=produtos.length?`<table class="admin-table"><thead><tr><th>Produto</th><th>Visualizações</th><th>3D</th><th>AR</th><th>Carrinho</th><th>Pedidos</th></tr></thead><tbody>${produtos.map(p=>`<tr><td><strong>${p.nome}</strong></td><td>${p.visualizacoes||0}</td><td>${p.views3d\vert{}\vert{}0}</td><td>${p.viewsAR||0}</td><td>${p.carrinho\vert{}\vert{}0}</td><td>${p.pedidos||0}</td></tr>`).join('')}</tbody></table>`:'<div class="admin-empty">Os indicadores aparecem conforme os clientes interagem com o cardápio.</div>';
 }
 
 function alterarStatusPedido(id,status){
@@ -992,8 +875,6 @@ function salvarConfigDemo(){
 }
 
 if(new URLSearchParams(window.location.search).get('painel')==='admin'){window.addEventListener('load',abrirPainelAdmin);}
-
-
 </script>
 </body>
 </html>
