@@ -418,8 +418,7 @@ async function carregarCatalogoDoSupabase(){
        imagem,
        disponivel:true,
        ar:local?.ar===true,
-       // Foto AR: somente imagens que realmente vieram do Storage do Supabase.
-       arFoto:(typeof db.image_url==='string' && db.image_url.includes('/storage/v1/object/public/menu-assets/')) ? imagem : (local?.arFoto||null),
+       arFoto:local?.arFoto||null,
        modelo3d:resolverImagemSupabase(modelo?.model_url,local?.modelo3d||null),
        poster3d:resolverImagemSupabase(modelo?.poster_url,local?.imagem||null),
        cameraOrbit:modelo?.camera_orbit||'0deg 75deg 105%',
@@ -878,28 +877,81 @@ function whatsappMensagem(nome,codigo,localPedido,pagto,observacao){
  msg+=`*SUBTOTAL:* ${formatarPreco(calcularSubtotal())}\n*TAXA DE ENTREGA:* ${formatarPreco(calcularTaxaEntrega())}\n*TOTAL:* ${formatarPreco(calcularTotal())}\n\n*STATUS:* Recebido`;
  return msg
 }
-function processarCheckout(){
+async function registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo}){
+ if(!menuSupabase||!window.supabaseRestaurantId)throw new Error('Supabase não está conectado ao restaurante.');
+ const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega(),total=subtotal+taxa;
+ const pedido={
+   restaurant_id:window.supabaseRestaurantId,
+   order_number:null,
+   customer_name:nome,
+   order_type:tipoAtendimentoSelecionado==='mesa'?'mesa':'delivery',
+   table_number:mesaAtual?Number(mesaAtual):null,
+   delivery_address:endereco||null,
+   payment_method:forma,
+   change_for:troco||null,
+   subtotal,
+   delivery_fee:taxa,
+   total,
+   status:'pending',
+   observation:observacao||null
+ };
+ delete pedido.order_number;
+ const {data:pedidoCriado,error:erroPedido}=await menuSupabase.from('orders').insert(pedido).select('id,order_number').single();
+ if(erroPedido)throw erroPedido;
+ const itens=carrinho.map(i=>({
+   order_id:pedidoCriado.id,
+   product_id:i.produtoId||null,
+   product_name:i.nome,
+   unit_price:Number(i.precoUnitario||i.preco),
+   quantity:Number(i.quantidade),
+   variant_name:i.combo?`Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}`:null,
+   observation:[
+     i.addons?.length?`Adicionais: ${i.addons.map(a=>a.nome).join(', ')}`:'',
+     i.observacao?`Obs.: ${i.observacao}`:''
+   ].filter(Boolean).join(' | ')||null
+ }));
+ const {error:erroItens}=await menuSupabase.from('order_items').insert(itens);
+ if(erroItens){
+   await menuSupabase.from('orders').delete().eq('id',pedidoCriado.id);
+   throw erroItens;
+ }
+ return pedidoCriado;
+}
+
+async function processarCheckout(){
  if(!carrinho.length)return mostrarToast('Seu pedido está vazio.');
  const nome=$('clienteNome').value.trim();if(!nome)return mostrarToast('Informe seu nome.');
  let localPedido='';
- if(tipoAtendimentoSelecionado==='mesa'){const mesa=$('numeroMesaPedido').value.trim();if(!mesa)return mostrarToast('Informe o número da mesa.');localPedido=`*MESA:* ${mesa}`}
- else{const endereco=$('clienteEndereco').value.trim();if(!endereco)return mostrarToast('Informe seu endereço de entrega.');localPedido=`*Endereço:* ${endereco}`}
+ let mesaAtual='';
+ let endereco='';
+ if(tipoAtendimentoSelecionado==='mesa'){mesaAtual=$('numeroMesaPedido').value.trim();if(!mesaAtual)return mostrarToast('Informe o número da mesa.');localPedido=`*MESA:* ${mesaAtual}`}
+ else{endereco=$('clienteEndereco').value.trim();if(!endereco)return mostrarToast('Informe seu endereço de entrega.');localPedido=`*Endereço:* ${endereco}`}
  const observacao=$('observacaoPedido').value.trim(); const forma=$('formaPagamento').value;let pagto=forma==='pix'?'PIX':forma==='dinheiro'?'Dinheiro':'Cartão';
- if(forma==='dinheiro'){const troco=validarTroco();if(troco===false)return;if(troco)pagto+=` (troco para ${formatarPreco(troco)})`}
- const mesaAtual=tipoAtendimentoSelecionado==='mesa'?($('numeroMesaPedido').value||'').trim():'';
+ let troco=null;
+ if(forma==='dinheiro'){troco=validarTroco();if(troco===false)return;if(troco)pagto+=` (troco para ${formatarPreco(troco)})`}
  localStorage.setItem('brasa180_nome_cliente',nome);
  if(mesaAtual)localStorage.setItem('brasa180_mesa',mesaAtual);
- const codigo=gerarCodigoPedido();ultimoPedidoCodigo=codigo;localStorage.setItem('brasa180_ultimo_pedido',codigo);
- const msg=whatsappMensagem(nome,codigo,localPedido,pagto,observacao);
- const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`;
- // O redirecionamento ocorre diretamente nesta ação de clique, evitando bloqueios de popup.
- // O carrinho é limpo antes da navegação para impedir duplicidade mesmo em navegadores móveis.
- limparCarrinhoAposEnvio();
- $('btnAcaoFinalizar').style.display='none';
- $('painelSucessoLocal').style.display='block';
- $('painelSucessoLocal').innerHTML=`<div class="box-sucesso"><h3>Pedido ${codigo} preparado</h3><p>O WhatsApp será aberto para você enviar o pedido. O carrinho foi limpo para evitar duplicidade.</p></div>`;
- mostrarToast('Pedido preparado. Abrindo WhatsApp…');
- window.location.href=url;
+ const codigo=gerarCodigoPedido();
+ mostrarToast('Registrando pedido…');
+ $('btnAcaoFinalizar').disabled=true;
+ try{
+   const pedidoCriado=await registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo});
+   const numeroReal=pedidoCriado?.order_number||codigo;
+   ultimoPedidoCodigo=numeroReal;
+   localStorage.setItem('brasa180_ultimo_pedido',numeroReal);
+   const msg=whatsappMensagem(nome,numeroReal,localPedido,pagto,observacao);
+   const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`;
+   limparCarrinhoAposEnvio();
+   $('btnAcaoFinalizar').style.display='none';
+   $('painelSucessoLocal').style.display='block';
+   $('painelSucessoLocal').innerHTML=`<div class="box-sucesso"><h3>Pedido ${numeroReal} registrado</h3><p>Seu pedido foi salvo no sistema. O WhatsApp será aberto para enviar os detalhes ao restaurante.</p></div>`;
+   mostrarToast('Pedido registrado. Abrindo WhatsApp…');
+   setTimeout(()=>{window.location.href=url},120);
+ }catch(erro){
+   console.error('Erro ao registrar pedido:',erro);
+   $('btnAcaoFinalizar').disabled=false;
+   mostrarToast('Não foi possível registrar o pedido. Tente novamente.');
+ }
 }
 function abrirAtendimento(){
  const mesa=($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim();
