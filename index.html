@@ -302,9 +302,10 @@ const COMBO_BEBIDAS=[
 
 
 /* =====================================================
-   SUPABASE — ETAPA 1: RESTAURANTE + CATEGORIAS + PRODUTOS
-   A interface atual continua como fallback para não quebrar
-   o cardápio caso o banco esteja temporariamente indisponível.
+   SUPABASE — CATÁLOGO + IMAGENS DO STORAGE
+   Nesta etapa o frontend passa a usar o schema real atual.
+   A imagem pode ser uma URL completa ou um caminho dentro
+   do bucket público "menu-assets".
 ===================================================== */
 const SUPABASE_URL="https://simcmxcroggzuwmhzmjhc.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_h6cxVSK_vH78I_HPNRGZUg_JoggyXx-";
@@ -330,6 +331,15 @@ function categoriaFrontendSupabase(nome){
  return n||'outros';
 }
 
+function resolverImagemSupabase(valor, fallback=''){
+ const caminho=String(valor||'').trim();
+ if(!caminho)return fallback;
+ if(/^https?:\/\//i.test(caminho)||/^data:/i.test(caminho)||/^blob:/i.test(caminho))return caminho;
+ if(!menuSupabase)return fallback;
+ const {data}=menuSupabase.storage.from('menu-assets').getPublicUrl(caminho);
+ return data?.publicUrl||fallback;
+}
+
 async function carregarCatalogoDoSupabase(){
  if(!menuSupabase){
    console.warn('[Mesa360/Supabase] SDK indisponível. Catálogo local mantido.');
@@ -338,74 +348,85 @@ async function carregarCatalogoDoSupabase(){
  try{
    const {data:restaurante,error:erroRestaurante}=await menuSupabase
      .from('restaurants')
-     .select('id,name,slug,active,settings,whatsapp,phone,primary_color')
+     .select('id,name,slug,is_open,primary_color')
      .eq('slug','brasa-180')
-     .eq('active',true)
      .maybeSingle();
    if(erroRestaurante)throw erroRestaurante;
-   if(!restaurante)throw new Error('Restaurante brasa-180 não encontrado ou inativo.');
+   if(!restaurante)throw new Error('Restaurante brasa-180 não encontrado.');
 
-   const [categoriasResp,produtosResp]=await Promise.all([
+   const [categoriasResp,produtosResp,modelosResp,configResp]=await Promise.all([
      menuSupabase
        .from('categories')
-       .select('id,name,sort_order,active')
+       .select('id,name,display_order')
        .eq('restaurant_id',restaurante.id)
-       .eq('active',true)
-       .order('sort_order',{ascending:true}),
+       .order('display_order',{ascending:true}),
      menuSupabase
        .from('products')
-       .select('id,category_id,name,description,price_cents,image_url,strategic_3d,model_url,width_cm,height_cm,depth_cm,gluten_free,lactose_free,vegetarian,vegan,active,sold_out,sort_order')
+       .select('id,category_id,name,description,price,image_url,is_available,is_active,display_order')
        .eq('restaurant_id',restaurante.id)
-       .eq('active',true)
-       .order('sort_order',{ascending:true})
+       .eq('is_active',true)
+       .eq('is_available',true)
+       .order('display_order',{ascending:true}),
+     menuSupabase
+       .from('product_models')
+       .select('id,product_id,model_url,poster_url,camera_orbit,field_of_view')
+       .order('created_at',{ascending:true}),
+     menuSupabase
+       .from('restaurant_settings')
+       .select('currency,delivery_enabled,table_orders_enabled,minimum_order,delivery_fee,settings')
+       .eq('restaurant_id',restaurante.id)
+       .maybeSingle()
    ]);
+
    if(categoriasResp.error)throw categoriasResp.error;
    if(produtosResp.error)throw produtosResp.error;
+   if(modelosResp.error)throw modelosResp.error;
+   if(configResp.error)throw configResp.error;
 
    const categoriasDB=categoriasResp.data||[];
-   const produtosDB=(produtosResp.data||[]).filter(p=>p.sold_out!==true);
+   const produtosDB=produtosResp.data||[];
+   const modelosDB=modelosResp.data||[];
    const locais=Array.isArray(restauranteAtual.produtos)?restauranteAtual.produtos:[];
    const porNome=new Map(locais.map(p=>[normalizarTextoSupabase(p.nome),p]));
    const categoriaPorId=new Map(categoriasDB.map(c=>[c.id,c]));
+   const modeloPorProduto=new Map();
+   modelosDB.forEach(m=>{
+     if(!modeloPorProduto.has(m.product_id))modeloPorProduto.set(m.product_id,m);
+   });
 
    const produtosBanco=produtosDB.map(db=>{
      const local=porNome.get(normalizarTextoSupabase(db.name));
      const categoriaDB=categoriaPorId.get(db.category_id);
      const categoria=categoriaFrontendSupabase(categoriaDB?.name||local?.categoria||'');
-     const imagem=String(db.image_url||'').trim()||local?.imagem||(
+     const fallback=local?.imagem||(
        categoria==='bebidas'
          ? 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1000&q=85'
          : categoria==='porcoes'
            ? 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85'
            : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85'
      );
+     const modelo=modeloPorProduto.get(db.id);
+     const imagem=resolverImagemSupabase(db.image_url,fallback);
      return {
        ...(local||{}),
        id:local?.id||('db-'+db.id),
        dbId:db.id,
        nome:db.name,
        descricao:db.description||local?.descricao||'',
-       preco:Number(db.price_cents||0)/100,
+       preco:Number(db.price||0),
        categoria,
        imagem,
        disponivel:true,
        ar:local?.ar===true,
        arFoto:local?.arFoto||null,
-       modelo3d:db.model_url||local?.modelo3d||null,
-       strategic3d:Boolean(db.strategic_3d),
-       soldOut:false,
-       dimensoes:(db.width_cm&&db.height_cm&&db.depth_cm)
-         ? `${db.width_cm} × ${db.depth_cm} × ${db.height_cm} cm`
-         : local?.dimensoes,
-       gluten_free:Boolean(db.gluten_free),
-       lactose_free:Boolean(db.lactose_free),
-       vegetarian:Boolean(db.vegetarian),
-       vegan:Boolean(db.vegan)
+       modelo3d:resolverImagemSupabase(modelo?.model_url,local?.modelo3d||null),
+       poster3d:resolverImagemSupabase(modelo?.poster_url,local?.imagem||null),
+       cameraOrbit:modelo?.camera_orbit||'0deg 75deg 105%',
+       fieldOfView:modelo?.field_of_view||'30deg'
      };
    });
 
    // Combos continuam locais nesta etapa; a tabela combos será integrada na etapa própria.
-   // Isso evita apagar os combos atuais enquanto a integração de combos ainda não foi feita.
    const combosLocais=locais.filter(p=>p.combo===true);
    const produtosFinais=[...produtosBanco];
    combosLocais.forEach(combo=>{
@@ -424,14 +445,16 @@ async function carregarCatalogoDoSupabase(){
      dbId:restaurante.id,
      slug:restaurante.slug,
      nome:restaurante.name||restauranteAtual.nome,
-     descricao:restaurante.settings?.description||restauranteAtual.descricao,
-     whatsapp:restaurante.whatsapp||restaurante.phone||restauranteAtual.whatsapp,
+     whatsapp:restauranteAtual.whatsapp,
      primaryColor:restaurante.primary_color||restauranteAtual.primaryColor,
      categorias:categoriasSemDuplicata,
-     produtos:produtosFinais
+     produtos:produtosFinais,
+     aberto:restaurante.is_open!==false,
+     configuracoes:configResp.data||null
    };
    window.supabaseRestaurantId=restaurante.id;
    window.restauranteSupabase=restaurante;
+   window.supabaseRestaurantSettings=configResp.data||null;
    window.supabaseConnectionStatus='conectado';
 
    if(restaurante.primary_color)document.documentElement.style.setProperty('--primary',restaurante.primary_color);
@@ -442,7 +465,7 @@ async function carregarCatalogoDoSupabase(){
    renderizarProdutos('todos');
    atualizarCarrinho();
    atualizarResumoAtendimento();
-   console.info('[Mesa360/Supabase] Catálogo carregado:',{categorias:categoriasDB.length,produtos:produtosBanco.length});
+   console.info('[Mesa360/Supabase] Catálogo carregado:',{categorias:categoriasDB.length,produtos:produtosBanco.length,modelos:modelosDB.length,storage:'menu-assets'});
    setTimeout(()=>mostrarToast('Cardápio conectado ao Supabase.'),120);
    return true;
  }catch(error){
