@@ -10,7 +10,7 @@
 <style>
 :root{--primary:#f59e0b;--primary-hover:#d97706;--bg:#0f1015;--surface:#181920;--surface-2:#20222b;--border:rgba(255,255,255,.08);--text:#f3f4f6;--muted:#9ca3af;--success:#34d399}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth;overflow-x:hidden}
+html{scroll-behavior:smooth;overflow-x:hidden}body.modal-aberto{overflow:hidden}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-width:320px;overflow-x:hidden;overscroll-behavior-x:none;touch-action:pan-y;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit}button{touch-action:manipulation}img{max-width:100%}.escondido{display:none!important}
 header{padding:34px 18px 28px;text-align:center;background:radial-gradient(circle at 50% -25%,#4a2d10 0%,#19130c 30%,var(--bg) 72%);border-bottom:1px solid var(--border)}
@@ -48,11 +48,13 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 .atendimento-destaque h3{font-size:14px;margin-bottom:4px}.atendimento-destaque p{font-size:11px;color:var(--muted);line-height:1.45;margin-bottom:10px}
 .seletor-atendimento{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn-opcao-tipo{min-height:48px;border:1px solid var(--border);background:var(--surface-2);color:#fff;border-radius:12px;font-size:12px;font-weight:900;cursor:pointer}.btn-opcao-tipo.ativo{background:var(--primary);border-color:var(--primary);color:#111}
 .combo-badge{position:absolute;top:10px;left:10px;padding:6px 10px;border-radius:999px;background:rgba(245,158,11,.94);color:#111;font-size:10px;font-weight:900}
-</style>
+
+.atendimento-destaque{margin-top:12px;padding:14px;border:1px solid rgba(245,158,11,.22);border-radius:15px;background:linear-gradient(180deg,rgba(245,158,11,.08),rgba(245,158,11,.025))}.atendimento-destaque h3{font-size:14px;margin-bottom:5px}.atendimento-destaque p{color:var(--muted);font-size:11px;line-height:1.45}.seletor-atendimento{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.btn-opcao-tipo{border:1px solid var(--border);background:var(--surface-2);color:#fff;border-radius:11px;padding:11px 9px;font-size:11px;font-weight:900;cursor:pointer}.btn-opcao-tipo.ativo{background:var(--primary);color:#111;border-color:var(--primary)}.link-whatsapp-fallback{display:block;margin-top:9px;padding:10px;border-radius:10px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#d1fae5;text-decoration:none;font-size:11px;font-weight:900;text-align:center}.aviso-modelo{margin-top:6px;color:#fbbf24;font-size:10px;line-height:1.4}.qr-mesa-info{margin-top:8px;padding:9px;border-radius:10px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:#d1fae5;font-size:10px;font-weight:800}.</style>
 </head>
 <body>
 <header>
   <div class="brand-badge">✦ Hamburgueria artesanal</div>
+  <button type="button" onclick="abrirAtendimento()" aria-label="Atendimento" style="margin:10px auto 0;display:block;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--text);border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer">🔔 Atendimento</button>
   <h1 id="restauranteNome">Brasa 180° Smash & Grill</h1>
   <p id="restauranteDescricao">Hambúrgueres artesanais na brasa, ingredientes selecionados e acompanhamentos para completar seu pedido.</p>
 </header>
@@ -65,7 +67,7 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 
 <div id="modalProduto" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalNome">
   <div class="modal-conteudo">
-    <button class="fechar-modal" type="button" onclick="fecharModal()" aria-label="Fechar">×</button>
+    <button class="fechar-modal" type="button" onclick="fecharModalProduto()" aria-label="Fechar">×</button>
     <h2 id="modalNome"></h2><p id="modalDescricao" class="modal-desc"></p><div id="modalPreco" class="modal-preco"></div>
     <div id="customizacaoProduto" class="customizacao-produto" style="display:none"></div>
     <div id="opcoesCombo" class="combo-opcoes" style="display:none"></div>
@@ -81,9 +83,9 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 <div id="modal3D" class="modal" role="dialog" aria-modal="true" aria-labelledby="nomeProduto3D">
   <div class="modal-conteudo">
     <button class="fechar-modal" type="button" onclick="fechar3D()" aria-label="Fechar visualização 3D">×</button>
-    <h2>Visualização 3D</h2><div id="nomeProduto3D" style="color:var(--muted);font-size:12px;margin-top:3px"></div>
+    <h2>Visualização 3D</h2><div id="nomeProduto3D" style="color:var(--muted);font-size:12px;margin-top:3px"></div><div style="margin:10px 0 12px;padding:10px 12px;border-radius:12px;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.18);color:var(--text);font-size:12px;line-height:1.45">💡 Aponte a câmera para a sua mesa para ver o tamanho real do hambúrguer no seu prato.</div>
     <div class="area-3d">
-      <model-viewer id="viewer3D" camera-controls auto-rotate ar-modes="scene-viewer quick-look webxr" ar-scale="fixed" shadow-intensity="1.6" shadow-softness="0.45" exposure="1.15" loading="lazy" reveal="auto" environment-image="neutral" interaction-prompt="auto" alt="Modelo 3D interativo do produto">
+      <model-viewer id="viewer3D" camera-controls auto-rotate ar-modes="scene-viewer quick-look webxr" ar-scale="fixed" scale="1.18 1.18 1.18" shadow-intensity="1.6" shadow-softness="0.45" exposure="1.15" loading="lazy" reveal="auto" environment-image="neutral" interaction-prompt="auto" alt="Modelo 3D interativo do produto">
         <button id="btnVerMesaViewer" slot="ar-button" class="btn-ver-mesa" type="button" onclick="notificarAR()">📱 Ver na minha mesa</button>
       </model-viewer>
     </div>
@@ -92,11 +94,27 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
   </div>
 </div>
 
+<div id="modalAtendimento" class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloAtendimento">
+  <div class="modal-conteudo">
+    <button class="fechar-modal" type="button" onclick="fecharModal('modalAtendimento')" aria-label="Fechar atendimento">×</button>
+    <h2 id="tituloAtendimento">🔔 Atendimento</h2>
+    <p class="modal-desc">Atendimento rápido para quem está comendo na mesa.</p>
+    <div class="opcao-grupo">
+      <h3>O que você precisa?</h3>
+      <div class="opcao-grid">
+        <button type="button" class="btn-ar" onclick="mostrarOpcoesGarcom()">🔔 Chamar Garçom</button>
+        <button type="button" class="btn-ar" onclick="mostrarOpcoesConta()">🧾 Pedir a Conta</button>
+      </div>
+    </div>
+    <div id="opcoesAtendimentoDetalhe" style="display:none;margin-top:12px"></div>
+  </div>
+</div>
+
 <div id="modalComerMesa" class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloComerMesa">
   <div class="modal-conteudo">
     <button class="fechar-modal" type="button" onclick="fecharComerNaMesa()" aria-label="Fechar comer na mesa">×</button>
     <h2 id="tituloComerMesa">Comer na mesa</h2>
-    <p class="modal-desc">Escolha esta opção para fazer o pedido e receber tudo diretamente na sua mesa.</p>
+    <p class="modal-desc">Escolha esta opção para fazer o pedido e receber tudo diretamente na sua mesa.</p><div id="qrMesaInfo" class="qr-mesa-info" style="display:none">Mesa identificada automaticamente pelo QR Code.</div>
     <div class="formulario-pedido">
       <label for="numeroMesa">Número da mesa *</label>
       <input id="numeroMesa" type="text" inputmode="numeric" placeholder="Ex.: 12" autocomplete="off">
@@ -118,8 +136,13 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
       </div>
     </div>
     <p id="tipoAtendimentoResumo" class="modal-desc">Pedido para entrega.</p>
+    <div id="acoesMesaOperacao" style="display:none;margin:10px 0 4px;gap:8px;grid-template-columns:1fr 1fr">
+      <button type="button" class="btn-ar" onclick="chamarGarcom()">🔔 Chamar garçom</button>
+      <button type="button" class="btn-ar" onclick="pedirConta()">🧾 Pedir a conta</button>
+    </div>
     <div id="carrinhoLista" class="carrinho-lista"></div>
     <div id="carrinhoFinalizacao" style="display:none">
+      <div id="resumoTaxas" class="modal-desc" style="display:grid;gap:4px;margin:10px 0 0"></div>
       <div class="carrinho-total"><span>Total</span><span id="carrinhoTotal">R$ 0,00</span></div>
       <div class="formulario-pedido">
         <label for="clienteNome">Seu nome *</label><input id="clienteNome" type="text" placeholder="Nome para identificação" autocomplete="name">
@@ -129,7 +152,7 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
         <label for="formaPagamento">Pagamento *</label>
         <select id="formaPagamento" onchange="alternarOpcoesPagamento()"><option value="pix">⚡ PIX</option><option value="cartao">💳 Cartão</option><option value="dinheiro">💵 Dinheiro</option></select>
         <div id="boxPixInfo" class="box-pix"><p>Chave PIX do estabelecimento</p><div class="chave-pix-texto" id="chavePixTexto">5534984252341</div><button class="btn-copiar-pix" type="button" onclick="copiarChavePix()">📋 Copiar chave PIX</button></div>
-        <div id="boxTroco" style="display:none"><input id="valorTroco" type="text" placeholder="Troco para quanto? Ex.: R$ 100"></div>
+        <div id="boxTroco" style="display:none"><label for="valorTroco">Troco para quanto? *</label><input id="valorTroco" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 100,00"></div>
       </div>
       <div id="painelSucessoLocal" style="display:none"></div>
       <button id="btnAcaoFinalizar" class="btn-principal" type="button" onclick="processarCheckout()" style="margin-top:14px">📱 Finalizar Pedido no WhatsApp</button>
@@ -145,6 +168,7 @@ const restauranteAtual={
  descricao:"Hambúrgueres artesanais na brasa, ingredientes selecionados e acompanhamentos para completar seu pedido.",
  nicho:"Hamburgueria",
  whatsapp:"5534984252341",
+ taxaEntrega:5.00,
  categorias:[{id:"todos",nome:"Ver todos"},{id:"burgers",nome:"Hambúrgueres"},{id:"porcoes",nome:"Porções"},{id:"bebidas",nome:"Bebidas"},{id:"combos",nome:"Combos"}],
  produtos:[
   {id:"hamburguer-brasa",nome:"Brasa Smash Double",descricao:"Dois burgers prensados na chapa, cheddar derretido, bacon crocante e molho da casa no pão brioche.",preco:38.90,categoria:"burgers",imagem:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85",ar:true,modelo3d:"models/hamburguer-brasa.glb"},
@@ -180,6 +204,7 @@ const restauranteAtual={
 };
 
 let carrinho=JSON.parse(localStorage.getItem('brasa180_carrinho')||'[]');
+if(!Array.isArray(carrinho))carrinho=[];carrinho=carrinho.map(i=>({...i,quantidade:Math.max(1,Number(i.quantidade)||1),addons:Array.isArray(i.addons)?i.addons:[],observacao:i.observacao||''}));
 let produtoSelecionado=restauranteAtual.produtos[0]?.id||null;
 let quantidadeProdutoAtual=1;
 let tipoAtendimentoSelecionado=localStorage.getItem('brasa180_atendimento')||'delivery';
@@ -215,7 +240,36 @@ const COMBO_BEBIDAS=[
 function $(id){return document.getElementById(id)}
 function formatarPreco(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function salvarEstado(){localStorage.setItem('brasa180_carrinho',JSON.stringify(carrinho));localStorage.setItem('brasa180_atendimento',tipoAtendimentoSelecionado)}
+function abrirModal(id){const el=$(id);if(!el)return;if(!document.querySelector('.modal.ativo'))window.__scrollYAntesModal=window.scrollY;el.classList.add('ativo');document.body.classList.add('modal-aberto')}
+function fecharModal(id){const el=$(id);if(!el)return;el.classList.remove('ativo');if(!document.querySelector('.modal.ativo')){document.body.classList.remove('modal-aberto');const y=Number(window.__scrollYAntesModal||0);requestAnimationFrame(()=>window.scrollTo({top:y,behavior:'smooth'}))}}
+function fecharTodosModais(){document.querySelectorAll('.modal.ativo').forEach(m=>m.classList.remove('ativo'));document.body.classList.remove('modal-aberto');const y=Number(window.__scrollYAntesModal||0);requestAnimationFrame(()=>window.scrollTo({top:y,behavior:'smooth'}))}
 function iniciarRestaurante(){
+ const params=new URLSearchParams(window.location.search);
+ const mesaURL=(params.get('mesa')||'').replace(/\D/g,'').slice(0,4).trim();
+ const nomeSalvo=localStorage.getItem('brasa180_nome_cliente')||'';
+ const mesaSalva=localStorage.getItem('brasa180_mesa')||'';
+ if(mesaURL){
+   tipoAtendimentoSelecionado='mesa';
+   localStorage.setItem('brasa180_atendimento','mesa');
+   localStorage.setItem('brasa180_mesa',mesaURL);
+   setTimeout(()=>{
+     if($('numeroMesaPedido'))$('numeroMesaPedido').value=mesaURL;
+     if($('numeroMesa'))$('numeroMesa').value=mesaURL;
+     if($('clienteNome')&&nomeSalvo)$('clienteNome').value=nomeSalvo;
+     if($('qrMesaInfo')){ $('qrMesaInfo').style.display='block'; $('qrMesaInfo').textContent=`Você está na Mesa ${mesaURL}.`; }
+     atualizarResumoAtendimento();
+     mostrarToast(`Você está na Mesa ${mesaURL}.`);
+   },0);
+ } else {
+   const atendimentoSalvo=localStorage.getItem('brasa180_atendimento');
+   if(atendimentoSalvo==='mesa')tipoAtendimentoSelecionado='mesa';
+   setTimeout(()=>{
+     if($('numeroMesaPedido')&&mesaSalva)$('numeroMesaPedido').value=mesaSalva;
+     if($('numeroMesa')&&mesaSalva)$('numeroMesa').value=mesaSalva;
+     if($('clienteNome')&&nomeSalvo)$('clienteNome').value=nomeSalvo;
+     atualizarResumoAtendimento();
+   },0);
+ }
  $('restauranteNome').textContent=restauranteAtual.nome;
  $('restauranteDescricao').textContent=restauranteAtual.descricao;
  $('rodapeNome').textContent=restauranteAtual.nome;
@@ -225,12 +279,13 @@ function iniciarRestaurante(){
  alternarOpcoesPagamento();
  atualizarResumoAtendimento();
 }
+
 function renderizarCategorias(){
  $('categorias').innerHTML=restauranteAtual.categorias.map(c=>`<button type="button" class="categoria ${c.id==='todos'?'ativa':''}" data-categoria="${c.id}" onclick="filtrarProdutos('${c.id}',this)">${c.nome}</button>`).join('')
 }
 function renderizarProdutos(cat='todos'){
  const lista=cat==='todos'?restauranteAtual.produtos:restauranteAtual.produtos.filter(p=>p.categoria===cat);
- $('listaProdutos').innerHTML=lista.map(p=>`<article class="produto" data-categoria="${p.categoria}" onclick="abrirProdutoPorId('${p.id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${p.imagem}" alt="${p.nome}">${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.modelo3d?(p.ar?'<span class="badge-3d">📱 AR + 3D</span>':'<span class="badge-3d">🧊 3D</span>'):''}</div><div class="produto-info"><div class="produto-kicker">${p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Combo'}</div><h2>${p.nome}</h2><p>${p.descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-3d-card">${p.combo?'Montar combo':p.modelo3d?(p.ar?'AR + 3D':'3D'):'Ver detalhes'}</span></div></div></article>`).join('');
+ $('listaProdutos').innerHTML=lista.map(p=>`<article class="produto" data-categoria="${p.categoria}" onclick="abrirProdutoPorId('${p.id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${p.imagem}" alt="${p.nome}">${p.combo?'<span class="combo-badge">COMBO</span>':''}${resolverModelo3D(p)?(p.ar?'<span class="badge-3d">📱 AR + 3D</span>':'<span class="badge-3d">🧊 3D</span>'):''}</div><div class="produto-info"><div class="produto-kicker">${p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Combo'}</div><h2>${p.nome}</h2><p>${p.descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-3d-card">${p.combo?'Montar combo':p.modelo3d?(p.ar?'AR + 3D':'3D'):'Ver detalhes'}</span></div></div></article>`).join('');
  if(!lista.length)$('listaProdutos').innerHTML='<div class="carrinho-vazio" style="grid-column:1/-1">Nenhum item disponível nesta categoria.</div>';
 }
 function filtrarProdutos(cat,btn){
@@ -252,37 +307,51 @@ function renderizarCustomizacao(p){
    <div><label for="comboBebida">Bebida do combo *</label><select id="comboBebida"><option value="">Escolha a bebida</option>${COMBO_BEBIDAS.map(x=>`<option value="${x.id}">${x.nome}</option>`).join('')}</select></div>
    <div class="customizacao-sub">Nenhuma batata é selecionada automaticamente. Você escolhe a porção antes de adicionar.</div>`;
  }
+ box.style.display='grid';
+ box.innerHTML += `<div><label for="observacaoItem">Observação do item</label><input id="observacaoItem" type="text" placeholder="Ex.: sem cebola, molho à parte" maxlength="140"></div>`;
 }
 function abrirProdutoPorId(id){
  const p=restauranteAtual.produtos.find(x=>x.id===id);if(!p)return;
  produtoSelecionado=p.id;quantidadeProdutoAtual=1;
  $('modalNome').textContent=p.nome;$('modalDescricao').textContent=p.descricao;$('modalPreco').textContent=formatarPreco(p.preco);$('quantidadeProduto').textContent='1';
  renderizarCustomizacao(p);
- const tem3d=!!p.modelo3d,temAR=!!p.ar&&tem3d;
+ const tem3d=!!resolverModelo3D(p),temAR=!!p.ar&&tem3d;
  $('btnAbrir3DProduto').style.display=tem3d&&!temAR?'flex':'none';
  $('btnVerMesaProduto').style.display=temAR?'flex':'none';
- $('modalProduto').classList.add('ativo');
+ abrirModal('modalProduto');
+}
+function resolverModelo3D(p){
+ const fallback='models/hamburguer-brasa.glb';
+ if(!p?.modelo3d)return null;
+ // Na demonstração, somente os 5 produtos de AR usam o GLB funcional como fallback.
+ // Produtos sem AR não exibem 3D se o arquivo próprio ainda não estiver publicado.
+ if(p.ar)return fallback;
+ return p.modelo3d===fallback?fallback:null;
 }
 function prepararViewer(){
  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado),v=$('viewer3D');
- if(!p?.modelo3d)return false;
+ const modelo=resolverModelo3D(p);
+ if(!p||!modelo)return false;
  const temAR=!!p.ar;
- $('nomeProduto3D').textContent=p.nome;$('statusModelo').textContent='Carregando modelo…';
- if(v.getAttribute('src')!==p.modelo3d)v.setAttribute('src',p.modelo3d);
- v.setAttribute('alt',`Modelo 3D interativo de ${p.nome}`);v.toggleAttribute('ar',temAR);v.setAttribute('ar-modes','scene-viewer quick-look webxr');
+ $('nomeProduto3D').textContent=p.nome;
+ $('statusModelo').textContent=p.modelo3d===modelo?'Carregando modelo…':'Modelo demonstrativo';
+ if(v.getAttribute('src')!==modelo)v.setAttribute('src',modelo);
+ v.setAttribute('alt',`Modelo 3D interativo de ${p.nome}`);
+ v.toggleAttribute('ar',temAR);
+ v.setAttribute('ar-modes','scene-viewer quick-look webxr');
  $('btnVerMesaViewer').style.display=temAR?'flex':'none';
- v.addEventListener('load',()=>{$('statusModelo').textContent='3D pronto'},{once:true});
- v.addEventListener('error',()=>{$('statusModelo').textContent='Modelo indisponível';mostrarToast('O modelo 3D deste produto ainda está em preparação.')},{once:true});
+ v.addEventListener('load',()=>{$('statusModelo').textContent=p.modelo3d===modelo?'3D pronto':'3D demonstrativo'},{once:true});
+ v.addEventListener('error',()=>{$('statusModelo').textContent='Modelo indisponível';mostrarToast('O modelo 3D não pôde ser carregado. Verifique a pasta models.')},{once:true});
  return true
 }
-function abrir3D(){if(!prepararViewer())return;$('modalProduto').classList.remove('ativo');$('modal3D').classList.add('ativo')}
+function abrir3D(){if(!prepararViewer())return;fecharModal('modalProduto');abrirModal('modal3D')}
 async function abrirARDireto(){
  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
- if(!p?.ar||!p.modelo3d)return mostrarToast('Este produto possui apenas visualização 3D.');
+ if(!p?.ar)return mostrarToast('Este produto ainda não possui AR.');
  if(!prepararViewer())return;
- $('modalProduto').classList.remove('ativo');$('modal3D').classList.add('ativo');
+ fecharModal('modalProduto');abrirModal('modal3D');
  const v=$('viewer3D');
- try{await customElements.whenDefined('model-viewer');setTimeout(()=>{if(v.canActivateAR&&typeof v.activateAR==='function')v.activateAR();else mostrarToast('AR não disponível neste aparelho ou navegador.')},180)}catch(e){mostrarToast('Não foi possível iniciar o AR neste aparelho.')}
+ try{await customElements.whenDefined('model-viewer');setTimeout(()=>{if(v.canActivateAR&&typeof v.activateAR==='function')v.activateAR();else mostrarToast('AR não disponível neste aparelho ou navegador.')},120)}catch(e){mostrarToast('Não foi possível iniciar o AR neste aparelho.')}
 }
 function notificarAR(){mostrarToast('Abrindo a experiência na sua mesa…')}
 function alterarQuantidadeProduto(v){quantidadeProdutoAtual=Math.max(1,quantidadeProdutoAtual+v);$('quantidadeProduto').textContent=quantidadeProdutoAtual}
@@ -296,72 +365,155 @@ function coletarCustomizacao(){
    const bn=COMBO_BURGERS.find(x=>x.id===b)?.nome,pn=COMBO_PORCOES.find(x=>x.id===poc)?.nome,vn=COMBO_BEBIDAS.find(x=>x.id===bev)?.nome;
    combo={hamburguer:bn,porcao:pn,bebida:vn}
  }
- return {addons,combo}
+ const observacao=document.getElementById('observacaoItem')?.value.trim()||'';
+ return {addons,combo,observacao}
 }
 function adicionarProdutoAtual(){
  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);if(!p)return;
  const custom=coletarCustomizacao();if(custom===null)return;
  const addonTotal=custom.addons.reduce((s,a)=>s+a.preco,0);
- const item={id:`${p.id}-${Date.now()}`,produtoId:p.id,nome:p.nome,preco:p.preco,quantidade:quantidadeProdutoAtual,addons:custom.addons,combo:custom.combo,observacao:''};
+ const item={id:`${p.id}-${Date.now()}`,produtoId:p.id,nome:p.nome,preco:p.preco,quantidade:quantidadeProdutoAtual,addons:custom.addons,combo:custom.combo,observacao:custom.observacao||''};
  item.precoUnitario=p.preco+addonTotal;
  carrinho.push(item);
  salvarEstado();atualizarCarrinho();fecharModal();fechar3D();mostrarToast(`${p.nome} adicionado ao pedido.`);
 }
+function calcularSubtotal(){return carrinho.reduce((s,i)=>s+(Number(i.precoUnitario||i.preco)*i.quantidade),0)}
+function calcularTaxaEntrega(){return tipoAtendimentoSelecionado==='delivery'&&carrinho.length?Number(restauranteAtual.taxaEntrega||0):0}
+function calcularTotal(){return calcularSubtotal()+calcularTaxaEntrega()}
 function atualizarCarrinho(){const qtd=carrinho.reduce((s,i)=>s+i.quantidade,0);$('carrinhoContador').textContent=qtd;renderizarCarrinho();salvarEstado()}
 function renderizarCarrinho(){
  const lista=$('carrinhoLista'),fin=$('carrinhoFinalizacao');
- if(!carrinho.length){lista.innerHTML='<div class="carrinho-vazio">Seu pedido está vazio. Escolha seus favoritos no cardápio.</div>';fin.style.display='none';return}
- lista.innerHTML=carrinho.map((i,idx)=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.quantidade}x ${i.nome}</div><div class="item-carrinho-preco">${formatarPreco(i.precoUnitario||i.preco)} cada${i.addons?.length?`<br>+ ${i.addons.map(a=>a.nome).join(', ')}`:''}${i.combo?`<br>Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}`:''}</div></div><div class="item-controles"><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},1)">+</button><button class="item-btn" type="button" onclick="removerItemCarrinho(${idx})" aria-label="Remover">×</button></div></div>`).join('');
- $('carrinhoTotal').textContent=formatarPreco(calcularTotal());fin.style.display='block';atualizarResumoAtendimento()
+ if(!carrinho.length){lista.innerHTML='<div class="carrinho-vazio">Seu pedido está vazio. Escolha seus favoritos no cardápio.</div>';fin.style.display='none';$('acoesMesaOperacao').style.display='none';return}
+ lista.innerHTML=carrinho.map((i,idx)=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.quantidade}x ${i.nome}</div><div class="item-carrinho-preco">${formatarPreco(i.precoUnitario||i.preco)} cada${i.addons?.length?`<br>+ ${i.addons.map(a=>a.nome).join(', ')}`:''}${i.combo?`<br>Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}`:''}${i.observacao?`<br>Obs.: ${i.observacao}`:''}</div></div><div class="item-controles"><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},1)">+</button><button class="item-btn" type="button" onclick="removerItemCarrinho(${idx})" aria-label="Remover">×</button></div></div>`).join('');
+ const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega();
+ $('resumoTaxas').innerHTML=`<div><span>Subtotal: </span><strong>${formatarPreco(subtotal)}</strong></div>${taxa?`<div><span>Taxa de entrega: </span><strong>${formatarPreco(taxa)}</strong></div>`:'<div><span>Taxa de entrega: </span><strong>R$ 0,00</strong></div>'}`;
+ $('carrinhoTotal').textContent=formatarPreco(subtotal+taxa);
+ fin.style.display='block';atualizarResumoAtendimento()
 }
 function alterarQuantidadeCarrinho(idx,v){const i=carrinho[idx];if(!i)return;i.quantidade+=v;if(i.quantidade<=0)carrinho.splice(idx,1);atualizarCarrinho()}
 function removerItemCarrinho(idx){carrinho.splice(idx,1);atualizarCarrinho();mostrarToast('Item removido do pedido.')}
-function calcularTotal(){return carrinho.reduce((s,i)=>s+(Number(i.precoUnitario||i.preco)*i.quantidade),0)}
 function atualizarResumoAtendimento(){
  const mesa=($('numeroMesaPedido')?.value||'').trim();
- $('tipoAtendimentoResumo').textContent=tipoAtendimentoSelecionado==='mesa'?(mesa?`Comer na mesa • Mesa ${mesa}.`:'Comer na mesa • informe sua mesa.'):'Pedido para entrega.';
- $('campoMesaPedido').style.display=tipoAtendimentoSelecionado==='mesa'?'block':'none';
- $('campoEnderecoPedido').style.display=tipoAtendimentoSelecionado==='mesa'?'none':'block';
- $('btnTipoMesa')?.classList.toggle('ativo',tipoAtendimentoSelecionado==='mesa');
- $('btnTipoDelivery')?.classList.toggle('ativo',tipoAtendimentoSelecionado==='delivery');
+ const mesaAtiva=tipoAtendimentoSelecionado==='mesa';
+ $('tipoAtendimentoResumo').textContent=mesaAtiva?(mesa?`Comer na minha mesa • Mesa ${mesa}.`:'Comer na minha mesa • informe sua mesa.'):'Pedido para entrega.';
+ $('campoMesaPedido').style.display=mesaAtiva?'block':'none';
+ $('campoEnderecoPedido').style.display=mesaAtiva?'none':'block';
+ const endereco=$('clienteEndereco'); if(endereco)endereco.required=!mesaAtiva;
+ const mesaInput=$('numeroMesaPedido'); if(mesaInput)mesaInput.required=mesaAtiva;
+ $('btnTipoMesa')?.classList.toggle('ativo',mesaAtiva);$('btnTipoDelivery')?.classList.toggle('ativo',!mesaAtiva);
+ const acoes=$('acoesMesaOperacao');if(acoes)acoes.style.display=mesaAtiva?'grid':'none';
+ const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega();
+ if($('resumoTaxas'))$('resumoTaxas').innerHTML=`<div><span>Subtotal: </span><strong>${formatarPreco(subtotal)}</strong></div><div><span>Taxa de entrega: </span><strong>${formatarPreco(taxa)}</strong></div>`;
+ if($('carrinhoTotal'))$('carrinhoTotal').textContent=formatarPreco(subtotal+taxa);
 }
 function selecionarTipoAtendimento(tipo){
- tipoAtendimentoSelecionado=tipo;salvarEstado();atualizarResumoAtendimento();
+ tipoAtendimentoSelecionado=tipo;salvarEstado();atualizarResumoAtendimento();renderizarCarrinho();
  if(tipo==='mesa'&&!($('numeroMesaPedido').value||'').trim())$('numeroMesaPedido').focus();
 }
-function selecionarComerNaMesa(){$('numeroMesa').value=$('numeroMesaPedido')?.value||'';$('modalComerMesa').classList.add('ativo')}
-function confirmarComerNaMesa(){
- const mesa=$('numeroMesa').value.trim();if(!mesa)return mostrarToast('Informe o número da mesa.');
- tipoAtendimentoSelecionado='mesa';$('numeroMesaPedido').value=mesa;$('modalComerMesa').classList.remove('ativo');abrirCarrinho();mostrarToast(`Mesa ${mesa} selecionada.`)
+function selecionarComerNaMesa(){
+ $('numeroMesa').value=$('numeroMesaPedido')?.value||'';
+ const viaQR=new URLSearchParams(window.location.search).get('mesa');
+ $('qrMesaInfo').style.display=viaQR?'block':'none';
+ abrirModal('modalComerMesa');
 }
-function abrirCarrinho(){$('modalCarrinho').classList.add('ativo');$('painelSucessoLocal').style.display='none';$('btnAcaoFinalizar').style.display='flex';atualizarResumoAtendimento();renderizarCarrinho()}
-function fecharCarrinho(){$('modalCarrinho').classList.remove('ativo')}
-function fecharComerNaMesa(){$('modalComerMesa').classList.remove('ativo')}
-function fecharModal(){$('modalProduto').classList.remove('ativo')}
-function fechar3D(){const v=$('viewer3D');$('modal3D').classList.remove('ativo');v.removeAttribute('src')}
-function alternarOpcoesPagamento(){const forma=$('formaPagamento').value;$('boxPixInfo').style.display=forma==='pix'?'block':'none';$('boxTroco').style.display=forma==='dinheiro'?'block':'none'}
+function confirmarComerNaMesa(){
+ const mesa=$('numeroMesa').value.trim();
+ if(!mesa)return mostrarToast('Informe o número da mesa.');
+ tipoAtendimentoSelecionado='mesa';$('numeroMesaPedido').value=mesa;fecharModal('modalComerMesa');salvarEstado();abrirCarrinho();mostrarToast(`Mesa ${mesa} selecionada.`)
+}
+function abrirCarrinho(){abrirModal('modalCarrinho');$('painelSucessoLocal').style.display='none';$('btnAcaoFinalizar').style.display='flex';atualizarResumoAtendimento();renderizarCarrinho()}
+function fecharCarrinho(){fecharModal('modalCarrinho')}
+function fecharComerNaMesa(){fecharModal('modalComerMesa')}
+function fecharModalProduto(){fecharModal('modalProduto')}
+function fechar3D(){const v=$('viewer3D');fecharModal('modal3D');v.removeAttribute('src')}
+function alternarOpcoesPagamento(){const forma=$('formaPagamento').value;const troco=$('valorTroco');$('boxPixInfo').style.display=forma==='pix'?'block':'none';$('boxTroco').style.display=forma==='dinheiro'?'block':'none';if(troco)troco.required=forma==='dinheiro';if(forma!=='dinheiro'&&troco)troco.value=''}
 function copiarChavePix(){const chave=$('chavePixTexto').textContent;navigator.clipboard?.writeText(chave).then(()=>mostrarToast('Chave PIX copiada.')).catch(()=>mostrarToast('Selecione e copie a chave PIX.'))}
 function gerarCodigoPedido(){return `B180-${Date.now().toString().slice(-6)}`}
+function validarTroco(){
+ const el=$('valorTroco');if(!el)return null;
+ const texto=el.value.trim().replace(/R\$/gi,'').replace(/[^0-9,.-]/g,'');
+ if(!texto)return null;
+ let normalizado=texto;
+ if(texto.includes(',')&&texto.includes('.'))normalizado=texto.replace(/\./g,'').replace(',','.');
+ else if(texto.includes(','))normalizado=texto.replace(',','.');
+ const valor=Number(normalizado);
+ if(!Number.isFinite(valor)||valor<=0){mostrarToast('Informe um valor de troco válido.');el.focus();return false}
+ if(valor<calcularTotal()){mostrarToast(`O troco deve ser igual ou maior que ${formatarPreco(calcularTotal())}.`);el.focus();return false}
+ return valor
+}
+function limparCarrinhoAposEnvio(){carrinho=[];localStorage.removeItem('brasa180_carrinho');localStorage.setItem('brasa180_atendimento',tipoAtendimentoSelecionado);atualizarCarrinho()}
+function whatsappMensagem(nome,codigo,localPedido,pagto,observacao){
+ let msg=tipoAtendimentoSelecionado==='mesa'
+   ? `*MESA ${(($('numeroMesaPedido')?.value||'').trim()||'NÃO INFORMADA').toUpperCase()} - PEDIDO LOCAL*\n\nOlá! Gostaria de fazer um pedido pelo cardápio da Brasa 180° Smash & Grill.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* COMER NA MINHA MESA\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`
+   : `Olá! Gostaria de fazer um pedido pelo cardápio da Brasa 180° Smash & Grill.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* ENTREGA\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`;
+ carrinho.forEach(i=>{msg+=`• ${i.quantidade}x ${i.nome} — ${formatarPreco((i.precoUnitario||i.preco)*i.quantidade)}\n`;if(i.addons?.length)msg+=`  Adicionais: ${i.addons.map(a=>a.nome).join(', ')}\n`;if(i.combo)msg+=`  Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}\n`;if(i.observacao)msg+=`  Observação: ${i.observacao}\n`});
+ if(observacao)msg+=`\n*OBSERVAÇÕES GERAIS:* ${observacao}\n`;
+ msg+=`*SUBTOTAL:* ${formatarPreco(calcularSubtotal())}\n*TAXA DE ENTREGA:* ${formatarPreco(calcularTaxaEntrega())}\n*TOTAL:* ${formatarPreco(calcularTotal())}\n\n*STATUS:* Recebido`;
+ return msg
+}
 function processarCheckout(){
  if(!carrinho.length)return mostrarToast('Seu pedido está vazio.');
  const nome=$('clienteNome').value.trim();if(!nome)return mostrarToast('Informe seu nome.');
  let localPedido='';
- if(tipoAtendimentoSelecionado==='mesa'){const mesa=$('numeroMesaPedido').value.trim();if(!mesa)return mostrarToast('Informe o número da mesa.');localPedido=`*Mesa:* ${mesa}`}
+ if(tipoAtendimentoSelecionado==='mesa'){const mesa=$('numeroMesaPedido').value.trim();if(!mesa)return mostrarToast('Informe o número da mesa.');localPedido=`*MESA:* ${mesa}`}
  else{const endereco=$('clienteEndereco').value.trim();if(!endereco)return mostrarToast('Informe seu endereço de entrega.');localPedido=`*Endereço:* ${endereco}`}
  const observacao=$('observacaoPedido').value.trim(); const forma=$('formaPagamento').value;let pagto=forma==='pix'?'PIX':forma==='dinheiro'?'Dinheiro':'Cartão';
- if(forma==='dinheiro'){const troco=$('valorTroco').value.trim();if(troco)pagto+=` (troco para ${troco})`}
+ if(forma==='dinheiro'){const troco=validarTroco();if(troco===false)return;if(troco)pagto+=` (troco para ${formatarPreco(troco)})`}
+ const mesaAtual=tipoAtendimentoSelecionado==='mesa'?($('numeroMesaPedido').value||'').trim():'';
+ localStorage.setItem('brasa180_nome_cliente',nome);
+ if(mesaAtual)localStorage.setItem('brasa180_mesa',mesaAtual);
  const codigo=gerarCodigoPedido();ultimoPedidoCodigo=codigo;localStorage.setItem('brasa180_ultimo_pedido',codigo);
- let msg=`Olá! Gostaria de fazer um pedido pelo cardápio da Brasa 180° Smash & Grill.\n\n*Pedido:* ${codigo}\n*Cliente:* ${nome}\n*Atendimento:* ${tipoAtendimentoSelecionado==='mesa'?'Comer na mesa':'Entrega'}\n${localPedido}\n*Pagamento:* ${pagto}\n\n*Itens:*\n`;
- carrinho.forEach(i=>{msg+=`• ${i.quantidade}x ${i.nome} — ${formatarPreco((i.precoUnitario||i.preco)*i.quantidade)}\n`;if(i.addons?.length)msg+=`  Adicionais: ${i.addons.map(a=>a.nome).join(', ')}\n`;if(i.combo)msg+=`  Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}\n`});
- if(observacao)msg+=`\n*Observações:* ${observacao}`;msg+=`\n*Total:* ${formatarPreco(calcularTotal())}\n\n*Status:* Recebido`;
- window.open(`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`,'_blank','noopener');
- $('painelSucessoLocal').style.display='block';$('painelSucessoLocal').innerHTML=`<div class="box-sucesso"><h3>Pedido ${codigo} preparado</h3><p>O pedido foi organizado e está pronto para ser enviado à hamburgueria pelo WhatsApp.</p></div>`;
- mostrarToast('Pedido preparado para o WhatsApp.')
+ const msg=whatsappMensagem(nome,codigo,localPedido,pagto,observacao);
+ const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`;
+ // O redirecionamento ocorre diretamente nesta ação de clique, evitando bloqueios de popup.
+ // O carrinho é limpo antes da navegação para impedir duplicidade mesmo em navegadores móveis.
+ limparCarrinhoAposEnvio();
+ $('btnAcaoFinalizar').style.display='none';
+ $('painelSucessoLocal').style.display='block';
+ $('painelSucessoLocal').innerHTML=`<div class="box-sucesso"><h3>Pedido ${codigo} preparado</h3><p>O WhatsApp será aberto para você enviar o pedido. O carrinho foi limpo para evitar duplicidade.</p></div>`;
+ mostrarToast('Pedido preparado. Abrindo WhatsApp…');
+ window.location.href=url;
+}
+function abrirAtendimento(){
+ const mesa=($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim();
+ if(tipoAtendimentoSelecionado!=='mesa' && !mesa)return mostrarToast('Ative Comer na minha mesa e informe a mesa para usar o atendimento.');
+ if(mesa){tipoAtendimentoSelecionado='mesa';$('numeroMesaPedido').value=mesa;localStorage.setItem('brasa180_mesa',mesa);salvarEstado();atualizarResumoAtendimento();}
+ abrirModal('modalAtendimento');
+}
+function mostrarOpcoesGarcom(){
+ const box=$('opcoesAtendimentoDetalhe');
+ box.style.display='block';
+ box.innerHTML=`<label for="tipoGarcom">Motivo do atendimento</label><select id="tipoGarcom"><option value="Trazer talheres/guardanapos">Trazer talheres/guardanapos</option><option value="Dúvida no cardápio">Dúvida no cardápio</option><option value="Outros">Outros</option></select><button type="button" class="btn-principal" style="margin-top:10px" onclick="confirmarAtendimento('garcom')">Enviar solicitação</button>`;
+}
+function mostrarOpcoesConta(){
+ const box=$('opcoesAtendimentoDetalhe');
+ box.style.display='block';
+ box.innerHTML=`<label for="tipoConta">Forma de pagamento</label><select id="tipoConta"><option value="Dinheiro">Dinheiro</option><option value="Cartão na mesa">Cartão na mesa</option><option value="PIX">PIX</option></select><button type="button" class="btn-principal" style="margin-top:10px" onclick="confirmarAtendimento('conta')">Pedir a conta</button>`;
+}
+function confirmarAtendimento(tipo){
+ const mesa=($('numeroMesaPedido')?.value||'').trim();
+ if(!mesa)return mostrarToast('Informe o número da mesa.');
+ let msg='';
+ if(tipo==='garcom'){const motivo=$('tipoGarcom')?.value||'Outros';msg=`*SOLICITAÇÃO DE MESA ${mesa.toUpperCase()}:*\n\n*CHAMAR GARÇOM*\nMotivo: ${motivo}`;}
+ else {const pagamento=$('tipoConta')?.value||'Cartão na mesa';msg=`*SOLICITAÇÃO DE MESA ${mesa.toUpperCase()}:*\n\n*PEDIR A CONTA*\nPagamento: ${pagamento}`;}
+ fecharModal('modalAtendimento'); window.location.href=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`;
+}
+function chamarGarcom(){
+ if(tipoAtendimentoSelecionado!=='mesa')return mostrarToast('Selecione Comer na minha mesa primeiro.');
+ const mesa=($('numeroMesaPedido').value||'').trim();if(!mesa)return mostrarToast('Informe a mesa primeiro.');
+ const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(`*CHAMAR GARÇOM*\n\n*Brasa 180° Smash & Grill*\n*MESA:* ${mesa}\n\nSolicitação: Atendimento na mesa.`)}`;
+ mostrarToast(`Abrindo WhatsApp para chamar o garçom da mesa ${mesa}…`);window.location.href=url;
+}
+function pedirConta(){
+ if(tipoAtendimentoSelecionado!=='mesa')return mostrarToast('Selecione Comer na minha mesa primeiro.');
+ const mesa=($('numeroMesaPedido').value||'').trim();if(!mesa)return mostrarToast('Informe a mesa primeiro.');
+ const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(`*PEDIR A CONTA*\n\n*Brasa 180° Smash & Grill*\n*MESA:* ${mesa}\n\nSolicitação: Encerrar atendimento e trazer a conta.`)}`;
+ mostrarToast(`Abrindo WhatsApp para pedir a conta da mesa ${mesa}…`);window.location.href=url;
 }
 function mostrarToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('ativo');clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove('ativo'),2300)}
-function fecharModalAoClicarFora(e){if(e.target.classList.contains('modal'))e.target.classList.remove('ativo')}
+function fecharModalAoClicarFora(e){if(e.target.classList.contains('modal'))fecharModal(e.target.id)}
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',fecharModalAoClicarFora));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.ativo').forEach(m=>m.classList.remove('ativo'))}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharTodosModais()});
 // Bloqueia zoom acidental da página, preservando a interação do model-viewer.
 document.addEventListener('touchmove',e=>{if(e.touches.length>1&&!e.target.closest('model-viewer'))e.preventDefault()},{passive:false});
 document.addEventListener('gesturestart',e=>{if(!e.target.closest('model-viewer'))e.preventDefault()},{passive:false});
