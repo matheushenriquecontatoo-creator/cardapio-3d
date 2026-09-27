@@ -7,6 +7,7 @@
 <title>Brasa 180° Smash & Grill — Cardápio</title>
 <link rel="dns-prefetch" href="https://ajax.googleapis.com">
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--primary:#f59e0b;--primary-hover:#d97706;--bg:#0f1015;--surface:#181920;--surface-2:#20222b;--border:rgba(255,255,255,.08);--text:#f3f4f6;--muted:#9ca3af;--success:#34d399}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -225,7 +226,7 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 <footer><strong id="rodapeNome">Brasa 180° Smash & Grill</strong>Cardápio digital com visualização 3D e realidade aumentada por foto.</footer>
 
 <script>
-const restauranteAtual={
+let restauranteAtual={
  nome:"Brasa 180° Smash & Grill",
  descricao:"Hambúrgueres artesanais na brasa, ingredientes selecionados e acompanhamentos para completar seu pedido.",
  nicho:"Hamburgueria",
@@ -298,6 +299,162 @@ const COMBO_BEBIDAS=[
  {id:'agua-sem-gas',nome:'Água Mineral 500ml'},
  {id:'agua-com-gas',nome:'Água com Gás 500ml'}
 ];
+
+
+/* =====================================================
+   SUPABASE — ETAPA 1: RESTAURANTE + CATEGORIAS + PRODUTOS
+   A interface atual continua como fallback para não quebrar
+   o cardápio caso o banco esteja temporariamente indisponível.
+===================================================== */
+const SUPABASE_URL="https://simcmxcroggzuwmhzmjhc.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_h6cxVSK_vH78I_HPNRGZUg_JoggyXx-";
+const menuSupabase=window.supabase?.createClient
+  ? window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY)
+  : null;
+window.menuSupabase=menuSupabase;
+window.supabaseConnectionStatus=menuSupabase?'iniciando':'sdk_indisponivel';
+window.supabaseRestaurantId=null;
+
+function normalizarTextoSupabase(valor){
+ return String(valor||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+function slugSupabase(valor){
+ return normalizarTextoSupabase(valor).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+function categoriaFrontendSupabase(nome){
+ const n=slugSupabase(nome);
+ if(n.includes('hamburg')||n.includes('lanche'))return 'burgers';
+ if(n.includes('porcao')||n.includes('acompanh'))return 'porcoes';
+ if(n.includes('bebida')||n.includes('refrigerante'))return 'bebidas';
+ if(n.includes('combo'))return 'combos';
+ return n||'outros';
+}
+
+async function carregarCatalogoDoSupabase(){
+ if(!menuSupabase){
+   console.warn('[Mesa360/Supabase] SDK indisponível. Catálogo local mantido.');
+   return false;
+ }
+ try{
+   const {data:restaurante,error:erroRestaurante}=await menuSupabase
+     .from('restaurants')
+     .select('id,name,slug,active,settings,whatsapp,phone,primary_color')
+     .eq('slug','brasa-180')
+     .eq('active',true)
+     .maybeSingle();
+   if(erroRestaurante)throw erroRestaurante;
+   if(!restaurante)throw new Error('Restaurante brasa-180 não encontrado ou inativo.');
+
+   const [categoriasResp,produtosResp]=await Promise.all([
+     menuSupabase
+       .from('categories')
+       .select('id,name,sort_order,active')
+       .eq('restaurant_id',restaurante.id)
+       .eq('active',true)
+       .order('sort_order',{ascending:true}),
+     menuSupabase
+       .from('products')
+       .select('id,category_id,name,description,price_cents,image_url,strategic_3d,model_url,width_cm,height_cm,depth_cm,gluten_free,lactose_free,vegetarian,vegan,active,sold_out,sort_order')
+       .eq('restaurant_id',restaurante.id)
+       .eq('active',true)
+       .order('sort_order',{ascending:true})
+   ]);
+   if(categoriasResp.error)throw categoriasResp.error;
+   if(produtosResp.error)throw produtosResp.error;
+
+   const categoriasDB=categoriasResp.data||[];
+   const produtosDB=(produtosResp.data||[]).filter(p=>p.sold_out!==true);
+   const locais=Array.isArray(restauranteAtual.produtos)?restauranteAtual.produtos:[];
+   const porNome=new Map(locais.map(p=>[normalizarTextoSupabase(p.nome),p]));
+   const categoriaPorId=new Map(categoriasDB.map(c=>[c.id,c]));
+
+   const produtosBanco=produtosDB.map(db=>{
+     const local=porNome.get(normalizarTextoSupabase(db.name));
+     const categoriaDB=categoriaPorId.get(db.category_id);
+     const categoria=categoriaFrontendSupabase(categoriaDB?.name||local?.categoria||'');
+     const imagem=String(db.image_url||'').trim()||local?.imagem||(
+       categoria==='bebidas'
+         ? 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1000&q=85'
+         : categoria==='porcoes'
+           ? 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=85'
+           : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85'
+     );
+     return {
+       ...(local||{}),
+       id:local?.id||('db-'+db.id),
+       dbId:db.id,
+       nome:db.name,
+       descricao:db.description||local?.descricao||'',
+       preco:Number(db.price_cents||0)/100,
+       categoria,
+       imagem,
+       disponivel:true,
+       ar:local?.ar===true,
+       arFoto:local?.arFoto||null,
+       modelo3d:db.model_url||local?.modelo3d||null,
+       strategic3d:Boolean(db.strategic_3d),
+       soldOut:false,
+       dimensoes:(db.width_cm&&db.height_cm&&db.depth_cm)
+         ? `${db.width_cm} × ${db.depth_cm} × ${db.height_cm} cm`
+         : local?.dimensoes,
+       gluten_free:Boolean(db.gluten_free),
+       lactose_free:Boolean(db.lactose_free),
+       vegetarian:Boolean(db.vegetarian),
+       vegan:Boolean(db.vegan)
+     };
+   });
+
+   // Combos continuam locais nesta etapa; a tabela combos será integrada na etapa própria.
+   // Isso evita apagar os combos atuais enquanto a integração de combos ainda não foi feita.
+   const combosLocais=locais.filter(p=>p.combo===true);
+   const produtosFinais=[...produtosBanco];
+   combosLocais.forEach(combo=>{
+     if(!produtosFinais.some(p=>normalizarTextoSupabase(p.nome)===normalizarTextoSupabase(combo.nome)))produtosFinais.push(combo);
+   });
+
+   const categoriasFinais=[{id:'todos',nome:'Ver todos'},...categoriasDB.map(c=>({id:categoriaFrontendSupabase(c.name),nome:c.name,dbId:c.id}))];
+   const categoriasSemDuplicata=[];
+   const idsCategorias=new Set();
+   categoriasFinais.forEach(c=>{
+     if(!idsCategorias.has(c.id)){idsCategorias.add(c.id);categoriasSemDuplicata.push(c)}
+   });
+
+   restauranteAtual={
+     ...restauranteAtual,
+     dbId:restaurante.id,
+     slug:restaurante.slug,
+     nome:restaurante.name||restauranteAtual.nome,
+     descricao:restaurante.settings?.description||restauranteAtual.descricao,
+     whatsapp:restaurante.whatsapp||restaurante.phone||restauranteAtual.whatsapp,
+     primaryColor:restaurante.primary_color||restauranteAtual.primaryColor,
+     categorias:categoriasSemDuplicata,
+     produtos:produtosFinais
+   };
+   window.supabaseRestaurantId=restaurante.id;
+   window.restauranteSupabase=restaurante;
+   window.supabaseConnectionStatus='conectado';
+
+   if(restaurante.primary_color)document.documentElement.style.setProperty('--primary',restaurante.primary_color);
+   $('restauranteNome').textContent=restauranteAtual.nome;
+   $('restauranteDescricao').textContent=restauranteAtual.descricao;
+   $('rodapeNome').textContent=restauranteAtual.nome;
+   renderizarCategorias();
+   renderizarProdutos('todos');
+   atualizarCarrinho();
+   atualizarResumoAtendimento();
+   console.info('[Mesa360/Supabase] Catálogo carregado:',{categorias:categoriasDB.length,produtos:produtosBanco.length});
+   setTimeout(()=>mostrarToast('Cardápio conectado ao Supabase.'),120);
+   return true;
+ }catch(error){
+   window.supabaseConnectionStatus='erro';
+   console.error('[Mesa360/Supabase] Não foi possível carregar o catálogo. Mantendo fallback local.',error);
+   return false;
+ }
+}
+
+async function inicializarSupabaseCatalogo(){
+ await carregarCatalogoDoSupabase();
+}
 
 function $(id){return document.getElementById(id)}
 function formatarPreco(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
@@ -797,6 +954,7 @@ document.addEventListener('gesturestart',e=>{if(!e.target.closest('model-viewer'
 document.addEventListener('gesturechange',e=>{if(!e.target.closest('model-viewer'))e.preventDefault()},{passive:false});
 let ultimoToque=0;document.addEventListener('touchend',e=>{if(e.target.closest('model-viewer'))return;const agora=Date.now();if(agora-ultimoToque<300)e.preventDefault();ultimoToque=agora},{passive:false});
 iniciarRestaurante();
+inicializarSupabaseCatalogo();
 </script>
 </body>
 </html>
