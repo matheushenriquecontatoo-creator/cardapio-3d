@@ -51,11 +51,11 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 .ar-foto-btn.principal{background:var(--primary);color:#111;border-color:transparent}
 .ar-foto-status{text-align:center;color:#fff;font-size:11px;font-weight:800;padding:7px;text-shadow:0 2px 10px #000}
 .ar-foto-fallback-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,calc(100vw - 32px));z-index:8;text-align:center;pointer-events:none}
-.ar-foto-fallback-card img{width:min(260px,72vw);max-height:42vh;object-fit:contain;filter:drop-shadow(0 20px 22px rgba(0,0,0,.55));pointer-events:auto;touch-action:none;user-select:none;-webkit-user-drag:none;cursor:grab}
+.ar-foto-fallback-card img{width:min(350px,86vw);max-height:52vh;object-fit:contain;filter:drop-shadow(0 20px 22px rgba(0,0,0,.55));pointer-events:auto;touch-action:none;user-select:none;-webkit-user-drag:none;cursor:grab}
 .ar-foto-fallback-card img.arrastando{cursor:grabbing}
 .ar-foto-fallback-hint{margin-top:8px;padding:9px 12px;border-radius:12px;background:rgba(8,9,12,.72);color:#fff;font-size:11px;line-height:1.4;backdrop-filter:blur(10px)}
 .ar-foto-fallback-tools{display:flex;justify-content:center;gap:7px;margin-top:8px;pointer-events:auto}
-.ar-foto-fallback-tools button{width:42px;height:38px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(10,10,12,.78);color:#fff;font-weight:900;cursor:pointer}
+.ar-foto-fallback-tools button{min-width:120px;height:38px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(10,10,12,.78);color:#fff;font-weight:900;cursor:pointer}
 .ar-foto-legenda{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:rgba(8,9,12,.7);color:#fff;font-size:10px;font-weight:900;white-space:nowrap;z-index:8}
 @media(max-width:390px){.ar-foto-instrucoes{width:calc(100vw - 28px);padding:15px}.ar-foto-btn{min-height:45px;font-size:11px}}
 
@@ -74,7 +74,13 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 .seletor-atendimento{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn-opcao-tipo{min-height:48px;border:1px solid var(--border);background:var(--surface-2);color:#fff;border-radius:12px;font-size:12px;font-weight:900;cursor:pointer}.btn-opcao-tipo.ativo{background:var(--primary);border-color:var(--primary);color:#111}
 .combo-badge{position:absolute;top:10px;left:10px;padding:6px 10px;border-radius:999px;background:rgba(245,158,11,.94);color:#111;font-size:10px;font-weight:900}
 
-.atendimento-destaque{margin-top:12px;padding:14px;border:1px solid rgba(245,158,11,.22);border-radius:15px;background:linear-gradient(180deg,rgba(245,158,11,.08),rgba(245,158,11,.025))}.atendimento-destaque h3{font-size:14px;margin-bottom:5px}.atendimento-destaque p{color:var(--muted);font-size:11px;line-height:1.45}.seletor-atendimento{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.btn-opcao-tipo{border:1px solid var(--border);background:var(--surface-2);color:#fff;border-radius:11px;padding:11px 9px;font-size:11px;font-weight:900;cursor:pointer}.btn-opcao-tipo.ativo{background:var(--primary);color:#111;border-color:var(--primary)}.link-whatsapp-fallback{display:block;margin-top:9px;padding:10px;border-radius:10px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#d1fae5;text-decoration:none;font-size:11px;font-weight:900;text-align:center}.aviso-modelo{margin-top:6px;color:#fbbf24;font-size:10px;line-height:1.4}.qr-mesa-info{margin-top:8px;padding:9px;border-radius:10px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:#d1fae5;font-size:10px;font-weight:800}.</style>
+.atendimento-destaque{margin-top:12px;padding:14px;border:1px solid rgba(245,158,11,.22);border-radius:15px;background:linear-gradient(180deg,rgba(245,158,11,.08),rgba(245,158,11,.025))}.atendimento-destaque h3{font-size:14px;margin-bottom:5px}.atendimento-destaque p{color:var(--muted);font-size:11px;line-height:1.45}.seletor-atendimento{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.btn-opcao-tipo{border:1px solid var(--border);background:var(--surface-2);color:#fff;border-radius:11px;padding:11px 9px;font-size:11px;font-weight:900;cursor:pointer}.btn-opcao-tipo.ativo{background:var(--primary);color:#111;border-color:var(--primary)}.link-whatsapp-fallback{display:block;margin-top:9px;padding:10px;border-radius:10px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#d1fae5;text-decoration:none;font-size:11px;font-weight:900;text-align:center}.aviso-modelo{margin-top:6px;color:#fbbf24;font-size:10px;line-height:1.4}.qr-mesa-info{margin-top:8px;padding:9px;border-radius:10px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:#d1fae5;font-size:10px;font-weight:800}.
+.conta-fluxo{display:grid;gap:9px;padding:12px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--border)}
+.conta-fluxo-titulo{font-weight:800;font-size:16px;margin-bottom:2px}
+.conta-fluxo label{font-size:12px;color:var(--muted);font-weight:700}
+.conta-fluxo input,.conta-fluxo select{width:100%;min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--text);padding:0 12px;font-size:15px;outline:none}
+.conta-fluxo input:focus,.conta-fluxo select:focus{border-color:rgba(245,158,11,.7)}
+</style>
 </head>
 <body>
 <header>
@@ -134,11 +140,9 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
     </div>
     <div id="arFotoFallback" class="ar-foto-fallback-card" style="display:none">
       <img id="arFotoFallbackImg" alt="Foto do produto em realidade aumentada">
-      <div class="ar-foto-fallback-hint">Seu navegador não oferece AR espacial. Arraste a foto para posicionar e use +/− para ajustar o tamanho.</div>
+      <div class="ar-foto-fallback-hint">Modo AR compatível: a foto já entra em tamanho grande. Arraste apenas se quiser reposicionar na cena.</div>
       <div class="ar-foto-fallback-tools">
-        <button type="button" onclick="ajustarARFallback(-0.1)" aria-label="Diminuir">−</button>
-        <button type="button" onclick="centralizarARFallback()" aria-label="Centralizar">↺</button>
-        <button type="button" onclick="ajustarARFallback(0.1)" aria-label="Aumentar">+</button>
+        <button type="button" onclick="centralizarARFallback()" aria-label="Reposicionar">↺ Reposicionar</button>
       </div>
     </div>
     <div id="arFotoLegenda" class="ar-foto-legenda" style="display:none">Foto AR • mova o celular para conferir o posicionamento</div>
@@ -413,7 +417,7 @@ let arFotoViewerSpace=null;
 let arFotoLocalSpace=null;
 let arFotoPlaced=null;
 let arFotoTexture=null;
-let arFotoFallbackScale=1;
+let arFotoFallbackScale=1.3;
 let arFotoFallbackX=0;
 let arFotoFallbackY=0;
 let arFotoDragging=false;
@@ -480,7 +484,7 @@ async function iniciarARFoto(dataUrl){
  arFotoLocalSpace=await session.requestReferenceSpace('local');
  $('arFotoCanvas').style.display='block';
  $('arFotoCamera').style.display='none';
- definirStatusARFoto('Mova o celular devagar até detectar a mesa.');
+ definirStatusARFoto('Mova o celular devagar até detectar uma superfície.');
 }
 
 function renderARFoto(time,frame){
@@ -490,7 +494,7 @@ function renderARFoto(time,frame){
    const hit=hits[0];
    if(hit&&!arFotoPlaced){
      $('arFotoInstrucoes').style.display='block';
-     definirStatusARFoto('Superfície encontrada. Toque na tela para colocar.');
+     definirStatusARFoto('Superfície encontrada. Toque para colocar o produto.');
    }else if(!arFotoPlaced){
      $('arFotoInstrucoes').style.display='block';
    }
@@ -533,7 +537,7 @@ async function iniciarARFotoFallback(dataUrl){
  $('arFotoLegenda').style.display='block';
  $('arFotoFallbackImg').src=dataUrl;
  centralizarARFallback();
- definirStatusARFoto('Modo compatibilidade: arraste a foto e ajuste o tamanho.');
+ definirStatusARFoto('AR adaptativo ativo. A foto já está em tamanho grande; arraste para reposicionar.');
  const img=$('arFotoFallbackImg');
  img.onpointerdown=e=>{
    arFotoDragging=true;img.classList.add('arrastando');img.setPointerCapture?.(e.pointerId);
@@ -556,11 +560,11 @@ function atualizarARFallbackVisual(){
  img.style.transform=`translate(${arFotoFallbackX}px,${arFotoFallbackY}px) scale(${arFotoFallbackScale})`;
 }
 function ajustarARFallback(delta){
- arFotoFallbackScale=Math.max(.55,Math.min(1.65,arFotoFallbackScale+delta));
- atualizarARFallbackVisual();
+ // Mantido apenas para compatibilidade com versões antigas; o usuário não recebe controles de escala.
+ arFotoFallbackScale=1.3;atualizarARFallbackVisual();
 }
 function centralizarARFallback(){
- arFotoFallbackScale=1;arFotoFallbackX=0;arFotoFallbackY=0;atualizarARFallbackVisual();
+ arFotoFallbackScale=1.3;arFotoFallbackX=0;arFotoFallbackY=0;atualizarARFallbackVisual();
 }
 async function reiniciarARFoto(){
  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
@@ -605,7 +609,12 @@ function adicionarProdutoAtual(){
  const item={id:`${p.id}-${Date.now()}`,produtoId:p.id,nome:p.nome,preco:p.preco,quantidade:quantidadeProdutoAtual,addons:custom.addons,combo:custom.combo,observacao:custom.observacao||''};
  item.precoUnitario=p.preco+addonTotal;
  carrinho.push(item);
- salvarEstado();atualizarCarrinho();fecharModal();fechar3D();mostrarToast(`${p.nome} adicionado ao pedido.`);
+ salvarEstado();
+ atualizarCarrinho();
+ fecharModalProduto();
+ fechar3D();
+ // Fluxo comercial: adicionou o produto -> fecha a etapa atual -> abre Meu pedido.
+ setTimeout(()=>{abrirCarrinho();mostrarToast(`${p.nome} adicionado ao pedido.`)},80);
 }
 function calcularSubtotal(){return carrinho.reduce((s,i)=>s+(Number(i.precoUnitario||i.preco)*i.quantidade),0)}
 function calcularTaxaEntrega(){return tipoAtendimentoSelecionado==='delivery'&&carrinho.length?Number(restauranteAtual.taxaEntrega||0):0}
@@ -671,7 +680,14 @@ function validarTroco(){
  if(valor<calcularTotal()){mostrarToast(`O troco deve ser igual ou maior que ${formatarPreco(calcularTotal())}.`);el.focus();return false}
  return valor
 }
-function limparCarrinhoAposEnvio(){carrinho=[];localStorage.removeItem('brasa180_carrinho');localStorage.setItem('brasa180_atendimento',tipoAtendimentoSelecionado);atualizarCarrinho()}
+function limparCarrinhoAposEnvio(){
+ carrinho=[];
+ localStorage.removeItem('brasa180_carrinho');
+ localStorage.setItem('brasa180_atendimento',tipoAtendimentoSelecionado);
+ const obs=$('observacaoPedido');if(obs)obs.value='';
+ const troco=$('valorTroco');if(troco)troco.value='';
+ atualizarCarrinho();
+}
 function whatsappMensagem(nome,codigo,localPedido,pagto,observacao){
  let msg=tipoAtendimentoSelecionado==='mesa'
    ? `*MESA ${(($('numeroMesaPedido')?.value||'').trim()||'NÃO INFORMADA').toUpperCase()} - PEDIDO LOCAL*\n\nOlá! Gostaria de fazer um pedido pelo cardápio da Brasa 180° Smash & Grill.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* COMER NA MINHA MESA\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`
@@ -708,6 +724,9 @@ function abrirAtendimento(){
  const mesa=($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim();
  if(tipoAtendimentoSelecionado!=='mesa' && !mesa)return mostrarToast('Ative Comer na minha mesa e informe a mesa para usar o atendimento.');
  if(mesa){tipoAtendimentoSelecionado='mesa';$('numeroMesaPedido').value=mesa;localStorage.setItem('brasa180_mesa',mesa);salvarEstado();atualizarResumoAtendimento();}
+ const box=$('opcoesAtendimentoDetalhe');
+ if(box){box.style.display='none';box.innerHTML='';}
+ $('tituloAtendimento').textContent='🔔 Atendimento';
  abrirModal('modalAtendimento');
 }
 function mostrarOpcoesGarcom(){
@@ -717,16 +736,44 @@ function mostrarOpcoesGarcom(){
 }
 function mostrarOpcoesConta(){
  const box=$('opcoesAtendimentoDetalhe');
+ const mesaAtual=($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim();
  box.style.display='block';
- box.innerHTML=`<label for="tipoConta">Forma de pagamento</label><select id="tipoConta"><option value="Dinheiro">Dinheiro</option><option value="Cartão na mesa">Cartão na mesa</option><option value="PIX">PIX</option></select><button type="button" class="btn-principal" style="margin-top:10px" onclick="confirmarAtendimento('conta')">Pedir a conta</button>`;
+ box.innerHTML=`
+   <div class="conta-fluxo">
+     <div class="conta-fluxo-titulo">Pedir a conta</div>
+     <label for="mesaConta">Número da mesa *</label>
+     <input id="mesaConta" type="text" inputmode="numeric" value="${mesaAtual}" placeholder="Ex.: 12" autocomplete="off">
+     <label for="tipoConta">Forma de pagamento *</label>
+     <select id="tipoConta">
+       <option value="Dinheiro">Dinheiro</option>
+       <option value="Cartão na mesa">Cartão na mesa</option>
+       <option value="PIX">PIX</option>
+     </select>
+     <button type="button" class="btn-principal" style="margin-top:10px" onclick="confirmarAtendimento('conta')">🧾 Solicitar a conta</button>
+   </div>`;
+ setTimeout(()=>$('mesaConta')?.focus(),50);
 }
 function confirmarAtendimento(tipo){
+ if(tipo==='conta'){
+   const mesa=($('mesaConta')?.value||'').trim();
+   if(!mesa)return mostrarToast('Informe o número da mesa.');
+   const pagamento=$('tipoConta')?.value||'Cartão na mesa';
+   localStorage.setItem('brasa180_mesa',mesa);
+   $('numeroMesaPedido').value=mesa;
+   tipoAtendimentoSelecionado='mesa';
+   salvarEstado();
+   const msg=`*PEDIR A CONTA*\n\n*Brasa 180° Smash & Grill*\n*MESA:* ${mesa}\n*FORMA DE PAGAMENTO:* ${pagamento}\n\nSolicitação de encerramento do atendimento.`;
+   fecharModal('modalAtendimento');
+   mostrarToast('Solicitação de conta preparada. Abrindo WhatsApp…');
+   setTimeout(()=>{window.location.href=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`},120);
+   return;
+ }
  const mesa=($('numeroMesaPedido')?.value||'').trim();
  if(!mesa)return mostrarToast('Informe o número da mesa.');
- let msg='';
- if(tipo==='garcom'){const motivo=$('tipoGarcom')?.value||'Outros';msg=`*SOLICITAÇÃO DE MESA ${mesa.toUpperCase()}:*\n\n*CHAMAR GARÇOM*\nMotivo: ${motivo}`;}
- else {const pagamento=$('tipoConta')?.value||'Cartão na mesa';msg=`*SOLICITAÇÃO DE MESA ${mesa.toUpperCase()}:*\n\n*PEDIR A CONTA*\nPagamento: ${pagamento}`;}
- fecharModal('modalAtendimento'); window.location.href=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`;
+ const motivo=$('tipoGarcom')?.value||'Outros';
+ const msg=`*SOLICITAÇÃO DE MESA ${mesa.toUpperCase()}:*\n\n*CHAMAR GARÇOM*\nMotivo: ${motivo}`;
+ fecharModal('modalAtendimento');
+ setTimeout(()=>{window.location.href=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`},120);
 }
 function chamarGarcom(){
  if(tipoAtendimentoSelecionado!=='mesa')return mostrarToast('Selecione Comer na minha mesa primeiro.');
