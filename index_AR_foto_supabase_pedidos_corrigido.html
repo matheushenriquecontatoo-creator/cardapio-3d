@@ -354,6 +354,14 @@ async function carregarCatalogoDoSupabase(){
    if(erroRestaurante)throw erroRestaurante;
    if(!restaurante)throw new Error('Restaurante brasa-180 não encontrado.');
 
+   // O restaurante é a referência necessária para registrar pedidos.
+   // Definimos o ID imediatamente após a consulta principal, antes das
+   // consultas auxiliares de categorias, produtos, modelos e configurações.
+   // Assim, um problema isolado em uma dessas consultas não impede o checkout.
+   window.supabaseRestaurantId=restaurante.id;
+   window.restauranteSupabase=restaurante;
+   window.supabaseConnectionStatus='conectado';
+
    const [categoriasResp,produtosResp,modelosResp,configResp]=await Promise.all([
      menuSupabase
        .from('categories')
@@ -469,8 +477,15 @@ async function carregarCatalogoDoSupabase(){
    setTimeout(()=>mostrarToast('Cardápio conectado ao Supabase.'),120);
    return true;
  }catch(error){
-   window.supabaseConnectionStatus='erro';
-   console.error('[Mesa360/Supabase] Não foi possível carregar o catálogo. Mantendo fallback local.',error);
+   // Se a consulta principal do restaurante funcionou, mantemos o ID para
+   // que o registro do pedido continue disponível mesmo que uma consulta
+   // auxiliar do catálogo falhe.
+   if(window.supabaseRestaurantId){
+     window.supabaseConnectionStatus='parcial';
+   }else{
+     window.supabaseConnectionStatus='erro';
+   }
+   console.error('[Mesa360/Supabase] Não foi possível carregar completamente o catálogo. Mantendo o que estiver disponível.',error);
    return false;
  }
 }
