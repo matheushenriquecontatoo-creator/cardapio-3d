@@ -920,7 +920,13 @@ async function processarCheckout(){
  }catch(erro){
    console.error('Erro ao registrar pedido:',erro);
    $('btnAcaoFinalizar').disabled=false;
-   mostrarToast('Não foi possível registrar o pedido. Tente novamente.');
+   const detalhe = erro?.message || erro?.details || erro?.hint || String(erro);
+   mostrarToast(`Erro ao registrar: ${detalhe}`);
+   const painel=$('painelSucessoLocal');
+   if(painel){
+     painel.style.display='block';
+     painel.innerHTML=`<div class=\"box-sucesso\" style=\"border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.08)\"><h3>Não foi possível registrar o pedido</h3><p>${String(detalhe).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p></div>`;
+   }
  }
 }
 function abrirAtendimento(){
