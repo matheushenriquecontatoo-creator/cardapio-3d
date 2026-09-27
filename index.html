@@ -892,10 +892,31 @@ function whatsappMensagem(nome,codigo,localPedido,pagto,observacao){
  msg+=`*SUBTOTAL:* ${formatarPreco(calcularSubtotal())}\n*TAXA DE ENTREGA:* ${formatarPreco(calcularTaxaEntrega())}\n*TOTAL:* ${formatarPreco(calcularTotal())}\n\n*STATUS:* Recebido`;
  return msg
 }
+async function garantirConexaoSupabasePedido(){
+ if(!menuSupabase){
+   throw new Error('SDK do Supabase não carregou no navegador.');
+ }
+ if(window.supabaseRestaurantId)return window.supabaseRestaurantId;
+
+ // Fallback: o checkout não depende mais da inicialização assíncrona do catálogo.
+ const {data,error}=await menuSupabase
+   .from('restaurants')
+   .select('id,name,slug')
+   .eq('slug','brasa-180')
+   .maybeSingle();
+ if(error)throw error;
+ if(!data?.id)throw new Error('Restaurante brasa-180 não foi encontrado no Supabase.');
+
+ window.supabaseRestaurantId=data.id;
+ window.restauranteSupabase=data;
+ window.supabaseConnectionStatus='conectado';
+ return data.id;
+}
+
 async function registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo}){
- if(!menuSupabase||!window.supabaseRestaurantId)throw new Error('Supabase não está conectado ao restaurante.');
+ const restaurantId=await garantirConexaoSupabasePedido();
  const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega(),total=subtotal+taxa;
- const pedido={restaurant_id:window.supabaseRestaurantId,customer_name:nome,order_type:tipoAtendimentoSelecionado==='mesa'?'mesa':'delivery',table_number:mesaAtual?Number(mesaAtual):null,delivery_address:endereco||null,payment_method:forma,change_for:troco||null,subtotal,delivery_fee:taxa,total,status:'pending',observation:observacao||null};
+ const pedido={restaurant_id:restaurantId,customer_name:nome,order_type:tipoAtendimentoSelecionado==='mesa'?'mesa':'delivery',table_number:mesaAtual?Number(mesaAtual):null,delivery_address:endereco||null,payment_method:forma,change_for:troco||null,subtotal,delivery_fee:taxa,total,status:'pending',observation:observacao||null};
  const itens=carrinho.map(i=>({product_id:i.produtoId||null,product_name:i.nome,unit_price:Number(i.precoUnitario||i.preco),quantity:Number(i.quantidade),variant_name:i.combo?`Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}`:null,observation:[i.addons?.length?`Adicionais: ${i.addons.map(a=>a.nome).join(', ')}`:'',i.observacao?`Obs.: ${i.observacao}`:''].filter(Boolean).join(' | ')||null}));
  const {data:pedidoCriado,error}=await menuSupabase.rpc('criar_pedido_publico',{pedido,itens});
  if(error)throw error;
