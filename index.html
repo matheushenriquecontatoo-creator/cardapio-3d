@@ -880,44 +880,14 @@ function whatsappMensagem(nome,codigo,localPedido,pagto,observacao){
 async function registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo}){
  if(!menuSupabase||!window.supabaseRestaurantId)throw new Error('Supabase não está conectado ao restaurante.');
  const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega(),total=subtotal+taxa;
- const pedido={
-   restaurant_id:window.supabaseRestaurantId,
-   order_number:null,
-   customer_name:nome,
-   order_type:tipoAtendimentoSelecionado==='mesa'?'mesa':'delivery',
-   table_number:mesaAtual?Number(mesaAtual):null,
-   delivery_address:endereco||null,
-   payment_method:forma,
-   change_for:troco||null,
-   subtotal,
-   delivery_fee:taxa,
-   total,
-   status:'pending',
-   observation:observacao||null
- };
- delete pedido.order_number;
- const {data:pedidoCriado,error:erroPedido}=await menuSupabase.from('orders').insert(pedido).select('id,order_number').single();
- if(erroPedido)throw erroPedido;
- const itens=carrinho.map(i=>({
-   order_id:pedidoCriado.id,
-   product_id:i.produtoId||null,
-   product_name:i.nome,
-   unit_price:Number(i.precoUnitario||i.preco),
-   quantity:Number(i.quantidade),
-   variant_name:i.combo?`Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}`:null,
-   observation:[
-     i.addons?.length?`Adicionais: ${i.addons.map(a=>a.nome).join(', ')}`:'',
-     i.observacao?`Obs.: ${i.observacao}`:''
-   ].filter(Boolean).join(' | ')||null
- }));
- const {error:erroItens}=await menuSupabase.from('order_items').insert(itens);
- if(erroItens){
-   await menuSupabase.from('orders').delete().eq('id',pedidoCriado.id);
-   throw erroItens;
- }
- return pedidoCriado;
+ const pedido={restaurant_id:window.supabaseRestaurantId,customer_name:nome,order_type:tipoAtendimentoSelecionado==='mesa'?'mesa':'delivery',table_number:mesaAtual?Number(mesaAtual):null,delivery_address:endereco||null,payment_method:forma,change_for:troco||null,subtotal,delivery_fee:taxa,total,status:'pending',observation:observacao||null};
+ const itens=carrinho.map(i=>({product_id:i.produtoId||null,product_name:i.nome,unit_price:Number(i.precoUnitario||i.preco),quantity:Number(i.quantidade),variant_name:i.combo?`Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}`:null,observation:[i.addons?.length?`Adicionais: ${i.addons.map(a=>a.nome).join(', ')}`:'',i.observacao?`Obs.: ${i.observacao}`:''].filter(Boolean).join(' | ')||null}));
+ const {data:pedidoCriado,error}=await menuSupabase.rpc('criar_pedido_publico',{pedido,itens});
+ if(error)throw error;
+ const resultado=Array.isArray(pedidoCriado)?pedidoCriado[0]:pedidoCriado;
+ if(!resultado?.order_id)throw new Error('O Supabase não retornou o pedido criado.');
+ return {id:resultado.order_id,order_number:resultado.order_number};
 }
-
 async function processarCheckout(){
  if(!carrinho.length)return mostrarToast('Seu pedido está vazio.');
  const nome=$('clienteNome').value.trim();if(!nome)return mostrarToast('Informe seu nome.');
