@@ -418,7 +418,8 @@ async function carregarCatalogoDoSupabase(){
        imagem,
        disponivel:true,
        ar:local?.ar===true,
-       arFoto:local?.arFoto||null,
+       // Foto AR: somente imagens que realmente vieram do Storage do Supabase.
+       arFoto:(typeof db.image_url==='string' && db.image_url.includes('/storage/v1/object/public/menu-assets/')) ? imagem : (local?.arFoto||null),
        modelo3d:resolverImagemSupabase(modelo?.model_url,local?.modelo3d||null),
        poster3d:resolverImagemSupabase(modelo?.poster_url,local?.imagem||null),
        cameraOrbit:modelo?.camera_orbit||'0deg 75deg 105%',
