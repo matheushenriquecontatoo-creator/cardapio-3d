@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- VERSAO_MESA_FIX_2026-09-28 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -913,15 +914,12 @@ async function garantirConexaoSupabasePedido(){
  return data.id;
 }
 
-async function registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo}){
+async function registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo,tipoAtendimento}){
  const restaurantId=await garantirConexaoSupabasePedido();
  const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega(),total=subtotal+taxa;
- const mesaFinal=String(mesaAtual||localStorage.getItem('brasa180_mesa')||'').trim();
- const mesaNumero=mesaFinal?Number(mesaFinal):null;
- if(tipoAtendimentoSelecionado==='mesa'&&(!mesaFinal||!Number.isInteger(mesaNumero)||mesaNumero<=0)){
-   throw new Error('Número da mesa inválido.');
- }
- const pedido={restaurant_id:restaurantId,customer_name:nome,order_type:tipoAtendimentoSelecionado==='mesa'?'mesa':'delivery',table_number:tipoAtendimentoSelecionado==='mesa'?mesaNumero:null,delivery_address:endereco||null,payment_method:forma,change_for:troco||null,subtotal,delivery_fee:taxa,total,status:'pending',observation:observacao||null};
+ const ehMesa=tipoAtendimento==='mesa';
+ const numeroMesa=ehMesa && mesaAtual ? Number(mesaAtual) : null;
+ const pedido={restaurant_id:restaurantId,customer_name:nome,order_type:ehMesa?'mesa':'delivery',table_number:numeroMesa,delivery_address:endereco||null,payment_method:forma,change_for:troco||null,subtotal,delivery_fee:taxa,total,status:'pending',observation:observacao||null};
  const itens=carrinho.map(i=>{
    const produtoAtual=restauranteAtual.produtos.find(p=>p.id===i.produtoId);
    return {
@@ -945,7 +943,13 @@ async function processarCheckout(){
  let localPedido='';
  let mesaAtual='';
  let endereco='';
- if(tipoAtendimentoSelecionado==='mesa'){mesaAtual=(($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim());if(!mesaAtual)return mostrarToast('Informe o número da mesa.');if(!/^[0-9]+$/.test(mesaAtual)||Number(mesaAtual)<=0)return mostrarToast('Informe um número de mesa válido.');localStorage.setItem('brasa180_mesa',mesaAtual);localPedido=`*MESA:* ${mesaAtual}`}
+ if(tipoAtendimentoSelecionado==='mesa'){
+   mesaAtual=(($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim());
+   if(!mesaAtual)return mostrarToast('Informe o número da mesa.');
+   if(!/^[0-9]+$/.test(mesaAtual)||Number(mesaAtual)<=0)return mostrarToast('Informe um número de mesa válido.');
+   localStorage.setItem('brasa180_mesa',mesaAtual);
+   localPedido=`*MESA:* ${mesaAtual}`
+ }
  else{endereco=$('clienteEndereco').value.trim();if(!endereco)return mostrarToast('Informe seu endereço de entrega.');localPedido=`*Endereço:* ${endereco}`}
  const observacao=$('observacaoPedido').value.trim(); const forma=$('formaPagamento').value;let pagto=forma==='pix'?'PIX':forma==='dinheiro'?'Dinheiro':'Cartão';
  let troco=null;
@@ -956,7 +960,7 @@ async function processarCheckout(){
  mostrarToast('Registrando pedido…');
  $('btnAcaoFinalizar').disabled=true;
  try{
-   const pedidoCriado=await registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo});
+   const pedidoCriado=await registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo,tipoAtendimento:tipoAtendimentoSelecionado});
    const numeroReal=pedidoCriado?.order_number||codigo;
    ultimoPedidoCodigo=numeroReal;
    localStorage.setItem('brasa180_ultimo_pedido',numeroReal);
