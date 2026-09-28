@@ -1,197 +1,342 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Brasa 180° — Administração</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo — Brasa 180°</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f5;color:#171717}
-button,input{font:inherit}
-.login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
-.login-card{width:min(420px,100%);background:#fff;border-radius:20px;padding:30px;box-shadow:0 15px 50px #00000012}
-.brand{font-size:25px;font-weight:800;margin-bottom:6px}.muted{color:#737373}
-.field{display:grid;gap:7px;margin:16px 0}.field label{font-size:13px;font-weight:700}
-.field input{width:100%;border:1px solid #ddd;border-radius:11px;padding:12px 13px;outline:none}
-.field input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px #f59e0b18}
-.btn{border:0;border-radius:11px;padding:12px 15px;font-weight:800;cursor:pointer}
-.btn-primary{background:#f59e0b;color:#171717;width:100%}.btn-secondary{background:#eee}
-.error{background:#fff0f0;color:#b42318;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px;display:none}
-.app{display:none;min-height:100vh}
-.top{height:68px;background:#171717;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
-.top strong{font-size:18px}.top small{color:#bbb}
-.logout{border:1px solid #444;background:transparent;color:#fff;border-radius:9px;padding:8px 11px;cursor:pointer}
-.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 68px)}
-.side{background:#fff;border-right:1px solid #e8e8e8;padding:18px}
-.nav{display:grid;gap:7px}.nav button{text-align:left;border:0;background:transparent;padding:11px 12px;border-radius:10px;cursor:pointer;color:#444}.nav button.active,.nav button:hover{background:#fff3df;color:#9a5a00;font-weight:800}
-.main{padding:28px;max-width:1250px;width:100%;margin:auto}
-h1{margin:0 0 5px;font-size:28px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:22px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:20px 0}
-.stat{background:#fff;border-radius:15px;padding:20px;border:1px solid #eee}.stat b{font-size:28px;display:block;margin-top:4px}
-.card{background:#fff;border:1px solid #eee;border-radius:15px;overflow:hidden}
-.table{width:100%;border-collapse:collapse}.table th,.table td{padding:13px 15px;border-bottom:1px solid #eee;text-align:left;font-size:14px}.table th{font-size:12px;color:#737373;text-transform:uppercase}
-.thumb{width:48px;height:48px;border-radius:10px;object-fit:cover;background:#eee}
-.badge{display:inline-block;padding:5px 8px;border-radius:999px;font-size:12px;font-weight:800}.on{background:#e8f8ed;color:#18753b}.off{background:#f3f3f3;color:#777}
-.notice{padding:12px 14px;border-radius:11px;background:#fff8e8;color:#7a4a00;margin-bottom:18px;font-size:13px}
-.empty{padding:35px;text-align:center;color:#777}
-@media(max-width:760px){.layout{grid-template-columns:1fr}.side{display:none}.main{padding:18px}.stats{grid-template-columns:1fr}.table{min-width:700px}.card{overflow:auto}}
+:root{--primary:#f59e0b;--primary2:#d97706;--bg:#0b0f14;--panel:#111821;--panel2:#17202b;--border:#263241;--text:#f5f7fa;--muted:#8e9aaa;--success:#22c55e;--danger:#ef4444;--info:#38bdf8;--warning:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}.app{min-height:100vh;display:flex}.sidebar{width:250px;background:#0d131b;border-right:1px solid var(--border);position:fixed;inset:0 auto 0 0;z-index:20;overflow:auto}.brand{padding:22px 20px;border-bottom:1px solid var(--border)}.brand b{font-size:18px}.brand small{display:block;color:var(--muted);margin-top:4px}.nav{padding:12px}.nav button{width:100%;text-align:left;background:transparent;border:0;color:#cbd5e1;padding:12px;border-radius:9px;margin:2px 0}.nav button:hover,.nav button.active{background:#192330;color:#fff}.nav .group{font-size:10px;color:#657386;text-transform:uppercase;padding:16px 12px 6px;letter-spacing:.08em}.main{margin-left:250px;width:calc(100% - 250px)}.topbar{height:72px;background:rgba(13,19,27,.95);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:15}.store-status{display:flex;align-items:center;gap:10px}.status-dot{width:9px;height:9px;border-radius:50%;background:var(--danger)}.status-dot.open{background:var(--success)}.master{border:1px solid var(--border);background:#151e29;color:#fff;border-radius:9px;padding:9px 13px}.content{padding:24px;max-width:1500px;margin:auto}.view{display:none}.view.active{display:block}.page-title{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:20px}.page-title h1{font-size:25px;margin:0}.page-title p{margin:5px 0 0;color:var(--muted);font-size:13px}.btn{border:1px solid var(--border);background:#17212d;color:#fff;border-radius:9px;padding:10px 14px}.btn:hover{filter:brightness(1.15)}.btn.primary{background:var(--primary);border-color:var(--primary);color:#17100a;font-weight:700}.btn.danger{background:#36171a;border-color:#6e2529;color:#ffb3b6}.btn.success{background:#12351f;border-color:#216b3c;color:#9af0b4}.btn.small{padding:7px 9px;font-size:12px}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:18px}.metric small{color:var(--muted);font-size:12px}.metric strong{font-size:27px;display:block;margin-top:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:18px}.panel h3{margin:0 0 14px;font-size:16px}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px 9px;border-bottom:1px solid var(--border);text-align:left;font-size:13px;white-space:nowrap}.table th{color:var(--muted);font-weight:600}.thumb{width:46px;height:46px;border-radius:8px;object-fit:cover;background:#202a35}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;background:#202a35;color:#d9e1ea}.badge.green{background:#12351f;color:#9af0b4}.badge.red{background:#3b181b;color:#ffb3b6}.badge.yellow{background:#3a2d0e;color:#f8d982}.badge.blue{background:#102f40;color:#9edfff}.actions{display:flex;gap:6px;flex-wrap:wrap}.searchbar{display:flex;gap:9px;margin-bottom:14px}.input,.select,.textarea{width:100%;background:#0d141c;border:1px solid var(--border);color:#fff;border-radius:8px;padding:10px 11px;outline:none}.input:focus,.select:focus,.textarea:focus{border-color:var(--primary)}.field{margin-bottom:13px}.field label{display:block;color:#aab5c3;font-size:12px;margin-bottom:6px}.check{display:flex;align-items:center;gap:8px;color:#cbd5e1;font-size:13px}.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}.modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#101720;border:1px solid var(--border);border-radius:14px;padding:20px}.modal h2{margin:0 0 18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.toast{position:fixed;right:20px;bottom:20px;background:#17212d;border:1px solid var(--border);padding:12px 15px;border-radius:9px;z-index:100;display:none;box-shadow:0 10px 30px #0008}.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 0,#202b37,#0b0f14 55%)}.loginbox{width:min(410px,100%);background:#111821;border:1px solid var(--border);border-radius:16px;padding:28px}.loginbox h1{margin:0}.loginbox p{color:var(--muted);font-size:13px}.loginbox .btn{width:100%;margin-top:5px}.notice{padding:11px 13px;border-radius:9px;background:#17202b;color:#b7c4d2;font-size:12px;margin-bottom:14px}.notice.warn{border:1px solid #5d4814}.kds{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:13px;overflow:auto}.ticket{background:#151e28;border:1px solid var(--border);border-radius:12px;padding:14px;min-height:210px}.ticket h4{margin:0}.ticket .items{margin:12px 0}.ticket .item{padding:7px 0;border-bottom:1px solid #26303b;font-size:13px}.ticket-actions{display:flex;gap:6px;margin-top:12px}.progress{height:5px;background:#26303b;border-radius:5px;overflow:hidden}.progress i{display:block;height:100%;background:var(--primary)}.login-error{color:#ff9b9f;font-size:12px;margin-top:10px}.empty{padding:30px;text-align:center;color:var(--muted)}.section-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}.tab{background:#141d27;border:1px solid var(--border);color:#bac5d1;border-radius:8px;padding:8px 11px}.tab.active{border-color:var(--primary);color:#fff}.print-only{display:none}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}.kds{grid-template-columns:repeat(2,minmax(240px,1fr))}}
+@media(max-width:760px){.sidebar{width:72px}.brand{padding:18px 8px;text-align:center}.brand b{font-size:0}.brand b:after{content:"B";font-size:22px;color:var(--primary)}.brand small,.nav .group{display:none}.nav button{font-size:0;text-align:center}.nav button:before{content:"•";font-size:21px}.main{margin-left:72px;width:calc(100% - 72px)}.topbar{padding:0 12px}.content{padding:15px}.cards,.grid2,.grid3{grid-template-columns:1fr}.kds{grid-template-columns:1fr}.page-title{align-items:flex-start;flex-direction:column}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.table th:nth-child(4),.table td:nth-child(4){display:none}}
+@media print{body{background:#fff;color:#000}.sidebar,.topbar,.no-print{display:none!important}.main{margin:0;width:100%}.content{padding:0}.print-only{display:block}.ticket-print{width:58mm;font-family:monospace;font-size:11px}.ticket-print h2{text-align:center;font-size:15px}}
 </style>
 </head>
 <body>
 
-<div id="login" class="login-wrap">
-  <div class="login-card">
-    <div class="brand">Brasa 180°</div>
-    <div class="muted">Painel administrativo</div>
-    <div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="username" placeholder="seu@email.com"></div>
-    <div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></div>
-    <button id="loginBtn" class="btn btn-primary">Entrar no painel</button>
-    <div id="loginError" class="error"></div>
-    <p class="muted" style="font-size:12px;margin-top:18px">O acesso utiliza o Supabase Auth. O cadastro do primeiro usuário administrativo será configurado separadamente.</p>
+<div id="loginScreen" class="login">
+  <div class="loginbox">
+    <h1>Brasa 180°</h1>
+    <p>Painel administrativo e operacional</p>
+    <div class="field"><label>E-mail</label><input id="loginEmail" class="input" type="email" autocomplete="username"></div>
+    <div class="field"><label>Senha</label><input id="loginPassword" class="input" type="password" autocomplete="current-password"></div>
+    <button class="btn primary" onclick="login()">Entrar</button>
+    <div id="loginError" class="login-error"></div>
   </div>
 </div>
 
-<div id="app" class="app">
-  <header class="top">
-    <div><strong id="restaurantName">Brasa 180°</strong><br><small id="userEmail"></small></div>
-    <button id="logoutBtn" class="logout">Sair</button>
-  </header>
-  <div class="layout">
-    <aside class="side">
-      <nav class="nav">
-        <button class="active" data-section="dashboard">Visão geral</button>
-        <button data-section="products">Produtos</button>
-        <button data-section="orders">Pedidos</button>
-        <button data-section="settings">Configurações</button>
-      </nav>
-    </aside>
-    <main class="main">
-      <section id="dashboardSection">
-        <div class="section-head"><div><h1>Visão geral</h1><div class="muted">Resumo do seu restaurante.</div></div></div>
-        <div class="notice">Primeira versão do painel: leitura dos dados já existentes. As edições de produtos serão adicionadas na próxima etapa.</div>
-        <div class="stats">
-          <div class="stat"><span class="muted">Produtos ativos</span><b id="statProducts">—</b></div>
-          <div class="stat"><span class="muted">Pedidos registrados</span><b id="statOrders">—</b></div>
-          <div class="stat"><span class="muted">Categorias</span><b id="statCategories">—</b></div>
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand"><b>Brasa 180°</b><small id="roleLabel">Painel</small></div>
+    <nav class="nav">
+      <div class="group">Operação</div>
+      <button data-view="dashboard" onclick="go('dashboard')">Dashboard</button>
+      <button data-view="orders" onclick="go('orders')">Pedidos</button>
+      <button data-view="kds" onclick="go('kds')">Cozinha / KDS</button>
+      <button data-view="tables" onclick="go('tables')">Mesas</button>
+      <button data-view="cash" onclick="go('cash')">Caixa</button>
+      <div class="group">Catálogo</div>
+      <button data-view="products" onclick="go('products')">Produtos</button>
+      <button data-view="categories" onclick="go('categories')">Categorias</button>
+      <button data-view="addons" onclick="go('addons')">Adicionais</button>
+      <button data-view="combos" onclick="go('combos')">Combos</button>
+      <div class="group">Gestão</div>
+      <button data-view="customers" onclick="go('customers')">Clientes / CRM</button>
+      <button data-view="delivery" onclick="go('delivery')">Entregas</button>
+      <button data-view="marketing" onclick="go('marketing')">Marketing</button>
+      <button data-view="reports" onclick="go('reports')">Relatórios</button>
+      <button data-view="settings" onclick="go('settings')">Configurações</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="store-status">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="storeStatusText">Carregando...</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="master" onclick="toggleStore()" id="storeToggle">...</button>
+        <button class="btn small" onclick="logout()">Sair</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section id="view-dashboard" class="view active">
+        <div class="page-title"><div><h1>Visão geral</h1><p>Operação do restaurante em tempo real.</p></div></div>
+        <div class="cards">
+          <div class="card metric"><small>Pedidos hoje</small><strong id="mOrders">0</strong></div>
+          <div class="card metric"><small>Faturamento hoje</small><strong id="mRevenue">R$ 0,00</strong></div>
+          <div class="card metric"><small>Ticket médio</small><strong id="mTicket">R$ 0,00</strong></div>
+          <div class="card metric"><small>Produtos ativos</small><strong id="mProducts">0</strong></div>
+        </div>
+        <div class="grid2" style="margin-top:16px">
+          <div class="panel"><h3>Pedidos recentes</h3><div id="recentOrders"></div></div>
+          <div class="panel"><h3>Estoque / atenção operacional</h3><div class="notice">O controle de estoque por insumo exige a estrutura de ficha técnica e estoque no banco. A interface está preparada, mas não inventa baixas que o banco ainda não suporta.</div><div id="stockInfo"></div></div>
         </div>
       </section>
 
-      <section id="productsSection" style="display:none">
-        <div class="section-head"><div><h1>Produtos</h1><div class="muted">Produtos cadastrados no Supabase.</div></div></div>
-        <div class="card"><table class="table"><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Disponível</th></tr></thead><tbody id="productsBody"></tbody></table></div>
-      </section>
-
-      <section id="ordersSection" style="display:none">
-        <div class="section-head"><div><h1>Pedidos</h1><div class="muted">Últimos pedidos registrados.</div></div></div>
-        <div class="card"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Tipo</th><th>Mesa</th><th>Total</th><th>Status</th></tr></thead><tbody id="ordersBody"></tbody></table></div>
-      </section>
-
-      <section id="settingsSection" style="display:none">
-        <div class="section-head"><div><h1>Configurações</h1><div class="muted">Informações atuais do restaurante.</div></div></div>
-        <div class="card" style="padding:20px">
-          <p><b>Restaurante:</b> <span id="settingsName">—</span></p>
-          <p><b>Slug:</b> <span id="settingsSlug">—</span></p>
-          <p><b>WhatsApp:</b> <span id="settingsWhatsapp">—</span></p>
-          <p><b>Aberto:</b> <span id="settingsOpen">—</span></p>
+      <section id="view-products" class="view">
+        <div class="page-title"><div><h1>Produtos</h1><p>Cadastro, preço, imagem e disponibilidade.</p></div><button class="btn primary" onclick="openProduct()">+ Novo produto</button></div>
+        <div class="panel">
+          <div class="searchbar"><input id="productSearch" class="input" placeholder="Buscar produto..." oninput="renderProducts()"></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Disponibilidade</th><th>Status</th><th>Ações</th></tr></thead><tbody id="productsBody"></tbody></table></div>
         </div>
       </section>
-    </main>
-  </div>
+
+      <section id="view-categories" class="view">
+        <div class="page-title"><div><h1>Categorias</h1><p>Organização do cardápio.</p></div><button class="btn primary" onclick="openCategory()">+ Nova categoria</button></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Ordem</th><th>Ativa</th><th>Ações</th></tr></thead><tbody id="categoriesBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-orders" class="view">
+        <div class="page-title"><div><h1>Pedidos</h1><p>Atualização automática pelo Realtime.</p></div><button class="btn" onclick="loadAll()">Atualizar</button></div>
+        <div class="section-tabs" id="orderTabs"></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Tipo</th><th>Mesa</th><th>Pagamento</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-kds" class="view">
+        <div class="page-title"><div><h1>KDS — Produção</h1><p>Fila operacional de pedidos pendentes e em preparo.</p></div><button class="btn" onclick="testSound()">Testar som</button></div>
+        <div class="kds" id="kdsBoard"></div>
+      </section>
+
+      <section id="view-tables" class="view">
+        <div class="page-title"><div><h1>Salão e mesas</h1><p>Mesas ativas e pedidos associados.</p></div><button class="btn primary" onclick="openTable()">+ Nova mesa</button></div>
+        <div class="grid3" id="tablesGrid"></div>
+      </section>
+
+      <section id="view-cash" class="view">
+        <div class="page-title"><div><h1>Caixa</h1><p>Resumo de recebimentos e controle operacional.</p></div></div>
+        <div class="notice warn">A estrutura atual possui pedidos e pagamentos, mas não possui ainda tabela de sessões de caixa, sangrias e suprimentos. Esta tela calcula o resumo disponível sem alterar o banco.</div>
+        <div class="cards"><div class="card metric"><small>Dinheiro</small><strong id="cashMoney">R$ 0,00</strong></div><div class="card metric"><small>PIX</small><strong id="cashPix">R$ 0,00</strong></div><div class="card metric"><small>Cartão</small><strong id="cashCard">R$ 0,00</strong></div><div class="card metric"><small>Total</small><strong id="cashTotal">R$ 0,00</strong></div></div>
+      </section>
+
+      <section id="view-addons" class="view">
+        <div class="page-title"><div><h1>Adicionais</h1><p>Itens extras disponíveis para vinculação aos produtos.</p></div><button class="btn primary" onclick="openAddon()">+ Novo adicional</button></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Preço</th><th>Disponível</th><th>Ações</th></tr></thead><tbody id="addonsBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-combos" class="view">
+        <div class="page-title"><div><h1>Combos</h1><p>Combos cadastrados no catálogo.</p></div></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Preço</th><th>Status</th><th>Itens</th></tr></thead><tbody id="combosBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-customers" class="view">
+        <div class="page-title"><div><h1>Clientes / CRM</h1><p>Base derivada dos pedidos registrados.</p></div></div>
+        <div class="panel"><div class="notice">A tabela atual de pedidos não possui uma entidade de cliente permanente. Esta tela agrupa os clientes pelos nomes existentes nos pedidos.</div><div class="table-wrap"><table class="table"><thead><tr><th>Cliente</th><th>Pedidos</th><th>Total</th><th>WhatsApp</th></tr></thead><tbody id="customersBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-delivery" class="view">
+        <div class="page-title"><div><h1>Entregas</h1><p>Pedidos de delivery e acompanhamento operacional.</p></div></div>
+        <div class="notice">O banco atual registra endereço e tipo de pedido, mas ainda não possui cadastro de entregadores, regiões e comissão. A tela mostra o que já existe e fica pronta para a próxima expansão estrutural.</div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Endereço</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody id="deliveryBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-marketing" class="view">
+        <div class="page-title"><div><h1>Marketing e fidelidade</h1><p>Configurações de rastreamento e preparação do CRM.</p></div></div>
+        <div class="grid2">
+          <div class="panel"><h3>Rastreamento</h3><div class="field"><label>Meta Pixel ID</label><input id="metaPixel" class="input"></div><div class="field"><label>Google Analytics ID</label><input id="gaId" class="input"></div><button class="btn primary" onclick="saveMarketing()">Salvar</button></div>
+          <div class="panel"><h3>Cupons e fidelidade</h3><div class="notice">Não existem tabelas de cupons e pontos no schema atual. Não serão criados registros falsos. O módulo estrutural pode ser adicionado em uma migração posterior.</div></div>
+        </div>
+      </section>
+
+      <section id="view-reports" class="view">
+        <div class="page-title"><div><h1>Relatórios</h1><p>Resumo baseado nos pedidos registrados no Supabase.</p></div><div class="actions"><button class="btn" onclick="exportCSV()">Exportar CSV</button><button class="btn" onclick="window.print()">Imprimir</button></div></div>
+        <div class="cards"><div class="card metric"><small>Faturamento</small><strong id="rRevenue">R$ 0,00</strong></div><div class="card metric"><small>Pedidos</small><strong id="rOrders">0</strong></div><div class="card metric"><small>Ticket médio</small><strong id="rTicket">R$ 0,00</strong></div><div class="card metric"><small>Itens vendidos</small><strong id="rItems">0</strong></div></div>
+        <div class="grid2" style="margin-top:16px"><div class="panel"><h3>Top produtos</h3><div id="topProducts"></div></div><div class="panel"><h3>Formas de pagamento</h3><div id="paymentSummary"></div></div></div>
+      </section>
+
+      <section id="view-settings" class="view">
+        <div class="page-title"><div><h1>Configurações</h1><p>Dados gerais do restaurante e operação.</p></div></div>
+        <div class="grid2">
+          <div class="panel"><h3>Restaurante</h3><div class="field"><label>Nome</label><input id="setName" class="input"></div><div class="field"><label>WhatsApp</label><input id="setWhatsapp" class="input"></div><div class="field"><label>Horários</label><textarea id="setHours" class="textarea" rows="4"></textarea></div><div class="field"><label>Cor principal</label><input id="setColor" class="input" type="color"></div><button class="btn primary" onclick="saveRestaurant()">Salvar restaurante</button></div>
+          <div class="panel"><h3>Operação</h3><div class="field"><label>Chave PIX</label><input id="setPix" class="input"></div><div class="field"><label>Taxa de entrega</label><input id="setDeliveryFee" class="input" type="number" step=".01"></div><div class="field"><label>Pedido mínimo</label><input id="setMinOrder" class="input" type="number" step=".01"></div><label class="check"><input id="setDelivery" type="checkbox"> Aceitar delivery</label><br><label class="check"><input id="setTableOrders" type="checkbox"> Aceitar pedidos de mesa</label><br><button class="btn primary" onclick="saveSettings()">Salvar operação</button></div>
+        </div>
+      </section>
+    </div>
+  </main>
 </div>
+
+<div id="modal" class="modal-back hidden"><div class="modal"><div id="modalContent"></div></div></div>
+<div id="toast" class="toast"></div>
 
 <script>
 const SUPABASE_URL="https://dtkcjenytrpaholunkef.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY="sb_publishable_G0tSaqoDOryj5LXHnQAZeQ_YhKWfLHn";
-const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const SUPABASE_KEY="sb_publishable_G0tSaqoDOryj5LXHnQAZeQ_YhKWfLHn";
 const RESTAURANT_SLUG="brasa-180";
-let restaurant=null;
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let session=null,profile=null,restaurant=null,settings=null;
+let products=[],categories=[],orders=[],addons=[],combos=[],tables=[];
+let currentOrderFilter="all", realtimeChannel=null, audioCtx=null;
 
 const $=id=>document.getElementById(id);
-const money=v=>Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const money=v=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(v||0));
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function toast(msg){$("toast").textContent=msg;$("toast").style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").style.display="none",3000)}
+function err(e,context="Operação"){console.error(context,e);toast(context+": "+(e?.message||"Erro desconhecido"))}
+function closeModal(){$("modal").classList.add("hidden")}
+function openModal(content){$("modalContent").innerHTML=content;$("modal").classList.remove("hidden")}
+function role(){return profile?.role||"owner"}
+function canWrite(){return ["owner","admin"].includes(role())}
+function fmtStatus(s){const map={pending:["Pendente","yellow"],preparing:["Em preparo","blue"],ready:["Pronto","green"],out_for_delivery:["Em rota","blue"],completed:["Concluído","green"],cancelled:["Cancelado","red"]};const x=map[s]||[s||"—",""];return `<span class="badge ${x[1]}">${esc(x[0])}</span>`}
+function typeLabel(t){return ({mesa:"Mesa",delivery:"Delivery",balcao:"Balcão"}[t]||t||"—")}
 
-function showError(message){
-  $("loginError").textContent=message;
-  $("loginError").style.display="block";
+async function login(){
+  $("loginError").textContent="";
+  const email=$("loginEmail").value.trim(),password=$("loginPassword").value;
+  if(!email||!password){$("loginError").textContent="Informe e-mail e senha.";return}
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){$("loginError").textContent=error.message;return}
+  session=data.session;await boot();
 }
+async function logout(){await sb.auth.signOut();location.reload()}
 
-async function loadRestaurant(){
-  const {data,error}=await supabaseClient.from("restaurants").select("id,name,slug,phone_whatsapp,is_open,primary_color").eq("slug",RESTAURANT_SLUG).maybeSingle();
-  if(error) throw error;
-  if(!data) throw new Error("Restaurante não encontrado.");
-  restaurant=data;
-  $("restaurantName").textContent=data.name;
-  $("settingsName").textContent=data.name;
-  $("settingsSlug").textContent=data.slug;
-  $("settingsWhatsapp").textContent=data.phone_whatsapp||"—";
-  $("settingsOpen").textContent=data.is_open?"Sim":"Não";
+async function boot(){
+  if(!session){$("loginScreen").classList.remove("hidden");$("app").classList.add("hidden");return}
+  const {data:p,error:pe}=await sb.from("profiles").select("id,restaurant_id,full_name,role").eq("id",session.user.id).single();
+  if(pe||!p?.restaurant_id){$("loginError").textContent="Usuário autenticado, mas sem perfil de restaurante.";await sb.auth.signOut();return}
+  profile=p;
+  const {data:r,error:re}=await sb.from("restaurants").select("*").eq("id",p.restaurant_id).single();
+  if(re||!r){err(re||new Error("Restaurante não encontrado"),"Carregamento");return}
+  restaurant=r;
+  const {data:s}=await sb.from("restaurant_settings").select("*").eq("restaurant_id",restaurant.id).maybeSingle();settings=s;
+  $("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");
+  $("roleLabel").textContent=`${profile.full_name||session.user.email} · ${role()}`;
+  applyRoleUI();renderStoreStatus();fillSettings();await loadAll();subscribeRealtime();
 }
-
-async function loadDashboard(){
-  const [p,c,o]=await Promise.all([
-    supabaseClient.from("products").select("id",{count:"exact",head:true}).eq("restaurant_id",restaurant.id).eq("is_active",true),
-    supabaseClient.from("categories").select("id",{count:"exact",head:true}).eq("restaurant_id",restaurant.id).eq("is_active",true),
-    supabaseClient.from("orders").select("id",{count:"exact",head:true}).eq("restaurant_id",restaurant.id)
-  ]);
-  if(p.error) throw p.error;if(c.error) throw c.error;if(o.error) throw o.error;
-  $("statProducts").textContent=p.count??0;
-  $("statCategories").textContent=c.count??0;
-  $("statOrders").textContent=o.count??0;
+function applyRoleUI(){
+  const r=role();
+  const allowed={owner:"*",admin:"*",cozinha:["dashboard","orders","kds"],kds:["dashboard","kds"],caixa:["dashboard","orders","cash"],garcom:["dashboard","orders","tables"]}[r]||["dashboard"];
+  document.querySelectorAll(".nav button").forEach(b=>{const v=b.dataset.view;if(allowed!=="*"&&!allowed.includes(v))b.classList.add("hidden")});
 }
-
-async function loadProducts(){
-  const {data,error}=await supabaseClient.from("products").select("id,name,price,image_url,is_available,is_active,category:categories(name)").eq("restaurant_id",restaurant.id).order("display_order").order("name");
-  if(error) throw error;
-  $("productsBody").innerHTML=data?.length?data.map(p=>`<tr>
-    <td><div style="display:flex;align-items:center;gap:10px">${p.image_url?`<img class="thumb" src="${p.image_url}" alt="">`:`<div class="thumb"></div>`}<b>${escapeHtml(p.name)}</b></div></td>
-    <td>${escapeHtml(p.category?.name||"—")}</td>
-    <td>${money(p.price)}</td>
-    <td><span class="badge ${p.is_active&&p.is_available?"on":"off"}">${p.is_active&&p.is_available?"Disponível":"Indisponível"}</span></td>
-  </tr>`).join(""):`<tr><td colspan="4" class="empty">Nenhum produto encontrado.</td></tr>`;
+function go(v){
+  if($("view-"+v).classList.contains("hidden"))return;
+  document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+  $("view-"+v).classList.add("active");
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.view===v));
+  if(v==="kds")renderKDS();
+  if(v==="tables")renderTables();
 }
-
-async function loadOrders(){
-  const {data,error}=await supabaseClient.from("orders").select("order_number,customer_name,order_type,table_number,total,status").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}).limit(30);
-  if(error) throw error;
-  $("ordersBody").innerHTML=data?.length?data.map(o=>`<tr>
-    <td><b>#${o.order_number}</b></td><td>${escapeHtml(o.customer_name)}</td>
-    <td>${o.order_type==="mesa"?"Mesa":"Entrega"}</td><td>${o.table_number??"—"}</td>
-    <td>${money(o.total)}</td><td><span class="badge off">${escapeHtml(o.status||"pending")}</span></td>
-  </tr>`).join(""):`<tr><td colspan="6" class="empty">Nenhum pedido encontrado.</td></tr>`;
+function renderStoreStatus(){
+  const open=!!restaurant.is_open;$("statusDot").classList.toggle("open",open);$("storeStatusText").textContent=open?"LOJA ABERTA":"LOJA FECHADA";$("storeToggle").textContent=open?"LOJA ABERTA":"LOJA FECHADA";
 }
-
-function escapeHtml(v){
-  return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+async function toggleStore(){
+  if(!canWrite()){toast("Seu perfil não pode alterar o status da loja.");return}
+  const next=!restaurant.is_open;const {error}=await sb.from("restaurants").update({is_open:next}).eq("id",restaurant.id);
+  if(error){err(error,"Status da loja");return}restaurant.is_open=next;renderStoreStatus();toast(next?"Loja aberta":"Loja fechada");
 }
-
-async function openApp(session){
-  $("login").style.display="none"; $("app").style.display="block"; $("userEmail").textContent=session.user.email||"";
-  try{await loadRestaurant();await Promise.all([loadDashboard(),loadProducts(),loadOrders()]);}
-  catch(e){alert("Erro ao carregar o painel: "+(e.message||e));}
+async function loadAll(){
+  try{
+    const [pc,cc,oo,aa,co,tt]=await Promise.all([
+      sb.from("products").select("*,categories(id,name)").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
+      sb.from("categories").select("*").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
+      sb.from("orders").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}).limit(500),
+      sb.from("add_ons").select("*").eq("restaurant_id",restaurant.id).order("name"),
+      sb.from("combos").select("*").eq("restaurant_id",restaurant.id).order("display_order"),
+      sb.from("tables").select("*").eq("restaurant_id",restaurant.id).order("table_number")
+    ]);
+    if(pc.error)throw pc.error;if(cc.error)throw cc.error;if(oo.error)throw oo.error;
+    products=pc.data||[];categories=cc.data||[];orders=oo.data||[];addons=aa.data||[];combos=co.data||[];tables=tt.data||[];
+    renderAll();
+  }catch(e){err(e,"Carregamento dos dados")}
 }
+function renderAll(){renderProducts();renderCategories();renderOrders();renderKDS();renderTables();renderAddons();renderCombos();renderDashboard();renderCustomers();renderDelivery();renderReports();renderCash()}
+function renderProducts(){
+  const q=($("productSearch")?.value||"").toLowerCase();
+  const rows=products.filter(p=>p.name.toLowerCase().includes(q)).map(p=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:9px"><img class="thumb" src="${esc(p.image_url||"")}" onerror="this.style.visibility='hidden'"><b>${esc(p.name)}</b></div></td>
+    <td>${esc(p.categories?.name||"Sem categoria")}</td><td>${money(p.price)}</td>
+    <td><button class="btn small ${p.is_available?"success":""}" onclick="toggleAvailable('${p.id}')">${p.is_available?"Disponível":"Esgotado"}</button></td>
+    <td>${p.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td>
+    <td><div class="actions"><button class="btn small" onclick="openProduct('${p.id}')">Editar</button><button class="btn small" onclick="toggleActive('${p.id}')">${p.is_active?"Desativar":"Ativar"}</button></div></td>
+  </tr>`).join("");
+  $("productsBody").innerHTML=rows||`<tr><td colspan="6" class="empty">Nenhum produto encontrado.</td></tr>`;
+}
+function productForm(p={}){return `<h2>${p.id?"Editar produto":"Novo produto"}</h2>
+  <div class="formgrid">
+  <div class="field full"><label>Nome</label><input id="pfName" class="input" value="${esc(p.name||"")}"></div>
+  <div class="field"><label>Preço</label><input id="pfPrice" class="input" type="number" step=".01" min="0" value="${p.price??0}"></div>
+  <div class="field"><label>Categoria</label><select id="pfCat" class="select"><option value="">Sem categoria</option>${categories.map(c=>`<option value="${c.id}" ${c.id===p.category_id?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div>
+  <div class="field full"><label>Descrição</label><textarea id="pfDesc" class="textarea" rows="3">${esc(p.description||"")}</textarea></div>
+  <div class="field full"><label>Imagem</label><input id="pfImage" class="input" type="file" accept="image/*"><small style="color:#8190a0">A imagem será enviada para o bucket público menu-assets.</small></div>
+  <div class="field"><label class="check"><input id="pfAvailable" type="checkbox" ${p.is_available!==false?"checked":""}> Disponível</label></div>
+  <div class="field"><label class="check"><input id="pfActive" type="checkbox" ${p.is_active!==false?"checked":""}> Ativo no cardápio</label></div>
+  </div>
+  <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveProduct('${p.id||""}')">Salvar produto</button></div>`}
+function openProduct(id){if(!canWrite()){toast("Seu perfil não pode editar produtos.");return}const p=products.find(x=>x.id===id)||{};openModal(productForm(p))}
+async function uploadImage(file,productId){
+  if(!file)return null;
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
+  const path=`products/${restaurant.id}/${productId}-${crypto.randomUUID()}.${ext}`;
+  const {error}=await sb.storage.from("menu-assets").upload(path,file,{upsert:false,contentType:file.type});
+  if(error)throw error;
+  return sb.storage.from("menu-assets").getPublicUrl(path).data.publicUrl;
+}
+async function saveProduct(id){
+  try{
+    if(!canWrite())throw new Error("Sem permissão.");
+    const name=$("pfName").value.trim(),price=Number($("pfPrice").value);
+    if(!name)throw new Error("Informe o nome do produto.");if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");
+    const payload={restaurant_id:restaurant.id,name,description:$("pfDesc").value.trim()||null,price,category_id:$("pfCat").value||null,is_available:$("pfAvailable").checked,is_active:$("pfActive").checked};
+    let productId=id;
+    if(id){const {error}=await sb.from("products").update(payload).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error}
+    else{const {data,error}=await sb.from("products").insert(payload).select("id").single();if(error)throw error;productId=data.id}
+    const file=$("pfImage").files[0];if(file){const url=await uploadImage(file,productId);const {error}=await sb.from("products").update({image_url:url}).eq("id",productId);if(error)throw error}
+    closeModal();await loadAll();toast("Produto salvo com sucesso.");
+  }catch(e){err(e,"Salvar produto")}
+}
+async function toggleAvailable(id){try{const p=products.find(x=>x.id===id);const {error}=await sb.from("products").update({is_available:!p.is_available}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Pausa rápida")}}
+async function toggleActive(id){try{const p=products.find(x=>x.id===id);const {error}=await sb.from("products").update({is_active:!p.is_active}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Status do produto")}}
 
-$("loginBtn").addEventListener("click",async()=>{
-  $("loginError").style.display="none";
-  const email=$("email").value.trim(),password=$("password").value;
-  if(!email||!password)return showError("Informe e-mail e senha.");
-  $("loginBtn").disabled=true;$("loginBtn").textContent="Entrando…";
-  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
-  $("loginBtn").disabled=false;$("loginBtn").textContent="Entrar no painel";
-  if(error)return showError(error.message);
-  await openApp(data.session);
-});
+function renderCategories(){
+  $("categoriesBody").innerHTML=categories.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${c.display_order||0}</td><td>${c.is_active?'<span class="badge green">Ativa</span>':'<span class="badge red">Inativa</span>'}</td><td><div class="actions"><button class="btn small" onclick="openCategory('${c.id}')">Editar</button><button class="btn small" onclick="toggleCategory('${c.id}')">${c.is_active?"Desativar":"Ativar"}</button></div></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhuma categoria.</td></tr>`;
+}
+function openCategory(id){if(!canWrite())return toast("Sem permissão.");const c=categories.find(x=>x.id===id)||{};openModal(`<h2>${id?"Editar":"Nova"} categoria</h2><div class="field"><label>Nome</label><input id="cfName" class="input" value="${esc(c.name||"")}"></div><div class="field"><label>Ordem</label><input id="cfOrder" class="input" type="number" value="${c.display_order||0}"></div><div class="field"><label class="check"><input id="cfActive" type="checkbox" ${c.is_active!==false?"checked":""}> Ativa</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCategory('${id||""}')">Salvar</button></div>`)}
+async function saveCategory(id){try{const name=$("cfName").value.trim();if(!name)throw new Error("Informe o nome.");const p={restaurant_id:restaurant.id,name,display_order:Number($("cfOrder").value)||0,is_active:$("cfActive").checked};const q=id?sb.from("categories").update(p).eq("id",id):sb.from("categories").insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast("Categoria salva.")}catch(e){err(e,"Categoria")}}
+async function toggleCategory(id){const c=categories.find(x=>x.id===id);const {error}=await sb.from("categories").update({is_active:!c.is_active}).eq("id",id);if(error)err(error,"Categoria");else loadAll()}
 
-$("logoutBtn").addEventListener("click",async()=>{await supabaseClient.auth.signOut();location.reload();});
+function renderOrders(){
+  const filtered=currentOrderFilter==="all"?orders:orders.filter(o=>o.status===currentOrderFilter);
+  $("orderTabs").innerHTML=[["all","Todos"],["pending","Pendentes"],["preparing","Em preparo"],["ready","Prontos"],["out_for_delivery","Em rota"],["completed","Concluídos"],["cancelled","Cancelados"]].map(([v,t])=>`<button class="tab ${currentOrderFilter===v?"active":""}" onclick="currentOrderFilter='${v}';renderOrders()">${t}</button>`).join("");
+  $("ordersBody").innerHTML=filtered.map(o=>`<tr><td>#${o.order_number}</td><td>${esc(o.customer_name||"Cliente")}</td><td>${typeLabel(o.order_type)}</td><td>${o.table_number||"—"}</td><td>${esc(o.payment_method||"—")}</td><td>${money(o.total)}</td><td>${fmtStatus(o.status)}</td><td><div class="actions"><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button><button class="btn small" onclick="openWhats('${o.id}')">WhatsApp</button><button class="btn small" onclick="printOrder('${o.id}')">Imprimir</button></div></td></tr>`).join("")||`<tr><td colspan="8" class="empty">Nenhum pedido.</td></tr>`;
+}
+async function advanceOrder(id){const o=orders.find(x=>x.id===id);const seq={pending:"preparing",preparing:"ready",ready:o.order_type==="delivery"?"out_for_delivery":"completed",out_for_delivery:"completed"};const next=seq[o.status];if(!next)return;if(next==="completed"&&o.status==="ready"&&o.order_type==="mesa"){}const {error}=await sb.from("orders").update({status:next}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)err(error,"Status do pedido");else{await loadAll();openWhats(id,next)}}
+function renderKDS(){const active=orders.filter(o=>["pending","preparing","ready"].includes(o.status));$("kdsBoard").innerHTML=active.map(o=>{const items=o.order_items||[];return `<div class="ticket"><div style="display:flex;justify-content:space-between"><h4>#${o.order_number} · ${typeLabel(o.order_type)}</h4>${fmtStatus(o.status)}</div><small>${esc(o.customer_name||"Cliente")} ${o.table_number?`· Mesa ${o.table_number}`:""}</small><div class="items">${items.length?items.map(i=>`<div class="item"><b>${i.quantity}x</b> ${esc(i.product_name)}${i.variant_name?` · ${esc(i.variant_name)}`:""}</div>`).join(""):`<div class="item">Itens não carregados nesta consulta.</div>`}</div><div class="ticket-actions"><button class="btn small primary" onclick="advanceOrder('${o.id}')">Avançar</button><button class="btn small" onclick="printOrder('${o.id}')">Imprimir</button></div></div>`}).join("")||`<div class="empty">Fila vazia.</div>`}
+function testSound(){beep();toast("Som testado.")}
+function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(audioCtx.destination);o.start();setTimeout(()=>o.stop(),180)}catch(e){}}
+function subscribeRealtime(){
+  if(realtimeChannel)sb.removeChannel(realtimeChannel);
+  realtimeChannel=sb.channel("orders").on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:`restaurant_id=eq.${restaurant.id}`},payload=>{if(payload.eventType==="INSERT"&&payload.new?.status==="pending"){beep();toast(`Novo pedido #${payload.new.order_number}`)}loadAll()}).subscribe();
+}
+function renderTables(){$("tablesGrid").innerHTML=tables.map(t=>{const os=orders.filter(o=>o.table_number===t.table_number&&["pending","preparing","ready"].includes(o.status));const total=os.reduce((a,o)=>a+Number(o.total||0),0);return `<div class="card"><h3 style="margin:0">Mesa ${t.table_number}</h3><small>${esc(t.description||"")}</small><div style="margin:14px 0;font-size:22px">${money(total)}</div><span class="badge ${os.length?"yellow":"green"}">${os.length?os.length+" pedido(s) aberto(s)":"Livre"}</span></div>`}).join("")||`<div class="empty">Nenhuma mesa cadastrada.</div>`}
+function openTable(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Nova mesa</h2><div class="field"><label>Número</label><input id="tfNumber" class="input" type="number" min="1"></div><div class="field"><label>Descrição</label><input id="tfDesc" class="input"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTable()">Salvar</button></div>`)}
+async function saveTable(){try{const n=Number($("tfNumber").value);if(!n)throw new Error("Número inválido.");const {error}=await sb.from("tables").insert({restaurant_id:restaurant.id,table_number:n,description:$("tfDesc").value.trim()||null,is_active:true});if(error)throw error;closeModal();await loadAll();toast("Mesa criada.")}catch(e){err(e,"Mesa")}}
 
-document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{
-  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");
-  ["dashboard","products","orders","settings"].forEach(s=>$(s+"Section").style.display=s===btn.dataset.section?"block":"none");
-}));
+function renderAddons(){$("addonsBody").innerHTML=addons.map(a=>`<tr><td>${esc(a.name)}</td><td>${money(a.price)}</td><td>${a.is_available?'<span class="badge green">Sim</span>':'<span class="badge red">Não</span>'}</td><td><button class="btn small" onclick="editAddon('${a.id}')">Editar</button></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum adicional.</td></tr>`}
+function openAddon(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Novo adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon()">Salvar</button></div>`)}
+function editAddon(id){const a=addons.find(x=>x.id===id);openModal(`<h2>Editar adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input" value="${esc(a.name)}"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" value="${a.price}"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" ${a.is_available?"checked":""}> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon('${id}')">Salvar</button></div>`)}
+async function saveAddon(id){try{const p={restaurant_id:restaurant.id,name:$("afName").value.trim(),price:Number($("afPrice").value)||0,is_available:$("afAvail")?.checked??true};if(!p.name)throw new Error("Informe o nome.");const q=id?sb.from("add_ons").update(p).eq("id",id):sb.from("add_ons").insert(p);const {error}=await q;if(error)throw error;closeModal();loadAll()}catch(e){err(e,"Adicional")}}
 
-(async()=>{
-  const {data}=await supabaseClient.auth.getSession();
-  if(data.session) await openApp(data.session);
-})();
+function renderCombos(){ $("combosBody").innerHTML=combos.map(c=>`<tr><td>${esc(c.name)}</td><td>${money(c.price)}</td><td>${c.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td>—</td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum combo.</td></tr>`}
+function renderDashboard(){const today=new Date();today.setHours(0,0,0,0);const day=orders.filter(o=>new Date(o.created_at)>=today&&!["cancelled"].includes(o.status));const rev=day.reduce((a,o)=>a+Number(o.total||0),0);$("mOrders").textContent=day.length;$("mRevenue").textContent=money(rev);$("mTicket").textContent=money(day.length?rev/day.length:0);$("mProducts").textContent=products.filter(p=>p.is_active).length;$("recentOrders").innerHTML=orders.slice(0,6).map(o=>`<div style="padding:9px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>#${o.order_number} · ${esc(o.customer_name||"Cliente")}</span><b>${money(o.total)}</b></div>`).join("")||`<div class="empty">Sem pedidos.</div>`;$("stockInfo").innerHTML=`<div class="badge blue">${products.length} produtos cadastrados</div>`}
+function renderCustomers(){const m={};orders.forEach(o=>{const n=o.customer_name||"Cliente";m[n]??={count:0,total:0};m[n].count++;m[n].total+=Number(o.total||0)});$("customersBody").innerHTML=Object.entries(m).sort((a,b)=>b[1].total-a[1].total).map(([n,x])=>`<tr><td>${esc(n)}</td><td>${x.count}</td><td>${money(x.total)}</td><td>${restaurant.phone_whatsapp?`<button class="btn small" onclick="window.open('https://wa.me/${restaurant.phone_whatsapp}','_blank')">WhatsApp</button>`:"—"}</td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum cliente.</td></tr>`}
+function renderDelivery(){const ds=orders.filter(o=>o.order_type==="delivery");$("deliveryBody").innerHTML=ds.map(o=>`<tr><td>#${o.order_number}</td><td>${esc(o.customer_name||"Cliente")}</td><td>${esc(o.delivery_address||"—")}</td><td>${money(o.total)}</td><td>${fmtStatus(o.status)}</td><td><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button></td></tr>`).join("")||`<tr><td colspan="6" class="empty">Nenhum delivery.</td></tr>`}
+function renderReports(){const active=orders.filter(o=>o.status!=="cancelled"),rev=active.reduce((a,o)=>a+Number(o.total||0),0);$("rRevenue").textContent=money(rev);$("rOrders").textContent=active.length;$("rTicket").textContent=money(active.length?rev/active.length:0);$("rItems").textContent="—";const top={};active.forEach(o=>{(o.items||[]).forEach(i=>top[i.product_name]=(top[i.product_name]||0)+Number(i.quantity||1))});$("topProducts").innerHTML=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,q],i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${i+1}. ${esc(n)} <b style="float:right">${q}</b></div>`).join("")||"Sem itens detalhados.";const pay={};active.forEach(o=>pay[o.payment_method||"Não informado"]=(pay[o.payment_method||"Não informado"]||0)+Number(o.total||0));$("paymentSummary").innerHTML=Object.entries(pay).map(([n,v])=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${esc(n)} <b style="float:right">${money(v)}</b></div>`).join("")||"—"}
+function renderCash(){const active=orders.filter(o=>o.status!=="cancelled"),m={money:0,pix:0,card:0};active.forEach(o=>{const x=String(o.payment_method||"").toLowerCase(),v=Number(o.total||0);if(x.includes("pix"))m.pix+=v;else if(x.includes("cart"))m.card+=v;else if(x.includes("dinheiro"))m.money+=v});$("cashMoney").textContent=money(m.money);$("cashPix").textContent=money(m.pix);$("cashCard").textContent=money(m.card);$("cashTotal").textContent=money(m.money+m.pix+m.card)}
+
+function fillSettings(){if(!restaurant)return;$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
+async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);renderStoreStatus();toast("Restaurante atualizado.")}catch(e){err(e,"Restaurante")}}
+async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_key:$("setPix").value.trim(),meta_pixel_id:$("metaPixel").value.trim(),ga_id:$("gaId").value.trim()};const p={restaurant_id:restaurant.id,delivery_fee:Number($("setDeliveryFee").value)||0,minimum_order:Number($("setMinOrder").value)||0,accepts_delivery:$("setDelivery").checked,accepts_table_orders:$("setTableOrders").checked,settings:merged};let q=settings?sb.from("restaurant_settings").update(p).eq("id",settings.id):sb.from("restaurant_settings").insert(p);const {data,error}=await q.select("*").single();if(error)throw error;settings=data;fillSettings();toast("Configurações salvas.")}catch(e){err(e,"Configurações")}}
+async function saveMarketing(){return saveSettings()}
+
+function openWhats(id,next){const o=orders.find(x=>x.id===id);if(!restaurant.phone_whatsapp)return;const status={pending:"recebido",preparing:"em preparo",ready:"pronto",out_for_delivery:"saiu para entrega",completed:"concluído",cancelled:"cancelado"}[next||o.status]||o.status;const text=`Olá, ${o.customer_name||"cliente"}! Seu pedido #${o.order_number} está ${status}.`;window.open(`https://wa.me/${o.customer_phone||restaurant.phone_whatsapp}?text=${encodeURIComponent(text)}`,"_blank")}
+function printOrder(id){const o=orders.find(x=>x.id===id);const w=window.open("","_blank","width=400,height=700");w.document.write(`<html><head><title>Pedido #${o.order_number}</title><style>body{font-family:monospace;width:58mm;font-size:12px}h2{text-align:center;font-size:15px}.line{border-top:1px dashed #000;margin:8px 0}.row{display:flex;justify-content:space-between}</style></head><body><h2>${esc(restaurant.name)}</h2><div>Pedido #${o.order_number}</div><div>${new Date(o.created_at).toLocaleString("pt-BR")}</div><div class="line"></div><div>Cliente: ${esc(o.customer_name||"—")}</div><div>Tipo: ${typeLabel(o.order_type)}</div>${o.table_number?`<div>Mesa: ${o.table_number}</div>`:""}<div class="line"></div><div class="row"><b>Total</b><b>${money(o.total)}</b></div><div class="line"></div><div style="text-align:center">Obrigado!</div></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
+function exportCSV(){const rows=[["Pedido","Data","Cliente","Tipo","Mesa","Pagamento","Status","Total"],...orders.map(o=>[o.order_number,new Date(o.created_at).toLocaleString("pt-BR"),o.customer_name||"",o.order_type||"",o.table_number||"",o.payment_method||"",o.status||"",Number(o.total||0).toFixed(2)])];const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download=`vendas-${new Date().toISOString().slice(0,10)}.csv`;a.click()}
+
+$("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+sb.auth.getSession().then(({data})=>{session=data.session;boot()});
 </script>
 </body>
 </html>
