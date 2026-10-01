@@ -79,7 +79,7 @@
       </section>
 
       <section id="view-products" class="view">
-        <div class="page-title"><div><h1>Produtos</h1><p>Cadastro, preço, imagem e disponibilidade.</p></div><button class="btn primary" onclick="openProduct()">+ Novo produto</button></div>
+        <div class="page-title"><div><h1>Produtos</h1><p>Cadastro completo do cardápio, adicionais, 3D e AR.</p></div><button class="btn primary" onclick="openProduct()">+ Novo produto</button></div>
         <div class="panel">
           <div class="searchbar"><input id="productSearch" class="input" placeholder="Buscar produto..." oninput="renderProducts()"></div>
           <div class="table-wrap"><table class="table"><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Disponibilidade</th><th>Status</th><th>Ações</th></tr></thead><tbody id="productsBody"></tbody></table></div>
@@ -119,8 +119,8 @@
       </section>
 
       <section id="view-combos" class="view">
-        <div class="page-title"><div><h1>Combos</h1><p>Combos cadastrados no catálogo.</p></div></div>
-        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Preço</th><th>Status</th><th>Itens</th></tr></thead><tbody id="combosBody"></tbody></table></div></div>
+        <div class="page-title"><div><h1>Combos</h1><p>Crie, edite e monte combos usando os produtos do restaurante.</p></div><button class="btn primary" onclick="openCombo()">+ Novo combo</button></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Preço</th><th>Status</th><th>Itens</th><th>Ações</th></tr></thead><tbody id="combosBody"></tbody></table></div></div>
       </section>
 
       <section id="view-customers" class="view">
@@ -168,7 +168,7 @@ const SUPABASE_KEY="sb_publishable_G0tSaqoDOryj5LXHnQAZeQ_YhKWfLHn";
 const RESTAURANT_SLUG="brasa-180";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let session=null,profile=null,restaurant=null,settings=null;
-let products=[],categories=[],orders=[],addons=[],combos=[],tables=[];
+let products=[],categories=[],orders=[],addons=[],combos=[],tables=[],productModels=[],arConfigs=[],productAddons=[],comboItems=[];
 let currentOrderFilter="all", realtimeChannel=null, audioCtx=null;
 
 const $=id=>document.getElementById(id);
@@ -234,57 +234,103 @@ async function loadAll(){
       sb.from("categories").select("*").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
       sb.from("orders").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}).limit(500),
       sb.from("add_ons").select("*").eq("restaurant_id",restaurant.id).order("name"),
-      sb.from("combos").select("*").eq("restaurant_id",restaurant.id).order("display_order"),
+      sb.from("combos").select("*").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
       sb.from("tables").select("*").eq("restaurant_id",restaurant.id).order("table_number")
     ]);
-    if(pc.error)throw pc.error;if(cc.error)throw cc.error;if(oo.error)throw oo.error;
+    if(pc.error)throw pc.error;if(cc.error)throw cc.error;if(oo.error)throw oo.error;if(aa.error)throw aa.error;if(co.error)throw co.error;if(tt.error)throw tt.error;
+    const productIds=(pc.data||[]).map(x=>x.id), comboIds=(co.data||[]).map(x=>x.id);
+    const [pm,ar,pa,ci]=await Promise.all([
+      productIds.length?sb.from("product_models").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
+      productIds.length?sb.from("ar_configs").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
+      productIds.length?sb.from("product_add_ons").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
+      comboIds.length?sb.from("combo_items").select("*").in("combo_id",comboIds):Promise.resolve({data:[],error:null})
+    ]);
+    if(pm.error)throw pm.error;if(ar.error)throw ar.error;if(pa.error)throw pa.error;if(ci.error)throw ci.error;
     products=pc.data||[];categories=cc.data||[];orders=oo.data||[];addons=aa.data||[];combos=co.data||[];tables=tt.data||[];
+    productModels=pm.data||[];arConfigs=ar.data||[];productAddons=pa.data||[];comboItems=ci.data||[];
     renderAll();
   }catch(e){err(e,"Carregamento dos dados")}
 }
 function renderAll(){renderProducts();renderCategories();renderOrders();renderKDS();renderTables();renderAddons();renderCombos();renderDashboard();renderCustomers();renderDelivery();renderReports();renderCash()}
+function modelFor(productId){return productModels.find(x=>x.product_id===productId)||null}
+function arFor(productId){return arConfigs.find(x=>x.product_id===productId)||null}
+function addonIdsFor(productId){return productAddons.filter(x=>x.product_id===productId).map(x=>x.add_on_id)}
+function slugify(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
 function renderProducts(){
   const q=($("productSearch")?.value||"").toLowerCase();
-  const rows=products.filter(p=>p.name.toLowerCase().includes(q)).map(p=>`<tr>
-    <td><div style="display:flex;align-items:center;gap:9px"><img class="thumb" src="${esc(p.image_url||"")}" onerror="this.style.visibility='hidden'"><b>${esc(p.name)}</b></div></td>
-    <td>${esc(p.categories?.name||"Sem categoria")}</td><td>${money(p.price)}</td>
-    <td><button class="btn small ${p.is_available?"success":""}" onclick="toggleAvailable('${p.id}')">${p.is_available?"Disponível":"Esgotado"}</button></td>
-    <td>${p.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td>
-    <td><div class="actions"><button class="btn small" onclick="openProduct('${p.id}')">Editar</button><button class="btn small" onclick="toggleActive('${p.id}')">${p.is_active?"Desativar":"Ativar"}</button></div></td>
-  </tr>`).join("");
+  const rows=products.filter(p=>p.name.toLowerCase().includes(q)).map(p=>{
+    const model=modelFor(p.id),ar=arFor(p.id),adds=addonIdsFor(p.id).length;
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:9px"><img class="thumb" src="${esc(p.image_url||"")}" onerror="this.style.visibility='hidden'"><div><b>${esc(p.name)}</b><div style="display:flex;gap:4px;margin-top:4px">${model?'<span class="badge blue">3D</span>':""}${ar?.ar_enabled?'<span class="badge green">AR</span>':""}${adds?`<span class="badge">${adds} adicional(is)</span>`:""}</div></div></div></td>
+      <td>${esc(p.categories?.name||"Sem categoria")}</td><td>${money(p.price)}</td>
+      <td><button class="btn small ${p.is_available?"success":""}" onclick="toggleAvailable('${p.id}')">${p.is_available?"Disponível":"Esgotado"}</button></td>
+      <td>${p.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td>
+      <td><div class="actions"><button class="btn small" onclick="openProduct('${p.id}')">Editar</button><button class="btn small" onclick="toggleActive('${p.id}')">${p.is_active?"Desativar":"Ativar"}</button></div></td>
+    </tr>`}).join("");
   $("productsBody").innerHTML=rows||`<tr><td colspan="6" class="empty">Nenhum produto encontrado.</td></tr>`;
 }
-function productForm(p={}){return `<h2>${p.id?"Editar produto":"Novo produto"}</h2>
+function productForm(p={}){
+  const selected=addonIdsFor(p.id);
+  const model=modelFor(p.id)||{};
+  const ar=arFor(p.id)||{};
+  return `<h2>${p.id?"Editar produto":"Novo produto"}</h2>
   <div class="formgrid">
-  <div class="field full"><label>Nome</label><input id="pfName" class="input" value="${esc(p.name||"")}"></div>
-  <div class="field"><label>Preço</label><input id="pfPrice" class="input" type="number" step=".01" min="0" value="${p.price??0}"></div>
-  <div class="field"><label>Categoria</label><select id="pfCat" class="select"><option value="">Sem categoria</option>${categories.map(c=>`<option value="${c.id}" ${c.id===p.category_id?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div>
-  <div class="field full"><label>Descrição</label><textarea id="pfDesc" class="textarea" rows="3">${esc(p.description||"")}</textarea></div>
-  <div class="field full"><label>Imagem</label><input id="pfImage" class="input" type="file" accept="image/*"><small style="color:#8190a0">A imagem será enviada para o bucket público menu-assets.</small></div>
-  <div class="field"><label class="check"><input id="pfAvailable" type="checkbox" ${p.is_available!==false?"checked":""}> Disponível</label></div>
-  <div class="field"><label class="check"><input id="pfActive" type="checkbox" ${p.is_active!==false?"checked":""}> Ativo no cardápio</label></div>
+    <div class="field full"><label>Nome</label><input id="pfName" class="input" value="${esc(p.name||"")}"></div>
+    <div class="field"><label>Preço</label><input id="pfPrice" class="input" type="number" step=".01" min="0" value="${p.price??0}"></div>
+    <div class="field"><label>Categoria</label><select id="pfCat" class="select"><option value="">Sem categoria</option>${categories.map(c=>`<option value="${c.id}" ${c.id===p.category_id?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div>
+    <div class="field"><label>Ordem no cardápio</label><input id="pfOrder" class="input" type="number" value="${p.display_order||0}"></div>
+    <div class="field"><label>Imagem principal</label><input id="pfImage" class="input" type="file" accept="image/*"><small style="color:#8190a0">A imagem será enviada para o bucket público menu-assets.</small></div>
+    <div class="field full"><label>Descrição</label><textarea id="pfDesc" class="textarea" rows="3">${esc(p.description||"")}</textarea></div>
+    <div class="field"><label class="check"><input id="pfAvailable" type="checkbox" ${p.is_available!==false?"checked":""}> Disponível</label></div>
+    <div class="field"><label class="check"><input id="pfActive" type="checkbox" ${p.is_active!==false?"checked":""}> Ativo no cardápio</label></div>
+    <div class="field full"><label>Adicionais permitidos</label><div class="grid3">${addons.length?addons.map(a=>`<label class="check" style="padding:8px;background:#0d141c;border:1px solid var(--border);border-radius:8px"><input class="pfAddon" type="checkbox" value="${a.id}" ${selected.includes(a.id)?"checked":""}> ${esc(a.name)} · ${money(a.price)}</label>`).join(""):`<span class="notice">Cadastre adicionais primeiro.</span>`}</div></div>
+    <div class="field full"><label>Modelo 3D (GLB)</label>
+      ${model.model_url?`<div class="notice">Modelo atual: <a href="${esc(model.model_url)}" target="_blank" style="color:#9edfff">abrir modelo</a></div>`:""}
+      <input id="pfModel" class="input" type="file" accept=".glb,model/gltf-binary">
+      <input id="pfModelUrl" class="input" style="margin-top:7px" placeholder="Ou cole a URL do GLB" value="${esc(model.model_url||"")}">
+    </div>
+    <div class="field"><label>Imagem de capa do 3D (opcional)</label><input id="pfPoster" class="input" type="file" accept="image/*"></div>
+    <div class="field"><label>AR</label><label class="check"><input id="pfAr" type="checkbox" ${ar.ar_enabled?"checked":""}> Liberar "Ver na minha mesa"</label></div>
   </div>
   <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveProduct('${p.id||""}')">Salvar produto</button></div>`}
 function openProduct(id){if(!canWrite()){toast("Seu perfil não pode editar produtos.");return}const p=products.find(x=>x.id===id)||{};openModal(productForm(p))}
-async function uploadImage(file,productId){
+async function uploadAsset(file,folder,entityId){
   if(!file)return null;
-  const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
-  const path=`products/${restaurant.id}/${productId}-${crypto.randomUUID()}.${ext}`;
+  const ext=(file.name.split(".").pop()||"bin").toLowerCase().replace(/[^a-z0-9]/g,"");
+  const path=`${folder}/${restaurant.id}/${entityId}-${crypto.randomUUID()}.${ext}`;
   const {error}=await sb.storage.from("menu-assets").upload(path,file,{upsert:false,contentType:file.type});
   if(error)throw error;
   return sb.storage.from("menu-assets").getPublicUrl(path).data.publicUrl;
 }
+async function uploadImage(file,productId){return uploadAsset(file,"products",productId)}
 async function saveProduct(id){
   try{
     if(!canWrite())throw new Error("Sem permissão.");
     const name=$("pfName").value.trim(),price=Number($("pfPrice").value);
-    if(!name)throw new Error("Informe o nome do produto.");if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");
-    const payload={restaurant_id:restaurant.id,name,description:$("pfDesc").value.trim()||null,price,category_id:$("pfCat").value||null,is_available:$("pfAvailable").checked,is_active:$("pfActive").checked};
+    if(!name)throw new Error("Informe o nome do produto.");
+    if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");
+    const payload={restaurant_id:restaurant.id,name,description:$("pfDesc").value.trim()||null,price,category_id:$("pfCat").value||null,display_order:Number($("pfOrder").value)||0,is_available:$("pfAvailable").checked,is_active:$("pfActive").checked};
     let productId=id;
     if(id){const {error}=await sb.from("products").update(payload).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error}
     else{const {data,error}=await sb.from("products").insert(payload).select("id").single();if(error)throw error;productId=data.id}
-    const file=$("pfImage").files[0];if(file){const url=await uploadImage(file,productId);const {error}=await sb.from("products").update({image_url:url}).eq("id",productId);if(error)throw error}
-    closeModal();await loadAll();toast("Produto salvo com sucesso.");
+    const file=$("pfImage").files[0];if(file){const url=await uploadImage(file,productId);const {error}=await sb.from("products").update({image_url:url}).eq("id",productId).eq("restaurant_id",restaurant.id);if(error)throw error}
+    const addonIds=[...document.querySelectorAll(".pfAddon:checked")].map(x=>x.value);
+    const {error:delErr}=await sb.from("product_add_ons").delete().eq("product_id",productId);if(delErr)throw delErr;
+    if(addonIds.length){const {error:addErr}=await sb.from("product_add_ons").insert(addonIds.map(add_on_id=>({product_id:productId,add_on_id})));if(addErr)throw addErr}
+    const modelFile=$("pfModel").files[0],posterFile=$("pfPoster").files[0];
+    let modelUrl=$("pfModelUrl").value.trim()||null;
+    if(modelFile)modelUrl=await uploadAsset(modelFile,"models",productId);
+    let posterUrl=modelFor(productId)?.poster_url||null;
+    if(posterFile)posterUrl=await uploadAsset(posterFile,"models-posters",productId);
+    if(modelUrl){
+      const {error}=await sb.from("product_models").upsert({product_id:productId,model_url:modelUrl,poster_url:posterUrl,camera_orbit:"0deg 75deg 105%",field_of_view:"30deg"},{onConflict:"product_id"});
+      if(error)throw error;
+    }else if(id){
+      const {error}=await sb.from("product_models").delete().eq("product_id",productId);if(error)throw error;
+    }
+    const {error:arErr}=await sb.from("ar_configs").upsert({product_id:productId,ar_enabled:$("pfAr").checked,ar_scale:"auto"},{onConflict:"product_id"});
+    if(arErr)throw arErr;
+    closeModal();await loadAll();toast("Produto salvo com catálogo, adicionais, 3D e AR.");
   }catch(e){err(e,"Salvar produto")}
 }
 async function toggleAvailable(id){try{const p=products.find(x=>x.id===id);const {error}=await sb.from("products").update({is_available:!p.is_available}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Pausa rápida")}}
@@ -293,9 +339,9 @@ async function toggleActive(id){try{const p=products.find(x=>x.id===id);const {e
 function renderCategories(){
   $("categoriesBody").innerHTML=categories.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${c.display_order||0}</td><td>${c.is_active?'<span class="badge green">Ativa</span>':'<span class="badge red">Inativa</span>'}</td><td><div class="actions"><button class="btn small" onclick="openCategory('${c.id}')">Editar</button><button class="btn small" onclick="toggleCategory('${c.id}')">${c.is_active?"Desativar":"Ativar"}</button></div></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhuma categoria.</td></tr>`;
 }
-function openCategory(id){if(!canWrite())return toast("Sem permissão.");const c=categories.find(x=>x.id===id)||{};openModal(`<h2>${id?"Editar":"Nova"} categoria</h2><div class="field"><label>Nome</label><input id="cfName" class="input" value="${esc(c.name||"")}"></div><div class="field"><label>Ordem</label><input id="cfOrder" class="input" type="number" value="${c.display_order||0}"></div><div class="field"><label class="check"><input id="cfActive" type="checkbox" ${c.is_active!==false?"checked":""}> Ativa</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCategory('${id||""}')">Salvar</button></div>`)}
-async function saveCategory(id){try{const name=$("cfName").value.trim();if(!name)throw new Error("Informe o nome.");const p={restaurant_id:restaurant.id,name,display_order:Number($("cfOrder").value)||0,is_active:$("cfActive").checked};const q=id?sb.from("categories").update(p).eq("id",id):sb.from("categories").insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast("Categoria salva.")}catch(e){err(e,"Categoria")}}
-async function toggleCategory(id){const c=categories.find(x=>x.id===id);const {error}=await sb.from("categories").update({is_active:!c.is_active}).eq("id",id);if(error)err(error,"Categoria");else loadAll()}
+function openCategory(id){if(!canWrite())return toast("Sem permissão.");const c=categories.find(x=>x.id===id)||{};openModal(`<h2>${id?"Editar":"Nova"} categoria</h2><div class="field"><label>Nome</label><input id="cfName" class="input" value="${esc(c.name||"")}"></div><div class="field"><label>Ordem no cardápio</label><input id="cfOrder" class="input" type="number" value="${c.display_order||0}"></div><div class="field"><label class="check"><input id="cfActive" type="checkbox" ${c.is_active!==false?"checked":""}> Ativa</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCategory('${id||""}')">Salvar</button></div>`)}
+async function saveCategory(id){try{if(!canWrite())throw new Error("Sem permissão.");const name=$("cfName").value.trim();if(!name)throw new Error("Informe o nome.");const p={restaurant_id:restaurant.id,name,display_order:Number($("cfOrder").value)||0,is_active:$("cfActive").checked};const q=id?sb.from("categories").update(p).eq("id",id).eq("restaurant_id",restaurant.id):sb.from("categories").insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast("Categoria salva.")}catch(e){err(e,"Categoria")}}
+async function toggleCategory(id){try{if(!canWrite())throw new Error("Sem permissão.");const c=categories.find(x=>x.id===id);const {error}=await sb.from("categories").update({is_active:!c.is_active}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Categoria")}}
 
 function renderOrders(){
   const filtered=currentOrderFilter==="all"?orders:orders.filter(o=>o.status===currentOrderFilter);
@@ -314,16 +360,59 @@ function renderTables(){$("tablesGrid").innerHTML=tables.map(t=>{const os=orders
 function openTable(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Nova mesa</h2><div class="field"><label>Número</label><input id="tfNumber" class="input" type="number" min="1"></div><div class="field"><label>Descrição</label><input id="tfDesc" class="input"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTable()">Salvar</button></div>`)}
 async function saveTable(){try{const n=Number($("tfNumber").value);if(!n)throw new Error("Número inválido.");const {error}=await sb.from("tables").insert({restaurant_id:restaurant.id,table_number:n,description:$("tfDesc").value.trim()||null,is_active:true});if(error)throw error;closeModal();await loadAll();toast("Mesa criada.")}catch(e){err(e,"Mesa")}}
 
-function renderAddons(){$("addonsBody").innerHTML=addons.map(a=>`<tr><td>${esc(a.name)}</td><td>${money(a.price)}</td><td>${a.is_available?'<span class="badge green">Sim</span>':'<span class="badge red">Não</span>'}</td><td><button class="btn small" onclick="editAddon('${a.id}')">Editar</button></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum adicional.</td></tr>`}
-function openAddon(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Novo adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon()">Salvar</button></div>`)}
-function editAddon(id){const a=addons.find(x=>x.id===id);openModal(`<h2>Editar adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input" value="${esc(a.name)}"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" value="${a.price}"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" ${a.is_available?"checked":""}> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon('${id}')">Salvar</button></div>`)}
-async function saveAddon(id){try{const p={restaurant_id:restaurant.id,name:$("afName").value.trim(),price:Number($("afPrice").value)||0,is_available:$("afAvail")?.checked??true};if(!p.name)throw new Error("Informe o nome.");const q=id?sb.from("add_ons").update(p).eq("id",id):sb.from("add_ons").insert(p);const {error}=await q;if(error)throw error;closeModal();loadAll()}catch(e){err(e,"Adicional")}}
+function renderAddons(){$("addonsBody").innerHTML=addons.map(a=>`<tr><td>${esc(a.name)}</td><td>${money(a.price)}</td><td>${a.is_available?'<span class="badge green">Sim</span>':'<span class="badge red">Não</span>'}</td><td><div class="actions"><button class="btn small" onclick="editAddon('${a.id}')">Editar</button><button class="btn small" onclick="toggleAddon('${a.id}')">${a.is_available?"Pausar":"Ativar"}</button></div></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum adicional.</td></tr>`}
+function openAddon(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Novo adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" min="0"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" checked> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon()">Salvar</button></div>`)}
+function editAddon(id){const a=addons.find(x=>x.id===id);if(!a)return;openModal(`<h2>Editar adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input" value="${esc(a.name)}"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" min="0" value="${a.price}"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" ${a.is_available?"checked":""}> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon('${id}')">Salvar</button></div>`)}
+async function saveAddon(id){try{if(!canWrite())throw new Error("Sem permissão.");const name=$("afName").value.trim(),price=Number($("afPrice").value);if(!name)throw new Error("Informe o nome.");if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");const p={restaurant_id:restaurant.id,name,price,is_available:$("afAvail").checked};const q=id?sb.from("add_ons").update(p).eq("id",id).eq("restaurant_id",restaurant.id):sb.from("add_ons").insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast("Adicional salvo.")}catch(e){err(e,"Adicional")}}
+async function toggleAddon(id){try{if(!canWrite())throw new Error("Sem permissão.");const a=addons.find(x=>x.id===id);const {error}=await sb.from("add_ons").update({is_available:!a.is_available}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Adicional")}}
 
-function renderCombos(){ $("combosBody").innerHTML=combos.map(c=>`<tr><td>${esc(c.name)}</td><td>${money(c.price)}</td><td>${c.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td>—</td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum combo.</td></tr>`}
+function comboProducts(comboId){return comboItems.filter(x=>x.combo_id===comboId)}
+function renderCombos(){
+  $("combosBody").innerHTML=combos.map(c=>{
+    const items=comboProducts(c.id).map(i=>{const p=products.find(x=>x.id===i.product_id);return p?`${i.quantity}x ${esc(p.name)}`:`${i.quantity}x produto removido`}).join("<br>");
+    return `<tr><td><b>${esc(c.name)}</b><br><small>${esc(c.description||"")}</small></td><td>${money(c.price)}</td><td>${c.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td>${items||"—"}</td><td><div class="actions"><button class="btn small" onclick="openCombo('${c.id}')">Editar</button><button class="btn small" onclick="toggleCombo('${c.id}')">${c.is_active?"Desativar":"Ativar"}</button></div></td></tr>`
+  }).join("")||`<tr><td colspan="5" class="empty">Nenhum combo.</td></tr>`;
+}
+function openCombo(id){
+  if(!canWrite())return toast("Sem permissão.");
+  const c=combos.find(x=>x.id===id)||{}, selected={};
+  comboProducts(id).forEach(i=>selected[i.product_id]=i.quantity);
+  const list=products.filter(p=>p.is_active).map(p=>`<div style="display:grid;grid-template-columns:1fr 90px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><label class="check"><input class="comboProduct" type="checkbox" value="${p.id}" ${selected[p.id]?"checked":""}> ${esc(p.name)} · ${money(p.price)}</label><input class="input comboQty" data-product="${p.id}" type="number" min="1" value="${selected[p.id]||1}"></div>`).join("");
+  openModal(`<h2>${id?"Editar":"Novo"} combo</h2>
+    <div class="formgrid">
+      <div class="field full"><label>Nome</label><input id="cfmName" class="input" value="${esc(c.name||"")}"></div>
+      <div class="field"><label>Preço do combo</label><input id="cfmPrice" class="input" type="number" step=".01" min="0" value="${c.price??0}"></div>
+      <div class="field"><label>Ordem</label><input id="cfmOrder" class="input" type="number" value="${c.display_order||0}"></div>
+      <div class="field full"><label>Descrição</label><textarea id="cfmDesc" class="textarea" rows="2">${esc(c.description||"")}</textarea></div>
+      <div class="field full"><label>Imagem do combo</label><input id="cfmImage" class="input" type="file" accept="image/*"></div>
+      <div class="field"><label class="check"><input id="cfmActive" type="checkbox" ${c.is_active!==false?"checked":""}> Ativo</label></div>
+      <div class="field full"><label>Produtos do combo</label><div style="max-height:300px;overflow:auto;border:1px solid var(--border);border-radius:9px;padding:8px">${list||'<div class="empty">Cadastre produtos primeiro.</div>'}</div></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCombo('${id||""}')">Salvar combo</button></div>`);
+}
+async function saveCombo(id){
+  try{
+    if(!canWrite())throw new Error("Sem permissão.");
+    const name=$("cfmName").value.trim(),price=Number($("cfmPrice").value);
+    if(!name)throw new Error("Informe o nome.");if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");
+    const payload={restaurant_id:restaurant.id,name,slug:slugify(name),description:$("cfmDesc").value.trim()||null,price,display_order:Number($("cfmOrder").value)||0,is_active:$("cfmActive").checked};
+    let comboId=id;
+    if(id){const {error}=await sb.from("combos").update(payload).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error}
+    else{const {data,error}=await sb.from("combos").insert(payload).select("id").single();if(error)throw error;comboId=data.id}
+    const file=$("cfmImage").files[0];
+    if(file){const url=await uploadAsset(file,"combos",comboId);const {error}=await sb.from("combos").update({image_url:url}).eq("id",comboId).eq("restaurant_id",restaurant.id);if(error)throw error}
+    const {error:delErr}=await sb.from("combo_items").delete().eq("combo_id",comboId);if(delErr)throw delErr;
+    const chosen=[...document.querySelectorAll(".comboProduct:checked")].map(el=>{const q=document.querySelector(`.comboQty[data-product="${el.value}"]`);return {combo_id:comboId,product_id:el.value,quantity:Math.max(1,Number(q?.value)||1)}})
+    if(chosen.length){const {error}=await sb.from("combo_items").insert(chosen);if(error)throw error}
+    closeModal();await loadAll();toast("Combo salvo com os produtos selecionados.");
+  }catch(e){err(e,"Combo")}
+}
+async function toggleCombo(id){try{if(!canWrite())throw new Error("Sem permissão.");const c=combos.find(x=>x.id===id);const {error}=await sb.from("combos").update({is_active:!c.is_active}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Combo")}}
+
 function renderDashboard(){const today=new Date();today.setHours(0,0,0,0);const day=orders.filter(o=>new Date(o.created_at)>=today&&!["cancelled"].includes(o.status));const rev=day.reduce((a,o)=>a+Number(o.total||0),0);$("mOrders").textContent=day.length;$("mRevenue").textContent=money(rev);$("mTicket").textContent=money(day.length?rev/day.length:0);$("mProducts").textContent=products.filter(p=>p.is_active).length;$("recentOrders").innerHTML=orders.slice(0,6).map(o=>`<div style="padding:9px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>#${o.order_number} · ${esc(o.customer_name||"Cliente")}</span><b>${money(o.total)}</b></div>`).join("")||`<div class="empty">Sem pedidos.</div>`;$("stockInfo").innerHTML=`<div class="badge blue">${products.length} produtos cadastrados</div>`}
 function renderCustomers(){const m={};orders.forEach(o=>{const n=o.customer_name||"Cliente";m[n]??={count:0,total:0};m[n].count++;m[n].total+=Number(o.total||0)});$("customersBody").innerHTML=Object.entries(m).sort((a,b)=>b[1].total-a[1].total).map(([n,x])=>`<tr><td>${esc(n)}</td><td>${x.count}</td><td>${money(x.total)}</td><td>${restaurant.phone_whatsapp?`<button class="btn small" onclick="window.open('https://wa.me/${restaurant.phone_whatsapp}','_blank')">WhatsApp</button>`:"—"}</td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum cliente.</td></tr>`}
 function renderDelivery(){const ds=orders.filter(o=>o.order_type==="delivery");$("deliveryBody").innerHTML=ds.map(o=>`<tr><td>#${o.order_number}</td><td>${esc(o.customer_name||"Cliente")}</td><td>${esc(o.delivery_address||"—")}</td><td>${money(o.total)}</td><td>${fmtStatus(o.status)}</td><td><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button></td></tr>`).join("")||`<tr><td colspan="6" class="empty">Nenhum delivery.</td></tr>`}
-function renderReports(){const active=orders.filter(o=>o.status!=="cancelled"),rev=active.reduce((a,o)=>a+Number(o.total||0),0);$("rRevenue").textContent=money(rev);$("rOrders").textContent=active.length;$("rTicket").textContent=money(active.length?rev/active.length:0);$("rItems").textContent="—";const top={};active.forEach(o=>{(o.items||[]).forEach(i=>top[i.product_name]=(top[i.product_name]||0)+Number(i.quantity||1))});$("topProducts").innerHTML=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,q],i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${i+1}. ${esc(n)} <b style="float:right">${q}</b></div>`).join("")||"Sem itens detalhados.";const pay={};active.forEach(o=>pay[o.payment_method||"Não informado"]=(pay[o.payment_method||"Não informado"]||0)+Number(o.total||0));$("paymentSummary").innerHTML=Object.entries(pay).map(([n,v])=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${esc(n)} <b style="float:right">${money(v)}</b></div>`).join("")||"—"}
+function renderReports(){const active=orders.filter(o=>o.status!=="cancelled"),rev=active.reduce((a,o)=>a+Number(o.total||0),0);$("rRevenue").textContent=money(rev);$("rOrders").textContent=active.length;$("rTicket").textContent=money(active.length?rev/active.length:0);const top={};active.forEach(o=>(o.items||[]).forEach(i=>top[i.product_name]=(top[i.product_name]||0)+Number(i.quantity||1)));const totalItems=Object.values(top).reduce((a,v)=>a+v,0);$("rItems").textContent=totalItems||"0";$("topProducts").innerHTML=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,q],i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${i+1}. ${esc(n)} <b style="float:right">${q}</b></div>`).join("")||"Sem itens detalhados.";const pay={};active.forEach(o=>pay[o.payment_method||"Não informado"]=(pay[o.payment_method||"Não informado"]||0)+Number(o.total||0));$("paymentSummary").innerHTML=Object.entries(pay).map(([n,v])=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${esc(n)} <b style="float:right">${money(v)}</b></div>`).join("")||"—"}
 function renderCash(){const active=orders.filter(o=>o.status!=="cancelled"),m={money:0,pix:0,card:0};active.forEach(o=>{const x=String(o.payment_method||"").toLowerCase(),v=Number(o.total||0);if(x.includes("pix"))m.pix+=v;else if(x.includes("cart"))m.card+=v;else if(x.includes("dinheiro"))m.money+=v});$("cashMoney").textContent=money(m.money);$("cashPix").textContent=money(m.pix);$("cashCard").textContent=money(m.card);$("cashTotal").textContent=money(m.money+m.pix+m.card)}
 
 function fillSettings(){if(!restaurant)return;$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
