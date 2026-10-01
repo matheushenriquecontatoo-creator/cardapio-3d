@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo — Mesa360 SaaS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--primary:#f59e0b;--primary2:#d97706;--bg:#0b0f14;--panel:#111821;--panel2:#17202b;--border:#263241;--text:#f5f7fa;--muted:#8e9aaa;--success:#22c55e;--danger:#ef4444;--info:#38bdf8;--warning:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}.app{min-height:100vh;display:flex}.sidebar{width:250px;background:#0d131b;border-right:1px solid var(--border);position:fixed;inset:0 auto 0 0;z-index:20;overflow:auto}.brand{padding:22px 20px;border-bottom:1px solid var(--border)}.brand b{font-size:18px}.brand small{display:block;color:var(--muted);margin-top:4px}.nav{padding:12px}.nav button{width:100%;text-align:left;background:transparent;border:0;color:#cbd5e1;padding:12px;border-radius:9px;margin:2px 0}.nav button:hover,.nav button.active{background:#192330;color:#fff}.nav .group{font-size:10px;color:#657386;text-transform:uppercase;padding:16px 12px 6px;letter-spacing:.08em}.main{margin-left:250px;width:calc(100% - 250px)}.topbar{height:72px;background:rgba(13,19,27,.95);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:15}.store-status{display:flex;align-items:center;gap:10px}.status-dot{width:9px;height:9px;border-radius:50%;background:var(--danger)}.status-dot.open{background:var(--success)}.master{border:1px solid var(--border);background:#151e29;color:#fff;border-radius:9px;padding:9px 13px}.content{padding:24px;max-width:1500px;margin:auto}.view{display:none}.view.active{display:block}.page-title{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:20px}.page-title h1{font-size:25px;margin:0}.page-title p{margin:5px 0 0;color:var(--muted);font-size:13px}.btn{border:1px solid var(--border);background:#17212d;color:#fff;border-radius:9px;padding:10px 14px}.btn:hover{filter:brightness(1.15)}.btn.primary{background:var(--primary);border-color:var(--primary);color:#17100a;font-weight:700}.btn.danger{background:#36171a;border-color:#6e2529;color:#ffb3b6}.btn.success{background:#12351f;border-color:#216b3c;color:#9af0b4}.btn.small{padding:7px 9px;font-size:12px}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:18px}.metric small{color:var(--muted);font-size:12px}.metric strong{font-size:27px;display:block;margin-top:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:18px}.panel h3{margin:0 0 14px;font-size:16px}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px 9px;border-bottom:1px solid var(--border);text-align:left;font-size:13px;white-space:nowrap}.table th{color:var(--muted);font-weight:600}.thumb{width:46px;height:46px;border-radius:8px;object-fit:cover;background:#202a35}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;background:#202a35;color:#d9e1ea}.badge.green{background:#12351f;color:#9af0b4}.badge.red{background:#3b181b;color:#ffb3b6}.badge.yellow{background:#3a2d0e;color:#f8d982}.badge.blue{background:#102f40;color:#9edfff}.actions{display:flex;gap:6px;flex-wrap:wrap}.searchbar{display:flex;gap:9px;margin-bottom:14px}.input,.select,.textarea{width:100%;background:#0d141c;border:1px solid var(--border);color:#fff;border-radius:8px;padding:10px 11px;outline:none}.input:focus,.select:focus,.textarea:focus{border-color:var(--primary)}.field{margin-bottom:13px}.field label{display:block;color:#aab5c3;font-size:12px;margin-bottom:6px}.check{display:flex;align-items:center;gap:8px;color:#cbd5e1;font-size:13px}.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}.modal{width:min(760px,100%);max-height:92vh;overflow:auto;background:#101720;border:1px solid var(--border);border-radius:14px;padding:20px}.modal h2{margin:0 0 18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.toast{position:fixed;right:20px;bottom:20px;background:#17212d;border:1px solid var(--border);padding:12px 15px;border-radius:9px;z-index:100;display:none;box-shadow:0 10px 30px #0008}.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 0,#202b37,#0b0f14 55%)}.loginbox{width:min(410px,100%);background:#111821;border:1px solid var(--border);border-radius:16px;padding:28px}.loginbox h1{margin:0}.loginbox p{color:var(--muted);font-size:13px}.loginbox .btn{width:100%;margin-top:5px}.notice{padding:11px 13px;border-radius:9px;background:#17202b;color:#b7c4d2;font-size:12px;margin-bottom:14px}.notice.warn{border:1px solid #5d4814}.kds{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:13px;overflow:auto}.ticket{background:#151e28;border:1px solid var(--border);border-radius:12px;padding:14px;min-height:210px}.ticket h4{margin:0}.ticket .items{margin:12px 0}.ticket .item{padding:7px 0;border-bottom:1px solid #26303b;font-size:13px}.ticket-actions{display:flex;gap:6px;margin-top:12px}.progress{height:5px;background:#26303b;border-radius:5px;overflow:hidden}.progress i{display:block;height:100%;background:var(--primary)}.login-error{color:#ff9b9f;font-size:12px;margin-top:10px}.empty{padding:30px;text-align:center;color:var(--muted)}.section-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}.tab{background:#141d27;border:1px solid var(--border);color:#bac5d1;border-radius:8px;padding:8px 11px}.tab.active{border-color:var(--primary);color:#fff}.print-only{display:none}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}.kds{grid-template-columns:repeat(2,minmax(240px,1fr))}}
+@media(max-width:760px){.sidebar{width:72px}.brand{padding:18px 8px;text-align:center}.brand b{font-size:0}.brand b:after{content:"B";font-size:22px;color:var(--primary)}.brand small,.nav .group{display:none}.nav button{font-size:0;text-align:center}.nav button:before{content:"•";font-size:21px}.main{margin-left:72px;width:calc(100% - 72px)}.topbar{padding:0 12px}.content{padding:15px}.cards,.grid2,.grid3{grid-template-columns:1fr}.kds{grid-template-columns:1fr}.page-title{align-items:flex-start;flex-direction:column}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.table th:nth-child(4),.table td:nth-child(4){display:none}}
+@media print{body{background:#fff;color:#000}.sidebar,.topbar,.no-print{display:none!important}.main{margin:0;width:100%}.content{padding:0}.print-only{display:block}.ticket-print{width:58mm;font-family:monospace;font-size:11px}.ticket-print h2{text-align:center;font-size:15px}}
+.qr-card{background:#0d141c;border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}.qr-code{width:128px;height:128px;background:#fff;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center}.qr-info{flex:1;min-width:220px}.qr-info b{display:block;font-size:15px;margin-bottom:5px}.qr-info small{color:var(--muted);line-height:1.45;display:block}.qr-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login">
+  <div class="loginbox">
+    <h1>Brasa 180°</h1>
+    <p>Painel administrativo e operacional</p>
+    <div class="field"><label>E-mail</label><input id="loginEmail" class="input" type="email" autocomplete="username"></div>
+    <div class="field"><label>Senha</label><input id="loginPassword" class="input" type="password" autocomplete="current-password"></div>
+    <button class="btn primary" onclick="login()">Entrar</button>
+    <button class="btn" onclick="openSignup()" style="margin-top:8px">Criar meu restaurante</button>
+    <button class="btn" onclick="recoverPassword()" style="margin-top:8px;background:transparent">Esqueci minha senha</button>
+    <div id="loginError" class="login-error"></div>
+    <div style="margin-top:14px;color:#7f8b99;font-size:11px;line-height:1.5">Crie sua conta e configure o restaurante sem precisar editar código.</div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand"><b>Brasa 180°</b><small id="roleLabel">Painel</small></div>
+    <nav class="nav">
+      <div class="group">Operação</div>
+      <button data-view="dashboard" onclick="go('dashboard')">Dashboard</button>
+      <button data-view="orders" onclick="go('orders')">Pedidos</button>
+      <button data-view="kds" onclick="go('kds')">Cozinha / KDS</button>
+      <button data-view="tables" onclick="go('tables')">Mesas</button>
+      <button data-view="cash" onclick="go('cash')">Caixa</button>
+      <div class="group">Catálogo</div>
+      <button data-view="products" onclick="go('products')">Produtos</button>
+      <button data-view="categories" onclick="go('categories')">Categorias</button>
+      <button data-view="addons" onclick="go('addons')">Adicionais</button>
+      <button data-view="combos" onclick="go('combos')">Combos</button>
+      <div class="group">Gestão</div>
+      <button data-view="customers" onclick="go('customers')">Clientes / CRM</button>
+      <button data-view="delivery" onclick="go('delivery')">Entregas</button>
+      <button data-view="marketing" onclick="go('marketing')">Marketing</button>
+      <button data-view="reports" onclick="go('reports')">Relatórios</button>
+      <button data-view="team" onclick="go('team')">Equipe / Permissões</button>
+      <button data-view="settings" onclick="go('settings')">Configurações</button>
+      <button data-view="billing" onclick="go('billing')">SaaS / Assinatura</button>
+<button data-view="saas" id="saasNav" onclick="go('saas')" style="display:none">Gestão Mesa360</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="store-status">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="storeStatusText">Carregando...</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="master" onclick="toggleStore()" id="storeToggle">...</button>
+        <button class="btn small" onclick="logout()">Sair</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section id="view-dashboard" class="view active">
+        <div class="page-title"><div><h1>Visão geral</h1><p>Operação do restaurante em tempo real.</p></div></div>
+        <div class="cards">
+          <div class="card metric"><small>Pedidos hoje</small><strong id="mOrders">0</strong></div>
+          <div class="card metric"><small>Faturamento hoje</small><strong id="mRevenue">R$ 0,00</strong></div>
+          <div class="card metric"><small>Ticket médio</small><strong id="mTicket">R$ 0,00</strong></div>
+          <div class="card metric"><small>Produtos ativos</small><strong id="mProducts">0</strong></div>
+        </div>
+        <div class="grid2" style="margin-top:16px">
+          <div class="panel"><h3>Pedidos recentes</h3><div id="recentOrders"></div></div>
+          <div class="panel"><h3>Estoque / atenção operacional</h3><div class="notice">O controle de estoque por insumo exige a estrutura de ficha técnica e estoque no banco. A interface está preparada, mas não inventa baixas que o banco ainda não suporta.</div><div id="stockInfo"></div></div>
+          <div class="panel"><h3>Onboarding comercial</h3><div id="onboardingBox"></div></div>
+        </div>
+      </section>
+
+      <section id="view-products" class="view">
+        <div class="page-title"><div><h1>Produtos</h1><p>Cadastro completo do cardápio, adicionais, 3D e AR.</p></div><button class="btn primary" onclick="openProduct()">+ Novo produto</button></div>
+        <div class="panel">
+          <div class="searchbar"><input id="productSearch" class="input" placeholder="Buscar produto..." oninput="renderProducts()"></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Disponibilidade</th><th>Status</th><th>Ações</th></tr></thead><tbody id="productsBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="view-categories" class="view">
+        <div class="page-title"><div><h1>Categorias</h1><p>Organização do cardápio.</p></div><button class="btn primary" onclick="openCategory()">+ Nova categoria</button></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Ordem</th><th>Ativa</th><th>Ações</th></tr></thead><tbody id="categoriesBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-orders" class="view">
+        <div class="page-title"><div><h1>Pedidos</h1><p>Atualização automática pelo Realtime.</p></div><button class="btn" onclick="loadAll()">Atualizar</button></div>
+        <div class="section-tabs" id="orderTabs"></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Tipo</th><th>Mesa</th><th>Pagamento</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-kds" class="view">
+        <div class="page-title"><div><h1>KDS — Produção</h1><p>Fila operacional de pedidos pendentes e em preparo.</p></div><button class="btn" onclick="testSound()">Testar som</button></div>
+        <div class="kds" id="kdsBoard"></div>
+      </section>
+
+      <section id="view-tables" class="view">
+        <div class="page-title"><div><h1>Salão e mesas</h1><p>Mesas ativas, pedidos associados e QR Codes individuais.</p></div><div class="actions"><button class="btn" onclick="openPublicMenu()">Abrir cardápio público</button><button class="btn" onclick="printAllTableQRs()">Imprimir QR Codes</button><button class="btn primary" onclick="openTable()">+ Nova mesa</button></div></div>
+        <div class="grid3" id="tablesGrid"></div>
+      </section>
+
+      <section id="view-cash" class="view">
+        <div class="page-title"><div><h1>Caixa</h1><p>Abertura, movimentações, conferência e fechamento.</p></div><div class="actions"><button class="btn primary" onclick="openCashSession()">Abrir caixa</button><button class="btn" onclick="openCashMovement()">+ Movimentação</button><button class="btn" onclick="closeCashSession()">Fechar caixa</button></div></div>
+        <div id="cashSessionNotice" class="notice"></div>
+        <div class="cards"><div class="card metric"><small>Dinheiro recebido</small><strong id="cashMoney">R$ 0,00</strong></div><div class="card metric"><small>PIX</small><strong id="cashPix">R$ 0,00</strong></div><div class="card metric"><small>Cartão</small><strong id="cashCard">R$ 0,00</strong></div><div class="card metric"><small>Total recebido</small><strong id="cashTotal">R$ 0,00</strong></div></div>
+        <div class="grid2" style="margin-top:16px"><div class="panel"><h3>Conferência do caixa</h3><div id="cashExpected"></div></div><div class="panel"><h3>Movimentações</h3><div id="cashMovements"></div></div></div>
+      </section>
+
+      <section id="view-addons" class="view">
+        <div class="page-title"><div><h1>Adicionais</h1><p>Itens extras disponíveis para vinculação aos produtos.</p></div><button class="btn primary" onclick="openAddon()">+ Novo adicional</button></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Preço</th><th>Disponível</th><th>Ações</th></tr></thead><tbody id="addonsBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-combos" class="view">
+        <div class="page-title"><div><h1>Combos</h1><p>Crie, edite e monte combos usando os produtos do restaurante.</p></div><button class="btn primary" onclick="openCombo()">+ Novo combo</button></div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Preço</th><th>Status</th><th>Itens</th><th>Ações</th></tr></thead><tbody id="combosBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-customers" class="view">
+        <div class="page-title"><div><h1>Clientes / CRM</h1><p>Cadastro permanente de clientes, histórico e fidelidade.</p></div><div class="actions"><button class="btn" onclick="syncCustomersFromOrders()">Importar dos pedidos</button><button class="btn primary" onclick="openCustomer()">+ Novo cliente</button></div></div>
+        <div class="cards"><div class="card metric"><small>Clientes cadastrados</small><strong id="crmCount">0</strong></div><div class="card metric"><small>Clientes ativos</small><strong id="crmActive">0</strong></div><div class="card metric"><small>Faturamento identificado</small><strong id="crmRevenue">R$ 0,00</strong></div><div class="card metric"><small>Pontos emitidos</small><strong id="crmPoints">0</strong></div></div>
+        <div class="panel" style="margin-top:16px"><div class="searchbar"><input id="customerSearch" class="input" placeholder="Buscar cliente por nome, telefone ou e-mail" oninput="renderCustomers()"></div><div class="table-wrap"><table class="table"><thead><tr><th>Cliente</th><th>Contato</th><th>Pedidos</th><th>Total</th><th>Pontos</th><th>Status</th><th>Ações</th></tr></thead><tbody id="customersBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-delivery" class="view">
+        <div class="page-title"><div><h1>Entregas</h1><p>Pedidos, entregadores e atribuição operacional.</p></div><button class="btn primary" onclick="openDriver()">+ Novo entregador</button></div>
+        <div class="grid2"><div class="panel"><h3>Entregadores</h3><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Contato</th><th>Veículo</th><th>Status</th><th>Ações</th></tr></thead><tbody id="driversBody"></tbody></table></div></div><div class="panel"><h3>Pedidos em delivery</h3><div class="table-wrap"><table class="table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Endereço</th><th>Entregador</th><th>Status</th><th>Ações</th></tr></thead><tbody id="deliveryBody"></tbody></table></div></div></div>
+      </section>
+
+      <section id="view-marketing" class="view">
+        <div class="page-title"><div><h1>Marketing e fidelidade</h1><p>Rastreamento, cupons e regras de relacionamento.</p></div><button class="btn primary" onclick="openCoupon()">+ Novo cupom</button></div>
+        <div class="grid2">
+          <div class="panel"><h3>Rastreamento</h3><div class="field"><label>Meta Pixel ID</label><input id="metaPixel" class="input"></div><div class="field"><label>Google Analytics ID</label><input id="gaId" class="input"></div><button class="btn primary" onclick="saveMarketing()">Salvar</button></div>
+          <div class="panel"><h3>Cupons</h3><div class="table-wrap"><table class="table"><thead><tr><th>Código</th><th>Desconto</th><th>Mínimo</th><th>Uso</th><th>Status</th><th>Ações</th></tr></thead><tbody id="couponsBody"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <section id="view-reports" class="view">
+        <div class="page-title"><div><h1>Relatórios</h1><p>Resumo baseado nos pedidos registrados no Supabase.</p></div><div class="actions"><button class="btn" onclick="exportCSV()">Exportar CSV</button><button class="btn" onclick="window.print()">Imprimir</button></div></div>
+        <div class="cards"><div class="card metric"><small>Faturamento</small><strong id="rRevenue">R$ 0,00</strong></div><div class="card metric"><small>Pedidos</small><strong id="rOrders">0</strong></div><div class="card metric"><small>Ticket médio</small><strong id="rTicket">R$ 0,00</strong></div><div class="card metric"><small>Itens vendidos</small><strong id="rItems">0</strong></div></div>
+        <div class="grid2" style="margin-top:16px"><div class="panel"><h3>Top produtos</h3><div id="topProducts"></div></div><div class="panel"><h3>Formas de pagamento</h3><div id="paymentSummary"></div></div></div>
+      </section>
+
+      <section id="view-team" class="view">
+        <div class="page-title"><div><h1>Equipe e permissões</h1><p>Usuários do restaurante, funções e acesso operacional.</p></div></div>
+        <div class="notice warn">A criação do usuário/senha continua sendo feita no Supabase Auth. Aqui você define o restaurante, a função, o acesso e a ativação do perfil.</div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Função</th><th>Status</th><th>Acessos</th><th>Ações</th></tr></thead><tbody id="teamBody"></tbody></table></div></div>
+      </section>
+
+      <section id="view-billing" class="view">
+<div class="page-title"><div><h1>SaaS / Assinatura</h1><p>Plano atual, limites e preparação para cobrança.</p></div></div>
+<div id="billingSummary" class="grid3"><div class="panel">Carregando...</div></div>
+<div class="panel" style="margin-top:16px"><h3>Planos</h3><div id="billingPlans" class="grid2"></div><div id="billingAccessNotice" class="notice warn" style="margin-top:14px">Verificando status da assinatura...</div></div>
+</section>
+<section id="view-settings" class="view">
+        <div class="panel" style="margin-bottom:16px"><h3>Cardápio público</h3><p style="color:var(--muted);font-size:13px;margin:0 0 12px">Link geral do restaurante para QR Code, Instagram, Google e WhatsApp.</p><div class="actions"><input id="publicMenuUrl" class="input" readonly style="flex:1"><button class="btn" onclick="copyPublicMenuUrl()">Copiar link</button><button class="btn" onclick="printPublicMenuQR()">Imprimir QR</button><button class="btn primary" onclick="openPublicMenu()">Abrir</button></div><div style="margin-top:12px;padding:11px;border-radius:10px;background:#0d141c;color:#9aa7b5;font-size:11px;line-height:1.5">URL comercial: <b style="color:#fff">?restaurante=${esc(restaurant?.slug||'')}</b>. Depois podemos conectar domínio próprio sem alterar o cadastro do restaurante.</div></div>
+        <div class="page-title"><div><h1>Configurações</h1><p>Dados gerais do restaurante e operação.</p></div></div>
+        <div class="grid2">
+          <div class="panel"><h3>Restaurante</h3><div class="field"><label>Nome</label><input id="setName" class="input"></div><div class="field"><label>WhatsApp</label><input id="setWhatsapp" class="input"></div><div class="field"><label>Horários</label><textarea id="setHours" class="textarea" rows="4"></textarea></div><div class="field"><label>Cor principal</label><input id="setColor" class="input" type="color"></div><button class="btn primary" onclick="saveRestaurant()">Salvar restaurante</button></div>
+          <div class="panel"><h3>Operação</h3><div class="field"><label>Chave PIX</label><input id="setPix" class="input"></div><div class="field"><label>Taxa de entrega</label><input id="setDeliveryFee" class="input" type="number" step=".01"></div><div class="field"><label>Pedido mínimo</label><input id="setMinOrder" class="input" type="number" step=".01"></div><label class="check"><input id="setDelivery" type="checkbox"> Aceitar delivery</label><br><label class="check"><input id="setTableOrders" type="checkbox"> Aceitar pedidos de mesa</label><br><button class="btn primary" onclick="saveSettings()">Salvar operação</button></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div id="modal" class="modal-back hidden"><div class="modal"><div id="modalContent"></div></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL="https://dtkcjenytrpaholunkef.supabase.co";
+const SUPABASE_KEY="sb_publishable_G0tSaqoDOryj5LXHnQAZeQ_YhKWfLHn";
+const RESTAURANT_SLUG="brasa-180";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let session=null,profile=null,restaurant=null,settings=null;
+let products=[],categories=[],orders=[],addons=[],combos=[],tables=[],productModels=[],arConfigs=[],productAddons=[],comboItems=[],orderItems=[],payments=[],customers=[],cashSessions=[],cashMovements=[],drivers=[],coupons=[],loyaltyAccounts=[],teamProfiles=[];
+let currentOrderFilter="all", realtimeChannel=null, audioCtx=null;
+
+const $=id=>document.getElementById(id);
+const money=v=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(v||0));
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function toast(msg){$("toast").textContent=msg;$("toast").style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").style.display="none",3000)}
+function err(e,context="Operação"){console.error(context,e);toast(context+": "+(e?.message||"Erro desconhecido"))}
+function closeModal(){$("modal").classList.add("hidden")}
+function openModal(content){$("modalContent").innerHTML=content;$("modal").classList.remove("hidden")}
+function role(){return profile?.role||"owner"}
+function canWrite(){return ["owner","admin"].includes(role())}
+function fmtStatus(s){const map={pending:["Pendente","yellow"],preparing:["Em preparo","blue"],ready:["Pronto","green"],out_for_delivery:["Em rota","blue"],completed:["Concluído","green"],cancelled:["Cancelado","red"]};const x=map[s]||[s||"—",""];return `<span class="badge ${x[1]}">${esc(x[0])}</span>`}
+function typeLabel(t){return ({mesa:"Mesa",delivery:"Delivery",balcao:"Balcão"}[t]||t||"—")}
+
+async function login(){
+  $("loginError").textContent="";
+  const email=$("loginEmail").value.trim(),password=$("loginPassword").value;
+  if(!email||!password){$("loginError").textContent="Informe e-mail e senha.";return}
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){$("loginError").textContent=error.message;return}
+  session=data.session;await boot();
+}
+function openSignup(){
+  openModal(`<h2>Criar restaurante</h2><p style="color:var(--muted);font-size:12px;line-height:1.5">Abra sua conta do Mesa360 e receba um cardápio público próprio. O plano inicial será <b>trial</b>; nenhuma cobrança é feita por este cadastro.</p><div class="formgrid"><div class="field"><label>Nome do restaurante</label><input id="suName" class="input" placeholder="Ex.: Brasa 180°"></div><div class="field"><label>Identificador do cardápio</label><input id="suSlug" class="input" placeholder="brasa-180" oninput="this.value=slugify(this.value)"></div><div class="field"><label>Nome do responsável</label><input id="suOwner" class="input" placeholder="Seu nome"></div><div class="field"><label>WhatsApp comercial</label><input id="suPhone" class="input" placeholder="5511999999999"></div><div class="field"><label>E-mail de acesso</label><input id="suEmail" class="input" type="email" autocomplete="email"></div><div class="field"><label>Senha</label><input id="suPassword" class="input" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></div></div><div id="signupError" class="login-error"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="createRestaurantAccount()">Criar conta</button></div>`);
+}
+async function createRestaurantAccount(){
+  const errorBox=$("signupError");errorBox.textContent="";
+  const name=$("suName").value.trim(),slug=slugify($("suSlug").value),owner=$("suOwner").value.trim(),phone=$("suPhone").value.trim(),email=$("suEmail").value.trim(),password=$("suPassword").value;
+  if(!name||!slug||!email||!password){errorBox.textContent="Preencha nome, identificador, e-mail e senha.";return}
+  if(password.length<6){errorBox.textContent="A senha precisa ter pelo menos 6 caracteres.";return}
+  const pending={name,slug,owner,phone,email};
+  localStorage.setItem("mesa360_pending_signup",JSON.stringify(pending));
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:owner}}});
+  if(error){errorBox.textContent=error.message;return}
+  if(data.session){session=data.session;const ok=await finishRestaurantBootstrap(pending);if(ok){localStorage.removeItem("mesa360_pending_signup");closeModal();await boot();}}
+  else{closeModal();$("loginError").textContent="Conta criada. Confirme seu e-mail e depois entre no painel para finalizar a criação do restaurante.";}
+}
+async function finishRestaurantBootstrap(pending){
+  try{
+    const {data,error}=await sb.rpc("criar_restaurante_saas",{p_nome:pending.name,p_slug:pending.slug,p_nome_responsavel:pending.owner||null,p_whatsapp:pending.phone||null});
+    if(error)throw error;
+    return !!data;
+  }catch(e){console.error(e);$("loginError").textContent=e?.message||"Não foi possível criar o restaurante.";return false}
+}
+async function recoverPassword(){
+  const email=$("loginEmail").value.trim();
+  if(!email){$("loginError").textContent="Informe seu e-mail no campo acima para receber o link de recuperação.";return}
+  const redirectTo=window.location.origin+window.location.pathname;
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+  $("loginError").textContent=error?error.message:"Se o e-mail existir, o link de recuperação será enviado.";
+}
+async function logout(){await sb.auth.signOut();location.reload()}
+
+async function boot(){
+  if(!session){$("loginScreen").classList.remove("hidden");$("app").classList.add("hidden");return}
+  const {data:p,error:pe}=await sb.from("profiles").select("id,restaurant_id,full_name,role,is_active,permissions").eq("id",session.user.id).maybeSingle();
+  if(pe){$("loginError").textContent=pe.message||"Não foi possível carregar seu perfil.";return}
+  if(!p?.restaurant_id){
+    const pendingRaw=localStorage.getItem("mesa360_pending_signup");
+    if(pendingRaw){
+      try{const pending=JSON.parse(pendingRaw);const ok=await finishRestaurantBootstrap(pending);if(ok){localStorage.removeItem("mesa360_pending_signup");return boot();}}catch(e){$("loginError").textContent=e?.message||"Não foi possível finalizar o cadastro.";return}
+    }
+    $("loginError").textContent="Sua conta está autenticada, mas ainda não há um restaurante vinculado. Use 'Criar meu restaurante' para concluir o cadastro.";
+    return;
+  }
+  profile=p;
+  const {data:r,error:re}=await sb.from("restaurants").select("*").eq("id",p.restaurant_id).single();
+  if(re||!r){err(re||new Error("Restaurante não encontrado"),"Carregamento");return}
+  restaurant=r;
+  const {data:s}=await sb.from("restaurant_settings").select("*").eq("restaurant_id",restaurant.id).maybeSingle();settings=s;
+  $("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");
+  $("roleLabel").textContent=`${profile.full_name||session.user.email} · ${role()}`;
+  applyRoleUI();renderStoreStatus();fillSettings();await loadAll();subscribeRealtime();
+}
+function applyRoleUI(){
+  const permissions=profile?.permissions||{};
+  const fallback={owner:"*",admin:"*",cozinha:["dashboard","orders","kds"],kds:["dashboard","kds"],caixa:["dashboard","orders","cash"],garcom:["dashboard","orders","tables"]}[role()]||["dashboard"];
+  document.querySelectorAll(".nav button").forEach(b=>{const v=b.dataset.view;const allowed=fallback==="*"?true:(permissions[v]!==undefined?permissions[v]:fallback.includes(v));b.classList.toggle("hidden",!allowed)});
+  if(profile?.is_active===false){document.body.innerHTML='<div class="login"><div class="loginbox"><h1>Acesso bloqueado</h1><p>Este perfil está inativo. Solicite ao administrador do restaurante a reativação.</p></div></div>';}
+}
+function go(v){
+  if($("view-"+v).classList.contains("hidden"))return;
+  const p=profile?.permissions||{};if(p[v]===false)return toast("Seu perfil não possui acesso a esta área.");
+  document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+  $("view-"+v).classList.add("active");
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.view===v));
+  if(v==="kds")renderKDS();
+  if(v==="tables")renderTables();
+  if(v==="orders")renderOrders();
+}
+function renderStoreStatus(){
+  const open=!!restaurant.is_open;$("statusDot").classList.toggle("open",open);$("storeStatusText").textContent=open?"LOJA ABERTA":"LOJA FECHADA";$("storeToggle").textContent=open?"LOJA ABERTA":"LOJA FECHADA";
+}
+async function toggleStore(){
+  if(!canWrite()){toast("Seu perfil não pode alterar o status da loja.");return}
+  const next=!restaurant.is_open;const {error}=await sb.from("restaurants").update({is_open:next}).eq("id",restaurant.id);
+  if(error){err(error,"Status da loja");return}restaurant.is_open=next;renderStoreStatus();toast(next?"Loja aberta":"Loja fechada");
+}
+async function loadAll(){
+  try{
+    const [pc,cc,oo,aa,co,tt,cu,cs,cm,dd,cp,la,tp]=await Promise.all([
+      sb.from("products").select("*,categories(id,name)").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
+      sb.from("categories").select("*").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
+      sb.from("orders").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}).limit(500),
+      sb.from("add_ons").select("*").eq("restaurant_id",restaurant.id).order("name"),
+      sb.from("combos").select("*").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
+      sb.from("tables").select("*").eq("restaurant_id",restaurant.id).order("table_number"),
+      sb.from("customers").select("*").eq("restaurant_id",restaurant.id).order("name"),
+      sb.from("cash_sessions").select("*").eq("restaurant_id",restaurant.id).order("opened_at",{ascending:false}).limit(30),
+      sb.from("cash_movements").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}).limit(200),
+      sb.from("delivery_drivers").select("*").eq("restaurant_id",restaurant.id).order("name"),
+      sb.from("coupons").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}),
+      sb.from("loyalty_accounts").select("*").eq("restaurant_id",restaurant.id),
+      sb.from("profiles").select("id,restaurant_id,full_name,role,is_active,permissions,updated_at").eq("restaurant_id",restaurant.id).order("full_name")
+    ]);
+    if(pc.error)throw pc.error;if(cc.error)throw cc.error;if(oo.error)throw oo.error;if(aa.error)throw aa.error;if(co.error)throw co.error;if(tt.error)throw tt.error;if(cu.error)throw cu.error;if(cs.error)throw cs.error;if(cm.error)throw cm.error;if(dd.error)throw dd.error;if(cp.error)throw cp.error;if(la.error)throw la.error;if(tp.error)throw tp.error;
+
+    const productIds=(pc.data||[]).map(x=>x.id), comboIds=(co.data||[]).map(x=>x.id), orderIds=(oo.data||[]).map(x=>x.id);
+    const [pm,ar,pa,ci,oi,pay]=await Promise.all([
+      productIds.length?sb.from("product_models").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
+      productIds.length?sb.from("ar_configs").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
+      productIds.length?sb.from("product_add_ons").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
+      comboIds.length?sb.from("combo_items").select("*").in("combo_id",comboIds):Promise.resolve({data:[],error:null}),
+      orderIds.length?sb.from("order_items").select("*").in("order_id",orderIds).order("created_at"):Promise.resolve({data:[],error:null}),
+      sb.from("payments").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}).limit(1000)
+    ]);
+    if(pm.error)throw pm.error;if(ar.error)throw ar.error;if(pa.error)throw pa.error;if(ci.error)throw ci.error;
+    if(oi.error)throw oi.error;if(pay.error)throw pay.error;
+
+    products=pc.data||[];categories=cc.data||[];orders=oo.data||[];addons=aa.data||[];combos=co.data||[];tables=tt.data||[];
+    customers=cu.data||[];cashSessions=cs.data||[];cashMovements=cm.data||[];drivers=dd.data||[];coupons=cp.data||[];loyaltyAccounts=la.data||[];teamProfiles=tp.data||[];
+    productModels=pm.data||[];arConfigs=ar.data||[];productAddons=pa.data||[];comboItems=ci.data||[];
+    orderItems=oi.data||[];payments=pay.data||[];
+
+    const byOrder={};
+    orderItems.forEach(i=>(byOrder[i.order_id]??=[]).push(i));
+    orders.forEach(o=>o.items=byOrder[o.id]||[]);
+    renderAll();
+  }catch(e){err(e,"Carregamento dos dados")}
+}
+function renderAll(){renderProducts();renderCategories();renderOrders();renderKDS();renderTables();renderAddons();renderCombos();renderDashboard();renderCustomers();renderDelivery();renderReports();renderCash();renderCoupons();renderTeam();renderOnboarding();renderBilling()}
+function renderOnboarding(){
+  const steps=[
+    ['Identidade do restaurante',!!restaurant?.name],
+    ['WhatsApp comercial',!!String(restaurant?.phone_whatsapp||'').trim()],
+    ['Categoria ativa',categories.some(c=>c.is_active)],
+    ['Produto ativo',products.some(p=>p.is_active)],
+    ['Configuração operacional',!!settings]
+  ];
+  const done=steps.filter(x=>x[1]).length,total=steps.length;
+  const pct=Math.round(done/total*100);
+  if($('onboardingBox')) $('onboardingBox').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px"><b>${done}/${total} etapas</b><b>${pct}%</b></div><div class="progress"><i style="width:${pct}%"></i></div><div style="margin-top:12px;display:grid;gap:7px">${steps.map(x=>`<div>${x[1]?'✓':'○'} ${esc(x[0])}</div>`).join('')}</div><div style="margin-top:12px;color:var(--muted);font-size:12px">Plano atual: <b>${esc(restaurant?.plan||'trial')}</b> · Status: <b>${esc(restaurant?.subscription_status||'active')}</b></div>`;
+  if($('onboardingBox'))$('onboardingBox').insertAdjacentHTML('beforeend',`<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn small" onclick="openPublicMenu()">Abrir cardápio</button><button class="btn small" onclick="go('tables')">Configurar QR das mesas</button><button class="btn small" onclick="go('team')">Configurar equipe</button></div>`); if(done===total && restaurant && !restaurant.onboarding_completed && canWrite()) markOnboardingComplete();
+}
+let onboardingSaving=false;
+async function markOnboardingComplete(){
+  if(onboardingSaving)return;onboardingSaving=true;
+  const {error}=await sb.from('restaurants').update({onboarding_completed:true,onboarding_step:10}).eq('id',restaurant.id);
+  if(!error){restaurant.onboarding_completed=true;restaurant.onboarding_step=10;}
+  onboardingSaving=false;
+}
+const roleLabels={owner:'Proprietário',admin:'Administrador',cozinha:'Cozinha',kds:'KDS',caixa:'Caixa',garcom:'Garçom'};
+const permissionLabels={dashboard:'Dashboard',orders:'Pedidos',kds:'KDS',tables:'Mesas',cash:'Caixa',products:'Produtos',customers:'Clientes/CRM',delivery:'Delivery',marketing:'Marketing',reports:'Relatórios',settings:'Configurações',team:'Equipe',billing:'SaaS / Assinatura'};
+function renderTeam(){
+  const body=$('teamBody');if(!body)return;
+  const canManage=['owner','admin'].includes(role());
+  body.innerHTML=teamProfiles.map(p=>{const perms=p.permissions||{};const access=Object.keys(permissionLabels).filter(k=>perms[k]).map(k=>permissionLabels[k]).slice(0,5).join(', ')||'Nenhum';return `<tr><td><b>${esc(p.full_name||'Sem nome')}</b><small style="display:block;color:#8e9aaa">${esc(p.id)}</small></td><td>${esc(roleLabels[p.role]||p.role||'—')}</td><td>${p.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td>${esc(access)}${Object.keys(perms).filter(k=>perms[k]).length>5?'…':''}</td><td>${canManage?`<button class="btn small" onclick="editTeamProfile('${p.id}')">Editar</button>`:'—'}</td></tr>`}).join('')||'<tr><td colspan="5" class="empty">Nenhum perfil encontrado.</td></tr>';
+}
+function defaultPermissionsForRole(r){
+  if(r==='owner'||r==='admin')return Object.fromEntries(Object.keys(permissionLabels).map(k=>[k,true]));
+  if(r==='cozinha'||r==='kds')return {dashboard:true,kds:true,orders:false,tables:false,cash:false,products:false,customers:false,delivery:false,marketing:false,reports:false,settings:false,team:false};
+  if(r==='caixa')return {dashboard:true,orders:true,kds:false,tables:false,cash:true,products:false,customers:false,delivery:false,marketing:false,reports:true,settings:false,team:false};
+  if(r==='garcom')return {dashboard:true,orders:true,kds:false,tables:true,cash:false,products:false,customers:false,delivery:false,marketing:false,reports:false,settings:false,team:false};
+  return {};
+}
+function editTeamProfile(id){
+  if(!['owner','admin'].includes(role()))return toast('Sem permissão.');
+  const p=teamProfiles.find(x=>x.id===id);if(!p)return;
+  const perms=p.permissions||defaultPermissionsForRole(p.role);
+  openModal(`<h2>Editar perfil</h2><div class="field"><label>Nome</label><input id="tpName" class="input" value="${esc(p.full_name||'')}"></div><div class="field"><label>Função</label><select id="tpRole" class="select" onchange="fillRolePermissions()">${Object.entries(roleLabels).map(([v,l])=>`<option value="${v}" ${p.role===v?'selected':''}>${l}</option>`).join('')}</select></div><label class="check"><input id="tpActive" type="checkbox" ${p.is_active?'checked':''}> Perfil ativo</label><div class="field" style="margin-top:14px"><label>Permissões</label><div id="tpPerms" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${Object.entries(permissionLabels).map(([k,l])=>`<label class="check"><input type="checkbox" data-perm="${k}" ${perms[k]?'checked':''}> ${l}</label>`).join('')}</div></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTeamProfile('${p.id}')">Salvar</button></div>`);
+}
+function fillRolePermissions(){const r=$('tpRole')?.value;const perms=defaultPermissionsForRole(r);document.querySelectorAll('#tpPerms [data-perm]').forEach(x=>x.checked=!!perms[x.dataset.perm]);}
+async function saveTeamProfile(id){try{if(!['owner','admin'].includes(role()))throw new Error('Sem permissão.');const p=teamProfiles.find(x=>x.id===id);if(!p)throw new Error('Perfil não encontrado.');const perms={};document.querySelectorAll('#tpPerms [data-perm]').forEach(x=>perms[x.dataset.perm]=x.checked);const nextRole=$('tpRole').value;if(p.id===session.user.id && nextRole!==p.role)throw new Error('Não altere a própria função.');const payload={full_name:$('tpName').value.trim()||null,role:nextRole,is_active:$('tpActive').checked,permissions:perms};const {error}=await sb.from('profiles').update(payload).eq('id',id).eq('restaurant_id',restaurant.id);if(error)throw error;closeModal();await loadAll();toast('Perfil atualizado.')}catch(e){err(e,'Perfil')}
+}
+
+function modelFor(productId){return productModels.find(x=>x.product_id===productId)||null}
+function arFor(productId){return arConfigs.find(x=>x.product_id===productId)||null}
+function addonIdsFor(productId){return productAddons.filter(x=>x.product_id===productId).map(x=>x.add_on_id)}
+function slugify(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
+function renderProducts(){
+  const q=($("productSearch")?.value||"").toLowerCase();
+  const rows=products.filter(p=>p.name.toLowerCase().includes(q)).map(p=>{
+    const model=modelFor(p.id),ar=arFor(p.id),adds=addonIdsFor(p.id).length;
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:9px"><img class="thumb" src="${esc(p.image_url||"")}" onerror="this.style.visibility='hidden'"><div><b>${esc(p.name)}</b><div style="display:flex;gap:4px;margin-top:4px">${model?'<span class="badge blue">3D</span>':""}${ar?.ar_enabled?'<span class="badge green">AR</span>':""}${adds?`<span class="badge">${adds} adicional(is)</span>`:""}</div></div></div></td>
+      <td>${esc(p.categories?.name||"Sem categoria")}</td><td>${money(p.price)}</td>
+      <td><button class="btn small ${p.is_available?"success":""}" onclick="toggleAvailable('${p.id}')">${p.is_available?"Disponível":"Esgotado"}</button></td>
+      <td>${p.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td>
+      <td><div class="actions"><button class="btn small" onclick="openProduct('${p.id}')">Editar</button><button class="btn small" onclick="toggleActive('${p.id}')">${p.is_active?"Desativar":"Ativar"}</button></div></td>
+    </tr>`}).join("");
+  $("productsBody").innerHTML=rows||`<tr><td colspan="6" class="empty">Nenhum produto encontrado.</td></tr>`;
+}
+function productForm(p={}){
+  const selected=addonIdsFor(p.id);
+  const model=modelFor(p.id)||{};
+  const ar=arFor(p.id)||{};
+  return `<h2>${p.id?"Editar produto":"Novo produto"}</h2>
+  <div class="formgrid">
+    <div class="field full"><label>Nome</label><input id="pfName" class="input" value="${esc(p.name||"")}"></div>
+    <div class="field"><label>Preço</label><input id="pfPrice" class="input" type="number" step=".01" min="0" value="${p.price??0}"></div>
+    <div class="field"><label>Categoria</label><select id="pfCat" class="select"><option value="">Sem categoria</option>${categories.map(c=>`<option value="${c.id}" ${c.id===p.category_id?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div>
+    <div class="field"><label>Ordem no cardápio</label><input id="pfOrder" class="input" type="number" value="${p.display_order||0}"></div>
+    <div class="field"><label>Imagem principal</label><input id="pfImage" class="input" type="file" accept="image/*"><small style="color:#8190a0">A imagem será enviada para o bucket público menu-assets.</small></div>
+    <div class="field full"><label>Descrição</label><textarea id="pfDesc" class="textarea" rows="3">${esc(p.description||"")}</textarea></div>
+    <div class="field"><label class="check"><input id="pfAvailable" type="checkbox" ${p.is_available!==false?"checked":""}> Disponível</label></div>
+    <div class="field"><label class="check"><input id="pfActive" type="checkbox" ${p.is_active!==false?"checked":""}> Ativo no cardápio</label></div>
+    <div class="field full"><label>Adicionais permitidos</label><div class="grid3">${addons.length?addons.map(a=>`<label class="check" style="padding:8px;background:#0d141c;border:1px solid var(--border);border-radius:8px"><input class="pfAddon" type="checkbox" value="${a.id}" ${selected.includes(a.id)?"checked":""}> ${esc(a.name)} · ${money(a.price)}</label>`).join(""):`<span class="notice">Cadastre adicionais primeiro.</span>`}</div></div>
+    <div class="field full"><label>Modelo 3D (GLB)</label>
+      ${model.model_url?`<div class="notice">Modelo atual: <a href="${esc(model.model_url)}" target="_blank" style="color:#9edfff">abrir modelo</a></div>`:""}
+      <input id="pfModel" class="input" type="file" accept=".glb,model/gltf-binary">
+      <input id="pfModelUrl" class="input" style="margin-top:7px" placeholder="Ou cole a URL do GLB" value="${esc(model.model_url||"")}">
+    </div>
+    <div class="field"><label>Imagem de capa do 3D (opcional)</label><input id="pfPoster" class="input" type="file" accept="image/*"></div>
+    <div class="field"><label>AR</label><label class="check"><input id="pfAr" type="checkbox" ${ar.ar_enabled?"checked":""}> Liberar "Ver na minha mesa"</label></div>
+  </div>
+  <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveProduct('${p.id||""}')">Salvar produto</button></div>`}
+function openProduct(id){if(!canWrite()){toast("Seu perfil não pode editar produtos.");return}const p=products.find(x=>x.id===id)||{};openModal(productForm(p))}
+async function uploadAsset(file,folder,entityId){
+  if(!file)return null;
+  const ext=(file.name.split(".").pop()||"bin").toLowerCase().replace(/[^a-z0-9]/g,"");
+  const path=`${folder}/${restaurant.id}/${entityId}-${crypto.randomUUID()}.${ext}`;
+  const {error}=await sb.storage.from("menu-assets").upload(path,file,{upsert:false,contentType:file.type});
+  if(error)throw error;
+  return sb.storage.from("menu-assets").getPublicUrl(path).data.publicUrl;
+}
+async function uploadImage(file,productId){return uploadAsset(file,"products",productId)}
+async function saveProduct(id){
+  try{
+    if(!canWrite())throw new Error("Sem permissão.");
+    const name=$("pfName").value.trim(),price=Number($("pfPrice").value);
+    if(!name)throw new Error("Informe o nome do produto.");
+    if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");
+    const payload={restaurant_id:restaurant.id,name,description:$("pfDesc").value.trim()||null,price,category_id:$("pfCat").value||null,display_order:Number($("pfOrder").value)||0,is_available:$("pfAvailable").checked,is_active:$("pfActive").checked};
+    let productId=id;
+    if(id){const {error}=await sb.from("products").update(payload).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error}
+    else{const {data,error}=await sb.from("products").insert(payload).select("id").single();if(error)throw error;productId=data.id}
+    const file=$("pfImage").files[0];if(file){const url=await uploadImage(file,productId);const {error}=await sb.from("products").update({image_url:url}).eq("id",productId).eq("restaurant_id",restaurant.id);if(error)throw error}
+    const addonIds=[...document.querySelectorAll(".pfAddon:checked")].map(x=>x.value);
+    const {error:delErr}=await sb.from("product_add_ons").delete().eq("product_id",productId);if(delErr)throw delErr;
+    if(addonIds.length){const {error:addErr}=await sb.from("product_add_ons").insert(addonIds.map(add_on_id=>({product_id:productId,add_on_id})));if(addErr)throw addErr}
+    const modelFile=$("pfModel").files[0],posterFile=$("pfPoster").files[0];
+    let modelUrl=$("pfModelUrl").value.trim()||null;
+    if(modelFile)modelUrl=await uploadAsset(modelFile,"models",productId);
+    let posterUrl=modelFor(productId)?.poster_url||null;
+    if(posterFile)posterUrl=await uploadAsset(posterFile,"models-posters",productId);
+    if(modelUrl){
+      const {error}=await sb.from("product_models").upsert({product_id:productId,model_url:modelUrl,poster_url:posterUrl,camera_orbit:"0deg 75deg 105%",field_of_view:"30deg"},{onConflict:"product_id"});
+      if(error)throw error;
+    }else if(id){
+      const {error}=await sb.from("product_models").delete().eq("product_id",productId);if(error)throw error;
+    }
+    const {error:arErr}=await sb.from("ar_configs").upsert({product_id:productId,ar_enabled:$("pfAr").checked,ar_scale:"auto"},{onConflict:"product_id"});
+    if(arErr)throw arErr;
+    closeModal();await loadAll();toast("Produto salvo com catálogo, adicionais, 3D e AR.");
+  }catch(e){err(e,"Salvar produto")}
+}
+async function toggleAvailable(id){try{const p=products.find(x=>x.id===id);const {error}=await sb.from("products").update({is_available:!p.is_available}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Pausa rápida")}}
+async function toggleActive(id){try{const p=products.find(x=>x.id===id);const {error}=await sb.from("products").update({is_active:!p.is_active}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Status do produto")}}
+
+function renderCategories(){
+  $("categoriesBody").innerHTML=categories.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${c.display_order||0}</td><td>${c.is_active?'<span class="badge green">Ativa</span>':'<span class="badge red">Inativa</span>'}</td><td><div class="actions"><button class="btn small" onclick="openCategory('${c.id}')">Editar</button><button class="btn small" onclick="toggleCategory('${c.id}')">${c.is_active?"Desativar":"Ativar"}</button></div></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhuma categoria.</td></tr>`;
+}
+function openCategory(id){if(!canWrite())return toast("Sem permissão.");const c=categories.find(x=>x.id===id)||{};openModal(`<h2>${id?"Editar":"Nova"} categoria</h2><div class="field"><label>Nome</label><input id="cfName" class="input" value="${esc(c.name||"")}"></div><div class="field"><label>Ordem no cardápio</label><input id="cfOrder" class="input" type="number" value="${c.display_order||0}"></div><div class="field"><label class="check"><input id="cfActive" type="checkbox" ${c.is_active!==false?"checked":""}> Ativa</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCategory('${id||""}')">Salvar</button></div>`)}
+async function saveCategory(id){try{if(!canWrite())throw new Error("Sem permissão.");const name=$("cfName").value.trim();if(!name)throw new Error("Informe o nome.");const p={restaurant_id:restaurant.id,name,display_order:Number($("cfOrder").value)||0,is_active:$("cfActive").checked};const q=id?sb.from("categories").update(p).eq("id",id).eq("restaurant_id",restaurant.id):sb.from("categories").insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast("Categoria salva.")}catch(e){err(e,"Categoria")}}
+async function toggleCategory(id){try{if(!canWrite())throw new Error("Sem permissão.");const c=categories.find(x=>x.id===id);const {error}=await sb.from("categories").update({is_active:!c.is_active}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Categoria")}}
+
+function paymentFor(orderId){return payments.find(x=>x.order_id===orderId)||null}
+function renderOrders(){
+  const filtered=currentOrderFilter==="all"?orders:orders.filter(o=>o.status===currentOrderFilter);
+  $("orderTabs").innerHTML=[["all","Todos"],["pending","Pendentes"],["preparing","Em preparo"],["ready","Prontos"],["out_for_delivery","Em rota"],["completed","Concluídos"],["cancelled","Cancelados"]].map(([v,t])=>`<button class="tab ${currentOrderFilter===v?"active":""}" onclick="currentOrderFilter='${v}';renderOrders()">${t}</button>`).join("");
+  $("ordersBody").innerHTML=filtered.map(o=>{
+    const pay=paymentFor(o.id),items=o.items||[];
+    return `<tr>
+      <td><b>#${o.order_number}</b><br><small>${items.reduce((a,i)=>a+Number(i.quantity||0),0)} item(ns)</small></td>
+      <td>${esc(o.customer_name||"Cliente")}${o.customer_phone?`<small style="display:block;color:#8e9aaa">${esc(o.customer_phone)}</small>`:""}</td><td>${typeLabel(o.order_type)}</td><td>${o.table_number||"—"}</td>
+      <td>${esc(o.payment_method||"—")}${pay?.status==="paid"?'<br><span class="badge green">Pago</span>':pay?.status?`<br><span class="badge yellow">${esc(pay.status)}</span>`:""}</td>
+      <td>${money(o.total)}</td><td>${fmtStatus(o.status)}</td>
+      <td><div class="actions"><button class="btn small" onclick="openOrder('${o.id}')">Detalhes</button><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button><button class="btn small" onclick="printOrder('${o.id}')">Imprimir</button></div></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="8" class="empty">Nenhum pedido.</td></tr>`;
+}
+function openOrder(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const items=o.items||[],pay=paymentFor(id);
+  const itemHtml=items.length?items.map(i=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><span><b>${i.quantity}x</b> ${esc(i.product_name)}${i.variant_name?` · ${esc(i.variant_name)}`:""}${i.observation?`<small style="display:block;color:#8e9aaa">Obs.: ${esc(i.observation)}</small>`:""}</span><b>${money(Number(i.unit_price||0)*Number(i.quantity||1))}</b></div>`).join(""):`<div class="empty">Nenhum item encontrado.</div>`;
+  const addonRows=items.flatMap(i=>(i.add_ons||[]).map(a=>`<div style="font-size:12px;color:#9aa7b5">+ ${esc(a.add_on_name||a.name||"Adicional")} · ${money(a.price)}</div>`)).join("");
+  openModal(`<h2>Pedido #${o.order_number}</h2>
+    <div class="grid2">
+      <div class="panel"><h3>Cliente e entrega</h3><div><b>${esc(o.customer_name||"Cliente")}</b></div><div style="margin-top:7px">${typeLabel(o.order_type)}${o.table_number?` · Mesa ${o.table_number}`:""}</div>${o.delivery_address?`<div style="margin-top:7px;color:#aab5c3">${esc(o.delivery_address)}</div>`:""}${o.customer_phone?`<div style="margin-top:7px">WhatsApp: <b>${esc(o.customer_phone)}</b></div>`:""}${o.observation?`<div class="notice" style="margin-top:12px">Obs.: ${esc(o.observation)}</div>`:""}</div>
+      <div class="panel"><h3>Pagamento</h3><div>Forma: <b>${esc(o.payment_method||"Não informado")}</b></div><div style="margin-top:7px">Status: ${pay?fmtStatus(pay.status):'<span class="badge yellow">Não registrado</span>'}</div>${o.change_for?`<div style="margin-top:7px">Troco para: ${money(o.change_for)}</div>`:""}</div>
+    </div>
+    <div class="panel" style="margin-top:14px"><h3>Itens</h3>${itemHtml}${addonRows?`<div style="margin-top:8px">${addonRows}</div>`:""}<div style="display:flex;justify-content:space-between;margin-top:14px"><span>Subtotal</span><b>${money(o.subtotal)}</b></div>${Number(o.delivery_fee||0)>0?`<div style="display:flex;justify-content:space-between;margin-top:6px"><span>Entrega</span><b>${money(o.delivery_fee)}</b></div>`:""}${Number(o.discount_amount||0)>0?`<div style="display:flex;justify-content:space-between;margin-top:6px;color:#86efac"><span>Desconto${o.coupon_code?` (${esc(o.coupon_code)})`:""}</span><b>-${money(o.discount_amount)}</b></div>`:""}<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:18px"><span>Total</span><b>${money(o.total)}</b></div></div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Fechar</button><button class="btn" onclick="printOrder('${o.id}')">Imprimir</button><button class="btn primary" onclick="advanceOrder('${o.id}')">Avançar status</button></div>`);
+}
+async function advanceOrder(id){
+  try{
+    const o=orders.find(x=>x.id===id);if(!o)return;
+    const seq={pending:"preparing",preparing:"ready",ready:o.order_type==="delivery"?"out_for_delivery":"completed",out_for_delivery:"completed"};
+    const next=seq[o.status];if(!next)return toast("Esse pedido já está no último status operacional.");
+    const {error}=await sb.from("orders").update({status:next}).eq("id",id).eq("restaurant_id",restaurant.id);
+    if(error)throw error;
+    await loadAll();
+    if(next==="completed"&&o.payment_method){
+      const existing=paymentFor(id);
+      if(!existing){
+        const method=String(o.payment_method).toLowerCase();
+        const normalized=method.includes("pix")?"pix":method.includes("cart")?"card":method.includes("dinheiro")?"cash":null;
+        if(normalized){
+          const {error:pe}=await sb.from("payments").insert({restaurant_id:restaurant.id,order_id:id,method:normalized,status:"paid",amount:Number(o.total||0),paid_at:new Date().toISOString()});
+          if(pe)console.warn("Pagamento não registrado:",pe);
+          else await loadAll();
+        }
+      }
+    }
+    openWhats(id,next);
+  }catch(e){err(e,"Status do pedido")}
+}
+function renderKDS(){
+  const active=orders.filter(o=>["pending","preparing","ready"].includes(o.status));
+  $("kdsBoard").innerHTML=active.map(o=>{
+    const items=o.items||[];
+    return `<div class="ticket">
+      <div style="display:flex;justify-content:space-between"><h4>#${o.order_number} · ${typeLabel(o.order_type)}</h4>${fmtStatus(o.status)}</div>
+      <small>${esc(o.customer_name||"Cliente")} ${o.table_number?`· Mesa ${o.table_number}`:""}</small>
+      <div class="items">${items.length?items.map(i=>`<div class="item"><b>${i.quantity}x</b> ${esc(i.product_name)}${i.variant_name?` · ${esc(i.variant_name)}`:""}${i.observation?`<div style="color:#fbbf24;margin-top:3px">Obs.: ${esc(i.observation)}</div>`:""}</div>`).join(""):`<div class="item">Itens não encontrados.</div>`}</div>
+      ${o.observation?`<div class="notice warn">Pedido: ${esc(o.observation)}</div>`:""}
+      <div class="ticket-actions"><button class="btn small primary" onclick="advanceOrder('${o.id}')">Avançar</button><button class="btn small" onclick="openOrder('${o.id}')">Detalhes</button><button class="btn small" onclick="printOrder('${o.id}')">Imprimir</button></div>
+    </div>`;
+  }).join("")||`<div class="empty">Fila vazia.</div>`;
+}
+function testSound(){beep();toast("Som testado.")}
+function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(audioCtx.destination);o.start();setTimeout(()=>o.stop(),180)}catch(e){}}
+function subscribeRealtime(){
+  if(realtimeChannel)sb.removeChannel(realtimeChannel);
+  realtimeChannel=sb.channel("orders").on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:`restaurant_id=eq.${restaurant.id}`},payload=>{if(payload.eventType==="INSERT"&&payload.new?.status==="pending"){beep();toast(`Novo pedido #${payload.new.order_number}`)}loadAll()}).subscribe();
+}
+function renderTables(){
+ const activeOrders=orders.filter(o=>!['completed','cancelled'].includes(o.status));
+ $('tablesGrid').innerHTML=tables.map(t=>{
+  const os=activeOrders.filter(o=>Number(o.table_number)===Number(t.table_number));
+  const total=os.reduce((a,o)=>a+Number(o.total||0),0);
+  const url=publicMenuUrl(Number(t.table_number));
+  return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div style="font-size:18px;font-weight:900">Mesa ${esc(t.table_number)}</div><small style="color:var(--muted)">${esc(t.description||'')}</small></div><span class="badge ${os.length?'yellow':'green'}">${os.length?'Ocupada':'Livre'}</span></div><div style="margin-top:12px;color:var(--muted);font-size:12px">${os.length} pedido(s) aberto(s) · ${money(total)}</div><div class="qr-card" style="margin-top:12px"><div id="qr-${t.id}" class="qr-code"></div><div class="qr-info"><b>QR da Mesa ${esc(t.table_number)}</b><small>O cliente entra no cardápio com esta mesa preenchida automaticamente.</small><div class="qr-actions"><button class="btn small" onclick="openTable('${t.id}')">Editar</button><button class="btn small" onclick="copyText('${url}')">Copiar link</button><button class="btn small primary" onclick="printTableQR('${t.id}')">Imprimir</button></div></div></div></div>`;
+ }).join('')||'<div class="empty">Nenhuma mesa cadastrada.</div>';
+ setTimeout(()=>tables.forEach(t=>{const el=$('qr-'+t.id);if(el&&window.QRCode)new QRCode(el,{text:publicMenuUrl(Number(t.table_number)),width:112,height:112,colorDark:'#111111',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}),0);
+}
+
+function publicMenuUrl(table){
+ const base=window.location.origin+window.location.pathname.replace(/[^/]+$/,'');
+ const mesa=table!==''&&table!==null&&table!==undefined?`&mesa=${encodeURIComponent(table)}`:'';
+ return `${base}index.html?restaurante=${encodeURIComponent(restaurant?.slug||'brasa-180')}${mesa}`;
+}
+function openPublicMenu(){window.open(publicMenuUrl(''),'_blank')}
+function copyText(text){navigator.clipboard?.writeText(text).then(()=>toast('Link copiado.')).catch(()=>prompt('Copie o link:',text))}
+function copyPublicMenuUrl(){copyText(publicMenuUrl(''))}
+function printPublicMenuQR(){
+  const url=publicMenuUrl("");const w=window.open("","_blank","width=500,height=700");if(!w)return;
+  w.document.write(`<html><head><title>QR Cardápio - ${esc(restaurant?.name||'Restaurante')}</title><style>body{font-family:Arial;text-align:center;padding:30px}h1{font-size:30px;margin:0 0 8px}p{color:#555}#qr{width:300px;height:300px;margin:25px auto;background:#fff;padding:10px}</style></head><body><h1>${esc(restaurant?.name||'Restaurante')}</h1><p>Escaneie para abrir o cardápio</p><div id="qr"></div><p>${esc(url)}</p><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById('qr'),{text:${JSON.stringify(url)},width:300,height:300});setTimeout(()=>window.print(),700);<\/script></div></body></html>`);w.document.close();
+}
+function printTableQR(id){
+ const t=tables.find(x=>x.id===id);if(!t)return;const url=publicMenuUrl(Number(t.table_number));const w=window.open('','_blank','width=520,height=720');if(!w)return;
+ w.document.write(`<html><head><title>QR Mesa ${t.table_number}</title><style>body{font-family:Arial;text-align:center;padding:30px}h1{font-size:34px;margin:0 0 8px}p{color:#555}#qr{width:280px;height:280px;margin:25px auto;background:#fff;padding:10px}#qr img{width:280px;height:280px}</style></head><body><h1>Mesa ${t.table_number}</h1><p>${esc(restaurant?.name||'Restaurante')}</p><div id="qr"></div><p>Escaneie para abrir o cardápio desta mesa.</p><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById('qr'),{text:${JSON.stringify(url)},width:280,height:280});setTimeout(()=>window.print(),500);<\/script></div></body></html>`);w.document.close();
+}
+function printAllTableQRs(){
+ if(!tables.length)return toast('Cadastre pelo menos uma mesa.');const w=window.open('','_blank','width=800,height=900');if(!w)return;
+ const cards=tables.map(t=>`<div class="card"><h1>Mesa ${esc(t.table_number)}</h1><p>${esc(restaurant?.name||'Restaurante')}</p><div id="qr-${t.id}" class="qr"></div><small>Escaneie para abrir o cardápio desta mesa.</small></div>`).join('');
+ const scripts=tables.map(t=>`new QRCode(document.getElementById('qr-${t.id}'),{text:${JSON.stringify(publicMenuUrl(Number(t.table_number)))},width:220,height:220});`).join('');
+ w.document.write(`<html><head><title>QR Codes - ${esc(restaurant?.name||'Restaurante')}</title><style>body{font-family:Arial;margin:20px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}.card{border:1px solid #ddd;border-radius:12px;text-align:center;padding:20px;page-break-inside:avoid}.card h1{margin:0 0 6px}.card p{color:#666}.qr{width:220px;height:220px;margin:15px auto}.qr img{width:220px;height:220px}@media print{.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><div class="grid">${cards}</div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>${scripts}setTimeout(()=>window.print(),700);<\/script></div></body></html>`);w.document.close();
+}
+
+function openTable(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Nova mesa</h2><div class="field"><label>Número</label><input id="tfNumber" class="input" type="number" min="1"></div><div class="field"><label>Descrição</label><input id="tfDesc" class="input"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTable()">Salvar</button></div>`)}
+async function saveTable(id){
+  try{
+    if(!canWrite())throw new Error("Sem permissão.");
+    const n=Number($("tfNumber").value);if(!n)throw new Error("Número inválido.");
+    const payload={restaurant_id:restaurant.id,table_number:n,description:$("tfDesc").value.trim()||null,is_active:true};
+    const q=id?sb.from("tables").update(payload).eq("id",id).eq("restaurant_id",restaurant.id):sb.from("tables").insert(payload);
+    const {error}=await q;if(error)throw error;
+    closeModal();await loadAll();toast(id?"Mesa atualizada.":"Mesa criada.");
+  }catch(e){err(e,"Mesa")}
+}
+async function toggleTable(id){
+  try{if(!canWrite())throw new Error("Sem permissão.");const t=tables.find(x=>x.id===id);if(!t)return;const openOrders=orders.some(o=>o.table_number===t.table_number&&!["completed","cancelled"].includes(o.status));if(openOrders)return toast("Não desative uma mesa com pedido aberto.");const {error}=await sb.from("tables").update({is_active:false}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Mesa")}
+}
+function renderAddons(){$("addonsBody").innerHTML=addons.map(a=>`<tr><td>${esc(a.name)}</td><td>${money(a.price)}</td><td>${a.is_available?'<span class="badge green">Sim</span>':'<span class="badge red">Não</span>'}</td><td><div class="actions"><button class="btn small" onclick="editAddon('${a.id}')">Editar</button><button class="btn small" onclick="toggleAddon('${a.id}')">${a.is_available?"Pausar":"Ativar"}</button></div></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum adicional.</td></tr>`}
+function openAddon(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Novo adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" min="0"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" checked> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon()">Salvar</button></div>`)}
+function editAddon(id){const a=addons.find(x=>x.id===id);if(!a)return;openModal(`<h2>Editar adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input" value="${esc(a.name)}"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" min="0" value="${a.price}"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" ${a.is_available?"checked":""}> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon('${id}')">Salvar</button></div>`)}
+async function saveAddon(id){try{if(!canWrite())throw new Error("Sem permissão.");const name=$("afName").value.trim(),price=Number($("afPrice").value);if(!name)throw new Error("Informe o nome.");if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");const p={restaurant_id:restaurant.id,name,price,is_available:$("afAvail").checked};const q=id?sb.from("add_ons").update(p).eq("id",id).eq("restaurant_id",restaurant.id):sb.from("add_ons").insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast("Adicional salvo.")}catch(e){err(e,"Adicional")}}
+async function toggleAddon(id){try{if(!canWrite())throw new Error("Sem permissão.");const a=addons.find(x=>x.id===id);const {error}=await sb.from("add_ons").update({is_available:!a.is_available}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Adicional")}}
+
+function comboProducts(comboId){return comboItems.filter(x=>x.combo_id===comboId)}
+function renderCombos(){
+  $("combosBody").innerHTML=combos.map(c=>{
+    const items=comboProducts(c.id).map(i=>{const p=products.find(x=>x.id===i.product_id);return p?`${i.quantity}x ${esc(p.name)}`:`${i.quantity}x produto removido`}).join("<br>");
+    return `<tr><td><b>${esc(c.name)}</b><br><small>${esc(c.description||"")}</small></td><td>${money(c.price)}</td><td>${c.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td>${items||"—"}</td><td><div class="actions"><button class="btn small" onclick="openCombo('${c.id}')">Editar</button><button class="btn small" onclick="toggleCombo('${c.id}')">${c.is_active?"Desativar":"Ativar"}</button></div></td></tr>`
+  }).join("")||`<tr><td colspan="5" class="empty">Nenhum combo.</td></tr>`;
+}
+function openCombo(id){
+  if(!canWrite())return toast("Sem permissão.");
+  const c=combos.find(x=>x.id===id)||{}, selected={};
+  comboProducts(id).forEach(i=>selected[i.product_id]=i.quantity);
+  const list=products.filter(p=>p.is_active).map(p=>`<div style="display:grid;grid-template-columns:1fr 90px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><label class="check"><input class="comboProduct" type="checkbox" value="${p.id}" ${selected[p.id]?"checked":""}> ${esc(p.name)} · ${money(p.price)}</label><input class="input comboQty" data-product="${p.id}" type="number" min="1" value="${selected[p.id]||1}"></div>`).join("");
+  openModal(`<h2>${id?"Editar":"Novo"} combo</h2>
+    <div class="formgrid">
+      <div class="field full"><label>Nome</label><input id="cfmName" class="input" value="${esc(c.name||"")}"></div>
+      <div class="field"><label>Preço do combo</label><input id="cfmPrice" class="input" type="number" step=".01" min="0" value="${c.price??0}"></div>
+      <div class="field"><label>Ordem</label><input id="cfmOrder" class="input" type="number" value="${c.display_order||0}"></div>
+      <div class="field full"><label>Descrição</label><textarea id="cfmDesc" class="textarea" rows="2">${esc(c.description||"")}</textarea></div>
+      <div class="field full"><label>Imagem do combo</label><input id="cfmImage" class="input" type="file" accept="image/*"></div>
+      <div class="field"><label class="check"><input id="cfmActive" type="checkbox" ${c.is_active!==false?"checked":""}> Ativo</label></div>
+      <div class="field full"><label>Produtos do combo</label><div style="max-height:300px;overflow:auto;border:1px solid var(--border);border-radius:9px;padding:8px">${list||'<div class="empty">Cadastre produtos primeiro.</div>'}</div></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCombo('${id||""}')">Salvar combo</button></div>`);
+}
+async function saveCombo(id){
+  try{
+    if(!canWrite())throw new Error("Sem permissão.");
+    const name=$("cfmName").value.trim(),price=Number($("cfmPrice").value);
+    if(!name)throw new Error("Informe o nome.");if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");
+    const payload={restaurant_id:restaurant.id,name,slug:slugify(name),description:$("cfmDesc").value.trim()||null,price,display_order:Number($("cfmOrder").value)||0,is_active:$("cfmActive").checked};
+    let comboId=id;
+    if(id){const {error}=await sb.from("combos").update(payload).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error}
+    else{const {data,error}=await sb.from("combos").insert(payload).select("id").single();if(error)throw error;comboId=data.id}
+    const file=$("cfmImage").files[0];
+    if(file){const url=await uploadAsset(file,"combos",comboId);const {error}=await sb.from("combos").update({image_url:url}).eq("id",comboId).eq("restaurant_id",restaurant.id);if(error)throw error}
+    const {error:delErr}=await sb.from("combo_items").delete().eq("combo_id",comboId);if(delErr)throw delErr;
+    const chosen=[...document.querySelectorAll(".comboProduct:checked")].map(el=>{const q=document.querySelector(`.comboQty[data-product="${el.value}"]`);return {combo_id:comboId,product_id:el.value,quantity:Math.max(1,Number(q?.value)||1)}})
+    if(chosen.length){const {error}=await sb.from("combo_items").insert(chosen);if(error)throw error}
+    closeModal();await loadAll();toast("Combo salvo com os produtos selecionados.");
+  }catch(e){err(e,"Combo")}
+}
+async function toggleCombo(id){try{if(!canWrite())throw new Error("Sem permissão.");const c=combos.find(x=>x.id===id);const {error}=await sb.from("combos").update({is_active:!c.is_active}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Combo")}}
+
+function renderDashboard(){const today=new Date();today.setHours(0,0,0,0);const day=orders.filter(o=>new Date(o.created_at)>=today&&!["cancelled"].includes(o.status));const rev=day.reduce((a,o)=>a+Number(o.total||0),0);$("mOrders").textContent=day.length;$("mRevenue").textContent=money(rev);$("mTicket").textContent=money(day.length?rev/day.length:0);$("mProducts").textContent=products.filter(p=>p.is_active).length;$("recentOrders").innerHTML=orders.slice(0,6).map(o=>`<div onclick="openOrder('${o.id}')" style="padding:9px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;cursor:pointer"><span>#${o.order_number} · ${esc(o.customer_name||"Cliente")}<small style="display:block;color:#8e9aaa">${typeLabel(o.order_type)} · ${fmtStatus(o.status)}</small></span><b>${money(o.total)}</b></div>`).join("")||`<div class="empty">Sem pedidos.</div>`;$("stockInfo").innerHTML=`<div class="badge blue">${products.length} produtos cadastrados</div>`}
+function renderCustomers(){
+  const q=($('customerSearch')?.value||'').toLowerCase().trim();
+  const orderMap={};orders.forEach(o=>{const key=o.customer_id||('name:'+String(o.customer_name||'').trim().toLowerCase());if(!key)return;(orderMap[key]??={count:0,total:0});orderMap[key].count++;orderMap[key].total+=Number(o.total||0)});
+  const filtered=customers.filter(c=>!q||[c.name,c.phone,c.email].some(v=>String(v||'').toLowerCase().includes(q)));
+  $('crmCount').textContent=customers.length;$('crmActive').textContent=customers.filter(c=>c.is_active).length;$('crmRevenue').textContent=money(filtered.reduce((a,c)=>a+(orderMap[String(c.name||'').trim().toLowerCase()]?.total||0),0));$('crmPoints').textContent=loyaltyAccounts.reduce((a,x)=>a+Number(x.points||0),0);
+  $('customersBody').innerHTML=filtered.map(c=>{const o=orderMap[c.id]||orderMap['name:'+String(c.name||'').trim().toLowerCase()]||{count:0,total:0};const l=loyaltyAccounts.find(x=>x.customer_id===c.id);return `<tr><td><b>${esc(c.name)}</b>${c.email?`<small style="display:block;color:#8e9aaa">${esc(c.email)}</small>`:''}</td><td>${esc(c.phone||'—')}</td><td>${o.count}</td><td>${money(o.total)}</td><td>${Number(l?.points||0)}</td><td>${c.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td><div class="actions"><button class="btn small" onclick="openCustomer('${c.id}')">Editar</button><button class="btn small" onclick="adjustLoyalty('${c.id}')">Pontos</button></div></td></tr>`}).join('')||`<tr><td colspan="7" class="empty">Nenhum cliente encontrado.</td></tr>`;
+}
+async function syncCustomersFromOrders(){
+  if(!canWrite())return toast('Sem permissão.');
+  const names=[...new Set(orders.map(o=>String(o.customer_name||'').trim()).filter(n=>n&&n.toLowerCase()!=='cliente'))];let created=0;
+  for(const name of names){if(!customers.some(c=>c.name.trim().toLowerCase()===name.toLowerCase())){const {error}=await sb.from('customers').insert({restaurant_id:restaurant.id,name});if(!error)created++}}
+  await loadAll();toast(`${created} cliente(s) importado(s).`);
+}
+function openCustomer(id){
+  const c=customers.find(x=>x.id===id)||{};openModal(`<h2>${id?'Editar cliente':'Novo cliente'}</h2><div class="formgrid"><div class="field"><label>Nome</label><input id="cfName" class="input" value="${esc(c.name||'')}"></div><div class="field"><label>Telefone / WhatsApp</label><input id="cfPhone" class="input" value="${esc(c.phone||'')}"></div><div class="field"><label>E-mail</label><input id="cfEmail" class="input" value="${esc(c.email||'')}"></div><div class="field"><label>Endereço</label><input id="cfAddress" class="input" value="${esc(c.address||'')}"></div><div class="field full"><label>Observações</label><textarea id="cfNotes" class="textarea" rows="3">${esc(c.notes||'')}</textarea></div><label class="check full"><input id="cfActive" type="checkbox" ${c.is_active!==false?'checked':''}> Cliente ativo</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCustomer('${id||''}')">Salvar</button></div>`)
+}
+async function saveCustomer(id){try{if(!canWrite())throw new Error('Sem permissão.');const p={restaurant_id:restaurant.id,name:$('cfName').value.trim(),phone:$('cfPhone').value.trim()||null,email:$('cfEmail').value.trim()||null,address:$('cfAddress').value.trim()||null,notes:$('cfNotes').value.trim()||null,is_active:$('cfActive').checked};if(!p.name)throw new Error('Informe o nome.');let q=id?sb.from('customers').update(p).eq('id',id).eq('restaurant_id',restaurant.id):sb.from('customers').insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast('Cliente salvo.')}catch(e){err(e,'Cliente')}}
+async function adjustLoyalty(customerId){try{if(!canWrite())throw new Error('Sem permissão.');let l=loyaltyAccounts.find(x=>x.customer_id===customerId);const current=Number(l?.points||0);const value=prompt(`Pontos atuais: ${current}. Informe a quantidade a adicionar (use valor negativo para retirar):`);if(value===null)return;const delta=Number(value);if(!Number.isFinite(delta)||!Number.isInteger(delta))throw new Error('Informe um número inteiro.');const next=current+delta;if(next<0)throw new Error('Os pontos não podem ficar negativos.');if(l){const {error}=await sb.from('loyalty_accounts').update({points:next,total_earned:Number(l.total_earned||0)+Math.max(0,delta),total_redeemed:Number(l.total_redeemed||0)+Math.max(0,-delta)}).eq('id',l.id).eq('restaurant_id',restaurant.id);if(error)throw error}else{const {error}=await sb.from('loyalty_accounts').insert({restaurant_id:restaurant.id,customer_id:customerId,points:next,total_earned:Math.max(0,delta),total_redeemed:Math.max(0,-delta)});if(error)throw error}await loadAll();toast('Pontos atualizados.')}catch(e){err(e,'Fidelidade')}}
+
+function renderDelivery(){
+  $('driversBody').innerHTML=drivers.map(d=>`<tr><td><b>${esc(d.name)}</b></td><td>${esc(d.phone||'—')}</td><td>${esc(d.vehicle||'—')}</td><td><span class="badge ${d.status==='available'?'green':d.status==='busy'?'yellow':'red'}">${d.status==='available'?'Disponível':d.status==='busy'?'Em rota':'Offline'}</span></td><td><div class="actions"><button class="btn small" onclick="openDriver('${d.id}')">Editar</button><button class="btn small" onclick="toggleDriver('${d.id}')">${d.active?'Desativar':'Ativar'}</button></div></td></tr>`).join('')||`<tr><td colspan="5" class="empty">Nenhum entregador cadastrado.</td></tr>`;
+  const ds=orders.filter(o=>o.order_type==='delivery');$('deliveryBody').innerHTML=ds.map(o=>{const d=drivers.find(x=>x.id===o.delivery_driver_id);return `<tr><td>#${o.order_number}</td><td>${esc(o.customer_name||'Cliente')}</td><td>${esc(o.delivery_address||'—')}</td><td><select class="select" style="min-width:150px" onchange="assignDriver('${o.id}',this.value)"><option value="">Não atribuído</option>${drivers.filter(x=>x.active).map(x=>`<option value="${x.id}" ${x.id===o.delivery_driver_id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></td><td>${fmtStatus(o.status)}</td><td><div class="actions"><button class="btn small" onclick="openOrder('${o.id}')">Detalhes</button><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button></div></td></tr>`}).join('')||`<tr><td colspan="6" class="empty">Nenhum delivery.</td></tr>`;
+}
+function openDriver(id){const d=drivers.find(x=>x.id===id)||{};openModal(`<h2>${id?'Editar entregador':'Novo entregador'}</h2><div class="formgrid"><div class="field"><label>Nome</label><input id="dfName" class="input" value="${esc(d.name||'')}"></div><div class="field"><label>Telefone</label><input id="dfPhone" class="input" value="${esc(d.phone||'')}"></div><div class="field"><label>Veículo</label><input id="dfVehicle" class="input" value="${esc(d.vehicle||'')}" placeholder="Moto, carro..."></div><div class="field"><label>Status</label><select id="dfStatus" class="select"><option value="available" ${d.status==='available'?'selected':''}>Disponível</option><option value="busy" ${d.status==='busy'?'selected':''}>Em rota</option><option value="offline" ${d.status==='offline'?'selected':''}>Offline</option></select></div></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveDriver('${id||''}')">Salvar</button></div>`)}
+async function saveDriver(id){try{if(!canWrite())throw new Error('Sem permissão.');const p={restaurant_id:restaurant.id,name:$('dfName').value.trim(),phone:$('dfPhone').value.trim()||null,vehicle:$('dfVehicle').value.trim()||null,status:$('dfStatus').value,active:true};if(!p.name)throw new Error('Informe o nome.');const q=id?sb.from('delivery_drivers').update(p).eq('id',id).eq('restaurant_id',restaurant.id):sb.from('delivery_drivers').insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast('Entregador salvo.')}catch(e){err(e,'Entregador')}}
+async function toggleDriver(id){try{if(!canWrite())throw new Error('Sem permissão.');const d=drivers.find(x=>x.id===id);const {error}=await sb.from('delivery_drivers').update({active:!d.active}).eq('id',id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,'Entregador')}}
+async function assignDriver(orderId,driverId){try{if(!canWrite())throw new Error('Sem permissão.');const {error}=await sb.from('orders').update({delivery_driver_id:driverId||null}).eq('id',orderId).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll();toast('Entregador atribuído.')}catch(e){err(e,'Delivery')}}
+
+function renderCoupons(){$('couponsBody').innerHTML=coupons.map(c=>`<tr><td><b>${esc(c.code)}</b><small style="display:block;color:#8e9aaa">${esc(c.description||'')}</small></td><td>${c.discount_type==='percent'?`${Number(c.discount_value)}%`:money(c.discount_value)}</td><td>${money(c.minimum_order)}</td><td>${c.used_count||0}${c.max_uses?` / ${c.max_uses}`:''}</td><td>${c.active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td><div class="actions"><button class="btn small" onclick="openCoupon('${c.id}')">Editar</button><button class="btn small" onclick="toggleCoupon('${c.id}')">${c.active?'Desativar':'Ativar'}</button></div></td></tr>`).join('')||`<tr><td colspan="6" class="empty">Nenhum cupom cadastrado.</td></tr>`}
+function openCoupon(id){const c=coupons.find(x=>x.id===id)||{};openModal(`<h2>${id?'Editar cupom':'Novo cupom'}</h2><div class="formgrid"><div class="field"><label>Código</label><input id="cpfCode" class="input" value="${esc(c.code||'')}" placeholder="BEMVINDO10"></div><div class="field"><label>Descrição</label><input id="cpfDesc" class="input" value="${esc(c.description||'')}"></div><div class="field"><label>Tipo</label><select id="cpfType" class="select"><option value="percent" ${c.discount_type!=='fixed'?'selected':''}>Percentual</option><option value="fixed" ${c.discount_type==='fixed'?'selected':''}>Valor fixo</option></select></div><div class="field"><label>Desconto</label><input id="cpfValue" class="input" type="number" step=".01" value="${Number(c.discount_value||0)}"></div><div class="field"><label>Pedido mínimo</label><input id="cpfMin" class="input" type="number" step=".01" value="${Number(c.minimum_order||0)}"></div><div class="field"><label>Limite de usos</label><input id="cpfMax" class="input" type="number" min="1" value="${c.max_uses??''}"></div><div class="field"><label>Início</label><input id="cpfStart" class="input" type="datetime-local" value="${c.starts_at?new Date(c.starts_at).toISOString().slice(0,16):''}"></div><div class="field"><label>Expiração</label><input id="cpfEnd" class="input" type="datetime-local" value="${c.expires_at?new Date(c.expires_at).toISOString().slice(0,16):''}"></div><label class="check full"><input id="cpfActive" type="checkbox" ${c.active!==false?'checked':''}> Cupom ativo</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCoupon('${id||''}')">Salvar</button></div>`)}
+async function saveCoupon(id){try{if(!canWrite())throw new Error('Sem permissão.');const code=$('cpfCode').value.trim().toUpperCase();const type=$('cpfType').value;const value=Number($('cpfValue').value)||0;if(!code||value<=0)throw new Error('Informe código e desconto.');const p={restaurant_id:restaurant.id,code,description:$('cpfDesc').value.trim()||null,discount_type:type,discount_value:value,minimum_order:Number($('cpfMin').value)||0,max_uses:Number($('cpfMax').value)||null,starts_at:$('cpfStart').value?new Date($('cpfStart').value).toISOString():null,expires_at:$('cpfEnd').value?new Date($('cpfEnd').value).toISOString():null,active:$('cpfActive').checked};const q=id?sb.from('coupons').update(p).eq('id',id).eq('restaurant_id',restaurant.id):sb.from('coupons').insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast('Cupom salvo.')}catch(e){err(e,'Cupom')}}
+async function toggleCoupon(id){try{if(!canWrite())throw new Error('Sem permissão.');const c=coupons.find(x=>x.id===id);const {error}=await sb.from('coupons').update({active:!c.active}).eq('id',id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,'Cupom')}}
+
+function renderReports(){const active=orders.filter(o=>o.status!=="cancelled"),rev=active.reduce((a,o)=>a+Number(o.total||0),0);$("rRevenue").textContent=money(rev);$("rOrders").textContent=active.length;$("rTicket").textContent=money(active.length?rev/active.length:0);const top={};active.forEach(o=>(o.items||[]).forEach(i=>top[i.product_name]=(top[i.product_name]||0)+Number(i.quantity||1)));const totalItems=Object.values(top).reduce((a,v)=>a+v,0);$("rItems").textContent=totalItems||"0";$("topProducts").innerHTML=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,q],i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${i+1}. ${esc(n)} <b style="float:right">${q}</b></div>`).join("")||"Sem itens detalhados.";const pay={};active.forEach(o=>pay[o.payment_method||"Não informado"]=(pay[o.payment_method||"Não informado"]||0)+Number(o.total||0));$("paymentSummary").innerHTML=Object.entries(pay).map(([n,v])=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${esc(n)} <b style="float:right">${money(v)}</b></div>`).join("")||"—"}
+
+function cashSession(){return cashSessions.find(x=>x.status==='open')||null}
+function renderCash(){
+  const s=cashSession();const since=s?.opened_at?new Date(s.opened_at):null;const paid=payments.filter(p=>p.status==='paid'&&(!since||new Date(p.created_at)>=since));const m={money:0,pix:0,card:0};paid.forEach(p=>{if(p.method==='pix')m.pix+=Number(p.amount||0);else if(p.method==='card')m.card+=Number(p.amount||0);else if(p.method==='cash')m.money+=Number(p.amount||0)});
+  const mov=cashMovements.filter(x=>!s||x.session_id===s.id);const supplies=mov.filter(x=>x.type==='supply').reduce((a,x)=>a+Number(x.amount||0),0),withdrawals=mov.filter(x=>x.type==='withdrawal').reduce((a,x)=>a+Number(x.amount||0),0);const expected=(Number(s?.opening_amount||0)+m.money+supplies-withdrawals);
+  $('cashMoney').textContent=money(m.money);$('cashPix').textContent=money(m.pix);$('cashCard').textContent=money(m.card);$('cashTotal').textContent=money(m.money+m.pix+m.card);$('cashSessionNotice').innerHTML=s?`<b>Caixa aberto.</b> Abertura ${money(s.opening_amount)} · iniciado em ${new Date(s.opened_at).toLocaleString('pt-BR')}`:'Nenhum caixa aberto.';$('cashExpected').innerHTML=s?`<div style="display:grid;gap:8px"><div>Saldo esperado em dinheiro <b style="float:right">${money(expected)}</b></div><div>Suprimentos <b style="float:right">${money(supplies)}</b></div><div>Sangrias <b style="float:right">${money(withdrawals)}</b></div></div>`:'Abra o caixa para iniciar a conferência.';$('cashMovements').innerHTML=mov.slice(0,20).map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><b>${x.type==='supply'?'Suprimento':x.type==='withdrawal'?'Sangria':'Ajuste'}</b> · ${money(x.amount)}<small style="display:block;color:#8e9aaa">${esc(x.description||'')} · ${new Date(x.created_at).toLocaleString('pt-BR')}</small></div>`).join('')||'<div class="empty">Sem movimentações.</div>';
+}
+async function openCashSession(){try{if(!canWrite())throw new Error('Sem permissão.');if(cashSession())return toast('Já existe um caixa aberto.');const v=prompt('Valor inicial do caixa:', '0');if(v===null)return;const amount=Number(v);if(!Number.isFinite(amount)||amount<0)throw new Error('Valor inicial inválido.');const {error}=await sb.from('cash_sessions').insert({restaurant_id:restaurant.id,opened_by:session.user.id,opening_amount:amount,status:'open'});if(error)throw error;await loadAll();toast('Caixa aberto.')}catch(e){err(e,'Abertura do caixa')}}
+async function openCashMovement(){try{if(!canWrite())throw new Error('Sem permissão.');const s=cashSession();if(!s)throw new Error('Abra o caixa primeiro.');openModal(`<h2>Movimentação de caixa</h2><div class="formgrid"><div class="field"><label>Tipo</label><select id="cmType" class="select"><option value="supply">Suprimento</option><option value="withdrawal">Sangria</option><option value="adjustment">Ajuste</option></select></div><div class="field"><label>Valor</label><input id="cmAmount" class="input" type="number" min="0" step=".01"></div><div class="field full"><label>Descrição</label><input id="cmDesc" class="input"></div></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCashMovement('${s.id}')">Salvar</button></div>`)}catch(e){err(e,'Caixa')}}
+async function saveCashMovement(sessionId){try{const amount=Number($('cmAmount').value);if(!Number.isFinite(amount)||amount<=0)throw new Error('Informe um valor válido.');const {error}=await sb.from('cash_movements').insert({restaurant_id:restaurant.id,session_id:sessionId,user_id:session.user.id,type:$('cmType').value,amount,description:$('cmDesc').value.trim()||null});if(error)throw error;closeModal();await loadAll();toast('Movimentação registrada.')}catch(e){err(e,'Movimentação')}}
+async function closeCashSession(){try{if(!canWrite())throw new Error('Sem permissão.');const s=cashSession();if(!s)return toast('Não há caixa aberto.');const since=new Date(s.opened_at);const cashPaid=payments.filter(p=>p.status==='paid'&&p.method==='cash'&&new Date(p.created_at)>=since).reduce((a,p)=>a+Number(p.amount||0),0);const mov=cashMovements.filter(x=>x.session_id===s.id);const supplies=mov.filter(x=>x.type==='supply').reduce((a,x)=>a+Number(x.amount||0),0),withdrawals=mov.filter(x=>x.type==='withdrawal').reduce((a,x)=>a+Number(x.amount||0),0);const expected=Number(s.opening_amount||0)+cashPaid+supplies-withdrawals;const v=prompt(`Valor esperado: ${money(expected)}\nInforme o dinheiro contado no fechamento:`);if(v===null)return;const counted=Number(v);if(!Number.isFinite(counted)||counted<0)throw new Error('Valor contado inválido.');const {error}=await sb.from('cash_sessions').update({closed_by:session.user.id,expected_amount:expected,counted_amount:counted,difference:counted-expected,status:'closed',closed_at:new Date().toISOString()}).eq('id',s.id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll();toast(`Caixa fechado. Diferença: ${money(counted-expected)}`)}catch(e){err(e,'Fechamento do caixa')}}
+
+function fillSettings(){if(!restaurant)return; if($("publicMenuUrl"))$("publicMenuUrl").value=publicMenuUrl("");$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
+async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);restaurant.onboarding_step=Math.max(Number(restaurant.onboarding_step||0),2);renderStoreStatus();renderOnboarding();toast("Restaurante atualizado.")}catch(e){err(e,"Restaurante")}}
+async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_key:$("setPix").value.trim(),meta_pixel_id:$("metaPixel").value.trim(),ga_id:$("gaId").value.trim()};const p={restaurant_id:restaurant.id,delivery_fee:Number($("setDeliveryFee").value)||0,minimum_order:Number($("setMinOrder").value)||0,accepts_delivery:$("setDelivery").checked,accepts_table_orders:$("setTableOrders").checked,settings:merged};let q=settings?sb.from("restaurant_settings").update(p).eq("id",settings.id):sb.from("restaurant_settings").insert(p);const {data,error}=await q.select("*").single();if(error)throw error;settings=data;fillSettings();toast("Configurações salvas.")}catch(e){err(e,"Configurações")}}
+async function saveMarketing(){return saveSettings()}
+
+function openWhats(id,next){const o=orders.find(x=>x.id===id);if(!restaurant.phone_whatsapp)return;const status={pending:"recebido",preparing:"em preparo",ready:"pronto",out_for_delivery:"saiu para entrega",completed:"concluído",cancelled:"cancelado"}[next||o.status]||o.status;const text=`Olá, ${o.customer_name||"cliente"}! Seu pedido #${o.order_number} está ${status}.`;window.open(`https://wa.me/${o.customer_phone||restaurant.phone_whatsapp}?text=${encodeURIComponent(text)}`,"_blank")}
+function printOrder(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const items=o.items||[];
+  const rows=items.map(i=>`<div class="row"><span>${i.quantity}x ${esc(i.product_name)}</span><span>${money(Number(i.unit_price||0)*Number(i.quantity||1))}</span></div>${i.variant_name?`<div>${esc(i.variant_name)}</div>`:""}${i.observation?`<div>Obs.: ${esc(i.observation)}</div>`:""}`).join("");
+  const w=window.open("","_blank","width=400,height=700");if(!w)return;
+  w.document.write(`<html><head><title>Pedido #${o.order_number}</title><style>body{font-family:monospace;width:58mm;font-size:12px;margin:8px}h2{text-align:center;font-size:15px}.line{border-top:1px dashed #000;margin:8px 0}.row{display:flex;justify-content:space-between;gap:8px}.muted{color:#555}</style></head><body><h2>${esc(restaurant.name)}</h2><div>Pedido #${o.order_number}</div><div>${new Date(o.created_at).toLocaleString("pt-BR")}</div><div class="line"></div><div>Cliente: ${esc(o.customer_name||"—")}</div><div>Tipo: ${typeLabel(o.order_type)}</div>${o.table_number?`<div>Mesa: ${o.table_number}</div>`:""}${o.delivery_address?`<div>End.: ${esc(o.delivery_address)}</div>`:""}<div class="line"></div>${rows||"<div>Sem itens detalhados.</div>"}<div class="line"></div><div class="row"><span>Subtotal</span><b>${money(o.subtotal)}</b></div>${Number(o.delivery_fee||0)>0?`<div class="row"><span>Entrega</span><b>${money(o.delivery_fee)}</b></div>`:""}<div class="row"><b>Total</b><b>${money(o.total)}</b></div>${o.observation?`<div class="line"></div><div>Obs.: ${esc(o.observation)}</div>`:""}<div class="line"></div><div style="text-align:center">Obrigado!</div></div></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300);
+}
+function exportCSV(){const rows=[["Pedido","Data","Cliente","Tipo","Mesa","Pagamento","Status","Total"],...orders.map(o=>[o.order_number,new Date(o.created_at).toLocaleString("pt-BR"),o.customer_name||"",o.order_type||"",o.table_number||"",o.payment_method||"",o.status||"",Number(o.total||0).toFixed(2)])];const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download=`vendas-${new Date().toISOString().slice(0,10)}.csv`;a.click()}
+
+$("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+sb.auth.getSession().then(({data})=>{session=data.session;boot();setTimeout(initSaaSAdmin,1200)});
+async function initSaaSAdmin(){try{const {data,error}=await sb.rpc('saas_is_admin');if(!error&&data){$('saasNav').style.display='block';await renderSaaSAdmin()}}catch(e){console.warn('SaaS admin:',e)}}
+async function renderSaaSAdmin(){try{const {data,error}=await sb.rpc('saas_dashboard');if(error)throw error;const rs=data?.restaurants||[], plans=data?.plans||[];const active=rs.filter(x=>x.subscription_status==='active').length;const paid=rs.filter(x=>x.plan!=='trial').length;const totalProducts=rs.reduce((a,x)=>a+Number(x.products||0),0);$('saasMetrics').innerHTML=`<div class="card metric"><small>Restaurantes</small><strong>${rs.length}</strong></div><div class="card metric"><small>Ativos</small><strong>${active}</strong></div><div class="card metric"><small>Pagantes</small><strong>${paid}</strong></div><div class="card metric"><small>Produtos cadastrados</small><strong>${totalProducts}</strong></div>`;$('saasRestaurantsBody').innerHTML=rs.map(x=>`<tr><td><b>${esc(x.name)}</b><br><small style="color:#8e9aaa">${esc(x.slug)}</small></td><td><span class="badge blue">${esc(x.plan)}</span></td><td>${esc(x.subscription_status)}</td><td>${x.products}</td><td>${x.tables}</td><td>${x.staff}</td><td>${x.models}</td><td>${x.onboarding_completed?'Concluído':'Em andamento'}</td></tr>`).join('')||'<tr><td colspan="8">Nenhum restaurante.</td></tr>';$('saasPlans').innerHTML=plans.map(x=>`<div class="card"><b>${esc(x.name)}</b><div style="font-size:22px;font-weight:700;margin:8px 0">${money(x.price_monthly)}/mês</div><small>${x.max_products} produtos · ${x.max_tables} mesas · ${x.max_staff} usuários · ${x.max_3d_models} modelos 3D</small></div>`).join(''); if($('saasBillingEvents')){const ev=await sb.from('saas_billing_events').select('provider_event_id,event_type,processed,created_at').order('created_at',{ascending:false}).limit(20); $('saasBillingEvents').innerHTML=(ev.data||[]).map(e=>`<tr><td>${esc(e.event_type)}</td><td>${esc(e.provider_event_id)}</td><td>${e.processed?'Processado':'Pendente'}</td><td>${new Date(e.created_at).toLocaleString('pt-BR')}</td></tr>`).join('')||'<tr><td colspan="4">Nenhum evento recebido.</td></tr>'} }catch(e){toast('Acesso ao painel SaaS não autorizado.')}}
+async function startSubscription(plan){if(!restaurant?.id||plan==='trial')return;try{const {data,error}=await sb.functions.invoke('mesa360-create-subscription',{body:{restaurant_id:restaurant.id,plan}});if(error)throw error;if(data?.checkout_url)window.open(data.checkout_url,'_blank');else toast(data?.error||'Não foi possível iniciar a assinatura.')}catch(e){err(e,'Assinatura')}}
+async function renderBilling(){
+ const summary=$('billingSummary'), plans=$('billingPlans'); if(!summary||!plans||!restaurant?.id)return;
+ try{const {data,error}=await sb.rpc('obter_resumo_assinatura',{p_restaurant_id:restaurant.id});if(error)throw error;
+ const s=data||{}; let access={}; try{const q=await sb.rpc('obter_status_acesso_saas',{p_restaurant_id:restaurant.id}); if(!q.error) access=q.data||{};}catch(_){} if($('billingAccessNotice')) $('billingAccessNotice').textContent=access.allowed===false?'A assinatura está bloqueada ou fora do período de tolerância. O restaurante não poderá receber novos pedidos públicos.':'Assinatura operacional. O Mercado Pago ainda deve ser testado com credenciais de teste antes da ativação comercial.'; summary.innerHTML=`<div class="card"><small>Plano</small><strong style="display:block;font-size:25px;margin-top:8px">${esc(String(s.plan||'trial').toUpperCase())}</strong></div><div class="card"><small>Status</small><strong style="display:block;font-size:25px;margin-top:8px">${esc(s.subscription_status||'active')}</strong></div><div class="card"><small>Próxima cobrança</small><strong style="display:block;font-size:18px;margin-top:12px">${s.current_period_end?new Date(s.current_period_end).toLocaleDateString('pt-BR'):'Não definida'}</strong></div>`;
+ plans.innerHTML=(s.available_plans||[]).map(x=>`<div class="panel"><h3>${esc(x.name)}</h3><p>${esc(x.description||'')}</p><div style="font-size:22px;font-weight:700;margin:12px 0">${money(x.price_monthly||0)}<small style="font-size:12px;color:#8e9aaa">/mês</small></div><div style="color:#9aa7b5;font-size:12px">${x.max_products} produtos · ${x.max_tables} mesas · ${x.max_staff} usuários · ${x.max_3d_models} modelos 3D</div><button class="btn primary" style="margin-top:14px" onclick="${x.plan!==s.plan&&Number(x.price_monthly)>0?'startSubscription(\''+x.plan+'\')':'requestPlanChange(\''+x.plan+'\')'}">${x.plan===s.plan?'Plano atual':(Number(x.price_monthly)>0?'Assinar':'Solicitar mudança')}</button></div>`).join('');
+ }catch(e){summary.innerHTML='<div class="panel">Não foi possível carregar a assinatura.</div>';plans.innerHTML='';console.error(e)}
+}
+async function requestPlanChange(plan){if(!restaurant?.id)return; if(plan===(restaurant.plan||'trial'))return toast('Este já é o plano atual.'); if(!confirm('Registrar solicitação de mudança para '+plan.toUpperCase()+'?'))return; try{const {error}=await sb.rpc('solicitar_mudanca_plano',{p_restaurant_id:restaurant.id,p_plan:plan});if(error)throw error;toast('Solicitação registrada.');renderBilling()}catch(e){err(e,'Plano')}}
+</script>
+</div></body>
+</html>
