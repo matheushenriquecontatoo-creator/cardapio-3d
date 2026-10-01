@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Administrativo — Brasa 180°</title>
+<title>Painel Administrativo — Mesa360 SaaS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--primary:#f59e0b;--primary2:#d97706;--bg:#0b0f14;--panel:#111821;--panel2:#17202b;--border:#263241;--text:#f5f7fa;--muted:#8e9aaa;--success:#22c55e;--danger:#ef4444;--info:#38bdf8;--warning:#fbbf24}
@@ -47,6 +47,7 @@
       <button data-view="delivery" onclick="go('delivery')">Entregas</button>
       <button data-view="marketing" onclick="go('marketing')">Marketing</button>
       <button data-view="reports" onclick="go('reports')">Relatórios</button>
+      <button data-view="team" onclick="go('team')">Equipe / Permissões</button>
       <button data-view="settings" onclick="go('settings')">Configurações</button>
     </nav>
   </aside>
@@ -75,6 +76,7 @@
         <div class="grid2" style="margin-top:16px">
           <div class="panel"><h3>Pedidos recentes</h3><div id="recentOrders"></div></div>
           <div class="panel"><h3>Estoque / atenção operacional</h3><div class="notice">O controle de estoque por insumo exige a estrutura de ficha técnica e estoque no banco. A interface está preparada, mas não inventa baixas que o banco ainda não suporta.</div><div id="stockInfo"></div></div>
+          <div class="panel"><h3>Onboarding comercial</h3><div id="onboardingBox"></div></div>
         </div>
       </section>
 
@@ -149,6 +151,12 @@
         <div class="grid2" style="margin-top:16px"><div class="panel"><h3>Top produtos</h3><div id="topProducts"></div></div><div class="panel"><h3>Formas de pagamento</h3><div id="paymentSummary"></div></div></div>
       </section>
 
+      <section id="view-team" class="view">
+        <div class="page-title"><div><h1>Equipe e permissões</h1><p>Usuários do restaurante, funções e acesso operacional.</p></div></div>
+        <div class="notice warn">A criação do usuário/senha continua sendo feita no Supabase Auth. Aqui você define o restaurante, a função, o acesso e a ativação do perfil.</div>
+        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Função</th><th>Status</th><th>Acessos</th><th>Ações</th></tr></thead><tbody id="teamBody"></tbody></table></div></div>
+      </section>
+
       <section id="view-settings" class="view">
         <div class="page-title"><div><h1>Configurações</h1><p>Dados gerais do restaurante e operação.</p></div></div>
         <div class="grid2">
@@ -169,7 +177,7 @@ const SUPABASE_KEY="sb_publishable_G0tSaqoDOryj5LXHnQAZeQ_YhKWfLHn";
 const RESTAURANT_SLUG="brasa-180";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let session=null,profile=null,restaurant=null,settings=null;
-let products=[],categories=[],orders=[],addons=[],combos=[],tables=[],productModels=[],arConfigs=[],productAddons=[],comboItems=[],orderItems=[],payments=[],customers=[],cashSessions=[],cashMovements=[],drivers=[],coupons=[],loyaltyAccounts=[];
+let products=[],categories=[],orders=[],addons=[],combos=[],tables=[],productModels=[],arConfigs=[],productAddons=[],comboItems=[],orderItems=[],payments=[],customers=[],cashSessions=[],cashMovements=[],drivers=[],coupons=[],loyaltyAccounts=[],teamProfiles=[];
 let currentOrderFilter="all", realtimeChannel=null, audioCtx=null;
 
 const $=id=>document.getElementById(id);
@@ -196,7 +204,7 @@ async function logout(){await sb.auth.signOut();location.reload()}
 
 async function boot(){
   if(!session){$("loginScreen").classList.remove("hidden");$("app").classList.add("hidden");return}
-  const {data:p,error:pe}=await sb.from("profiles").select("id,restaurant_id,full_name,role").eq("id",session.user.id).single();
+  const {data:p,error:pe}=await sb.from("profiles").select("id,restaurant_id,full_name,role,is_active,permissions").eq("id",session.user.id).single();
   if(pe||!p?.restaurant_id){$("loginError").textContent="Usuário autenticado, mas sem perfil de restaurante.";await sb.auth.signOut();return}
   profile=p;
   const {data:r,error:re}=await sb.from("restaurants").select("*").eq("id",p.restaurant_id).single();
@@ -208,12 +216,14 @@ async function boot(){
   applyRoleUI();renderStoreStatus();fillSettings();await loadAll();subscribeRealtime();
 }
 function applyRoleUI(){
-  const r=role();
-  const allowed={owner:"*",admin:"*",cozinha:["dashboard","orders","kds"],kds:["dashboard","kds"],caixa:["dashboard","orders","cash"],garcom:["dashboard","orders","tables"]}[r]||["dashboard"];
-  document.querySelectorAll(".nav button").forEach(b=>{const v=b.dataset.view;if(allowed!=="*"&&!allowed.includes(v))b.classList.add("hidden")});
+  const permissions=profile?.permissions||{};
+  const fallback={owner:"*",admin:"*",cozinha:["dashboard","orders","kds"],kds:["dashboard","kds"],caixa:["dashboard","orders","cash"],garcom:["dashboard","orders","tables"]}[role()]||["dashboard"];
+  document.querySelectorAll(".nav button").forEach(b=>{const v=b.dataset.view;const allowed=fallback==="*"?true:(permissions[v]!==undefined?permissions[v]:fallback.includes(v));b.classList.toggle("hidden",!allowed)});
+  if(profile?.is_active===false){document.body.innerHTML='<div class="login"><div class="loginbox"><h1>Acesso bloqueado</h1><p>Este perfil está inativo. Solicite ao administrador do restaurante a reativação.</p></div></div>';}
 }
 function go(v){
   if($("view-"+v).classList.contains("hidden"))return;
+  const p=profile?.permissions||{};if(p[v]===false)return toast("Seu perfil não possui acesso a esta área.");
   document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
   $("view-"+v).classList.add("active");
   document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.view===v));
@@ -231,7 +241,7 @@ async function toggleStore(){
 }
 async function loadAll(){
   try{
-    const [pc,cc,oo,aa,co,tt,cu,cs,cm,dd,cp,la]=await Promise.all([
+    const [pc,cc,oo,aa,co,tt,cu,cs,cm,dd,cp,la,tp]=await Promise.all([
       sb.from("products").select("*,categories(id,name)").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
       sb.from("categories").select("*").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
       sb.from("orders").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}).limit(500),
@@ -243,9 +253,10 @@ async function loadAll(){
       sb.from("cash_movements").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}).limit(200),
       sb.from("delivery_drivers").select("*").eq("restaurant_id",restaurant.id).order("name"),
       sb.from("coupons").select("*").eq("restaurant_id",restaurant.id).order("created_at",{ascending:false}),
-      sb.from("loyalty_accounts").select("*").eq("restaurant_id",restaurant.id)
+      sb.from("loyalty_accounts").select("*").eq("restaurant_id",restaurant.id),
+      sb.from("profiles").select("id,restaurant_id,full_name,role,is_active,permissions,updated_at").eq("restaurant_id",restaurant.id).order("full_name")
     ]);
-    if(pc.error)throw pc.error;if(cc.error)throw cc.error;if(oo.error)throw oo.error;if(aa.error)throw aa.error;if(co.error)throw co.error;if(tt.error)throw tt.error;if(cu.error)throw cu.error;if(cs.error)throw cs.error;if(cm.error)throw cm.error;if(dd.error)throw dd.error;if(cp.error)throw cp.error;if(la.error)throw la.error;
+    if(pc.error)throw pc.error;if(cc.error)throw cc.error;if(oo.error)throw oo.error;if(aa.error)throw aa.error;if(co.error)throw co.error;if(tt.error)throw tt.error;if(cu.error)throw cu.error;if(cs.error)throw cs.error;if(cm.error)throw cm.error;if(dd.error)throw dd.error;if(cp.error)throw cp.error;if(la.error)throw la.error;if(tp.error)throw tp.error;
 
     const productIds=(pc.data||[]).map(x=>x.id), comboIds=(co.data||[]).map(x=>x.id), orderIds=(oo.data||[]).map(x=>x.id);
     const [pm,ar,pa,ci,oi,pay]=await Promise.all([
@@ -260,7 +271,7 @@ async function loadAll(){
     if(oi.error)throw oi.error;if(pay.error)throw pay.error;
 
     products=pc.data||[];categories=cc.data||[];orders=oo.data||[];addons=aa.data||[];combos=co.data||[];tables=tt.data||[];
-    customers=cu.data||[];cashSessions=cs.data||[];cashMovements=cm.data||[];drivers=dd.data||[];coupons=cp.data||[];loyaltyAccounts=la.data||[];
+    customers=cu.data||[];cashSessions=cs.data||[];cashMovements=cm.data||[];drivers=dd.data||[];coupons=cp.data||[];loyaltyAccounts=la.data||[];teamProfiles=tp.data||[];
     productModels=pm.data||[];arConfigs=ar.data||[];productAddons=pa.data||[];comboItems=ci.data||[];
     orderItems=oi.data||[];payments=pay.data||[];
 
@@ -270,7 +281,51 @@ async function loadAll(){
     renderAll();
   }catch(e){err(e,"Carregamento dos dados")}
 }
-function renderAll(){renderProducts();renderCategories();renderOrders();renderKDS();renderTables();renderAddons();renderCombos();renderDashboard();renderCustomers();renderDelivery();renderReports();renderCash();renderCoupons()}
+function renderAll(){renderProducts();renderCategories();renderOrders();renderKDS();renderTables();renderAddons();renderCombos();renderDashboard();renderCustomers();renderDelivery();renderReports();renderCash();renderCoupons();renderTeam();renderOnboarding()}
+function renderOnboarding(){
+  const steps=[
+    ['Identidade do restaurante',!!restaurant?.name],
+    ['WhatsApp comercial',!!String(restaurant?.phone_whatsapp||'').trim()],
+    ['Categoria ativa',categories.some(c=>c.is_active)],
+    ['Produto ativo',products.some(p=>p.is_active)],
+    ['Configuração operacional',!!settings]
+  ];
+  const done=steps.filter(x=>x[1]).length,total=steps.length;
+  const pct=Math.round(done/total*100);
+  if($('onboardingBox')) $('onboardingBox').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px"><b>${done}/${total} etapas</b><b>${pct}%</b></div><div class="progress"><i style="width:${pct}%"></i></div><div style="margin-top:12px;display:grid;gap:7px">${steps.map(x=>`<div>${x[1]?'✓':'○'} ${esc(x[0])}</div>`).join('')}</div><div style="margin-top:12px;color:var(--muted);font-size:12px">Plano atual: <b>${esc(restaurant?.plan||'trial')}</b> · Status: <b>${esc(restaurant?.subscription_status||'active')}</b></div>`;
+  if(done===total && restaurant && !restaurant.onboarding_completed && canWrite()) markOnboardingComplete();
+}
+let onboardingSaving=false;
+async function markOnboardingComplete(){
+  if(onboardingSaving)return;onboardingSaving=true;
+  const {error}=await sb.from('restaurants').update({onboarding_completed:true,onboarding_step:10}).eq('id',restaurant.id);
+  if(!error){restaurant.onboarding_completed=true;restaurant.onboarding_step=10;}
+  onboardingSaving=false;
+}
+const roleLabels={owner:'Proprietário',admin:'Administrador',cozinha:'Cozinha',kds:'KDS',caixa:'Caixa',garcom:'Garçom'};
+const permissionLabels={dashboard:'Dashboard',orders:'Pedidos',kds:'KDS',tables:'Mesas',cash:'Caixa',products:'Produtos',customers:'Clientes/CRM',delivery:'Delivery',marketing:'Marketing',reports:'Relatórios',settings:'Configurações',team:'Equipe'};
+function renderTeam(){
+  const body=$('teamBody');if(!body)return;
+  const canManage=['owner','admin'].includes(role());
+  body.innerHTML=teamProfiles.map(p=>{const perms=p.permissions||{};const access=Object.keys(permissionLabels).filter(k=>perms[k]).map(k=>permissionLabels[k]).slice(0,5).join(', ')||'Nenhum';return `<tr><td><b>${esc(p.full_name||'Sem nome')}</b><small style="display:block;color:#8e9aaa">${esc(p.id)}</small></td><td>${esc(roleLabels[p.role]||p.role||'—')}</td><td>${p.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td>${esc(access)}${Object.keys(perms).filter(k=>perms[k]).length>5?'…':''}</td><td>${canManage?`<button class="btn small" onclick="editTeamProfile('${p.id}')">Editar</button>`:'—'}</td></tr>`}).join('')||'<tr><td colspan="5" class="empty">Nenhum perfil encontrado.</td></tr>';
+}
+function defaultPermissionsForRole(r){
+  if(r==='owner'||r==='admin')return Object.fromEntries(Object.keys(permissionLabels).map(k=>[k,true]));
+  if(r==='cozinha'||r==='kds')return {dashboard:true,kds:true,orders:false,tables:false,cash:false,products:false,customers:false,delivery:false,marketing:false,reports:false,settings:false,team:false};
+  if(r==='caixa')return {dashboard:true,orders:true,kds:false,tables:false,cash:true,products:false,customers:false,delivery:false,marketing:false,reports:true,settings:false,team:false};
+  if(r==='garcom')return {dashboard:true,orders:true,kds:false,tables:true,cash:false,products:false,customers:false,delivery:false,marketing:false,reports:false,settings:false,team:false};
+  return {};
+}
+function editTeamProfile(id){
+  if(!['owner','admin'].includes(role()))return toast('Sem permissão.');
+  const p=teamProfiles.find(x=>x.id===id);if(!p)return;
+  const perms=p.permissions||defaultPermissionsForRole(p.role);
+  openModal(`<h2>Editar perfil</h2><div class="field"><label>Nome</label><input id="tpName" class="input" value="${esc(p.full_name||'')}"></div><div class="field"><label>Função</label><select id="tpRole" class="select" onchange="fillRolePermissions()">${Object.entries(roleLabels).map(([v,l])=>`<option value="${v}" ${p.role===v?'selected':''}>${l}</option>`).join('')}</select></div><label class="check"><input id="tpActive" type="checkbox" ${p.is_active?'checked':''}> Perfil ativo</label><div class="field" style="margin-top:14px"><label>Permissões</label><div id="tpPerms" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${Object.entries(permissionLabels).map(([k,l])=>`<label class="check"><input type="checkbox" data-perm="${k}" ${perms[k]?'checked':''}> ${l}</label>`).join('')}</div></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTeamProfile('${p.id}')">Salvar</button></div>`);
+}
+function fillRolePermissions(){const r=$('tpRole')?.value;const perms=defaultPermissionsForRole(r);document.querySelectorAll('#tpPerms [data-perm]').forEach(x=>x.checked=!!perms[x.dataset.perm]);}
+async function saveTeamProfile(id){try{if(!['owner','admin'].includes(role()))throw new Error('Sem permissão.');const p=teamProfiles.find(x=>x.id===id);if(!p)throw new Error('Perfil não encontrado.');const perms={};document.querySelectorAll('#tpPerms [data-perm]').forEach(x=>perms[x.dataset.perm]=x.checked);const nextRole=$('tpRole').value;if(p.id===session.user.id && nextRole!==p.role)throw new Error('Não altere a própria função.');const payload={full_name:$('tpName').value.trim()||null,role:nextRole,is_active:$('tpActive').checked,permissions:perms};const {error}=await sb.from('profiles').update(payload).eq('id',id).eq('restaurant_id',restaurant.id);if(error)throw error;closeModal();await loadAll();toast('Perfil atualizado.')}catch(e){err(e,'Perfil')}
+}
+
 function modelFor(productId){return productModels.find(x=>x.product_id===productId)||null}
 function arFor(productId){return arConfigs.find(x=>x.product_id===productId)||null}
 function addonIdsFor(productId){return productAddons.filter(x=>x.product_id===productId).map(x=>x.add_on_id)}
@@ -555,7 +610,7 @@ async function saveCashMovement(sessionId){try{const amount=Number($('cmAmount')
 async function closeCashSession(){try{if(!canWrite())throw new Error('Sem permissão.');const s=cashSession();if(!s)return toast('Não há caixa aberto.');const since=new Date(s.opened_at);const cashPaid=payments.filter(p=>p.status==='paid'&&p.method==='cash'&&new Date(p.created_at)>=since).reduce((a,p)=>a+Number(p.amount||0),0);const mov=cashMovements.filter(x=>x.session_id===s.id);const supplies=mov.filter(x=>x.type==='supply').reduce((a,x)=>a+Number(x.amount||0),0),withdrawals=mov.filter(x=>x.type==='withdrawal').reduce((a,x)=>a+Number(x.amount||0),0);const expected=Number(s.opening_amount||0)+cashPaid+supplies-withdrawals;const v=prompt(`Valor esperado: ${money(expected)}\nInforme o dinheiro contado no fechamento:`);if(v===null)return;const counted=Number(v);if(!Number.isFinite(counted)||counted<0)throw new Error('Valor contado inválido.');const {error}=await sb.from('cash_sessions').update({closed_by:session.user.id,expected_amount:expected,counted_amount:counted,difference:counted-expected,status:'closed',closed_at:new Date().toISOString()}).eq('id',s.id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll();toast(`Caixa fechado. Diferença: ${money(counted-expected)}`)}catch(e){err(e,'Fechamento do caixa')}}
 
 function fillSettings(){if(!restaurant)return;$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
-async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);renderStoreStatus();toast("Restaurante atualizado.")}catch(e){err(e,"Restaurante")}}
+async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);restaurant.onboarding_step=Math.max(Number(restaurant.onboarding_step||0),2);renderStoreStatus();renderOnboarding();toast("Restaurante atualizado.")}catch(e){err(e,"Restaurante")}}
 async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_key:$("setPix").value.trim(),meta_pixel_id:$("metaPixel").value.trim(),ga_id:$("gaId").value.trim()};const p={restaurant_id:restaurant.id,delivery_fee:Number($("setDeliveryFee").value)||0,minimum_order:Number($("setMinOrder").value)||0,accepts_delivery:$("setDelivery").checked,accepts_table_orders:$("setTableOrders").checked,settings:merged};let q=settings?sb.from("restaurant_settings").update(p).eq("id",settings.id):sb.from("restaurant_settings").insert(p);const {data,error}=await q.select("*").single();if(error)throw error;settings=data;fillSettings();toast("Configurações salvas.")}catch(e){err(e,"Configurações")}}
 async function saveMarketing(){return saveSettings()}
 

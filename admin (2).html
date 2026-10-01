@@ -292,6 +292,11 @@ function resolverImagemSupabase(valor, fallback=''){
  return data?.publicUrl||fallback;
 }
 
+function restauranteSlugDaUrl(){
+ const params=new URLSearchParams(window.location.search);
+ return (params.get('restaurante')||params.get('r')||'brasa-180').trim().toLowerCase();
+}
+
 async function carregarCatalogoDoSupabase(){
  if(!menuSupabase){
    window.supabaseConnectionStatus='sdk_indisponivel';
@@ -302,10 +307,10 @@ async function carregarCatalogoDoSupabase(){
    const {data:restaurante,error:erroRestaurante}=await menuSupabase
      .from('restaurants')
      .select('id,name,slug,is_open,primary_color,phone_whatsapp,description')
-     .eq('slug','brasa-180')
+     .eq('slug',restauranteSlugDaUrl())
      .maybeSingle();
    if(erroRestaurante)throw erroRestaurante;
-   if(!restaurante)throw new Error('Restaurante brasa-180 não encontrado.');
+   if(!restaurante)throw new Error(`Restaurante ${restauranteSlugDaUrl()} não encontrado.`);
 
    window.supabaseRestaurantId=restaurante.id;
    window.restauranteSupabase=restaurante;
@@ -812,8 +817,8 @@ function limparCarrinhoAposEnvio(){
 }
 function whatsappMensagem(nome,codigo,localPedido,pagto,observacao){
  let msg=tipoAtendimentoSelecionado==='mesa'
-   ? `*MESA ${(($('numeroMesaPedido')?.value||'').trim()||'NÃO INFORMADA').toUpperCase()} - PEDIDO LOCAL*\n\nOlá! Gostaria de fazer um pedido pelo cardápio da Brasa 180° Smash & Grill.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* COMER NA MINHA MESA\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`
-   : `Olá! Gostaria de fazer um pedido pelo cardápio da Brasa 180° Smash & Grill.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* ENTREGA\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`;
+   ? `*MESA ${(($('numeroMesaPedido')?.value||'').trim()||'NÃO INFORMADA').toUpperCase()} - PEDIDO LOCAL*\n\nOlá! Gostaria de fazer um pedido pelo cardápio da ${restauranteAtual?.nome||"restaurante"}.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* COMER NA MINHA MESA\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`
+   : `Olá! Gostaria de fazer um pedido pelo cardápio da ${restauranteAtual?.nome||"restaurante"}.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* ENTREGA\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`;
  carrinho.forEach(i=>{msg+=`• ${i.quantidade}x ${i.nome} — ${formatarPreco((i.precoUnitario||i.preco)*i.quantidade)}\n`;if(i.addons?.length)msg+=`  Adicionais: ${i.addons.map(a=>a.nome).join(', ')}\n`;if(i.combo)msg+=`  Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}\n`;if(i.observacao)msg+=`  Observação: ${i.observacao}\n`});
  if(observacao)msg+=`\n*OBSERVAÇÕES GERAIS:* ${observacao}\n`;
  msg+=`*SUBTOTAL:* ${formatarPreco(calcularSubtotal())}\n*TAXA DE ENTREGA:* ${formatarPreco(calcularTaxaEntrega())}\n*TOTAL:* ${formatarPreco(calcularTotal())}\n\n*STATUS:* Recebido`;
@@ -829,10 +834,10 @@ async function garantirConexaoSupabasePedido(){
  const {data,error}=await menuSupabase
    .from('restaurants')
    .select('id,name,slug')
-   .eq('slug','brasa-180')
+   .eq('slug',restauranteSlugDaUrl())
    .maybeSingle();
  if(error)throw error;
- if(!data?.id)throw new Error('Restaurante brasa-180 não foi encontrado no Supabase.');
+ if(!data?.id)throw new Error(`Restaurante ${restauranteSlugDaUrl()} não foi encontrado no Supabase.`);
 
  window.supabaseRestaurantId=data.id;
  window.restauranteSupabase=data;
@@ -952,7 +957,7 @@ function confirmarAtendimento(tipo){
    $('numeroMesaPedido').value=mesa;
    tipoAtendimentoSelecionado='mesa';
    salvarEstado();
-   const msg=`*PEDIR A CONTA*\n\n*Brasa 180° Smash & Grill*\n*MESA:* ${mesa}\n*FORMA DE PAGAMENTO:* ${pagamento}\n\nSolicitação de encerramento do atendimento.`;
+   const msg=`*PEDIR A CONTA*\n\n*${restauranteAtual?.nome||"Restaurante"}*\n*MESA:* ${mesa}\n*FORMA DE PAGAMENTO:* ${pagamento}\n\nSolicitação de encerramento do atendimento.`;
    fecharModal('modalAtendimento');
    mostrarToast('Solicitação de conta preparada. Abrindo WhatsApp…');
    setTimeout(()=>{window.location.href=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`},120);
@@ -968,13 +973,13 @@ function confirmarAtendimento(tipo){
 function chamarGarcom(){
  if(tipoAtendimentoSelecionado!=='mesa')return mostrarToast('Selecione Comer na minha mesa primeiro.');
  const mesa=($('numeroMesaPedido').value||'').trim();if(!mesa)return mostrarToast('Informe a mesa primeiro.');
- const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(`*CHAMAR GARÇOM*\n\n*Brasa 180° Smash & Grill*\n*MESA:* ${mesa}\n\nSolicitação: Atendimento na mesa.`)}`;
+ const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(`*CHAMAR GARÇOM*\n\n*${restauranteAtual?.nome||"Restaurante"}*\n*MESA:* ${mesa}\n\nSolicitação: Atendimento na mesa.`)}`;
  mostrarToast(`Abrindo WhatsApp para chamar o garçom da mesa ${mesa}…`);window.location.href=url;
 }
 function pedirConta(){
  if(tipoAtendimentoSelecionado!=='mesa')return mostrarToast('Selecione Comer na minha mesa primeiro.');
  const mesa=($('numeroMesaPedido').value||'').trim();if(!mesa)return mostrarToast('Informe a mesa primeiro.');
- const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(`*PEDIR A CONTA*\n\n*Brasa 180° Smash & Grill*\n*MESA:* ${mesa}\n\nSolicitação: Encerrar atendimento e trazer a conta.`)}`;
+ const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(`*PEDIR A CONTA*\n\n*${restauranteAtual?.nome||"Restaurante"}*\n*MESA:* ${mesa}\n\nSolicitação: Encerrar atendimento e trazer a conta.`)}`;
  mostrarToast(`Abrindo WhatsApp para pedir a conta da mesa ${mesa}…`);window.location.href=url;
 }
 function mostrarToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('ativo');clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove('ativo'),2300)}
