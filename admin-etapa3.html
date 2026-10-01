@@ -168,7 +168,7 @@ const SUPABASE_KEY="sb_publishable_G0tSaqoDOryj5LXHnQAZeQ_YhKWfLHn";
 const RESTAURANT_SLUG="brasa-180";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let session=null,profile=null,restaurant=null,settings=null;
-let products=[],categories=[],orders=[],addons=[],combos=[],tables=[],productModels=[],arConfigs=[],productAddons=[],comboItems=[];
+let products=[],categories=[],orders=[],addons=[],combos=[],tables=[],productModels=[],arConfigs=[],productAddons=[],comboItems=[],orderItems=[],payments=[];
 let currentOrderFilter="all", realtimeChannel=null, audioCtx=null;
 
 const $=id=>document.getElementById(id);
@@ -218,6 +218,7 @@ function go(v){
   document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.view===v));
   if(v==="kds")renderKDS();
   if(v==="tables")renderTables();
+  if(v==="orders")renderOrders();
 }
 function renderStoreStatus(){
   const open=!!restaurant.is_open;$("statusDot").classList.toggle("open",open);$("storeStatusText").textContent=open?"LOJA ABERTA":"LOJA FECHADA";$("storeToggle").textContent=open?"LOJA ABERTA":"LOJA FECHADA";
@@ -238,16 +239,26 @@ async function loadAll(){
       sb.from("tables").select("*").eq("restaurant_id",restaurant.id).order("table_number")
     ]);
     if(pc.error)throw pc.error;if(cc.error)throw cc.error;if(oo.error)throw oo.error;if(aa.error)throw aa.error;if(co.error)throw co.error;if(tt.error)throw tt.error;
-    const productIds=(pc.data||[]).map(x=>x.id), comboIds=(co.data||[]).map(x=>x.id);
-    const [pm,ar,pa,ci]=await Promise.all([
+
+    const productIds=(pc.data||[]).map(x=>x.id), comboIds=(co.data||[]).map(x=>x.id), orderIds=(oo.data||[]).map(x=>x.id);
+    const [pm,ar,pa,ci,oi,pay]=await Promise.all([
       productIds.length?sb.from("product_models").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
       productIds.length?sb.from("ar_configs").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
       productIds.length?sb.from("product_add_ons").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null}),
-      comboIds.length?sb.from("combo_items").select("*").in("combo_id",comboIds):Promise.resolve({data:[],error:null})
+      comboIds.length?sb.from("combo_items").select("*").in("combo_id",comboIds):Promise.resolve({data:[],error:null}),
+      orderIds.length?sb.from("order_items").select("*").in("order_id",orderIds).order("created_at"):Promise.resolve({data:[],error:null}),
+      orderIds.length?sb.from("payments").select("*").in("order_id",orderIds).order("created_at",{ascending:false}):Promise.resolve({data:[],error:null})
     ]);
     if(pm.error)throw pm.error;if(ar.error)throw ar.error;if(pa.error)throw pa.error;if(ci.error)throw ci.error;
+    if(oi.error)throw oi.error;if(pay.error)throw pay.error;
+
     products=pc.data||[];categories=cc.data||[];orders=oo.data||[];addons=aa.data||[];combos=co.data||[];tables=tt.data||[];
     productModels=pm.data||[];arConfigs=ar.data||[];productAddons=pa.data||[];comboItems=ci.data||[];
+    orderItems=oi.data||[];payments=pay.data||[];
+
+    const byOrder={};
+    orderItems.forEach(i=>(byOrder[i.order_id]??=[]).push(i));
+    orders.forEach(o=>o.items=byOrder[o.id]||[]);
     renderAll();
   }catch(e){err(e,"Carregamento dos dados")}
 }
@@ -343,23 +354,102 @@ function openCategory(id){if(!canWrite())return toast("Sem permissão.");const c
 async function saveCategory(id){try{if(!canWrite())throw new Error("Sem permissão.");const name=$("cfName").value.trim();if(!name)throw new Error("Informe o nome.");const p={restaurant_id:restaurant.id,name,display_order:Number($("cfOrder").value)||0,is_active:$("cfActive").checked};const q=id?sb.from("categories").update(p).eq("id",id).eq("restaurant_id",restaurant.id):sb.from("categories").insert(p);const {error}=await q;if(error)throw error;closeModal();await loadAll();toast("Categoria salva.")}catch(e){err(e,"Categoria")}}
 async function toggleCategory(id){try{if(!canWrite())throw new Error("Sem permissão.");const c=categories.find(x=>x.id===id);const {error}=await sb.from("categories").update({is_active:!c.is_active}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Categoria")}}
 
+function paymentFor(orderId){return payments.find(x=>x.order_id===orderId)||null}
 function renderOrders(){
   const filtered=currentOrderFilter==="all"?orders:orders.filter(o=>o.status===currentOrderFilter);
   $("orderTabs").innerHTML=[["all","Todos"],["pending","Pendentes"],["preparing","Em preparo"],["ready","Prontos"],["out_for_delivery","Em rota"],["completed","Concluídos"],["cancelled","Cancelados"]].map(([v,t])=>`<button class="tab ${currentOrderFilter===v?"active":""}" onclick="currentOrderFilter='${v}';renderOrders()">${t}</button>`).join("");
-  $("ordersBody").innerHTML=filtered.map(o=>`<tr><td>#${o.order_number}</td><td>${esc(o.customer_name||"Cliente")}</td><td>${typeLabel(o.order_type)}</td><td>${o.table_number||"—"}</td><td>${esc(o.payment_method||"—")}</td><td>${money(o.total)}</td><td>${fmtStatus(o.status)}</td><td><div class="actions"><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button><button class="btn small" onclick="openWhats('${o.id}')">WhatsApp</button><button class="btn small" onclick="printOrder('${o.id}')">Imprimir</button></div></td></tr>`).join("")||`<tr><td colspan="8" class="empty">Nenhum pedido.</td></tr>`;
+  $("ordersBody").innerHTML=filtered.map(o=>{
+    const pay=paymentFor(o.id),items=o.items||[];
+    return `<tr>
+      <td><b>#${o.order_number}</b><br><small>${items.reduce((a,i)=>a+Number(i.quantity||0),0)} item(ns)</small></td>
+      <td>${esc(o.customer_name||"Cliente")}</td><td>${typeLabel(o.order_type)}</td><td>${o.table_number||"—"}</td>
+      <td>${esc(o.payment_method||"—")}${pay?.status==="paid"?'<br><span class="badge green">Pago</span>':pay?.status?`<br><span class="badge yellow">${esc(pay.status)}</span>`:""}</td>
+      <td>${money(o.total)}</td><td>${fmtStatus(o.status)}</td>
+      <td><div class="actions"><button class="btn small" onclick="openOrder('${o.id}')">Detalhes</button><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button><button class="btn small" onclick="printOrder('${o.id}')">Imprimir</button></div></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="8" class="empty">Nenhum pedido.</td></tr>`;
 }
-async function advanceOrder(id){const o=orders.find(x=>x.id===id);const seq={pending:"preparing",preparing:"ready",ready:o.order_type==="delivery"?"out_for_delivery":"completed",out_for_delivery:"completed"};const next=seq[o.status];if(!next)return;if(next==="completed"&&o.status==="ready"&&o.order_type==="mesa"){}const {error}=await sb.from("orders").update({status:next}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)err(error,"Status do pedido");else{await loadAll();openWhats(id,next)}}
-function renderKDS(){const active=orders.filter(o=>["pending","preparing","ready"].includes(o.status));$("kdsBoard").innerHTML=active.map(o=>{const items=o.order_items||[];return `<div class="ticket"><div style="display:flex;justify-content:space-between"><h4>#${o.order_number} · ${typeLabel(o.order_type)}</h4>${fmtStatus(o.status)}</div><small>${esc(o.customer_name||"Cliente")} ${o.table_number?`· Mesa ${o.table_number}`:""}</small><div class="items">${items.length?items.map(i=>`<div class="item"><b>${i.quantity}x</b> ${esc(i.product_name)}${i.variant_name?` · ${esc(i.variant_name)}`:""}</div>`).join(""):`<div class="item">Itens não carregados nesta consulta.</div>`}</div><div class="ticket-actions"><button class="btn small primary" onclick="advanceOrder('${o.id}')">Avançar</button><button class="btn small" onclick="printOrder('${o.id}')">Imprimir</button></div></div>`}).join("")||`<div class="empty">Fila vazia.</div>`}
+function openOrder(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const items=o.items||[],pay=paymentFor(id);
+  const itemHtml=items.length?items.map(i=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><span><b>${i.quantity}x</b> ${esc(i.product_name)}${i.variant_name?` · ${esc(i.variant_name)}`:""}${i.observation?`<small style="display:block;color:#8e9aaa">Obs.: ${esc(i.observation)}</small>`:""}</span><b>${money(Number(i.unit_price||0)*Number(i.quantity||1))}</b></div>`).join(""):`<div class="empty">Nenhum item encontrado.</div>`;
+  const addonRows=items.flatMap(i=>(i.add_ons||[]).map(a=>`<div style="font-size:12px;color:#9aa7b5">+ ${esc(a.add_on_name||a.name||"Adicional")} · ${money(a.price)}</div>`)).join("");
+  openModal(`<h2>Pedido #${o.order_number}</h2>
+    <div class="grid2">
+      <div class="panel"><h3>Cliente e entrega</h3><div><b>${esc(o.customer_name||"Cliente")}</b></div><div style="margin-top:7px">${typeLabel(o.order_type)}${o.table_number?` · Mesa ${o.table_number}`:""}</div>${o.delivery_address?`<div style="margin-top:7px;color:#aab5c3">${esc(o.delivery_address)}</div>`:""}${o.observation?`<div class="notice" style="margin-top:12px">Obs.: ${esc(o.observation)}</div>`:""}</div>
+      <div class="panel"><h3>Pagamento</h3><div>Forma: <b>${esc(o.payment_method||"Não informado")}</b></div><div style="margin-top:7px">Status: ${pay?fmtStatus(pay.status):'<span class="badge yellow">Não registrado</span>'}</div>${o.change_for?`<div style="margin-top:7px">Troco para: ${money(o.change_for)}</div>`:""}</div>
+    </div>
+    <div class="panel" style="margin-top:14px"><h3>Itens</h3>${itemHtml}${addonRows?`<div style="margin-top:8px">${addonRows}</div>`:""}<div style="display:flex;justify-content:space-between;margin-top:14px"><span>Subtotal</span><b>${money(o.subtotal)}</b></div>${Number(o.delivery_fee||0)>0?`<div style="display:flex;justify-content:space-between;margin-top:6px"><span>Entrega</span><b>${money(o.delivery_fee)}</b></div>`:""}<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:18px"><span>Total</span><b>${money(o.total)}</b></div></div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Fechar</button><button class="btn" onclick="printOrder('${o.id}')">Imprimir</button><button class="btn primary" onclick="advanceOrder('${o.id}')">Avançar status</button></div>`);
+}
+async function advanceOrder(id){
+  try{
+    const o=orders.find(x=>x.id===id);if(!o)return;
+    const seq={pending:"preparing",preparing:"ready",ready:o.order_type==="delivery"?"out_for_delivery":"completed",out_for_delivery:"completed"};
+    const next=seq[o.status];if(!next)return toast("Esse pedido já está no último status operacional.");
+    const {error}=await sb.from("orders").update({status:next}).eq("id",id).eq("restaurant_id",restaurant.id);
+    if(error)throw error;
+    await loadAll();
+    if(next==="completed"&&o.payment_method){
+      const existing=paymentFor(id);
+      if(!existing){
+        const method=String(o.payment_method).toLowerCase();
+        const normalized=method.includes("pix")?"pix":method.includes("cart")?"card":method.includes("dinheiro")?"cash":null;
+        if(normalized){
+          const {error:pe}=await sb.from("payments").insert({restaurant_id:restaurant.id,order_id:id,method:normalized,status:"paid",amount:Number(o.total||0),paid_at:new Date().toISOString()});
+          if(pe)console.warn("Pagamento não registrado:",pe);
+          else await loadAll();
+        }
+      }
+    }
+    openWhats(id,next);
+  }catch(e){err(e,"Status do pedido")}
+}
+function renderKDS(){
+  const active=orders.filter(o=>["pending","preparing","ready"].includes(o.status));
+  $("kdsBoard").innerHTML=active.map(o=>{
+    const items=o.items||[];
+    return `<div class="ticket">
+      <div style="display:flex;justify-content:space-between"><h4>#${o.order_number} · ${typeLabel(o.order_type)}</h4>${fmtStatus(o.status)}</div>
+      <small>${esc(o.customer_name||"Cliente")} ${o.table_number?`· Mesa ${o.table_number}`:""}</small>
+      <div class="items">${items.length?items.map(i=>`<div class="item"><b>${i.quantity}x</b> ${esc(i.product_name)}${i.variant_name?` · ${esc(i.variant_name)}`:""}${i.observation?`<div style="color:#fbbf24;margin-top:3px">Obs.: ${esc(i.observation)}</div>`:""}</div>`).join(""):`<div class="item">Itens não encontrados.</div>`}</div>
+      ${o.observation?`<div class="notice warn">Pedido: ${esc(o.observation)}</div>`:""}
+      <div class="ticket-actions"><button class="btn small primary" onclick="advanceOrder('${o.id}')">Avançar</button><button class="btn small" onclick="openOrder('${o.id}')">Detalhes</button><button class="btn small" onclick="printOrder('${o.id}')">Imprimir</button></div>
+    </div>`;
+  }).join("")||`<div class="empty">Fila vazia.</div>`;
+}
 function testSound(){beep();toast("Som testado.")}
 function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(audioCtx.destination);o.start();setTimeout(()=>o.stop(),180)}catch(e){}}
 function subscribeRealtime(){
   if(realtimeChannel)sb.removeChannel(realtimeChannel);
   realtimeChannel=sb.channel("orders").on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:`restaurant_id=eq.${restaurant.id}`},payload=>{if(payload.eventType==="INSERT"&&payload.new?.status==="pending"){beep();toast(`Novo pedido #${payload.new.order_number}`)}loadAll()}).subscribe();
 }
-function renderTables(){$("tablesGrid").innerHTML=tables.map(t=>{const os=orders.filter(o=>o.table_number===t.table_number&&["pending","preparing","ready"].includes(o.status));const total=os.reduce((a,o)=>a+Number(o.total||0),0);return `<div class="card"><h3 style="margin:0">Mesa ${t.table_number}</h3><small>${esc(t.description||"")}</small><div style="margin:14px 0;font-size:22px">${money(total)}</div><span class="badge ${os.length?"yellow":"green"}">${os.length?os.length+" pedido(s) aberto(s)":"Livre"}</span></div>`}).join("")||`<div class="empty">Nenhuma mesa cadastrada.</div>`}
+function renderTables(){
+  $("tablesGrid").innerHTML=tables.filter(t=>t.is_active!==false).map(t=>{
+    const os=orders.filter(o=>o.table_number===t.table_number&&["pending","preparing","ready"].includes(o.status));
+    const total=os.reduce((a,o)=>a+Number(o.total||0),0);
+    return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3 style="margin:0">Mesa ${t.table_number}</h3><small>${esc(t.description||"")}</small></div><span class="badge ${os.length?"yellow":"green"}">${os.length?os.length+" aberto(s)":"Livre"}</span></div><div style="margin:14px 0;font-size:22px">${money(total)}</div><div class="actions">${os.length?`<button class="btn small" onclick="openOrder('${os[0].id}')">Ver pedido</button>`:""}<button class="btn small" onclick="editTable('${t.id}')">Editar</button><button class="btn small" onclick="toggleTable('${t.id}')">Desativar</button></div></div>`;
+  }).join("")||`<div class="empty">Nenhuma mesa ativa.</div>`;
+}
+function editTable(id){
+  if(!canWrite())return toast("Sem permissão.");
+  const t=tables.find(x=>x.id===id);if(!t)return;
+  openModal(`<h2>Editar mesa</h2><div class="field"><label>Número</label><input id="tfNumber" class="input" type="number" min="1" value="${t.table_number}"></div><div class="field"><label>Descrição</label><input id="tfDesc" class="input" value="${esc(t.description||"")}"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTable('${id}')">Salvar</button></div>`);
+}
 function openTable(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Nova mesa</h2><div class="field"><label>Número</label><input id="tfNumber" class="input" type="number" min="1"></div><div class="field"><label>Descrição</label><input id="tfDesc" class="input"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTable()">Salvar</button></div>`)}
-async function saveTable(){try{const n=Number($("tfNumber").value);if(!n)throw new Error("Número inválido.");const {error}=await sb.from("tables").insert({restaurant_id:restaurant.id,table_number:n,description:$("tfDesc").value.trim()||null,is_active:true});if(error)throw error;closeModal();await loadAll();toast("Mesa criada.")}catch(e){err(e,"Mesa")}}
-
+async function saveTable(id){
+  try{
+    if(!canWrite())throw new Error("Sem permissão.");
+    const n=Number($("tfNumber").value);if(!n)throw new Error("Número inválido.");
+    const payload={restaurant_id:restaurant.id,table_number:n,description:$("tfDesc").value.trim()||null,is_active:true};
+    const q=id?sb.from("tables").update(payload).eq("id",id).eq("restaurant_id",restaurant.id):sb.from("tables").insert(payload);
+    const {error}=await q;if(error)throw error;
+    closeModal();await loadAll();toast(id?"Mesa atualizada.":"Mesa criada.");
+  }catch(e){err(e,"Mesa")}
+}
+async function toggleTable(id){
+  try{if(!canWrite())throw new Error("Sem permissão.");const t=tables.find(x=>x.id===id);if(!t)return;const openOrders=orders.some(o=>o.table_number===t.table_number&&!["completed","cancelled"].includes(o.status));if(openOrders)return toast("Não desative uma mesa com pedido aberto.");const {error}=await sb.from("tables").update({is_active:false}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Mesa")}
+}
 function renderAddons(){$("addonsBody").innerHTML=addons.map(a=>`<tr><td>${esc(a.name)}</td><td>${money(a.price)}</td><td>${a.is_available?'<span class="badge green">Sim</span>':'<span class="badge red">Não</span>'}</td><td><div class="actions"><button class="btn small" onclick="editAddon('${a.id}')">Editar</button><button class="btn small" onclick="toggleAddon('${a.id}')">${a.is_available?"Pausar":"Ativar"}</button></div></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum adicional.</td></tr>`}
 function openAddon(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Novo adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" min="0"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" checked> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon()">Salvar</button></div>`)}
 function editAddon(id){const a=addons.find(x=>x.id===id);if(!a)return;openModal(`<h2>Editar adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input" value="${esc(a.name)}"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" min="0" value="${a.price}"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" ${a.is_available?"checked":""}> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon('${id}')">Salvar</button></div>`)}
@@ -409,11 +499,20 @@ async function saveCombo(id){
 }
 async function toggleCombo(id){try{if(!canWrite())throw new Error("Sem permissão.");const c=combos.find(x=>x.id===id);const {error}=await sb.from("combos").update({is_active:!c.is_active}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Combo")}}
 
-function renderDashboard(){const today=new Date();today.setHours(0,0,0,0);const day=orders.filter(o=>new Date(o.created_at)>=today&&!["cancelled"].includes(o.status));const rev=day.reduce((a,o)=>a+Number(o.total||0),0);$("mOrders").textContent=day.length;$("mRevenue").textContent=money(rev);$("mTicket").textContent=money(day.length?rev/day.length:0);$("mProducts").textContent=products.filter(p=>p.is_active).length;$("recentOrders").innerHTML=orders.slice(0,6).map(o=>`<div style="padding:9px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>#${o.order_number} · ${esc(o.customer_name||"Cliente")}</span><b>${money(o.total)}</b></div>`).join("")||`<div class="empty">Sem pedidos.</div>`;$("stockInfo").innerHTML=`<div class="badge blue">${products.length} produtos cadastrados</div>`}
+function renderDashboard(){const today=new Date();today.setHours(0,0,0,0);const day=orders.filter(o=>new Date(o.created_at)>=today&&!["cancelled"].includes(o.status));const rev=day.reduce((a,o)=>a+Number(o.total||0),0);$("mOrders").textContent=day.length;$("mRevenue").textContent=money(rev);$("mTicket").textContent=money(day.length?rev/day.length:0);$("mProducts").textContent=products.filter(p=>p.is_active).length;$("recentOrders").innerHTML=orders.slice(0,6).map(o=>`<div onclick="openOrder('${o.id}')" style="padding:9px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;cursor:pointer"><span>#${o.order_number} · ${esc(o.customer_name||"Cliente")}<small style="display:block;color:#8e9aaa">${typeLabel(o.order_type)} · ${fmtStatus(o.status)}</small></span><b>${money(o.total)}</b></div>`).join("")||`<div class="empty">Sem pedidos.</div>`;$("stockInfo").innerHTML=`<div class="badge blue">${products.length} produtos cadastrados</div>`}
 function renderCustomers(){const m={};orders.forEach(o=>{const n=o.customer_name||"Cliente";m[n]??={count:0,total:0};m[n].count++;m[n].total+=Number(o.total||0)});$("customersBody").innerHTML=Object.entries(m).sort((a,b)=>b[1].total-a[1].total).map(([n,x])=>`<tr><td>${esc(n)}</td><td>${x.count}</td><td>${money(x.total)}</td><td>${restaurant.phone_whatsapp?`<button class="btn small" onclick="window.open('https://wa.me/${restaurant.phone_whatsapp}','_blank')">WhatsApp</button>`:"—"}</td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum cliente.</td></tr>`}
-function renderDelivery(){const ds=orders.filter(o=>o.order_type==="delivery");$("deliveryBody").innerHTML=ds.map(o=>`<tr><td>#${o.order_number}</td><td>${esc(o.customer_name||"Cliente")}</td><td>${esc(o.delivery_address||"—")}</td><td>${money(o.total)}</td><td>${fmtStatus(o.status)}</td><td><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button></td></tr>`).join("")||`<tr><td colspan="6" class="empty">Nenhum delivery.</td></tr>`}
+function renderDelivery(){const ds=orders.filter(o=>o.order_type==="delivery");$("deliveryBody").innerHTML=ds.map(o=>`<tr><td>#${o.order_number}</td><td>${esc(o.customer_name||"Cliente")}</td><td>${esc(o.delivery_address||"—")}</td><td>${money(o.total)}</td><td>${fmtStatus(o.status)}</td><td><div class="actions"><button class="btn small" onclick="openOrder('${o.id}')">Detalhes</button><button class="btn small" onclick="advanceOrder('${o.id}')">Avançar</button></div></td></tr>`).join("")||`<tr><td colspan="6" class="empty">Nenhum delivery.</td></tr>`}
 function renderReports(){const active=orders.filter(o=>o.status!=="cancelled"),rev=active.reduce((a,o)=>a+Number(o.total||0),0);$("rRevenue").textContent=money(rev);$("rOrders").textContent=active.length;$("rTicket").textContent=money(active.length?rev/active.length:0);const top={};active.forEach(o=>(o.items||[]).forEach(i=>top[i.product_name]=(top[i.product_name]||0)+Number(i.quantity||1)));const totalItems=Object.values(top).reduce((a,v)=>a+v,0);$("rItems").textContent=totalItems||"0";$("topProducts").innerHTML=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,q],i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${i+1}. ${esc(n)} <b style="float:right">${q}</b></div>`).join("")||"Sem itens detalhados.";const pay={};active.forEach(o=>pay[o.payment_method||"Não informado"]=(pay[o.payment_method||"Não informado"]||0)+Number(o.total||0));$("paymentSummary").innerHTML=Object.entries(pay).map(([n,v])=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${esc(n)} <b style="float:right">${money(v)}</b></div>`).join("")||"—"}
-function renderCash(){const active=orders.filter(o=>o.status!=="cancelled"),m={money:0,pix:0,card:0};active.forEach(o=>{const x=String(o.payment_method||"").toLowerCase(),v=Number(o.total||0);if(x.includes("pix"))m.pix+=v;else if(x.includes("cart"))m.card+=v;else if(x.includes("dinheiro"))m.money+=v});$("cashMoney").textContent=money(m.money);$("cashPix").textContent=money(m.pix);$("cashCard").textContent=money(m.card);$("cashTotal").textContent=money(m.money+m.pix+m.card)}
+function renderCash(){
+  const paid=payments.filter(p=>p.status==="paid");
+  const m={money:0,pix:0,card:0};
+  if(paid.length){
+    paid.forEach(p=>{if(p.method==="pix")m.pix+=Number(p.amount||0);else if(p.method==="card")m.card+=Number(p.amount||0);else if(p.method==="cash")m.money+=Number(p.amount||0)});
+  }else{
+    orders.filter(o=>o.status!=="cancelled").forEach(o=>{const x=String(o.payment_method||"").toLowerCase(),v=Number(o.total||0);if(x.includes("pix"))m.pix+=v;else if(x.includes("cart"))m.card+=v;else if(x.includes("dinheiro"))m.money+=v});
+  }
+  $("cashMoney").textContent=money(m.money);$("cashPix").textContent=money(m.pix);$("cashCard").textContent=money(m.card);$("cashTotal").textContent=money(m.money+m.pix+m.card);
+}
 
 function fillSettings(){if(!restaurant)return;$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
 async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);renderStoreStatus();toast("Restaurante atualizado.")}catch(e){err(e,"Restaurante")}}
@@ -421,7 +520,13 @@ async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_
 async function saveMarketing(){return saveSettings()}
 
 function openWhats(id,next){const o=orders.find(x=>x.id===id);if(!restaurant.phone_whatsapp)return;const status={pending:"recebido",preparing:"em preparo",ready:"pronto",out_for_delivery:"saiu para entrega",completed:"concluído",cancelled:"cancelado"}[next||o.status]||o.status;const text=`Olá, ${o.customer_name||"cliente"}! Seu pedido #${o.order_number} está ${status}.`;window.open(`https://wa.me/${o.customer_phone||restaurant.phone_whatsapp}?text=${encodeURIComponent(text)}`,"_blank")}
-function printOrder(id){const o=orders.find(x=>x.id===id);const w=window.open("","_blank","width=400,height=700");w.document.write(`<html><head><title>Pedido #${o.order_number}</title><style>body{font-family:monospace;width:58mm;font-size:12px}h2{text-align:center;font-size:15px}.line{border-top:1px dashed #000;margin:8px 0}.row{display:flex;justify-content:space-between}</style></head><body><h2>${esc(restaurant.name)}</h2><div>Pedido #${o.order_number}</div><div>${new Date(o.created_at).toLocaleString("pt-BR")}</div><div class="line"></div><div>Cliente: ${esc(o.customer_name||"—")}</div><div>Tipo: ${typeLabel(o.order_type)}</div>${o.table_number?`<div>Mesa: ${o.table_number}</div>`:""}<div class="line"></div><div class="row"><b>Total</b><b>${money(o.total)}</b></div><div class="line"></div><div style="text-align:center">Obrigado!</div></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
+function printOrder(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const items=o.items||[];
+  const rows=items.map(i=>`<div class="row"><span>${i.quantity}x ${esc(i.product_name)}</span><span>${money(Number(i.unit_price||0)*Number(i.quantity||1))}</span></div>${i.variant_name?`<div>${esc(i.variant_name)}</div>`:""}${i.observation?`<div>Obs.: ${esc(i.observation)}</div>`:""}`).join("");
+  const w=window.open("","_blank","width=400,height=700");if(!w)return;
+  w.document.write(`<html><head><title>Pedido #${o.order_number}</title><style>body{font-family:monospace;width:58mm;font-size:12px;margin:8px}h2{text-align:center;font-size:15px}.line{border-top:1px dashed #000;margin:8px 0}.row{display:flex;justify-content:space-between;gap:8px}.muted{color:#555}</style></head><body><h2>${esc(restaurant.name)}</h2><div>Pedido #${o.order_number}</div><div>${new Date(o.created_at).toLocaleString("pt-BR")}</div><div class="line"></div><div>Cliente: ${esc(o.customer_name||"—")}</div><div>Tipo: ${typeLabel(o.order_type)}</div>${o.table_number?`<div>Mesa: ${o.table_number}</div>`:""}${o.delivery_address?`<div>End.: ${esc(o.delivery_address)}</div>`:""}<div class="line"></div>${rows||"<div>Sem itens detalhados.</div>"}<div class="line"></div><div class="row"><span>Subtotal</span><b>${money(o.subtotal)}</b></div>${Number(o.delivery_fee||0)>0?`<div class="row"><span>Entrega</span><b>${money(o.delivery_fee)}</b></div>`:""}<div class="row"><b>Total</b><b>${money(o.total)}</b></div>${o.observation?`<div class="line"></div><div>Obs.: ${esc(o.observation)}</div>`:""}<div class="line"></div><div style="text-align:center">Obrigado!</div></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300);
+}
 function exportCSV(){const rows=[["Pedido","Data","Cliente","Tipo","Mesa","Pagamento","Status","Total"],...orders.map(o=>[o.order_number,new Date(o.created_at).toLocaleString("pt-BR"),o.customer_name||"",o.order_type||"",o.table_number||"",o.payment_method||"",o.status||"",Number(o.total||0).toFixed(2)])];const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download=`vendas-${new Date().toISOString().slice(0,10)}.csv`;a.click()}
 
 $("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
