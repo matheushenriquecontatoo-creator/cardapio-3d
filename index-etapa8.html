@@ -85,6 +85,7 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 </style>
 </head>
 <body>
+<button id="btnCompartilharMenu" onclick="compartilharMenu()" style="position:fixed;right:14px;top:14px;z-index:1200;border:1px solid rgba(255,255,255,.12);background:rgba(10,10,12,.72);color:#fff;border-radius:999px;padding:9px 12px;font-size:11px;font-weight:900;backdrop-filter:blur(10px);cursor:pointer">Compartilhar</button>
 <header>
   <div class="brand-badge">✦ Hamburgueria artesanal</div>
   <button type="button" onclick="abrirAtendimento()" aria-label="Atendimento" style="margin:10px auto 0;display:block;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--text);border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer">🔔 Atendimento</button>
@@ -246,12 +247,12 @@ let adicionaisDisponiveis=[];
 let adicionaisPorProduto=new Map();
 let combosDisponiveis=[];
 let comboItensPorId=new Map();
-let carrinho=JSON.parse(localStorage.getItem('brasa180_carrinho')||'[]');
+let carrinho=JSON.parse(localStorage.getItem(storageKey('carrinho'))||'[]');
 if(!Array.isArray(carrinho))carrinho=[];carrinho=carrinho.map(i=>({...i,quantidade:Math.max(1,Number(i.quantidade)||1),addons:Array.isArray(i.addons)?i.addons:[],observacao:i.observacao||''}));
 let produtoSelecionado=null;
 let quantidadeProdutoAtual=1;
-let tipoAtendimentoSelecionado=localStorage.getItem('brasa180_atendimento')||'delivery';
-let ultimoPedidoCodigo=localStorage.getItem('brasa180_ultimo_pedido')||'';
+let tipoAtendimentoSelecionado=localStorage.getItem(storageKey('atendimento'))||'delivery';
+let ultimoPedidoCodigo=localStorage.getItem(storageKey('ultimo_pedido'))||'';
 
 /* =====================================================
    SUPABASE — CATÁLOGO + IMAGENS DO STORAGE
@@ -292,6 +293,13 @@ function resolverImagemSupabase(valor, fallback=''){
  return data?.publicUrl||fallback;
 }
 
+async function compartilharMenu(){
+ const url=window.location.href;
+ try{if(navigator.share){await navigator.share({title:document.title,text:'Confira nosso cardápio',url});return;}await navigator.clipboard.writeText(url);mostrarToast('Link do cardápio copiado.');}catch(e){if(e?.name!=='AbortError')mostrarToast('Não foi possível compartilhar agora.');}
+}
+
+function storageKey(nome){return `mesa360_${restauranteSlugDaUrl()}_${nome}`;}
+
 function restauranteSlugDaUrl(){
  const params=new URLSearchParams(window.location.search);
  return (params.get('restaurante')||params.get('r')||'brasa-180').trim().toLowerCase();
@@ -314,6 +322,9 @@ async function carregarCatalogoDoSupabase(){
 
    window.supabaseRestaurantId=restaurante.id;
    window.restauranteSupabase=restaurante;
+   document.title=`${restaurante.name||'Cardápio'} — Cardápio`;
+   if(restaurante.primary_color){document.documentElement.style.setProperty('--primary',restaurante.primary_color);}
+
 
    const [categoriasResp,produtosResp,modelosResp,arResp,configResp,addonsResp,combosResp,comboItemsResp]=await Promise.all([
      menuSupabase.from('categories').select('id,name,display_order,is_active').eq('restaurant_id',restaurante.id).eq('is_active',true).order('display_order',{ascending:true}),
@@ -420,19 +431,19 @@ async function inicializarSupabaseCatalogo(){
 
 function $(id){return document.getElementById(id)}
 function formatarPreco(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
-function salvarEstado(){localStorage.setItem('brasa180_carrinho',JSON.stringify(carrinho));localStorage.setItem('brasa180_atendimento',tipoAtendimentoSelecionado)}
+function salvarEstado(){localStorage.setItem(storageKey('carrinho'),JSON.stringify(carrinho));localStorage.setItem(storageKey('atendimento'),tipoAtendimentoSelecionado)}
 function abrirModal(id){const el=$(id);if(!el)return;if(!document.querySelector('.modal.ativo'))window.__scrollYAntesModal=window.scrollY;el.classList.add('ativo');document.body.classList.add('modal-aberto')}
 function fecharModal(id){const el=$(id);if(!el)return;el.classList.remove('ativo');if(!document.querySelector('.modal.ativo')){document.body.classList.remove('modal-aberto');const y=Number(window.__scrollYAntesModal||0);requestAnimationFrame(()=>window.scrollTo({top:y,behavior:'smooth'}))}}
 function fecharTodosModais(){document.querySelectorAll('.modal.ativo').forEach(m=>m.classList.remove('ativo'));document.body.classList.remove('modal-aberto');const y=Number(window.__scrollYAntesModal||0);requestAnimationFrame(()=>window.scrollTo({top:y,behavior:'smooth'}))}
 function iniciarRestaurante(){
  const params=new URLSearchParams(window.location.search);
  const mesaURL=(params.get('mesa')||'').replace(/\D/g,'').slice(0,4).trim();
- const nomeSalvo=localStorage.getItem('brasa180_nome_cliente')||'';
- const mesaSalva=localStorage.getItem('brasa180_mesa')||'';
+ const nomeSalvo=localStorage.getItem(storageKey('nome_cliente'))||'';
+ const mesaSalva=localStorage.getItem(storageKey('mesa'))||'';
  if(mesaURL){
    tipoAtendimentoSelecionado='mesa';
-   localStorage.setItem('brasa180_atendimento','mesa');
-   localStorage.setItem('brasa180_mesa',mesaURL);
+   localStorage.setItem(storageKey('atendimento'),'mesa');
+   localStorage.setItem(storageKey('mesa'),mesaURL);
    setTimeout(()=>{
      if($('numeroMesaPedido'))$('numeroMesaPedido').value=mesaURL;
      if($('numeroMesa'))$('numeroMesa').value=mesaURL;
@@ -442,7 +453,7 @@ function iniciarRestaurante(){
      mostrarToast(`Você está na Mesa ${mesaURL}.`);
    },0);
  } else {
-   const atendimentoSalvo=localStorage.getItem('brasa180_atendimento');
+   const atendimentoSalvo=localStorage.getItem(storageKey('atendimento'));
    if(atendimentoSalvo==='mesa')tipoAtendimentoSelecionado='mesa';
    setTimeout(()=>{
      if($('numeroMesaPedido')&&mesaSalva)$('numeroMesaPedido').value=mesaSalva;
@@ -783,7 +794,7 @@ function confirmarComerNaMesa(){
  if(!mesa)return mostrarToast('Informe o número da mesa.');
  tipoAtendimentoSelecionado='mesa';$('numeroMesaPedido').value=mesa;fecharModal('modalComerMesa');salvarEstado();abrirCarrinho();mostrarToast(`Mesa ${mesa} selecionada.`)
 }
-function abrirCarrinho(){abrirModal('modalCarrinho');$('painelSucessoLocal').style.display='none';$('btnAcaoFinalizar').style.display='flex';const nome=localStorage.getItem('brasa180_nome_cliente')||'';const tel=localStorage.getItem('brasa180_telefone_cliente')||'';if($('clienteNome'))$('clienteNome').value=nome;if($('clienteTelefone'))$('clienteTelefone').value=tel;descontoCheckout=0;cupomCheckout=null;if($('cupomPedido'))$('cupomPedido').value='';atualizarResumoAtendimento();renderizarCarrinho()}
+function abrirCarrinho(){abrirModal('modalCarrinho');$('painelSucessoLocal').style.display='none';$('btnAcaoFinalizar').style.display='flex';const nome=localStorage.getItem(storageKey('nome_cliente'))||'';const tel=localStorage.getItem(storageKey('telefone_cliente'))||'';if($('clienteNome'))$('clienteNome').value=nome;if($('clienteTelefone'))$('clienteTelefone').value=tel;descontoCheckout=0;cupomCheckout=null;if($('cupomPedido'))$('cupomPedido').value='';atualizarResumoAtendimento();renderizarCarrinho()}
 function fecharCarrinho(){fecharModal('modalCarrinho')}
 function fecharComerNaMesa(){fecharModal('modalComerMesa')}
 function fecharModalProduto(){fecharModal('modalProduto')}
@@ -809,8 +820,8 @@ function validarTroco(){
 }
 function limparCarrinhoAposEnvio(){
  carrinho=[];
- localStorage.removeItem('brasa180_carrinho');
- localStorage.setItem('brasa180_atendimento',tipoAtendimentoSelecionado);
+ localStorage.removeItem(storageKey('carrinho'));
+ localStorage.setItem(storageKey('atendimento'),tipoAtendimentoSelecionado);
  const obs=$('observacaoPedido');if(obs)obs.value='';
  const troco=$('valorTroco');if(troco)troco.value='';
  atualizarCarrinho();
@@ -875,18 +886,18 @@ async function processarCheckout(){
  let mesaAtual='';
  let endereco='';
  if(tipoAtendimentoSelecionado==='mesa'){
-   mesaAtual=(($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim());
+   mesaAtual=(($('numeroMesaPedido')?.value||localStorage.getItem(storageKey('mesa'))||'').trim());
    if(!mesaAtual)return mostrarToast('Informe o número da mesa.');
    if(!/^[0-9]+$/.test(mesaAtual)||Number(mesaAtual)<=0)return mostrarToast('Informe um número de mesa válido.');
-   localStorage.setItem('brasa180_mesa',mesaAtual);
+   localStorage.setItem(storageKey('mesa'),mesaAtual);
    localPedido=`*MESA:* ${mesaAtual}`
  }
  else{endereco=$('clienteEndereco').value.trim();if(!endereco)return mostrarToast('Informe seu endereço de entrega.');localPedido=`*Endereço:* ${endereco}`}
  const observacao=$('observacaoPedido').value.trim(); const forma=$('formaPagamento').value;let pagto=forma==='pix'?'PIX':forma==='dinheiro'?'Dinheiro':'Cartão';
  let troco=null;
  if(forma==='dinheiro'){troco=validarTroco();if(troco===false)return;if(troco)pagto+=` (troco para ${formatarPreco(troco)})`}
- localStorage.setItem('brasa180_nome_cliente',nome);localStorage.setItem('brasa180_telefone_cliente',telefone);
- if(mesaAtual)localStorage.setItem('brasa180_mesa',mesaAtual);
+ localStorage.setItem(storageKey('nome_cliente'),nome);localStorage.setItem(storageKey('telefone_cliente'),telefone);
+ if(mesaAtual)localStorage.setItem(storageKey('mesa'),mesaAtual);
  const codigo=gerarCodigoPedido();
  mostrarToast('Registrando pedido…');
  $('btnAcaoFinalizar').disabled=true;
@@ -894,7 +905,7 @@ async function processarCheckout(){
    const pedidoCriado=await registrarPedidoSupabase({nome,telefone,mesaAtual,endereco,forma,troco,observacao,codigo,tipoAtendimento:tipoAtendimentoSelecionado,cupomCodigo:cupomCheckout?.code||null});
    const numeroReal=pedidoCriado?.order_number||codigo;
    ultimoPedidoCodigo=numeroReal;
-   localStorage.setItem('brasa180_ultimo_pedido',numeroReal);
+   localStorage.setItem(storageKey('ultimo_pedido'),numeroReal);
    const msg=whatsappMensagem(nome,numeroReal,localPedido,pagto,observacao);
    const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`;
    limparCarrinhoAposEnvio();
@@ -916,9 +927,9 @@ async function processarCheckout(){
  }
 }
 function abrirAtendimento(){
- const mesa=($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim();
+ const mesa=($('numeroMesaPedido')?.value||localStorage.getItem(storageKey('mesa'))||'').trim();
  if(tipoAtendimentoSelecionado!=='mesa' && !mesa)return mostrarToast('Ative Comer na minha mesa e informe a mesa para usar o atendimento.');
- if(mesa){tipoAtendimentoSelecionado='mesa';$('numeroMesaPedido').value=mesa;localStorage.setItem('brasa180_mesa',mesa);salvarEstado();atualizarResumoAtendimento();}
+ if(mesa){tipoAtendimentoSelecionado='mesa';$('numeroMesaPedido').value=mesa;localStorage.setItem(storageKey('mesa'),mesa);salvarEstado();atualizarResumoAtendimento();}
  const box=$('opcoesAtendimentoDetalhe');
  if(box){box.style.display='none';box.innerHTML='';}
  $('tituloAtendimento').textContent='🔔 Atendimento';
@@ -931,7 +942,7 @@ function mostrarOpcoesGarcom(){
 }
 function mostrarOpcoesConta(){
  const box=$('opcoesAtendimentoDetalhe');
- const mesaAtual=($('numeroMesaPedido')?.value||localStorage.getItem('brasa180_mesa')||'').trim();
+ const mesaAtual=($('numeroMesaPedido')?.value||localStorage.getItem(storageKey('mesa'))||'').trim();
  box.style.display='block';
  box.innerHTML=`
    <div class="conta-fluxo">
@@ -953,7 +964,7 @@ function confirmarAtendimento(tipo){
    const mesa=($('mesaConta')?.value||'').trim();
    if(!mesa)return mostrarToast('Informe o número da mesa.');
    const pagamento=$('tipoConta')?.value||'Cartão na mesa';
-   localStorage.setItem('brasa180_mesa',mesa);
+   localStorage.setItem(storageKey('mesa'),mesa);
    $('numeroMesaPedido').value=mesa;
    tipoAtendimentoSelecionado='mesa';
    salvarEstado();

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel Administrativo — Mesa360 SaaS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{--primary:#f59e0b;--primary2:#d97706;--bg:#0b0f14;--panel:#111821;--panel2:#17202b;--border:#263241;--text:#f5f7fa;--muted:#8e9aaa;--success:#22c55e;--danger:#ef4444;--info:#38bdf8;--warning:#fbbf24}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
@@ -12,6 +13,7 @@
 @media(max-width:1050px){.cards{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}.kds{grid-template-columns:repeat(2,minmax(240px,1fr))}}
 @media(max-width:760px){.sidebar{width:72px}.brand{padding:18px 8px;text-align:center}.brand b{font-size:0}.brand b:after{content:"B";font-size:22px;color:var(--primary)}.brand small,.nav .group{display:none}.nav button{font-size:0;text-align:center}.nav button:before{content:"•";font-size:21px}.main{margin-left:72px;width:calc(100% - 72px)}.topbar{padding:0 12px}.content{padding:15px}.cards,.grid2,.grid3{grid-template-columns:1fr}.kds{grid-template-columns:1fr}.page-title{align-items:flex-start;flex-direction:column}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.table th:nth-child(4),.table td:nth-child(4){display:none}}
 @media print{body{background:#fff;color:#000}.sidebar,.topbar,.no-print{display:none!important}.main{margin:0;width:100%}.content{padding:0}.print-only{display:block}.ticket-print{width:58mm;font-family:monospace;font-size:11px}.ticket-print h2{text-align:center;font-size:15px}}
+.qr-card{background:#0d141c;border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}.qr-code{width:128px;height:128px;background:#fff;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center}.qr-info{flex:1;min-width:220px}.qr-info b{display:block;font-size:15px;margin-bottom:5px}.qr-info small{color:var(--muted);line-height:1.45;display:block}.qr-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 </style>
 </head>
 <body>
@@ -23,7 +25,10 @@
     <div class="field"><label>E-mail</label><input id="loginEmail" class="input" type="email" autocomplete="username"></div>
     <div class="field"><label>Senha</label><input id="loginPassword" class="input" type="password" autocomplete="current-password"></div>
     <button class="btn primary" onclick="login()">Entrar</button>
+    <button class="btn" onclick="openSignup()" style="margin-top:8px">Criar meu restaurante</button>
+    <button class="btn" onclick="recoverPassword()" style="margin-top:8px;background:transparent">Esqueci minha senha</button>
     <div id="loginError" class="login-error"></div>
+    <div style="margin-top:14px;color:#7f8b99;font-size:11px;line-height:1.5">Crie sua conta e configure o restaurante sem precisar editar código.</div>
   </div>
 </div>
 
@@ -105,7 +110,7 @@
       </section>
 
       <section id="view-tables" class="view">
-        <div class="page-title"><div><h1>Salão e mesas</h1><p>Mesas ativas e pedidos associados.</p></div><button class="btn primary" onclick="openTable()">+ Nova mesa</button></div>
+        <div class="page-title"><div><h1>Salão e mesas</h1><p>Mesas ativas, pedidos associados e QR Codes individuais.</p></div><div class="actions"><button class="btn" onclick="openPublicMenu()">Abrir cardápio público</button><button class="btn" onclick="printAllTableQRs()">Imprimir QR Codes</button><button class="btn primary" onclick="openTable()">+ Nova mesa</button></div></div>
         <div class="grid3" id="tablesGrid"></div>
       </section>
 
@@ -158,6 +163,7 @@
       </section>
 
       <section id="view-settings" class="view">
+        <div class="panel" style="margin-bottom:16px"><h3>Cardápio público</h3><p style="color:var(--muted);font-size:13px;margin:0 0 12px">Link geral do restaurante para QR Code, Instagram, Google e WhatsApp.</p><div class="actions"><input id="publicMenuUrl" class="input" readonly style="flex:1"><button class="btn" onclick="copyPublicMenuUrl()">Copiar link</button><button class="btn" onclick="printPublicMenuQR()">Imprimir QR</button><button class="btn primary" onclick="openPublicMenu()">Abrir</button></div><div style="margin-top:12px;padding:11px;border-radius:10px;background:#0d141c;color:#9aa7b5;font-size:11px;line-height:1.5">URL comercial: <b style="color:#fff">?restaurante=${esc(restaurant?.slug||'')}</b>. Depois podemos conectar domínio próprio sem alterar o cadastro do restaurante.</div></div>
         <div class="page-title"><div><h1>Configurações</h1><p>Dados gerais do restaurante e operação.</p></div></div>
         <div class="grid2">
           <div class="panel"><h3>Restaurante</h3><div class="field"><label>Nome</label><input id="setName" class="input"></div><div class="field"><label>WhatsApp</label><input id="setWhatsapp" class="input"></div><div class="field"><label>Horários</label><textarea id="setHours" class="textarea" rows="4"></textarea></div><div class="field"><label>Cor principal</label><input id="setColor" class="input" type="color"></div><button class="btn primary" onclick="saveRestaurant()">Salvar restaurante</button></div>
@@ -200,12 +206,49 @@ async function login(){
   if(error){$("loginError").textContent=error.message;return}
   session=data.session;await boot();
 }
+function openSignup(){
+  openModal(`<h2>Criar restaurante</h2><p style="color:var(--muted);font-size:12px;line-height:1.5">Abra sua conta do Mesa360 e receba um cardápio público próprio. O plano inicial será <b>trial</b>; nenhuma cobrança é feita por este cadastro.</p><div class="formgrid"><div class="field"><label>Nome do restaurante</label><input id="suName" class="input" placeholder="Ex.: Brasa 180°"></div><div class="field"><label>Identificador do cardápio</label><input id="suSlug" class="input" placeholder="brasa-180" oninput="this.value=slugify(this.value)"></div><div class="field"><label>Nome do responsável</label><input id="suOwner" class="input" placeholder="Seu nome"></div><div class="field"><label>WhatsApp comercial</label><input id="suPhone" class="input" placeholder="5511999999999"></div><div class="field"><label>E-mail de acesso</label><input id="suEmail" class="input" type="email" autocomplete="email"></div><div class="field"><label>Senha</label><input id="suPassword" class="input" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></div></div><div id="signupError" class="login-error"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="createRestaurantAccount()">Criar conta</button></div>`);
+}
+async function createRestaurantAccount(){
+  const errorBox=$("signupError");errorBox.textContent="";
+  const name=$("suName").value.trim(),slug=slugify($("suSlug").value),owner=$("suOwner").value.trim(),phone=$("suPhone").value.trim(),email=$("suEmail").value.trim(),password=$("suPassword").value;
+  if(!name||!slug||!email||!password){errorBox.textContent="Preencha nome, identificador, e-mail e senha.";return}
+  if(password.length<6){errorBox.textContent="A senha precisa ter pelo menos 6 caracteres.";return}
+  const pending={name,slug,owner,phone,email};
+  localStorage.setItem("mesa360_pending_signup",JSON.stringify(pending));
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:owner}}});
+  if(error){errorBox.textContent=error.message;return}
+  if(data.session){session=data.session;const ok=await finishRestaurantBootstrap(pending);if(ok){localStorage.removeItem("mesa360_pending_signup");closeModal();await boot();}}
+  else{closeModal();$("loginError").textContent="Conta criada. Confirme seu e-mail e depois entre no painel para finalizar a criação do restaurante.";}
+}
+async function finishRestaurantBootstrap(pending){
+  try{
+    const {data,error}=await sb.rpc("criar_restaurante_saas",{p_nome:pending.name,p_slug:pending.slug,p_nome_responsavel:pending.owner||null,p_whatsapp:pending.phone||null});
+    if(error)throw error;
+    return !!data;
+  }catch(e){console.error(e);$("loginError").textContent=e?.message||"Não foi possível criar o restaurante.";return false}
+}
+async function recoverPassword(){
+  const email=$("loginEmail").value.trim();
+  if(!email){$("loginError").textContent="Informe seu e-mail no campo acima para receber o link de recuperação.";return}
+  const redirectTo=window.location.origin+window.location.pathname;
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+  $("loginError").textContent=error?error.message:"Se o e-mail existir, o link de recuperação será enviado.";
+}
 async function logout(){await sb.auth.signOut();location.reload()}
 
 async function boot(){
   if(!session){$("loginScreen").classList.remove("hidden");$("app").classList.add("hidden");return}
-  const {data:p,error:pe}=await sb.from("profiles").select("id,restaurant_id,full_name,role,is_active,permissions").eq("id",session.user.id).single();
-  if(pe||!p?.restaurant_id){$("loginError").textContent="Usuário autenticado, mas sem perfil de restaurante.";await sb.auth.signOut();return}
+  const {data:p,error:pe}=await sb.from("profiles").select("id,restaurant_id,full_name,role,is_active,permissions").eq("id",session.user.id).maybeSingle();
+  if(pe){$("loginError").textContent=pe.message||"Não foi possível carregar seu perfil.";return}
+  if(!p?.restaurant_id){
+    const pendingRaw=localStorage.getItem("mesa360_pending_signup");
+    if(pendingRaw){
+      try{const pending=JSON.parse(pendingRaw);const ok=await finishRestaurantBootstrap(pending);if(ok){localStorage.removeItem("mesa360_pending_signup");return boot();}}catch(e){$("loginError").textContent=e?.message||"Não foi possível finalizar o cadastro.";return}
+    }
+    $("loginError").textContent="Sua conta está autenticada, mas ainda não há um restaurante vinculado. Use 'Criar meu restaurante' para concluir o cadastro.";
+    return;
+  }
   profile=p;
   const {data:r,error:re}=await sb.from("restaurants").select("*").eq("id",p.restaurant_id).single();
   if(re||!r){err(re||new Error("Restaurante não encontrado"),"Carregamento");return}
@@ -293,7 +336,7 @@ function renderOnboarding(){
   const done=steps.filter(x=>x[1]).length,total=steps.length;
   const pct=Math.round(done/total*100);
   if($('onboardingBox')) $('onboardingBox').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px"><b>${done}/${total} etapas</b><b>${pct}%</b></div><div class="progress"><i style="width:${pct}%"></i></div><div style="margin-top:12px;display:grid;gap:7px">${steps.map(x=>`<div>${x[1]?'✓':'○'} ${esc(x[0])}</div>`).join('')}</div><div style="margin-top:12px;color:var(--muted);font-size:12px">Plano atual: <b>${esc(restaurant?.plan||'trial')}</b> · Status: <b>${esc(restaurant?.subscription_status||'active')}</b></div>`;
-  if(done===total && restaurant && !restaurant.onboarding_completed && canWrite()) markOnboardingComplete();
+  if($('onboardingBox'))$('onboardingBox').insertAdjacentHTML('beforeend',`<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn small" onclick="openPublicMenu()">Abrir cardápio</button><button class="btn small" onclick="go('tables')">Configurar QR das mesas</button><button class="btn small" onclick="go('team')">Configurar equipe</button></div>`); if(done===total && restaurant && !restaurant.onboarding_completed && canWrite()) markOnboardingComplete();
 }
 let onboardingSaving=false;
 async function markOnboardingComplete(){
@@ -488,17 +531,39 @@ function subscribeRealtime(){
   realtimeChannel=sb.channel("orders").on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:`restaurant_id=eq.${restaurant.id}`},payload=>{if(payload.eventType==="INSERT"&&payload.new?.status==="pending"){beep();toast(`Novo pedido #${payload.new.order_number}`)}loadAll()}).subscribe();
 }
 function renderTables(){
-  $("tablesGrid").innerHTML=tables.filter(t=>t.is_active!==false).map(t=>{
-    const os=orders.filter(o=>o.table_number===t.table_number&&["pending","preparing","ready"].includes(o.status));
-    const total=os.reduce((a,o)=>a+Number(o.total||0),0);
-    return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><div><h3 style="margin:0">Mesa ${t.table_number}</h3><small>${esc(t.description||"")}</small></div><span class="badge ${os.length?"yellow":"green"}">${os.length?os.length+" aberto(s)":"Livre"}</span></div><div style="margin:14px 0;font-size:22px">${money(total)}</div><div class="actions">${os.length?`<button class="btn small" onclick="openOrder('${os[0].id}')">Ver pedido</button>`:""}<button class="btn small" onclick="editTable('${t.id}')">Editar</button><button class="btn small" onclick="toggleTable('${t.id}')">Desativar</button></div></div>`;
-  }).join("")||`<div class="empty">Nenhuma mesa ativa.</div>`;
+ const activeOrders=orders.filter(o=>!['completed','cancelled'].includes(o.status));
+ $('tablesGrid').innerHTML=tables.map(t=>{
+  const os=activeOrders.filter(o=>Number(o.table_number)===Number(t.table_number));
+  const total=os.reduce((a,o)=>a+Number(o.total||0),0);
+  const url=publicMenuUrl(Number(t.table_number));
+  return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div style="font-size:18px;font-weight:900">Mesa ${esc(t.table_number)}</div><small style="color:var(--muted)">${esc(t.description||'')}</small></div><span class="badge ${os.length?'yellow':'green'}">${os.length?'Ocupada':'Livre'}</span></div><div style="margin-top:12px;color:var(--muted);font-size:12px">${os.length} pedido(s) aberto(s) · ${money(total)}</div><div class="qr-card" style="margin-top:12px"><div id="qr-${t.id}" class="qr-code"></div><div class="qr-info"><b>QR da Mesa ${esc(t.table_number)}</b><small>O cliente entra no cardápio com esta mesa preenchida automaticamente.</small><div class="qr-actions"><button class="btn small" onclick="openTable('${t.id}')">Editar</button><button class="btn small" onclick="copyText('${url}')">Copiar link</button><button class="btn small primary" onclick="printTableQR('${t.id}')">Imprimir</button></div></div></div></div>`;
+ }).join('')||'<div class="empty">Nenhuma mesa cadastrada.</div>';
+ setTimeout(()=>tables.forEach(t=>{const el=$('qr-'+t.id);if(el&&window.QRCode)new QRCode(el,{text:publicMenuUrl(Number(t.table_number)),width:112,height:112,colorDark:'#111111',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}),0);
 }
-function editTable(id){
-  if(!canWrite())return toast("Sem permissão.");
-  const t=tables.find(x=>x.id===id);if(!t)return;
-  openModal(`<h2>Editar mesa</h2><div class="field"><label>Número</label><input id="tfNumber" class="input" type="number" min="1" value="${t.table_number}"></div><div class="field"><label>Descrição</label><input id="tfDesc" class="input" value="${esc(t.description||"")}"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTable('${id}')">Salvar</button></div>`);
+
+function publicMenuUrl(table){
+ const base=window.location.origin+window.location.pathname.replace(/[^/]+$/,'');
+ const mesa=table!==''&&table!==null&&table!==undefined?`&mesa=${encodeURIComponent(table)}`:'';
+ return `${base}index.html?restaurante=${encodeURIComponent(restaurant?.slug||'brasa-180')}${mesa}`;
 }
+function openPublicMenu(){window.open(publicMenuUrl(''),'_blank')}
+function copyText(text){navigator.clipboard?.writeText(text).then(()=>toast('Link copiado.')).catch(()=>prompt('Copie o link:',text))}
+function copyPublicMenuUrl(){copyText(publicMenuUrl(''))}
+function printPublicMenuQR(){
+  const url=publicMenuUrl("");const w=window.open("","_blank","width=500,height=700");if(!w)return;
+  w.document.write(`<html><head><title>QR Cardápio - ${esc(restaurant?.name||'Restaurante')}</title><style>body{font-family:Arial;text-align:center;padding:30px}h1{font-size:30px;margin:0 0 8px}p{color:#555}#qr{width:300px;height:300px;margin:25px auto;background:#fff;padding:10px}</style></head><body><h1>${esc(restaurant?.name||'Restaurante')}</h1><p>Escaneie para abrir o cardápio</p><div id="qr"></div><p>${esc(url)}</p><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById('qr'),{text:${JSON.stringify(url)},width:300,height:300});setTimeout(()=>window.print(),700);<\/script></body></html>`);w.document.close();
+}
+function printTableQR(id){
+ const t=tables.find(x=>x.id===id);if(!t)return;const url=publicMenuUrl(Number(t.table_number));const w=window.open('','_blank','width=520,height=720');if(!w)return;
+ w.document.write(`<html><head><title>QR Mesa ${t.table_number}</title><style>body{font-family:Arial;text-align:center;padding:30px}h1{font-size:34px;margin:0 0 8px}p{color:#555}#qr{width:280px;height:280px;margin:25px auto;background:#fff;padding:10px}#qr img{width:280px;height:280px}</style></head><body><h1>Mesa ${t.table_number}</h1><p>${esc(restaurant?.name||'Restaurante')}</p><div id="qr"></div><p>Escaneie para abrir o cardápio desta mesa.</p><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById('qr'),{text:${JSON.stringify(url)},width:280,height:280});setTimeout(()=>window.print(),500);<\/script></body></html>`);w.document.close();
+}
+function printAllTableQRs(){
+ if(!tables.length)return toast('Cadastre pelo menos uma mesa.');const w=window.open('','_blank','width=800,height=900');if(!w)return;
+ const cards=tables.map(t=>`<div class="card"><h1>Mesa ${esc(t.table_number)}</h1><p>${esc(restaurant?.name||'Restaurante')}</p><div id="qr-${t.id}" class="qr"></div><small>Escaneie para abrir o cardápio desta mesa.</small></div>`).join('');
+ const scripts=tables.map(t=>`new QRCode(document.getElementById('qr-${t.id}'),{text:${JSON.stringify(publicMenuUrl(Number(t.table_number)))},width:220,height:220});`).join('');
+ w.document.write(`<html><head><title>QR Codes - ${esc(restaurant?.name||'Restaurante')}</title><style>body{font-family:Arial;margin:20px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}.card{border:1px solid #ddd;border-radius:12px;text-align:center;padding:20px;page-break-inside:avoid}.card h1{margin:0 0 6px}.card p{color:#666}.qr{width:220px;height:220px;margin:15px auto}.qr img{width:220px;height:220px}@media print{.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><div class="grid">${cards}</div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>${scripts}setTimeout(()=>window.print(),700);<\/script></body></html>`);w.document.close();
+}
+
 function openTable(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Nova mesa</h2><div class="field"><label>Número</label><input id="tfNumber" class="input" type="number" min="1"></div><div class="field"><label>Descrição</label><input id="tfDesc" class="input"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveTable()">Salvar</button></div>`)}
 async function saveTable(id){
   try{
@@ -609,7 +674,7 @@ async function openCashMovement(){try{if(!canWrite())throw new Error('Sem permis
 async function saveCashMovement(sessionId){try{const amount=Number($('cmAmount').value);if(!Number.isFinite(amount)||amount<=0)throw new Error('Informe um valor válido.');const {error}=await sb.from('cash_movements').insert({restaurant_id:restaurant.id,session_id:sessionId,user_id:session.user.id,type:$('cmType').value,amount,description:$('cmDesc').value.trim()||null});if(error)throw error;closeModal();await loadAll();toast('Movimentação registrada.')}catch(e){err(e,'Movimentação')}}
 async function closeCashSession(){try{if(!canWrite())throw new Error('Sem permissão.');const s=cashSession();if(!s)return toast('Não há caixa aberto.');const since=new Date(s.opened_at);const cashPaid=payments.filter(p=>p.status==='paid'&&p.method==='cash'&&new Date(p.created_at)>=since).reduce((a,p)=>a+Number(p.amount||0),0);const mov=cashMovements.filter(x=>x.session_id===s.id);const supplies=mov.filter(x=>x.type==='supply').reduce((a,x)=>a+Number(x.amount||0),0),withdrawals=mov.filter(x=>x.type==='withdrawal').reduce((a,x)=>a+Number(x.amount||0),0);const expected=Number(s.opening_amount||0)+cashPaid+supplies-withdrawals;const v=prompt(`Valor esperado: ${money(expected)}\nInforme o dinheiro contado no fechamento:`);if(v===null)return;const counted=Number(v);if(!Number.isFinite(counted)||counted<0)throw new Error('Valor contado inválido.');const {error}=await sb.from('cash_sessions').update({closed_by:session.user.id,expected_amount:expected,counted_amount:counted,difference:counted-expected,status:'closed',closed_at:new Date().toISOString()}).eq('id',s.id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll();toast(`Caixa fechado. Diferença: ${money(counted-expected)}`)}catch(e){err(e,'Fechamento do caixa')}}
 
-function fillSettings(){if(!restaurant)return;$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
+function fillSettings(){if(!restaurant)return; if($("publicMenuUrl"))$("publicMenuUrl").value=publicMenuUrl("");$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
 async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);restaurant.onboarding_step=Math.max(Number(restaurant.onboarding_step||0),2);renderStoreStatus();renderOnboarding();toast("Restaurante atualizado.")}catch(e){err(e,"Restaurante")}}
 async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_key:$("setPix").value.trim(),meta_pixel_id:$("metaPixel").value.trim(),ga_id:$("gaId").value.trim()};const p={restaurant_id:restaurant.id,delivery_fee:Number($("setDeliveryFee").value)||0,minimum_order:Number($("setMinOrder").value)||0,accepts_delivery:$("setDelivery").checked,accepts_table_orders:$("setTableOrders").checked,settings:merged};let q=settings?sb.from("restaurant_settings").update(p).eq("id",settings.id):sb.from("restaurant_settings").insert(p);const {data,error}=await q.select("*").single();if(error)throw error;settings=data;fillSettings();toast("Configurações salvas.")}catch(e){err(e,"Configurações")}}
 async function saveMarketing(){return saveSettings()}
