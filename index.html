@@ -405,6 +405,11 @@ async function inicializarSupabaseCatalogo(){
 }
 
 function $(id){return document.getElementById(id)}
+function escaparHtml(valor){
+ return String(valor??'').replace(/[&<>\"']/g,char=>({
+   '&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'
+ }[char]));
+}
 function formatarPreco(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function salvarEstado(){localStorage.setItem(storageKey('carrinho'),JSON.stringify(carrinho));localStorage.setItem(storageKey('atendimento'),tipoAtendimentoSelecionado)}
 function abrirModal(id){const el=$(id);if(!el)return;if(!document.querySelector('.modal.ativo'))window.__scrollYAntesModal=window.scrollY;el.classList.add('ativo');document.body.classList.add('modal-aberto')}
@@ -448,11 +453,23 @@ function iniciarRestaurante(){
 }
 
 function renderizarCategorias(){
- $('categorias').innerHTML=restauranteAtual.categorias.map(c=>`<button type="button" class="categoria ${c.id==='todos'?'ativa':''}" data-categoria="${c.id}" onclick="filtrarProdutos('${c.id}',this)">${c.nome}</button>`).join('')
+ $('categorias').innerHTML=restauranteAtual.categorias.map(c=>{
+   const id=escaparHtml(c.id);
+   const nome=escaparHtml(c.nome);
+   return `<button type="button" class="categoria ${c.id==='todos'?'ativa':''}" data-categoria="${id}" onclick="filtrarProdutos('${id}',this)">${nome}</button>`;
+ }).join('');
 }
 function renderizarProdutos(cat='todos'){
  const lista=cat==='todos'?restauranteAtual.produtos:restauranteAtual.produtos.filter(p=>p.categoria===cat);
- $('listaProdutos').innerHTML=lista.map(p=>`<article class="produto" data-categoria="${p.categoria}" onclick="abrirProdutoPorId('${p.id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${p.imagem}" alt="${p.nome}">${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Combo'}</div><h2>${p.nome}</h2><p>${p.descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-ar-card">${p.combo?'Montar combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`).join('');
+ $('listaProdutos').innerHTML=lista.map(p=>{
+   const id=escaparHtml(p.id);
+   const categoria=escaparHtml(p.categoria);
+   const imagem=escaparHtml(p.imagem);
+   const nome=escaparHtml(p.nome);
+   const descricao=escaparHtml(p.descricao);
+   const kicker=p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Combo';
+   return `<article class="produto" data-categoria="${categoria}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}">${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${kicker}</div><h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-ar-card">${p.combo?'Montar combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`;
+ }).join('');
  if(!lista.length)$('listaProdutos').innerHTML='<div class="carrinho-vazio" style="grid-column:1/-1">Nenhum item disponível nesta categoria.</div>';
 }
 function filtrarProdutos(cat,btn){
@@ -468,16 +485,16 @@ function renderizarCustomizacao(p){
    const addons=adicionaisPorProduto.get(p.dbId)||[];
    if(addons.length){
      box.style.display='grid';
-     box.innerHTML=`<div class="customizacao-titulo">Personalize seu hambúrguer</div><div class="customizacao-sub">Escolha os adicionais que quiser.</div><div class="addon-lista">${addons.map(a=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="addon-check" value="${a.id}" data-nome="${a.name}" data-preco="${a.price}"><span class="addon-nome">${a.name}</span></span><span class="addon-preco">+ ${formatarPreco(a.price)}</span></label>`).join('')}</div>`;
+     box.innerHTML=`<div class="customizacao-titulo">Personalize seu hambúrguer</div><div class="customizacao-sub">Escolha os adicionais que quiser.</div><div class="addon-lista">${addons.map(a=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="addon-check" value="${a.id}" data-nome="${a.name}" data-preco="${a.price}"><span class="addon-nome">${escaparHtml(a.name)}</span></span><span class="addon-preco">+ ${formatarPreco(a.price)}</span></label>`).join('')}</div>`;
    }
  }else if(p?.combo){
    comboBox.style.display='grid';
    const burgers=restauranteAtual.produtos.filter(x=>x.categoria==='burgers');
    const porcoes=restauranteAtual.produtos.filter(x=>x.categoria==='porcoes');
    const bebidas=restauranteAtual.produtos.filter(x=>x.categoria==='bebidas');
-   comboBox.innerHTML=`<div><label for="comboBurger">Hambúrguer do combo *</label><select id="comboBurger"><option value="">Escolha o hambúrguer</option>${burgers.map(x=>`<option value="${x.dbId}">${x.nome}</option>`).join('')}</select></div>
-   <div><label for="comboPorcao">Porção do combo *</label><select id="comboPorcao"><option value="">Escolha a porção</option>${porcoes.map(x=>`<option value="${x.dbId}">${x.nome}</option>`).join('')}</select></div>
-   <div><label for="comboBebida">Bebida do combo *</label><select id="comboBebida"><option value="">Escolha a bebida</option>${bebidas.map(x=>`<option value="${x.dbId}">${x.nome}</option>`).join('')}</select></div>`;
+   comboBox.innerHTML=`<div><label for="comboBurger">Hambúrguer do combo *</label><select id="comboBurger"><option value="">Escolha o hambúrguer</option>${burgers.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>
+   <div><label for="comboPorcao">Porção do combo *</label><select id="comboPorcao"><option value="">Escolha a porção</option>${porcoes.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>
+   <div><label for="comboBebida">Bebida do combo *</label><select id="comboBebida"><option value="">Escolha a bebida</option>${bebidas.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>`;
  }
  box.style.display='grid';
  box.innerHTML += `<div><label for="observacaoItem">Observação do item</label><input id="observacaoItem" type="text" placeholder="Ex.: sem cebola, molho à parte" maxlength="140"></div>`;
@@ -505,6 +522,36 @@ let arFotoProductMesh=null;
 let arFotoShadowMesh=null;
 let arFotoTexture=null;
 let arFotoShadowTexture=null;
+let arFotoShadowGeometry=null;
+let arFotoProductGeometry=null;
+let arFotoProductMaterial=null;
+let arFotoShadowMaterial=null;
+let arFotoPlacementDone=false;
+
+const AR_FOTO_CONFIG=Object.freeze({
+  widthMeters:0.15,
+  minScale:0.55,
+  maxScale:1.85,
+  fallbackScaleStep:0.0022,
+  xrRotationPerPixel:0.010,
+  xrMoveXPerPixel:0.00075,
+  xrMoveZPerPixel:0.00105,
+  shadowWidthMeters:0.17,
+  shadowDepthMeters:0.075,
+  shadowOpacity:0.72
+});
+
+const arFotoUI={
+  modal:()=>$('modalARFoto'),
+  canvas:()=>$('arFotoCanvas'),
+  camera:()=>$('arFotoCamera'),
+  overlay:()=>$('arFotoOverlay'),
+  gestureLayer:()=>$('arFotoGestureLayer'),
+  name:()=>$('arFotoNome'),
+  fallback:()=>$('arFotoFallback'),
+  fallbackImg:()=>$('arFotoFallbackImg'),
+  status:()=>$('arFotoStatus')
+};
 
 let arFotoFallbackScale=1;
 let arFotoFallbackX=0;
@@ -517,344 +564,559 @@ let arFotoGestureBaseAngle=0;
 let arFotoGestureBaseScale=1;
 let arFotoGestureBaseRotation=0;
 
-function definirStatusARFoto(msg){
- const el=$('arFotoStatus');
- if(el)el.textContent='Arraste para mover • Pince para ajustar o tamanho';
+function definirStatusARFoto(){
+  const el=arFotoUI.status();
+  if(el)el.textContent='Arraste para mover • Pince para ajustar o tamanho';
 }
 
 function normalizarAngulo(angulo){
- while(angulo>Math.PI)angulo-=Math.PI*2;
- while(angulo<-Math.PI)angulo+=Math.PI*2;
- return angulo;
+  while(angulo>Math.PI)angulo-=Math.PI*2;
+  while(angulo<-Math.PI)angulo+=Math.PI*2;
+  return angulo;
+}
+
+function limitar(valor,min,max){
+  return Math.max(min,Math.min(max,valor));
 }
 
 function criarTexturaSombra(THREE){
- const canvas=document.createElement('canvas');
- canvas.width=512;canvas.height=512;
- const ctx=canvas.getContext('2d');
- const grad=ctx.createRadialGradient(256,256,18,256,256,245);
- grad.addColorStop(0,'rgba(0,0,0,.48)');
- grad.addColorStop(.35,'rgba(0,0,0,.28)');
- grad.addColorStop(.72,'rgba(0,0,0,.10)');
- grad.addColorStop(1,'rgba(0,0,0,0)');
- ctx.fillStyle=grad;
- ctx.fillRect(0,0,512,512);
- const texture=new THREE.CanvasTexture(canvas);
- texture.colorSpace=THREE.SRGBColorSpace;
- texture.needsUpdate=true;
- return texture;
+  const canvas=document.createElement('canvas');
+  canvas.width=512;
+  canvas.height=512;
+  const ctx=canvas.getContext('2d',{alpha:true});
+  if(!ctx)return null;
+
+  const grad=ctx.createRadialGradient(256,256,18,256,256,245);
+  grad.addColorStop(0,'rgba(0,0,0,.48)');
+  grad.addColorStop(.35,'rgba(0,0,0,.28)');
+  grad.addColorStop(.72,'rgba(0,0,0,.10)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,512,512);
+
+  const texture=new THREE.CanvasTexture(canvas);
+  texture.colorSpace=THREE.SRGBColorSpace;
+  texture.needsUpdate=true;
+  return texture;
+}
+
+function obterPontosAR(){
+  return [...arFotoPointers.values()];
 }
 
 function obterPontoCentral(){
- const pontos=[...arFotoPointers.values()];
- if(!pontos.length)return null;
- return {
-   x:pontos.reduce((s,p)=>s+p.x,0)/pontos.length,
-   y:pontos.reduce((s,p)=>s+p.y,0)/pontos.length
- };
+  const pontos=obterPontosAR();
+  if(!pontos.length)return null;
+  return {
+    x:pontos.reduce((s,p)=>s+p.x,0)/pontos.length,
+    y:pontos.reduce((s,p)=>s+p.y,0)/pontos.length
+  };
 }
 
 function distanciaPonteiros(){
- const pontos=[...arFotoPointers.values()];
- if(pontos.length<2)return 0;
- return Math.hypot(pontos[1].x-pontos[0].x,pontos[1].y-pontos[0].y);
+  const pontos=obterPontosAR();
+  if(pontos.length<2)return 0;
+  return Math.hypot(pontos[1].x-pontos[0].x,pontos[1].y-pontos[0].y);
 }
 
 function anguloPonteiros(){
- const pontos=[...arFotoPointers.values()];
- if(pontos.length<2)return 0;
- return Math.atan2(pontos[1].y-pontos[0].y,pontos[1].x-pontos[0].x);
+  const pontos=obterPontosAR();
+  if(pontos.length<2)return 0;
+  return Math.atan2(pontos[1].y-pontos[0].y,pontos[1].x-pontos[0].x);
 }
 
 function aplicarFallbackVisual(){
- const img=$('arFotoFallbackImg');
- if(!img)return;
- img.style.transform=`translate3d(${arFotoFallbackX}px,${arFotoFallbackY}px,0) scale(${arFotoFallbackScale}) rotate(${arFotoFallbackRotation}rad)`;
+  const img=arFotoUI.fallbackImg();
+  if(!img)return;
+  img.style.transform=`translate3d(${arFotoFallbackX}px,${arFotoFallbackY}px,0) scale(${arFotoFallbackScale}) rotate(${arFotoFallbackRotation}rad)`;
 }
 
 function atualizarFallbackPonteiro(){
- const pontos=[...arFotoPointers.values()];
- if(pontos.length===1){
-   const p=pontos[0];
-   p.startX=p.x;p.startY=p.y;
-   p.baseX=arFotoFallbackX;p.baseY=arFotoFallbackY;
- }else if(pontos.length===2){
-   arFotoGestureBaseDistance=Math.max(1,distanciaPonteiros());
-   arFotoGestureBaseAngle=anguloPonteiros();
-   arFotoGestureBaseScale=arFotoFallbackScale;
-   arFotoGestureBaseRotation=arFotoFallbackRotation;
-   const center=obterPontoCentral();
-   for(const p of pontos){p.centerStartX=center.x;p.centerStartY=center.y;p.baseX=arFotoFallbackX;p.baseY=arFotoFallbackY;}
- }
+  const pontos=obterPontosAR();
+
+  if(pontos.length===1){
+    const p=pontos[0];
+    p.startX=p.x;
+    p.startY=p.y;
+    p.baseX=arFotoFallbackX;
+    p.baseY=arFotoFallbackY;
+    return;
+  }
+
+  if(pontos.length===2){
+    const center=obterPontoCentral();
+    for(const p of pontos){
+      p.centerStartX=center.x;
+      p.centerStartY=center.y;
+      p.baseX=arFotoFallbackX;
+      p.baseY=arFotoFallbackY;
+    }
+    arFotoGestureBaseDistance=Math.max(1,distanciaPonteiros());
+    arFotoGestureBaseAngle=anguloPonteiros();
+    arFotoGestureBaseScale=arFotoFallbackScale;
+    arFotoGestureBaseRotation=arFotoFallbackRotation;
+  }
 }
 
 function atualizarFallbackGestos(){
- const pontos=[...arFotoPointers.values()];
- if(pontos.length===1){
-   const p=pontos[0];
-   const dx=p.x-p.startX,dy=p.y-p.startY;
-   arFotoFallbackX=p.baseX+dx;
-   arFotoFallbackY=p.baseY+dy;
-   // Um movimento horizontal também permite girar o produto com um dedo,
-   // mantendo o deslocamento vertical para reposicionamento.
-   arFotoFallbackRotation=normalizarAngulo(arFotoFallbackRotation+dx*0.0022);
-   p.startX=p.x;p.startY=p.y;p.baseX=arFotoFallbackX;p.baseY=arFotoFallbackY;
-   aplicarFallbackVisual();
-   return;
- }
- if(pontos.length>=2){
-   const distance=Math.max(1,distanciaPonteiros());
-   const angle=anguloPonteiros();
-   const center=obterPontoCentral();
-   const ratio=distance/Math.max(1,arFotoGestureBaseDistance);
-   arFotoFallbackScale=Math.max(.55,Math.min(1.85,arFotoGestureBaseScale*ratio));
-   arFotoFallbackRotation=normalizarAngulo(arFotoGestureBaseRotation+(angle-arFotoGestureBaseAngle));
-   const dx=center.x-(pontos[0].centerStartX??center.x);
-   const dy=center.y-(pontos[0].centerStartY??center.y);
-   arFotoFallbackX=(pontos[0].baseX??arFotoFallbackX)+dx;
-   arFotoFallbackY=(pontos[0].baseY??arFotoFallbackY)+dy;
-   aplicarFallbackVisual();
- }
+  const pontos=obterPontosAR();
+
+  if(pontos.length===1){
+    const p=pontos[0];
+    const dx=p.x-p.startX;
+    const dy=p.y-p.startY;
+
+    // No fallback, o gesto vertical move e o horizontal gira.
+    // Isso evita misturar dois comandos no mesmo eixo.
+    arFotoFallbackY=p.baseY+dy;
+    arFotoFallbackRotation=normalizarAngulo(
+      arFotoFallbackRotation+dx*AR_FOTO_CONFIG.fallbackScaleStep
+    );
+
+    p.startX=p.x;
+    p.startY=p.y;
+    p.baseY=arFotoFallbackY;
+    aplicarFallbackVisual();
+    return;
+  }
+
+  if(pontos.length>=2){
+    const distance=Math.max(1,distanciaPonteiros());
+    const angle=anguloPonteiros();
+    const center=obterPontoCentral();
+    const ratio=distance/Math.max(1,arFotoGestureBaseDistance);
+
+    arFotoFallbackScale=limitar(
+      arFotoGestureBaseScale*ratio,
+      AR_FOTO_CONFIG.minScale,
+      AR_FOTO_CONFIG.maxScale
+    );
+
+    arFotoFallbackRotation=normalizarAngulo(
+      arFotoGestureBaseRotation+(angle-arFotoGestureBaseAngle)
+    );
+
+    const dx=center.x-(pontos[0].centerStartX??center.x);
+    const dy=center.y-(pontos[0].centerStartY??center.y);
+
+    arFotoFallbackX=(pontos[0].baseX??arFotoFallbackX)+dx;
+    arFotoFallbackY=(pontos[0].baseY??arFotoFallbackY)+dy;
+    aplicarFallbackVisual();
+  }
 }
 
 function atualizarWebXRGestos(){
- if(!arFotoGroup)return;
- const pontos=[...arFotoPointers.values()];
- if(pontos.length===1){
-   const p=pontos[0];
-   const dx=p.x-p.startX,dy=p.y-p.startY;
-   // Horizontal: rotação 360°. Vertical/horizontal: deslocamento fino sobre a mesa.
-   arFotoGroup.rotation.y=normalizarAngulo(p.baseRotation+dx*0.010);
-   arFotoGroup.position.x=p.baseX+dx*0.00075;
-   arFotoGroup.position.z=p.baseZ+dy*0.00105;
-   return;
- }
- if(pontos.length>=2){
-   const distance=Math.max(1,distanciaPonteiros());
-   const angle=anguloPonteiros();
-   const center=obterPontoCentral();
-   const ratio=distance/Math.max(1,arFotoGestureBaseDistance);
-   const scale=Math.max(.55,Math.min(1.85,arFotoGestureBaseScale*ratio));
-   arFotoGroup.scale.set(scale,scale,scale);
-   arFotoGroup.rotation.y=normalizarAngulo(arFotoGestureBaseRotation+(angle-arFotoGestureBaseAngle));
-   const dx=center.x-(pontos[0].centerStartX??center.x);
-   const dy=center.y-(pontos[0].centerStartY??center.y);
-   arFotoGroup.position.x=(pontos[0].baseX??arFotoGroup.position.x)+dx*0.00075;
-   arFotoGroup.position.z=(pontos[0].baseZ??arFotoGroup.position.z)+dy*0.00105;
- }
+  if(!arFotoGroup)return;
+  const pontos=obterPontosAR();
+
+  if(pontos.length===1){
+    const p=pontos[0];
+    const dx=p.x-p.startX;
+    const dy=p.y-p.startY;
+
+    arFotoGroup.rotation.y=normalizarAngulo(
+      p.baseRotation+dx*AR_FOTO_CONFIG.xrRotationPerPixel
+    );
+    arFotoGroup.position.x=p.baseX+dx*AR_FOTO_CONFIG.xrMoveXPerPixel;
+    arFotoGroup.position.z=p.baseZ+dy*AR_FOTO_CONFIG.xrMoveZPerPixel;
+    return;
+  }
+
+  if(pontos.length>=2){
+    const distance=Math.max(1,distanciaPonteiros());
+    const angle=anguloPonteiros();
+    const center=obterPontoCentral();
+    const ratio=distance/Math.max(1,arFotoGestureBaseDistance);
+    const scale=limitar(
+      arFotoGestureBaseScale*ratio,
+      AR_FOTO_CONFIG.minScale,
+      AR_FOTO_CONFIG.maxScale
+    );
+
+    arFotoGroup.scale.setScalar(scale);
+    arFotoGroup.rotation.y=normalizarAngulo(
+      arFotoGestureBaseRotation+(angle-arFotoGestureBaseAngle)
+    );
+
+    const dx=center.x-(pontos[0].centerStartX??center.x);
+    const dy=center.y-(pontos[0].centerStartY??center.y);
+
+    arFotoGroup.position.x=(pontos[0].baseX??arFotoGroup.position.x)+dx*AR_FOTO_CONFIG.xrMoveXPerPixel;
+    arFotoGroup.position.z=(pontos[0].baseZ??arFotoGroup.position.z)+dy*AR_FOTO_CONFIG.xrMoveZPerPixel;
+  }
 }
 
 function prepararGestosAR(){
- const layer=$('arFotoGestureLayer');
- if(!layer||layer.dataset.bound==='1')return;
- layer.dataset.bound='1';
- layer.addEventListener('pointerdown',e=>{
-   if(e.pointerType==='mouse'&&e.button!==0)return;
-   layer.setPointerCapture?.(e.pointerId);
-   arFotoPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,baseX:arFotoFallbackX,baseY:arFotoFallbackY,baseRotation:arFotoGroup?.rotation.y||0,baseZ:arFotoGroup?.position.z||0});
-   atualizarFallbackPonteiro();
-   const pontos=[...arFotoPointers.values()];
-   if(pontos.length===2){
-     const center=obterPontoCentral();
-     for(const p of pontos){p.centerStartX=center.x;p.centerStartY=center.y;p.baseX=arFotoFallbackX;p.baseY=arFotoFallbackY;p.baseZ=arFotoGroup?.position.z||0;}
-     arFotoGestureBaseDistance=Math.max(1,distanciaPonteiros());
-     arFotoGestureBaseAngle=anguloPonteiros();
-     arFotoGestureBaseScale=arFotoGroup?.scale.x||arFotoFallbackScale;
-     arFotoGestureBaseRotation=arFotoGroup?.rotation.y||arFotoFallbackRotation;
-   }
-   e.preventDefault();
- },{passive:false});
- layer.addEventListener('pointermove',e=>{
-   const p=arFotoPointers.get(e.pointerId);
-   if(!p)return;
-   p.x=e.clientX;p.y=e.clientY;
-   if(arFotoGroup)atualizarWebXRGestos();
-   else atualizarFallbackGestos();
-   e.preventDefault();
- },{passive:false});
- const finalizar=e=>{
-   arFotoPointers.delete(e.pointerId);
-   try{layer.releasePointerCapture?.(e.pointerId)}catch(_){}
- };
- layer.addEventListener('pointerup',finalizar);
- layer.addEventListener('pointercancel',finalizar);
- layer.addEventListener('pointerleave',e=>{if(e.buttons===0)finalizar(e)});
+  const layer=arFotoUI.gestureLayer();
+  if(!layer||layer.dataset.bound==='1')return;
+  layer.dataset.bound='1';
+
+  layer.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+
+    layer.setPointerCapture?.(e.pointerId);
+    arFotoPointers.set(e.pointerId,{
+      x:e.clientX,
+      y:e.clientY,
+      startX:e.clientX,
+      startY:e.clientY,
+      baseX:arFotoFallbackX,
+      baseY:arFotoFallbackY,
+      baseRotation:arFotoGroup?.rotation.y||0,
+      baseZ:arFotoGroup?.position.z||0
+    });
+
+    atualizarFallbackPonteiro();
+
+    const pontos=obterPontosAR();
+    if(pontos.length===2){
+      const center=obterPontoCentral();
+      for(const p of pontos){
+        p.centerStartX=center.x;
+        p.centerStartY=center.y;
+        p.baseX=arFotoFallbackX;
+        p.baseY=arFotoFallbackY;
+        p.baseZ=arFotoGroup?.position.z||0;
+      }
+      arFotoGestureBaseDistance=Math.max(1,distanciaPonteiros());
+      arFotoGestureBaseAngle=anguloPonteiros();
+      arFotoGestureBaseScale=arFotoGroup?.scale.x||arFotoFallbackScale;
+      arFotoGestureBaseRotation=arFotoGroup?.rotation.y||arFotoFallbackRotation;
+    }
+
+    e.preventDefault();
+  },{passive:false});
+
+  layer.addEventListener('pointermove',e=>{
+    const p=arFotoPointers.get(e.pointerId);
+    if(!p)return;
+
+    p.x=e.clientX;
+    p.y=e.clientY;
+
+    if(arFotoGroup)atualizarWebXRGestos();
+    else atualizarFallbackGestos();
+
+    e.preventDefault();
+  },{passive:false});
+
+  const finalizar=e=>{
+    arFotoPointers.delete(e.pointerId);
+    try{layer.releasePointerCapture?.(e.pointerId)}catch(_){}
+  };
+
+  layer.addEventListener('pointerup',finalizar);
+  layer.addEventListener('pointercancel',finalizar);
+}
+
+function liberarHitTest(){
+  try{arFotoHitTestSource?.cancel?.()}catch(_){}
+  arFotoHitTestSource=null;
 }
 
 function criarObjetoAR(THREE,pose){
- if(!arFotoTexture||!pose)return;
- if(arFotoGroup&&arFotoScene)arFotoScene.remove(arFotoGroup);
- const aspect=(arFotoTexture.image?.width||1380)/(arFotoTexture.image?.height||1140);
- const largura=.15;
- const altura=largura/aspect;
+  if(!arFotoTexture||!pose||arFotoGroup)return;
 
- arFotoGroup=new THREE.Group();
- arFotoGroup.position.set(pose.transform.position.x,pose.transform.position.y,pose.transform.position.z);
+  const image=arFotoTexture.image;
+  const aspect=(image?.width||1380)/(image?.height||1140);
+  const largura=AR_FOTO_CONFIG.widthMeters;
+  const altura=largura/aspect;
 
- const produtoGeometry=new THREE.PlaneGeometry(largura,altura);
- const produtoMaterial=new THREE.MeshBasicMaterial({
-   map:arFotoTexture,transparent:true,alphaTest:.012,depthWrite:false,side:THREE.DoubleSide
- });
- arFotoProductMesh=new THREE.Mesh(produtoGeometry,produtoMaterial);
- arFotoProductMesh.position.y=altura/2;
- arFotoProductMesh.renderOrder=2;
- arFotoGroup.add(arFotoProductMesh);
+  arFotoGroup=new THREE.Group();
+  arFotoGroup.position.set(
+    pose.transform.position.x,
+    pose.transform.position.y,
+    pose.transform.position.z
+  );
 
- arFotoShadowTexture=criarTexturaSombra(THREE);
- const shadowMaterial=new THREE.MeshBasicMaterial({
-   map:arFotoShadowTexture,transparent:true,depthWrite:false,side:THREE.DoubleSide,opacity:.72
- });
- arFotoShadowMesh=new THREE.Mesh(new THREE.PlaneGeometry(.17,.075),shadowMaterial);
- arFotoShadowMesh.rotation.x=-Math.PI/2;
- arFotoShadowMesh.position.y=.001;
- arFotoShadowMesh.renderOrder=1;
- arFotoGroup.add(arFotoShadowMesh);
+  arFotoProductGeometry=new THREE.PlaneGeometry(largura,altura);
+  arFotoProductMaterial=new THREE.MeshBasicMaterial({
+    map:arFotoTexture,
+    transparent:true,
+    alphaTest:.012,
+    depthWrite:false,
+    side:THREE.DoubleSide
+  });
 
- const cameraPos=new THREE.Vector3();
- arFotoCamera3D?.getWorldPosition(cameraPos);
- const dx=cameraPos.x-arFotoGroup.position.x;
- const dz=cameraPos.z-arFotoGroup.position.z;
- if(Math.abs(dx)+Math.abs(dz)>.0001)arFotoGroup.rotation.y=Math.atan2(dx,dz);
+  arFotoProductMesh=new THREE.Mesh(
+    arFotoProductGeometry,
+    arFotoProductMaterial
+  );
+  arFotoProductMesh.position.y=altura/2;
+  arFotoProductMesh.renderOrder=2;
+  arFotoGroup.add(arFotoProductMesh);
 
- arFotoScene.add(arFotoGroup);
- definirStatusARFoto();
+  if(!arFotoShadowTexture){
+    arFotoShadowTexture=criarTexturaSombra(THREE);
+  }
+
+  arFotoShadowGeometry=new THREE.PlaneGeometry(
+    AR_FOTO_CONFIG.shadowWidthMeters,
+    AR_FOTO_CONFIG.shadowDepthMeters
+  );
+
+  arFotoShadowMaterial=new THREE.MeshBasicMaterial({
+    map:arFotoShadowTexture,
+    transparent:true,
+    depthWrite:false,
+    side:THREE.DoubleSide,
+    opacity:AR_FOTO_CONFIG.shadowOpacity
+  });
+
+  arFotoShadowMesh=new THREE.Mesh(
+    arFotoShadowGeometry,
+    arFotoShadowMaterial
+  );
+  arFotoShadowMesh.rotation.x=-Math.PI/2;
+  arFotoShadowMesh.position.y=.001;
+  arFotoShadowMesh.renderOrder=1;
+  arFotoGroup.add(arFotoShadowMesh);
+
+  const cameraPos=new THREE.Vector3();
+  arFotoCamera3D?.getWorldPosition(cameraPos);
+
+  const dx=cameraPos.x-arFotoGroup.position.x;
+  const dz=cameraPos.z-arFotoGroup.position.z;
+  if(Math.abs(dx)+Math.abs(dz)>.0001){
+    arFotoGroup.rotation.y=Math.atan2(dx,dz);
+  }
+
+  arFotoScene.add(arFotoGroup);
+  arFotoPlacementDone=true;
+  liberarHitTest();
+  definirStatusARFoto();
 }
 
 async function abrirARFoto(){
- const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
- if(!p?.arFoto)return mostrarToast('Este produto ainda não possui foto AR.');
- fecharModal('modalProduto');
- const modal=$('modalARFoto');
- modal.classList.add('ativo');
- document.body.classList.add('modal-aberto');
- $('arFotoNome').textContent='Brasa Bacon Supreme';
- $('arFotoFallback').style.display='none';
- $('arFotoFallbackImg').src=p.arFoto;
- arFotoFallbackScale=1;arFotoFallbackX=0;arFotoFallbackY=0;arFotoFallbackRotation=0;
- arFotoPointers.clear();
- prepararGestosAR();
- definirStatusARFoto();
- try{
-   await iniciarARFoto(p.arFoto);
- }catch(e){
-   console.warn('AR espacial indisponível; usando câmera compatível:',e);
-   try{await iniciarARFotoFallback(p.arFoto)}
-   catch(err){
-     console.error(err);
-     definirStatusARFoto();
-     mostrarToast('Permita o acesso à câmera e tente novamente.');
-   }
- }
+  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
+  if(!p?.arFoto){
+    mostrarToast('Este produto ainda não possui foto AR.');
+    return;
+  }
+
+  fecharModal('modalProduto');
+
+  const modal=arFotoUI.modal();
+  modal?.classList.add('ativo');
+  document.body.classList.add('modal-aberto');
+
+  arFotoUI.name().textContent=p.nome;
+  arFotoUI.fallback().style.display='none';
+  arFotoUI.fallbackImg().src=p.arFoto;
+
+  arFotoFallbackScale=1;
+  arFotoFallbackX=0;
+  arFotoFallbackY=0;
+  arFotoFallbackRotation=0;
+  arFotoPointers.clear();
+  arFotoPlacementDone=false;
+
+  prepararGestosAR();
+  definirStatusARFoto();
+
+  try{
+    await iniciarARFoto(p.arFoto);
+  }catch(e){
+    console.warn('[Mesa360/AR] WebXR indisponível; usando fallback:',e);
+    try{
+      await iniciarARFotoFallback(p.arFoto);
+    }catch(err){
+      console.error('[Mesa360/AR] Falha ao iniciar câmera:',err);
+      definirStatusARFoto();
+      mostrarToast('Permita o acesso à câmera e tente novamente.');
+    }
+  }
 }
 
 async function iniciarARFoto(dataUrl){
- if(!window.isSecureContext)throw new Error('AR requer HTTPS.');
- if(!navigator.xr)throw new Error('WebXR indisponível.');
- const suporte=await navigator.xr.isSessionSupported('immersive-ar');
- if(!suporte)throw new Error('AR imersivo não suportado.');
+  if(!window.isSecureContext)throw new Error('AR requer HTTPS.');
+  if(!navigator.xr)throw new Error('WebXR indisponível.');
 
- const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js');
- arFotoThree=THREE;
- arFotoScene=new THREE.Scene();
- arFotoCamera3D=new THREE.PerspectiveCamera();
- arFotoRenderer=new THREE.WebGLRenderer({
-   canvas:$('arFotoCanvas'),alpha:true,antialias:true,preserveDrawingBuffer:false
- });
- arFotoRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
- arFotoRenderer.setSize(window.innerWidth,window.innerHeight,false);
- arFotoRenderer.xr.enabled=true;
- arFotoRenderer.xr.setReferenceSpaceType('local');
- arFotoRenderer.setAnimationLoop((time,frame)=>renderARFoto(time,frame));
+  const suporte=await navigator.xr.isSessionSupported('immersive-ar');
+  if(!suporte)throw new Error('AR imersivo não suportado.');
 
- const textureLoader=new THREE.TextureLoader();
- arFotoTexture=await textureLoader.loadAsync(dataUrl);
- arFotoTexture.colorSpace=THREE.SRGBColorSpace;
- arFotoTexture.anisotropy=Math.min(arFotoRenderer.capabilities.getMaxAnisotropy(),4);
+  const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js');
+  arFotoThree=THREE;
+  arFotoScene=new THREE.Scene();
+  arFotoCamera3D=new THREE.PerspectiveCamera();
 
- const session=await navigator.xr.requestSession('immersive-ar',{
-   requiredFeatures:['hit-test'],
-   optionalFeatures:['dom-overlay'],
-   domOverlay:{root:$('arFotoOverlay')}
- });
- arFotoSession=session;
- session.addEventListener('end',limparARFotoSessao);
- await arFotoRenderer.xr.setSession(session);
- arFotoViewerSpace=await session.requestReferenceSpace('viewer');
- arFotoHitTestSource=await session.requestHitTestSource({space:arFotoViewerSpace});
- arFotoLocalSpace=await session.requestReferenceSpace('local');
- $('arFotoCanvas').style.display='block';
- $('arFotoCamera').style.display='none';
- definirStatusARFoto();
+  arFotoRenderer=new THREE.WebGLRenderer({
+    canvas:arFotoUI.canvas(),
+    alpha:true,
+    antialias:true,
+    preserveDrawingBuffer:false,
+    powerPreference:'high-performance'
+  });
+
+  arFotoRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  arFotoRenderer.setSize(window.innerWidth,window.innerHeight,false);
+  arFotoRenderer.xr.enabled=true;
+  arFotoRenderer.xr.setReferenceSpaceType('local');
+  arFotoRenderer.setAnimationLoop(renderARFoto);
+
+  const textureLoader=new THREE.TextureLoader();
+  arFotoTexture=await textureLoader.loadAsync(dataUrl);
+  arFotoTexture.colorSpace=THREE.SRGBColorSpace;
+  arFotoTexture.anisotropy=Math.min(
+    arFotoRenderer.capabilities.getMaxAnisotropy(),
+    4
+  );
+
+  arFotoSession=await navigator.xr.requestSession('immersive-ar',{
+    requiredFeatures:['hit-test'],
+    optionalFeatures:['dom-overlay'],
+    domOverlay:{root:arFotoUI.overlay()}
+  });
+
+  arFotoSession.addEventListener('end',limparARFotoSessao,{once:true});
+  await arFotoRenderer.xr.setSession(arFotoSession);
+
+  arFotoViewerSpace=await arFotoSession.requestReferenceSpace('viewer');
+  arFotoHitTestSource=await arFotoSession.requestHitTestSource({
+    space:arFotoViewerSpace
+  });
+  arFotoLocalSpace=await arFotoSession.requestReferenceSpace('local');
+
+  arFotoUI.canvas().style.display='block';
+  arFotoUI.camera().style.display='none';
+  definirStatusARFoto();
 }
 
 function renderARFoto(time,frame){
- if(!arFotoRenderer||!arFotoSession)return;
- if(frame&&arFotoHitTestSource&&arFotoLocalSpace&&!arFotoGroup&&arFotoThree){
-   const hits=frame.getHitTestResults(arFotoHitTestSource);
-   const hit=hits[0];
-   if(hit){
-     const pose=hit.getPose(arFotoLocalSpace);
-     if(pose)criarObjetoAR(arFotoThree,pose);
-   }
- }
- arFotoRenderer.render(arFotoScene,arFotoCamera3D);
+  if(!arFotoRenderer||!arFotoSession||!arFotoScene)return;
+
+  if(
+    frame &&
+    arFotoHitTestSource &&
+    arFotoLocalSpace &&
+    !arFotoPlacementDone &&
+    arFotoThree
+  ){
+    const hits=frame.getHitTestResults(arFotoHitTestSource);
+    const hit=hits[0];
+
+    if(hit){
+      const pose=hit.getPose(arFotoLocalSpace);
+      if(pose)criarObjetoAR(arFotoThree,pose);
+    }
+  }
+
+  arFotoRenderer.render(arFotoScene,arFotoCamera3D);
 }
 
 async function iniciarARFotoFallback(dataUrl){
- const video=$('arFotoCamera');
- if(!navigator.mediaDevices?.getUserMedia)throw new Error('Câmera indisponível.');
- const stream=await navigator.mediaDevices.getUserMedia({
-   video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false
- });
- video.srcObject=stream;
- await video.play();
- $('arFotoCanvas').style.display='none';
- video.style.display='block';
- $('arFotoFallback').style.display='block';
- $('arFotoFallbackImg').src=dataUrl;
- centralizarARFallback();
- definirStatusARFoto();
+  const video=arFotoUI.camera();
+  if(!navigator.mediaDevices?.getUserMedia){
+    throw new Error('Câmera indisponível.');
+  }
+
+  const stream=await navigator.mediaDevices.getUserMedia({
+    video:{
+      facingMode:{ideal:'environment'},
+      width:{ideal:1280},
+      height:{ideal:720}
+    },
+    audio:false
+  });
+
+  video.srcObject=stream;
+  await video.play();
+
+  arFotoUI.canvas().style.display='none';
+  video.style.display='block';
+  arFotoUI.fallback().style.display='block';
+  arFotoUI.fallbackImg().src=dataUrl;
+  centralizarARFallback();
+  definirStatusARFoto();
 }
 
-function atualizarARFallbackVisual(){aplicarFallbackVisual()}
-function ajustarARFallback(delta){centralizarARFallback()}
 function centralizarARFallback(){
- arFotoFallbackScale=1;arFotoFallbackX=0;arFotoFallbackY=0;arFotoFallbackRotation=0;
- aplicarFallbackVisual();
+  arFotoFallbackScale=1;
+  arFotoFallbackX=0;
+  arFotoFallbackY=0;
+  arFotoFallbackRotation=0;
+  aplicarFallbackVisual();
 }
+
 async function reiniciarARFoto(){
- const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
- if(!p?.arFoto)return;
- await fecharARFoto(false);
- await abrirARFoto();
+  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
+  if(!p?.arFoto)return;
+  await fecharARFoto(false);
+  await abrirARFoto();
 }
+
 function adicionarAoPedidoAR(){
- const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
- if(!p)return;
- fecharARFoto(false);
- setTimeout(()=>adicionarProdutoAtual(),40);
+  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
+  if(!p)return;
+  fecharARFoto(false);
+  setTimeout(()=>adicionarProdutoAtual(),40);
 }
+
 async function fecharARFoto(){
- try{if(arFotoSession)await arFotoSession.end()}catch(e){}
- const video=$('arFotoCamera');
- if(video?.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null}
- limparARFotoSessao();
- const modal=$('modalARFoto');
- if(modal)modal.classList.remove('ativo');
- document.body.classList.remove('modal-aberto');
- arFotoPointers.clear();
+  try{
+    if(arFotoSession)await arFotoSession.end();
+  }catch(e){
+    console.warn('[Mesa360/AR] Encerramento da sessão:',e);
+  }
+
+  const video=arFotoUI.camera();
+  if(video?.srcObject){
+    video.srcObject.getTracks().forEach(track=>track.stop());
+    video.srcObject=null;
+  }
+
+  limparARFotoSessao();
+
+  arFotoUI.modal()?.classList.remove('ativo');
+  document.body.classList.remove('modal-aberto');
+  arFotoPointers.clear();
 }
+
 function limparARFotoSessao(){
- if(arFotoRenderer){try{arFotoRenderer.setAnimationLoop(null)}catch(e){}}
- arFotoSession=null;arFotoHitTestSource=null;arFotoViewerSpace=null;arFotoLocalSpace=null;
- if(arFotoScene&&arFotoGroup)arFotoScene.remove(arFotoGroup);
- if(arFotoProductMesh){arFotoProductMesh.geometry?.dispose();arFotoProductMesh.material?.dispose()}
- if(arFotoShadowMesh){arFotoShadowMesh.geometry?.dispose();arFotoShadowMesh.material?.dispose()}
- arFotoShadowTexture?.dispose?.();
- arFotoGroup=null;arFotoProductMesh=null;arFotoShadowMesh=null;arFotoTexture=null;arFotoShadowTexture=null;
- if(arFotoScene)arFotoScene.clear();
- arFotoScene=null;arFotoCamera3D=null;arFotoRenderer=null;arFotoThree=null;
+  liberarHitTest();
+
+  if(arFotoRenderer){
+    try{arFotoRenderer.setAnimationLoop(null)}catch(_){}
+    try{arFotoRenderer.xr.setSession(null)}catch(_){}
+    try{arFotoRenderer.dispose()}catch(_){}
+  }
+
+  if(arFotoProductGeometry)arFotoProductGeometry.dispose();
+  if(arFotoShadowGeometry)arFotoShadowGeometry.dispose();
+  if(arFotoProductMaterial)arFotoProductMaterial.dispose();
+  if(arFotoShadowMaterial)arFotoShadowMaterial.dispose();
+
+  if(arFotoScene)arFotoScene.clear();
+
+  // A textura do produto pertence ao ciclo da sessão.
+  arFotoTexture?.dispose?.();
+  arFotoShadowTexture?.dispose?.();
+
+  arFotoSession=null;
+  arFotoRenderer=null;
+  arFotoThree=null;
+  arFotoScene=null;
+  arFotoCamera3D=null;
+  arFotoViewerSpace=null;
+  arFotoLocalSpace=null;
+  arFotoGroup=null;
+  arFotoProductMesh=null;
+  arFotoShadowMesh=null;
+  arFotoTexture=null;
+  arFotoShadowTexture=null;
+  arFotoProductGeometry=null;
+  arFotoShadowGeometry=null;
+  arFotoProductMaterial=null;
+  arFotoShadowMaterial=null;
+  arFotoPlacementDone=false;
+
+  const canvas=arFotoUI.canvas();
+  if(canvas){
+    canvas.style.display='block';
+    canvas.width=canvas.width;
+  }
 }
+
 function alterarQuantidadeProduto(v){quantidadeProdutoAtual=Math.max(1,quantidadeProdutoAtual+v);$('quantidadeProduto').textContent=quantidadeProdutoAtual}
 function coletarCustomizacao(){
  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
