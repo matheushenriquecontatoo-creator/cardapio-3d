@@ -210,8 +210,10 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
       <div class="carrinho-total"><span>Total</span><span id="carrinhoTotal">R$ 0,00</span></div>
       <div class="formulario-pedido">
         <label for="clienteNome">Seu nome *</label><input id="clienteNome" type="text" placeholder="Nome para identificação" autocomplete="name">
+        <label for="clienteTelefone">WhatsApp / telefone *</label><input id="clienteTelefone" type="tel" placeholder="(34) 99999-9999" autocomplete="tel">
         <div id="campoMesaPedido" style="display:none"><label for="numeroMesaPedido">Número da mesa *</label><input id="numeroMesaPedido" type="text" inputmode="numeric" placeholder="Ex.: 12" autocomplete="off"></div>
         <div id="campoEnderecoPedido"><label for="clienteEndereco">Endereço de entrega *</label><input id="clienteEndereco" type="text" placeholder="Rua, número e bairro" autocomplete="street-address"></div>
+        <label for="cupomPedido">Cupom de desconto</label><div style="display:flex;gap:7px"><input id="cupomPedido" type="text" placeholder="Ex.: BEMVINDO10" autocomplete="off" style="flex:1"><button class="btn-copiar-pix" type="button" onclick="aplicarCupomCheckout()">Aplicar</button></div><div id="cupomResultado" class="modal-desc" style="margin-top:4px"></div>
         <label for="observacaoPedido">Observações do pedido</label><input id="observacaoPedido" type="text" placeholder="Ex.: sem cebola, molho à parte">
         <label for="formaPagamento">Pagamento *</label>
         <select id="formaPagamento" onchange="alternarOpcoesPagamento()"><option value="pix">⚡ PIX</option><option value="cartao">💳 Cartão</option><option value="dinheiro">💵 Dinheiro</option></select>
@@ -732,7 +734,9 @@ function adicionarProdutoAtual(){
 }
 function calcularSubtotal(){return carrinho.reduce((s,i)=>s+(Number(i.precoUnitario||i.preco)*i.quantidade),0)}
 function calcularTaxaEntrega(){return tipoAtendimentoSelecionado==='delivery'&&carrinho.length?Number(restauranteAtual.taxaEntrega||0):0}
-function calcularTotal(){return calcularSubtotal()+calcularTaxaEntrega()}
+let descontoCheckout=0;let cupomCheckout=null;
+function calcularTotal(){return Math.max(0,calcularSubtotal()+calcularTaxaEntrega()-descontoCheckout)}
+function renderizarDescontoCheckout(){const el=$('cupomResultado');if(!el)return;el.innerHTML=cupomCheckout?`<span style="color:#86efac;font-weight:800">Cupom ${cupomCheckout.code} aplicado: -${formatarPreco(descontoCheckout)}</span>`:''}
 function atualizarCarrinho(){const qtd=carrinho.reduce((s,i)=>s+i.quantidade,0);$('carrinhoContador').textContent=qtd;renderizarCarrinho();salvarEstado()}
 function renderizarCarrinho(){
  const lista=$('carrinhoLista'),fin=$('carrinhoFinalizacao');
@@ -760,7 +764,7 @@ function atualizarResumoAtendimento(){
  if($('carrinhoTotal'))$('carrinhoTotal').textContent=formatarPreco(subtotal+taxa);
 }
 function selecionarTipoAtendimento(tipo){
- tipoAtendimentoSelecionado=tipo;salvarEstado();atualizarResumoAtendimento();renderizarCarrinho();
+ tipoAtendimentoSelecionado=tipo;descontoCheckout=0;cupomCheckout=null;salvarEstado();atualizarResumoAtendimento();renderizarCarrinho();
  if(tipo==='mesa'&&!($('numeroMesaPedido').value||'').trim())$('numeroMesaPedido').focus();
 }
 function selecionarComerNaMesa(){
@@ -774,7 +778,7 @@ function confirmarComerNaMesa(){
  if(!mesa)return mostrarToast('Informe o número da mesa.');
  tipoAtendimentoSelecionado='mesa';$('numeroMesaPedido').value=mesa;fecharModal('modalComerMesa');salvarEstado();abrirCarrinho();mostrarToast(`Mesa ${mesa} selecionada.`)
 }
-function abrirCarrinho(){abrirModal('modalCarrinho');$('painelSucessoLocal').style.display='none';$('btnAcaoFinalizar').style.display='flex';atualizarResumoAtendimento();renderizarCarrinho()}
+function abrirCarrinho(){abrirModal('modalCarrinho');$('painelSucessoLocal').style.display='none';$('btnAcaoFinalizar').style.display='flex';const nome=localStorage.getItem('brasa180_nome_cliente')||'';const tel=localStorage.getItem('brasa180_telefone_cliente')||'';if($('clienteNome'))$('clienteNome').value=nome;if($('clienteTelefone'))$('clienteTelefone').value=tel;descontoCheckout=0;cupomCheckout=null;if($('cupomPedido'))$('cupomPedido').value='';atualizarResumoAtendimento();renderizarCarrinho()}
 function fecharCarrinho(){fecharModal('modalCarrinho')}
 function fecharComerNaMesa(){fecharModal('modalComerMesa')}
 function fecharModalProduto(){fecharModal('modalProduto')}
@@ -782,6 +786,10 @@ function fechar3D(){const v=$('viewer3D');fecharModal('modal3D');v.removeAttribu
 function alternarOpcoesPagamento(){const forma=$('formaPagamento').value;const troco=$('valorTroco');$('boxPixInfo').style.display=forma==='pix'?'block':'none';$('boxTroco').style.display=forma==='dinheiro'?'block':'none';if(troco)troco.required=forma==='dinheiro';if(forma!=='dinheiro'&&troco)troco.value=''}
 function copiarChavePix(){const chave=$('chavePixTexto').textContent;navigator.clipboard?.writeText(chave).then(()=>mostrarToast('Chave PIX copiada.')).catch(()=>mostrarToast('Selecione e copie a chave PIX.'))}
 function gerarCodigoPedido(){return `B180-${Date.now().toString().slice(-6)}`}
+async function aplicarCupomCheckout(){
+ const code=($('cupomPedido')?.value||'').trim().toUpperCase();if(!code)return mostrarToast('Informe o código do cupom.');
+ try{const restaurantId=await garantirConexaoSupabasePedido();const {data,error}=await menuSupabase.rpc('validar_cupom_publico',{p_restaurant_id:restaurantId,p_code:code,p_subtotal:calcularSubtotal()});if(error)throw error;const c=Array.isArray(data)?data[0]:data;if(!c)throw new Error('Cupom inválido.');descontoCheckout=Number(c.discount_amount||0);cupomCheckout=c;atualizarResumoAtendimento();renderizarCarrinho();mostrarToast(`Cupom ${code} aplicado.`)}catch(e){descontoCheckout=0;cupomCheckout=null;atualizarResumoAtendimento();renderizarCarrinho();mostrarToast(e?.message||'Não foi possível validar o cupom.')}}
+
 function validarTroco(){
  const el=$('valorTroco');if(!el)return null;
  const texto=el.value.trim().replace(/R\$/gi,'').replace(/[^0-9,.-]/g,'');
@@ -832,12 +840,12 @@ async function garantirConexaoSupabasePedido(){
  return data.id;
 }
 
-async function registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo,tipoAtendimento}){
+async function registrarPedidoSupabase({nome,telefone,mesaAtual,endereco,forma,troco,observacao,codigo,tipoAtendimento,cupomCodigo}){
  const restaurantId=await garantirConexaoSupabasePedido();
- const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega(),total=subtotal+taxa;
+ const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega(),total=Math.max(0,subtotal+taxa-descontoCheckout);
  const ehMesa=tipoAtendimento==='mesa';
  const numeroMesa=ehMesa && mesaAtual ? Number(mesaAtual) : null;
- const pedido={restaurant_id:restaurantId,customer_name:nome,order_type:ehMesa?'mesa':'delivery',table_number:numeroMesa,delivery_address:endereco||null,payment_method:forma,change_for:troco||null,subtotal,delivery_fee:taxa,total,status:'pending',observation:observacao||null};
+ const pedido={restaurant_id:restaurantId,customer_name:nome,customer_phone:telefone,coupon_code:cupomCodigo||null,order_type:ehMesa?'mesa':'delivery',table_number:numeroMesa,delivery_address:endereco||null,payment_method:forma,change_for:troco||null,subtotal,delivery_fee:taxa,total,status:'pending',observation:observacao||null};
  const itens=carrinho.map(i=>{
    const produtoAtual=restauranteAtual.produtos.find(p=>p.id===i.produtoId);
    return {
@@ -857,7 +865,7 @@ async function registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,obse
 }
 async function processarCheckout(){
  if(!carrinho.length)return mostrarToast('Seu pedido está vazio.');
- const nome=$('clienteNome').value.trim();if(!nome)return mostrarToast('Informe seu nome.');
+ const nome=$('clienteNome').value.trim();if(!nome)return mostrarToast('Informe seu nome.');const telefone=($('clienteTelefone')?.value||'').trim();if(!telefone)return mostrarToast('Informe seu WhatsApp/telefone.');
  let localPedido='';
  let mesaAtual='';
  let endereco='';
@@ -872,13 +880,13 @@ async function processarCheckout(){
  const observacao=$('observacaoPedido').value.trim(); const forma=$('formaPagamento').value;let pagto=forma==='pix'?'PIX':forma==='dinheiro'?'Dinheiro':'Cartão';
  let troco=null;
  if(forma==='dinheiro'){troco=validarTroco();if(troco===false)return;if(troco)pagto+=` (troco para ${formatarPreco(troco)})`}
- localStorage.setItem('brasa180_nome_cliente',nome);
+ localStorage.setItem('brasa180_nome_cliente',nome);localStorage.setItem('brasa180_telefone_cliente',telefone);
  if(mesaAtual)localStorage.setItem('brasa180_mesa',mesaAtual);
  const codigo=gerarCodigoPedido();
  mostrarToast('Registrando pedido…');
  $('btnAcaoFinalizar').disabled=true;
  try{
-   const pedidoCriado=await registrarPedidoSupabase({nome,mesaAtual,endereco,forma,troco,observacao,codigo,tipoAtendimento:tipoAtendimentoSelecionado});
+   const pedidoCriado=await registrarPedidoSupabase({nome,telefone,mesaAtual,endereco,forma,troco,observacao,codigo,tipoAtendimento:tipoAtendimentoSelecionado,cupomCodigo:cupomCheckout?.code||null});
    const numeroReal=pedidoCriado?.order_number||codigo;
    ultimoPedidoCodigo=numeroReal;
    localStorage.setItem('brasa180_ultimo_pedido',numeroReal);
