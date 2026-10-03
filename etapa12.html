@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- MESA360 ETAPA 5 — BOTTOMSHEET UX -->
 <!-- VERSAO_MESA_FIX_2026-09-28 -->
 <html lang="pt-BR">
 <head>
@@ -101,6 +102,30 @@ header>p{margin:10px 16px 0;max-width:none;color:#6B7280;font-size:13px;line-hei
 .modal{background:rgba(17,24,39,.48)}.modal-conteudo{background:#fff;color:#111827;border:1px solid #e5e7eb;border-radius:20px;box-shadow:0 24px 80px rgba(17,24,39,.22)}.fechar-modal{background:#f3f4f6;color:#111827;border-color:#e5e7eb}.modal h2{color:#111827}.modal-desc{color:#6B7280}.modal-preco{color:#059669}.btn-quantidade{background:#f3f4f6;color:#111827;border-color:#e5e7eb}.btn-principal{background:#10B981;color:#fff}.btn-ar{background:#f3f4f6;color:#111827;border-color:#e5e7eb}.btn-ar.destaque{background:#111827;color:#fff}.customizacao-produto{background:#f9fafb;border-color:#e5e7eb}.customizacao-titulo{color:#111827}.addon-opcao{background:#fff;border-color:#e5e7eb}.addon-nome{color:#111827}.combo-opcoes select,.formulario-pedido input,.formulario-pedido select,.conta-fluxo input,.conta-fluxo select{background:#fff;color:#111827;border-color:#d1d5db}.item-carrinho{border-color:#e5e7eb}.item-carrinho-nome{color:#111827}.item-btn{background:#f3f4f6;color:#111827;border-color:#e5e7eb}.carrinho-total{border-color:#e5e7eb;color:#111827}.toast{box-shadow:0 10px 30px rgba(17,24,39,.18)}
 footer{color:#6B7280}footer strong{color:#374151}
 @media(max-width:700px){.mesa-capa{height:165px}.mesa-nome{font-size:19px}.mesa-entrega{margin-top:12px}.produto-imagem-wrap{height:155px}}
+
+/* ===== MESA360 ETAPA 7 — BUSCA E DESCOBERTA ===== */
+.busca-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.38);backdrop-filter:blur(7px);z-index:2500;align-items:flex-start;justify-content:center;padding:12px}.busca-overlay.ativo{display:flex}.busca-painel{width:min(680px,100%);margin-top:max(8px,env(safe-area-inset-top));background:#fff;border:1px solid #e5e7eb;border-radius:22px;box-shadow:0 22px 70px rgba(15,23,42,.22);overflow:hidden}.busca-topo{display:flex;align-items:center;gap:9px;padding:12px;border-bottom:1px solid #eef0f3}.busca-input-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:0;background:#f3f4f6;border-radius:14px;padding:0 12px}.busca-input-wrap span{font-size:19px;color:#6b7280}.busca-input{width:100%;height:46px;border:0;outline:0;background:transparent;color:#111827;font-size:15px}.busca-fechar{width:42px;height:42px;border:0;border-radius:50%;background:#f3f4f6;color:#374151;font-size:20px;cursor:pointer}.busca-resultados{max-height:min(62vh,520px);overflow:auto;padding:8px 12px 14px}.busca-hint{padding:22px 10px;text-align:center;color:#6b7280;font-size:13px;line-height:1.5}.busca-resultado{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px solid #f0f1f3;cursor:pointer}.busca-resultado:last-child{border-bottom:0}.busca-resultado-img{width:58px;height:58px;border-radius:12px;object-fit:cover;background:#f3f4f6}.busca-resultado-nome{font-size:14px;font-weight:800;color:#111827;line-height:1.25}.busca-resultado-desc{margin-top:3px;color:#6b7280;font-size:11px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.busca-resultado-preco{font-size:13px;font-weight:900;color:#059669;white-space:nowrap}.busca-chips{display:flex;gap:7px;overflow:auto;padding:4px 0 10px;scrollbar-width:none}.busca-chips::-webkit-scrollbar{display:none}.busca-chip{border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}.busca-chip.ativo{background:#ecfdf5;border-color:#a7f3d0;color:#047857}.busca-contador{padding:8px 4px 3px;color:#6b7280;font-size:11px;font-weight:700}.resultado-vazio{padding:30px 10px;text-align:center}.resultado-vazio-icone{font-size:30px;margin-bottom:7px}.resultado-vazio strong{display:block;color:#111827;font-size:14px}.resultado-vazio span{display:block;margin-top:5px;color:#6b7280;font-size:12px}
+@media(max-width:520px){.busca-overlay{padding:8px}.busca-painel{border-radius:20px}.busca-resultados{max-height:66vh}}
+
+/* ETAPA 8 — fidelização, favoritos e recompra */
+.mesa-favoritos{padding:4px 14px 12px;background:#f4f5f7}
+.mesa-section-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:0 0 10px}
+.mesa-section-title{margin:0!important;font-size:18px!important;font-weight:900!important;color:#111827!important;letter-spacing:-.35px!important}
+.mesa-section-sub{margin:3px 0 0!important;font-size:11px!important;color:#6b7280!important}
+.mesa-favoritos-lista{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:none}
+.mesa-favoritos-lista::-webkit-scrollbar{display:none}
+.mesa-favorito-card{position:relative;min-width:156px;max-width:156px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:8px;box-shadow:0 5px 18px rgba(17,24,39,.06)}
+.mesa-favorito-img{width:100%;height:102px;object-fit:cover;border-radius:12px;display:block;background:#eef0f2}
+.mesa-favorito-nome{font-size:13px;font-weight:850;color:#111827;margin:8px 2px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mesa-favorito-preco{font-size:13px;font-weight:900;color:#059669;margin:0 2px 7px}
+.mesa-favorito-btn{width:100%;border:0;background:#ecfdf5;color:#047857;border-radius:10px;padding:8px 7px;font-weight:850;font-size:11px;cursor:pointer}
+.produto-favorito-btn{position:absolute;right:9px;top:9px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.94);box-shadow:0 5px 16px rgba(17,24,39,.13);font-size:18px;line-height:1;z-index:3;cursor:pointer;color:#6b7280}
+.produto-favorito-btn.ativo{color:#059669;background:#ecfdf5}
+.produto-imagem-wrap{position:relative!important}
+.mesa-repetir{padding-bottom:4px!important}
+.mesa-repetir-lista{scrollbar-width:none!important}
+.mesa-repetir-lista::-webkit-scrollbar{display:none}
+@media(max-width:700px){.mesa-favoritos{padding-left:12px;padding-right:12px}.mesa-favorito-card{min-width:148px;max-width:148px}.mesa-favorito-img{height:94px}}
 </style>
 
 <style>
@@ -128,13 +153,157 @@ footer{color:#6B7280}footer strong{color:#374151}
 .produto-sheet-adicionar{width:100%;min-height:52px;border-radius:14px;font-size:15px;font-weight:900;background:#10b981;box-shadow:0 8px 22px rgba(16,185,129,.20)}
 .produto-sheet-ar{width:100%;min-height:46px;border-radius:14px}
 @media(max-width:700px){.modal-produto-sheet .produto-sheet-conteudo{max-height:94vh;border-radius:24px 24px 0 0}.produto-sheet-imagem-wrap{height:235px}.produto-sheet-corpo{padding:17px 16px calc(18px + env(safe-area-inset-bottom))}.produto-sheet-corpo h2{font-size:21px}.produto-sheet-fechar{top:12px;right:12px}.produto-sheet-adicionar{min-height:50px}}
+
+/* ===== MESA360 ETAPA 5 — BOTTOMSHEET UX ===== */
+.modal-produto-sheet{align-items:flex-end!important;justify-content:center!important;padding:0!important;background:rgba(15,23,42,.48)!important;backdrop-filter:blur(5px)}
+.modal-produto-sheet .produto-sheet-conteudo{width:min(100%,680px)!important;max-width:680px!important;max-height:min(92vh,900px)!important;height:auto!important;margin:0!important;border-radius:28px 28px 0 0!important;overflow:hidden!important;background:#fff!important;box-shadow:0 -18px 50px rgba(15,23,42,.22)!important;transform:translateY(0);display:flex!important;flex-direction:column!important;padding:0!important}
+.produto-sheet-handle{position:absolute!important;z-index:8;top:9px;left:50%;transform:translateX(-50%);width:42px;height:5px;border-radius:99px;background:rgba(255,255,255,.82)!important;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.produto-sheet-fechar{position:absolute!important;z-index:9;top:14px!important;right:14px!important;width:40px!important;height:40px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.7)!important;background:rgba(255,255,255,.86)!important;color:#111827!important;box-shadow:0 4px 14px rgba(0,0,0,.14)!important;font-size:25px!important;line-height:1!important}
+.produto-sheet-imagem-wrap{height:245px!important;min-height:245px!important;width:100%!important;background:#f3f4f6!important;overflow:hidden!important;position:relative!important}
+.produto-sheet-imagem{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+.produto-sheet-corpo{overflow-y:auto!important;padding:20px 18px calc(112px + env(safe-area-inset-bottom))!important;-webkit-overflow-scrolling:touch!important}
+.produto-sheet-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}
+.produto-sheet-kicker{font-size:11px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.08em!important;color:#059669!important}
+#modalNome{font-size:24px!important;line-height:1.15!important;font-weight:800!important;color:#111827!important;margin:4px 0 7px!important}
+#modalDescricao{font-size:14px!important;line-height:1.5!important;color:#6b7280!important;margin:0 0 18px!important}
+#modalPreco{font-size:18px!important;font-weight:800!important;color:#111827!important}
+.customizacao-produto{display:grid!important;gap:12px!important;margin-top:8px!important}
+.customizacao-titulo{font-size:18px!important;font-weight:800!important;color:#111827!important;margin-top:2px!important}
+.customizacao-sub{font-size:13px!important;color:#9ca3af!important;margin-top:-6px!important;margin-bottom:2px!important}
+.addon-lista{display:grid!important;gap:9px!important}
+.addon-opcao{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:14px 13px!important;border:1px solid #e5e7eb!important;border-radius:14px!important;background:#fff!important;cursor:pointer!important;transition:.16s ease!important}
+.addon-opcao:has(.addon-check:checked){border-color:#10b981!important;background:#f0fdf4!important;box-shadow:0 0 0 1px rgba(16,185,129,.12)!important}
+.addon-esq{display:flex!important;align-items:center!important;gap:11px!important;min-width:0!important}
+.addon-check{width:19px!important;height:19px!important;accent-color:#10b981!important;flex:0 0 auto!important}
+.addon-nome{font-size:14px!important;font-weight:600!important;color:#374151!important}
+.addon-preco{font-size:13px!important;font-weight:800!important;color:#111827!important;white-space:nowrap!important}
+.customizacao-produto>div:last-child{margin-top:4px!important}
+.customizacao-produto label[for="observacaoItem"]{display:block!important;font-size:13px!important;font-weight:700!important;color:#374151!important;margin-bottom:6px!important}
+#observacaoItem{width:100%!important;min-height:82px!important;resize:none!important;border:1px solid #e5e7eb!important;border-radius:13px!important;padding:12px!important;font:inherit!important;font-size:14px!important;color:#111827!important;background:#fff!important;outline:none!important}
+#observacaoItem:focus{border-color:#10b981!important;box-shadow:0 0 0 3px rgba(16,185,129,.10)!important}
+.produto-sheet-quantidade-row{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:17px 0!important;border-top:1px solid #f1f5f9!important;margin-top:18px!important;font-size:14px!important;font-weight:700!important;color:#374151!important}
+.quantidade-box{display:flex!important;align-items:center!important;gap:12px!important}
+.quantidade-box .btn-quantidade{width:34px!important;height:34px!important;border-radius:50%!important;border:1px solid #d1d5db!important;background:#fff!important;color:#111827!important;font-size:20px!important;display:grid!important;place-items:center!important;padding:0!important}
+.quantidade-numero{min-width:18px;text-align:center;font-weight:800;color:#111827}
+.produto-sheet-acoes{position:absolute!important;bottom:0!important;left:0!important;right:0!important;z-index:7!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important;background:rgba(255,255,255,.96)!important;border-top:1px solid #e5e7eb!important;box-shadow:0 -8px 24px rgba(15,23,42,.08)!important;display:block!important}
+.produto-sheet-adicionar{width:100%!important;min-height:54px!important;border:0!important;border-radius:15px!important;background:#059669!important;color:#fff!important;font-size:15px!important;font-weight:800!important;box-shadow:0 8px 20px rgba(5,150,105,.22)!important}
+.produto-sheet-adicionar:active{transform:scale(.99)}
+.produto-sheet-ar{display:none!important}
+@media(max-width:700px){.modal-produto-sheet .produto-sheet-conteudo{width:100%!important;max-height:94vh!important;border-radius:28px 28px 0 0!important}.produto-sheet-imagem-wrap{height:220px!important;min-height:220px!important}.produto-sheet-corpo{padding-left:16px!important;padding-right:16px!important}.produto-sheet-acoes{padding-left:12px!important;padding-right:12px!important}}
+@media(min-width:701px){.modal-produto-sheet .produto-sheet-conteudo{border-radius:28px!important;margin-bottom:18px!important}.produto-sheet-acoes{border-radius:0 0 28px 28px!important}}
+</style>
+
+<style id="mesa360-etapa6">
+/* ===== MESA360 ETAPA 6 — ACABAMENTO GERAL / HOME MOBILE ===== */
+html{scroll-behavior:smooth}
+body{background:#f5f6f8;color:#111827;letter-spacing:-.01em}
+header{background:#fff!important;overflow:hidden;border-bottom:1px solid #eef0f3}
+.mesa-capa{height:205px!important;background-position:center!important}
+.mesa-capa::after{background:linear-gradient(180deg,rgba(0,0,0,.02) 15%,rgba(0,0,0,.42) 100%)!important}
+.mesa-header-acoes{top:12px!important;right:12px!important}
+.mesa-header-btn{width:42px!important;height:42px!important;background:rgba(255,255,255,.88)!important;color:#111827!important;border:1px solid rgba(255,255,255,.9)!important;box-shadow:0 5px 18px rgba(0,0,0,.10)!important;font-weight:800}
+.mesa-info{margin:-36px 16px 0!important;padding-left:84px!important}
+.mesa-logo{width:68px!important;height:68px!important;border-width:4px!important;box-shadow:0 7px 22px rgba(17,24,39,.18)!important}
+.mesa-nome{font-size:22px!important;padding-top:39px!important;letter-spacing:-.65px!important}
+.mesa-meta{font-size:11px!important;gap:6px 11px!important}
+.mesa-perfil{font-size:11px!important;color:#374151!important}
+header>p{margin:9px 16px 13px!important;font-size:12px!important;max-width:620px!important}
+.mesa-entrega{margin:12px 12px 0!important;min-height:104px!important;border-radius:18px!important;padding:16px!important;box-shadow:0 8px 24px rgba(5,150,105,.15)!important}
+.mesa-entrega-icone{width:60px!important;height:60px!important;border-radius:18px!important;font-size:31px!important}
+.mesa-entrega h2{font-size:19px!important}.mesa-entrega p{font-size:11px!important}.mesa-entrega strong{font-size:10px!important}
+.mesa-dots{padding:7px 0 1px!important;color:#10b981!important}
+.categorias{padding:10px 12px!important;gap:8px!important;top:0!important;background:rgba(255,255,255,.97)!important;box-shadow:0 4px 16px rgba(17,24,39,.06)!important}
+.categoria{padding:9px 14px!important;border-radius:12px!important;font-size:11px!important;background:#fff!important;color:#4b5563!important;transition:.16s ease!important}
+.categoria.ativa{background:#111827!important;color:#fff!important;border-color:#111827!important;box-shadow:0 4px 10px rgba(17,24,39,.12)!important}
+.produtos{max-width:900px!important;margin:14px auto 112px!important;padding:0 12px!important;gap:12px!important}
+.produto{border-radius:18px!important;border:1px solid #e9ebef!important;box-shadow:0 3px 14px rgba(17,24,39,.045)!important;overflow:hidden!important;transition:transform .16s ease,box-shadow .16s ease!important}
+.produto:active{transform:scale(.992)}
+.produto-imagem-wrap{height:190px!important;background:#f1f3f5!important}
+.produto-imagem-wrap img{transition:transform .25s ease!important}
+.produto:hover .produto-imagem-wrap img{transform:scale(1.015)}
+.produto-info{padding:13px 14px 14px!important}
+.produto-kicker{font-size:10px!important;text-transform:uppercase!important;letter-spacing:.06em!important;font-weight:850!important;color:#059669!important}
+.produto-info h2{font-size:16px!important;letter-spacing:-.3px!important;margin-top:3px!important}
+.produto-info p{font-size:11px!important;line-height:1.42!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important;min-height:31px!important}
+.produto-rodape{margin-top:10px!important;align-items:center!important}
+.preco{font-size:16px!important;font-weight:900!important;color:#111827!important}
+.ver-ar-card{border-radius:10px!important;padding:7px 10px!important;font-size:10px!important;font-weight:850!important}
+.acoes-flutuantes{bottom:max(12px,env(safe-area-inset-bottom))!important;gap:8px!important}
+.acao-flutuante{min-height:48px!important;border-radius:15px!important;font-size:12px!important;box-shadow:0 10px 28px rgba(17,24,39,.17)!important}
+.acao-mesa{background:#fff!important}.acao-pedido{background:#111827!important}
+.toast{border-radius:14px!important}
+footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
+@media(min-width:701px){.mesa-capa{height:235px!important}.mesa-entrega{max-width:876px!important;margin-left:auto!important;margin-right:auto!important}.mesa-dots{max-width:900px;margin:auto}.mesa-repetir{max-width:900px;margin:auto}.produtos{grid-template-columns:repeat(2,minmax(0,1fr))!important}.produto-imagem-wrap{height:210px!important}}
+@media(max-width:700px){.mesa-capa{height:180px!important}.mesa-nome{font-size:19px!important}.produto-imagem-wrap{height:158px!important}.produtos{grid-template-columns:1fr!important}.produto-info h2{font-size:15px!important}.acao-flutuante{flex:1!important}.acoes-flutuantes{width:calc(100vw - 20px)!important;right:10px!important}}
+</style>
+
+<style id="mesa360-etapa9-css">
+.mesa-confirm-overlay{position:fixed;inset:0;z-index:1200;background:rgba(15,23,42,.48);backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center;padding:0}
+.mesa-confirm-overlay.open{display:flex}
+.mesa-confirm-sheet{width:min(100%,560px);background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -18px 60px rgba(15,23,42,.22);padding:26px 20px calc(22px + env(safe-area-inset-bottom));animation:mesaConfirmIn .24s ease-out}
+@keyframes mesaConfirmIn{from{transform:translateY(30px);opacity:.7}to{transform:translateY(0);opacity:1}}
+.mesa-confirm-handle{width:42px;height:5px;border-radius:99px;background:#d9dee7;margin:0 auto 20px}
+.mesa-confirm-icon{width:68px;height:68px;border-radius:50%;background:#dcfce7;color:#059669;display:grid;place-items:center;font-size:34px;margin:0 auto 14px;font-weight:800}
+.mesa-confirm-title{text-align:center;font-size:22px;font-weight:800;color:#111827;margin:0}
+.mesa-confirm-sub{text-align:center;color:#6b7280;font-size:14px;line-height:1.5;margin:7px auto 18px;max-width:390px}
+.mesa-confirm-code{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:16px;padding:15px;margin-bottom:16px;text-align:center}
+.mesa-confirm-code small{display:block;color:#6b7280;font-size:12px;margin-bottom:4px}.mesa-confirm-code strong{font-size:24px;color:#111827;letter-spacing:.5px}
+.mesa-confirm-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.mesa-confirm-info div{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:11px 12px}.mesa-confirm-info span{display:block;font-size:11px;color:#6b7280;margin-bottom:3px}.mesa-confirm-info b{font-size:14px;color:#111827}
+.mesa-confirm-actions{display:grid;gap:9px}.mesa-confirm-primary{border:0;background:#059669;color:#fff;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer}.mesa-confirm-secondary{border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:14px;padding:13px 16px;font-size:14px;font-weight:700;cursor:pointer}
+.mesa-confirm-note{text-align:center;color:#9ca3af;font-size:11px;line-height:1.4;margin:12px 8px 0}
+</style>
+
+
+<style>
+.mesa-track-overlay{position:fixed;inset:0;background:rgba(17,24,39,.42);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center;z-index:10020}
+.mesa-track-overlay.open{display:flex}
+.mesa-track-sheet{width:min(100%,560px);max-height:min(88vh,760px);overflow:auto;background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -20px 60px rgba(0,0,0,.2);padding:12px 18px calc(22px + env(safe-area-inset-bottom));animation:mesaTrackUp .24s ease-out}
+@keyframes mesaTrackUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+.mesa-track-handle{width:42px;height:5px;border-radius:999px;background:#d1d5db;margin:2px auto 16px}
+.mesa-track-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.mesa-track-head h2{margin:0;font-size:21px;color:#111827}.mesa-track-close{width:38px;height:38px;border-radius:50%;border:1px solid #e5e7eb;background:#f9fafb;font-size:22px;color:#374151;cursor:pointer}
+.mesa-track-code{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:14px;margin-bottom:18px}.mesa-track-code span{display:block;color:#6b7280;font-size:12px}.mesa-track-code strong{display:block;margin-top:3px;font-size:22px;color:#047857}
+.mesa-track-line{position:relative;margin:4px 2px 20px}.mesa-track-step{position:relative;display:grid;grid-template-columns:34px 1fr;gap:12px;min-height:72px}.mesa-track-step:not(:last-child)::before{content:"";position:absolute;left:15px;top:31px;width:2px;height:52px;background:#e5e7eb}.mesa-track-step.done:not(:last-child)::before,.mesa-track-step.active:not(:last-child)::before{background:#10b981}.mesa-track-dot{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb;font-size:14px}.mesa-track-step.done .mesa-track-dot,.mesa-track-step.active .mesa-track-dot{background:#059669;border-color:#059669;color:#fff}.mesa-track-step.active .mesa-track-dot{box-shadow:0 0 0 5px #d1fae5}.mesa-track-copy strong{display:block;color:#374151;font-size:14px;line-height:1.2}.mesa-track-copy span{display:block;margin-top:4px;color:#9ca3af;font-size:12px;line-height:1.4}.mesa-track-step.done .mesa-track-copy strong,.mesa-track-step.active .mesa-track-copy strong{color:#111827}.mesa-track-refresh{width:100%;border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:14px;padding:12px;font-weight:700;cursor:pointer}.mesa-track-note{text-align:center;color:#9ca3af;font-size:11px;line-height:1.4;margin:11px 8px 0}
+.mesa-confirm-track{border:1px solid #d1fae5;background:#ecfdf5;color:#047857;border-radius:14px;padding:13px 16px;font-size:14px;font-weight:800;cursor:pointer;width:100%;margin-top:9px}
+.mesa-track-cancelled{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:14px;padding:13px;margin-bottom:15px;font-size:13px;line-height:1.4}
+</style>
+
+<style id="mesa360-etapa11-css">
+.mesa-conta-btn{position:relative}
+.mesa-conta-overlay{position:fixed;inset:0;z-index:10040;background:rgba(17,24,39,.44);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center}
+.mesa-conta-overlay.open{display:flex}
+.mesa-conta-sheet{width:min(100%,580px);max-height:min(90vh,820px);overflow:auto;background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -20px 70px rgba(0,0,0,.2);padding:12px 18px calc(24px + env(safe-area-inset-bottom));animation:mesaContaUp .24s ease-out}
+@keyframes mesaContaUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+.mesa-conta-handle{width:42px;height:5px;border-radius:999px;background:#d1d5db;margin:2px auto 16px}
+.mesa-conta-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.mesa-conta-head h2{margin:0;font-size:22px;color:#111827}.mesa-conta-close{width:38px;height:38px;border-radius:50%;border:1px solid #e5e7eb;background:#f9fafb;color:#374151;font-size:22px;cursor:pointer}
+.mesa-conta-profile{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:18px;padding:15px;margin-bottom:14px}.mesa-conta-profile-title{font-size:12px;color:#6b7280;margin-bottom:8px}.mesa-conta-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.mesa-conta-profile-grid label{display:block;font-size:11px;color:#6b7280;margin-bottom:4px}.mesa-conta-profile-grid input{width:100%;box-sizing:border-box;border:1px solid #d1d5db;border-radius:11px;padding:10px;background:#fff;color:#111827;outline:none}.mesa-conta-profile-grid input:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.1)}
+.mesa-conta-save{width:100%;border:0;background:#059669;color:#fff;border-radius:12px;padding:11px;margin-top:10px;font-weight:800;cursor:pointer}
+.mesa-conta-section-title{font-size:16px;font-weight:800;color:#111827;margin:18px 0 9px}.mesa-conta-empty{border:1px dashed #d1d5db;border-radius:16px;padding:18px;text-align:center;color:#9ca3af;font-size:13px;background:#fafafa}
+.mesa-conta-order{border:1px solid #e5e7eb;border-radius:17px;padding:14px;margin-bottom:9px;background:#fff}.mesa-conta-order-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.mesa-conta-order-code{font-weight:800;color:#111827}.mesa-conta-order-status{font-size:11px;font-weight:800;border-radius:999px;padding:5px 8px;background:#ecfdf5;color:#047857}.mesa-conta-order-meta{display:flex;justify-content:space-between;gap:8px;margin-top:8px;color:#6b7280;font-size:12px}.mesa-conta-order-total{font-size:15px;font-weight:800;color:#111827}.mesa-conta-order-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.mesa-conta-order-actions button{border:1px solid #e5e7eb;background:#fff;border-radius:11px;padding:9px;font-size:12px;font-weight:700;color:#374151;cursor:pointer}.mesa-conta-order-actions button.primary{background:#ecfdf5;border-color:#bbf7d0;color:#047857}
+@media(max-width:480px){.mesa-conta-profile-grid{grid-template-columns:1fr}.mesa-conta-order-actions{grid-template-columns:1fr 1fr}}
+</style>
+
+
+<style id="mesa360-etapa12-performance">
+.m360-loading-overlay{position:fixed;inset:0;z-index:99999;background:rgba(244,245,247,.96);display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .25s ease,visibility .25s ease}.m360-loading-overlay.is-hidden{opacity:0;visibility:hidden;pointer-events:none}.m360-loading-card{width:min(420px,100%);background:#fff;border:1px solid #e5e7eb;border-radius:24px;padding:28px;box-shadow:0 18px 60px rgba(15,23,42,.12);text-align:center}.m360-loading-logo{width:58px;height:58px;border-radius:18px;margin:0 auto 16px;object-fit:cover;background:#f1f5f9}.m360-spinner{width:28px;height:28px;border:3px solid #d1fae5;border-top-color:#059669;border-radius:50%;animation:m360spin .8s linear infinite;margin:18px auto 0}@keyframes m360spin{to{transform:rotate(360deg)}}.m360-offline{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);z-index:99998;background:#111827;color:#fff;padding:10px 14px;border-radius:999px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.25s}.m360-offline.show{opacity:1;transform:translate(-50%,0)}.m360-retry{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;padding:11px 16px;background:#059669;color:#fff;font-weight:700;cursor:pointer;margin-top:16px}.m360-top{position:fixed;right:16px;bottom:92px;z-index:70;width:44px;height:44px;border:1px solid #e5e7eb;border-radius:50%;background:#fff;color:#111827;box-shadow:0 8px 24px rgba(15,23,42,.12);display:none;align-items:center;justify-content:center;font-size:18px}.m360-top.show{display:flex}.m360-img-loading{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 37%,#f1f5f9 63%);background-size:400% 100%;animation:m360shimmer 1.2s ease infinite}@keyframes m360shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 </style>
 </head>
 <body>
+<div id="m360Loading" class="m360-loading-overlay" aria-live="polite">
+  <div class="m360-loading-card">
+    <img id="m360LoadingLogo" class="m360-loading-logo" alt="" decoding="async">
+    <strong style="display:block;font-size:18px;color:#111827">Abrindo o cardápio</strong>
+    <span style="display:block;margin-top:6px;color:#6b7280;font-size:14px">Carregando produtos e opções...</span>
+    <div class="m360-spinner" aria-hidden="true"></div>
+  </div>
+</div>
+<div id="m360Offline" class="m360-offline" role="status">Você está sem internet. Tentando reconectar...</div>
+<button id="m360Top" class="m360-top" type="button" aria-label="Voltar ao topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
 <header>
   <div class="mesa-capa" id="mesaCapa"></div>
   <div class="mesa-header-acoes">
     <button class="mesa-header-btn" type="button" onclick="focarBuscaMenu()" aria-label="Buscar">⌕</button>
+    <button class="mesa-header-btn" type="button" onclick="abrirMinhaConta()" aria-label="Minha conta">◉</button>
     <button class="mesa-header-btn" type="button" onclick="compartilharMenu()" aria-label="Compartilhar">↗</button>
   </div>
   <div class="mesa-info">
@@ -153,6 +322,10 @@ footer{color:#6B7280}footer strong{color:#374151}
 <section class="mesa-repetir" id="secaoPecaDeNovo" style="display:none">
   <h2 class="mesa-section-title">Peça de novo</h2>
   <div class="mesa-repetir-lista" id="listaPecaDeNovo"></div>
+</section>
+<section class="mesa-favoritos" id="secaoFavoritos" style="display:none">
+  <div class="mesa-section-head"><div><h2 class="mesa-section-title">Seus favoritos</h2><p class="mesa-section-sub">Acesse seus pedidos preferidos rapidamente.</p></div></div>
+  <div class="mesa-favoritos-lista" id="listaFavoritos"></div>
 </section>
 <nav class="categorias" id="categorias" aria-label="Categorias do cardápio"></nav>
 <main class="produtos" id="listaProdutos"></main>
@@ -173,10 +346,9 @@ footer{color:#6B7280}footer strong{color:#374151}
       <div id="customizacaoProduto" class="customizacao-produto" style="display:none"></div>
       <div id="opcoesCombo" class="combo-opcoes" style="display:none"></div>
       <div class="produto-sheet-quantidade-row"><span>Quantidade</span><div class="quantidade-box"><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(-1)" aria-label="Diminuir quantidade">−</button><span id="quantidadeProduto" class="quantidade-numero">1</span><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(1)" aria-label="Aumentar quantidade">+</button></div></div>
-      <div class="botoes-produto produto-sheet-acoes">
-        <button id="btnAdicionarProduto" class="btn-principal produto-sheet-adicionar" type="button" onclick="adicionarProdutoAtual()">Adicionar ao carrinho • R$ 0,00</button>
-        <button id="btnVerMesaProduto" class="btn-ar destaque produto-sheet-ar" type="button" onclick="abrirARFoto()" style="display:none">📱 Ver na minha mesa</button>
-      </div>
+    </div>
+    <div class="produto-sheet-acoes">
+      <button id="btnAdicionarProduto" class="btn-principal produto-sheet-adicionar" type="button" onclick="adicionarProdutoAtual()">Adicionar ao Pedido • R$ 0,00</button>
     </div>
   </div>
 </div>
@@ -272,6 +444,24 @@ footer{color:#6B7280}footer strong{color:#374151}
     </div>
   </div>
 </div>
+
+<div class="mesa-conta-overlay" id="mesaMinhaConta" role="dialog" aria-modal="true" aria-labelledby="mesaContaTitulo" onclick="fecharMinhaConta(event)">
+  <div class="mesa-conta-sheet" onclick="event.stopPropagation()">
+    <div class="mesa-conta-handle"></div>
+    <div class="mesa-conta-head"><h2 id="mesaContaTitulo">Minha conta</h2><button class="mesa-conta-close" type="button" onclick="fecharMinhaConta()" aria-label="Fechar">×</button></div>
+    <div class="mesa-conta-profile">
+      <div class="mesa-conta-profile-title">Seus dados ficam salvos neste aparelho para facilitar os próximos pedidos.</div>
+      <div class="mesa-conta-profile-grid">
+        <div><label for="mesaContaNome">Nome</label><input id="mesaContaNome" autocomplete="name" placeholder="Seu nome"></div>
+        <div><label for="mesaContaTelefone">WhatsApp / telefone</label><input id="mesaContaTelefone" autocomplete="tel" inputmode="tel" placeholder="(34) 99999-9999"></div>
+      </div>
+      <button class="mesa-conta-save" type="button" onclick="salvarPerfilMesa360()">Salvar meus dados</button>
+    </div>
+    <div class="mesa-conta-section-title">Meus pedidos</div>
+    <div id="mesaContaPedidos"><div class="mesa-conta-empty">Seus pedidos aparecerão aqui depois da primeira compra.</div></div>
+  </div>
+</div>
+
 <div id="toast" class="toast" aria-live="polite"></div>
 <footer><strong id="rodapeNome">Brasa 180° Smash & Grill</strong>Cardápio digital com realidade aumentada por foto.</footer>
 
@@ -465,7 +655,7 @@ async function carregarCatalogoDoSupabase(){
    window.supabaseRestaurantId=restaurante.id;window.supabaseRestaurantSettings=config;window.supabaseConnectionStatus='conectado';
    if(restaurante.primary_color)document.documentElement.style.setProperty('--primary',restaurante.primary_color);
    $('restauranteNome').textContent=restauranteAtual.nome;$('restauranteDescricao').textContent=restauranteAtual.descricao;$('rodapeNome').textContent=restauranteAtual.nome;
-   renderizarCategorias();renderizarProdutos('todos');atualizarCarrinho();atualizarResumoAtendimento();
+   renderizarHomeRedesign();renderizarCategorias();renderizarProdutos('todos');atualizarCarrinho();atualizarResumoAtendimento();
    console.info('[Mesa360/Supabase] Fonte única do catálogo ativa:',{categorias:categoriasDB.length,produtos:produtosDB.length,combos:combosDB.length,adicionais:addonsDB.length,ar:arDB.length});
    setTimeout(()=>mostrarToast('Cardápio carregado do Supabase.'),120);
    return true;
@@ -533,14 +723,72 @@ function iniciarRestaurante(){
 }
 
 function focarBuscaMenu(){
- const termo=prompt('O que você procura no cardápio?');
- if(!termo)return;
- const q=termo.trim().toLowerCase();
- const alvo=restauranteAtual.produtos.find(p=>`${p.nome} ${p.descricao}`.toLowerCase().includes(q));
- if(alvo){abrirProdutoPorId(alvo.id);return;}
- mostrarToast('Nenhum produto encontrado.');
+ const existente=document.getElementById('mesaBuscaOverlay');
+ if(existente){existente.classList.add('ativo');document.body.classList.add('modal-aberto');setTimeout(()=>document.getElementById('mesaBuscaInput')?.focus(),40);renderizarResultadosBusca('');return;}
+ const overlay=document.createElement('div');
+ overlay.id='mesaBuscaOverlay';overlay.className='busca-overlay ativo';
+ overlay.innerHTML=`<div class="busca-painel" role="dialog" aria-modal="true" aria-label="Buscar no cardápio">
+   <div class="busca-topo">
+     <div class="busca-input-wrap"><span>⌕</span><input id="mesaBuscaInput" class="busca-input" type="search" autocomplete="off" placeholder="Buscar hambúrguer, batata, bebida..." aria-label="Buscar produto"></div>
+     <button type="button" class="busca-fechar" aria-label="Fechar busca" onclick="fecharBuscaMenu()">×</button>
+   </div>
+   <div class="busca-resultados" id="mesaBuscaResultados"></div>
+ </div>`;
+ overlay.addEventListener('click',e=>{if(e.target===overlay)fecharBuscaMenu()});
+ document.body.appendChild(overlay);document.body.classList.add('modal-aberto');
+ const input=document.getElementById('mesaBuscaInput');
+ input?.addEventListener('input',e=>renderizarResultadosBusca(e.target.value));
+ input?.addEventListener('keydown',e=>{if(e.key==='Escape')fecharBuscaMenu()});
+ renderizarResultadosBusca('');
+ setTimeout(()=>input?.focus(),40);
+}
+function fecharBuscaMenu(){const el=document.getElementById('mesaBuscaOverlay');if(el){el.classList.remove('ativo');document.body.classList.remove('modal-aberto');setTimeout(()=>el.remove(),180)}}
+function renderizarResultadosBusca(termo=''){
+ const box=document.getElementById('mesaBuscaResultados');if(!box)return;
+ const produtos=Array.isArray(restauranteAtual?.produtos)?restauranteAtual.produtos:[];
+ const q=String(termo||'').trim().toLowerCase();
+ const categorias=[...new Map(produtos.map(p=>[p.categoria,p.categoria]).filter(([k])=>k)).keys()].slice(0,8);
+ let lista=q?produtos.filter(p=>`${p.nome} ${p.descricao} ${p.categoria}`.toLowerCase().includes(q)):produtos.slice(0,8);
+ if(!q){
+   const nomes=categorias.map(c=>`<button type="button" class="busca-chip" onclick="buscarCategoriaRapida('${escaparHtml(c)}')">${escaparHtml(c)}</button>`).join('');
+   box.innerHTML=`<div class="busca-chips">${nomes}</div><div class="busca-hint">Digite o nome do produto ou escolha uma categoria para encontrar rapidamente.</div>`;return;
+ }
+ box.innerHTML=`<div class="busca-contador">${lista.length} ${lista.length===1?'resultado encontrado':'resultados encontrados'}</div>`+(lista.length?lista.map(p=>`<button type="button" class="busca-resultado" onclick="selecionarResultadoBusca('${escaparHtml(p.id)}')"><img class="busca-resultado-img" src="${escaparHtml(p.imagem)}" alt="" loading="lazy"><span><span class="busca-resultado-nome">${escaparHtml(p.nome)}</span><span class="busca-resultado-desc">${escaparHtml(p.descricao||'')}</span></span><span class="busca-resultado-preco">${formatarPreco(p.preco)}</span></button>`).join(''):`<div class="resultado-vazio"><div class="resultado-vazio-icone">⌕</div><strong>Nenhum produto encontrado</strong><span>Tente outro nome ou termo de busca.</span></div>`);
+}
+function selecionarResultadoBusca(id){fecharBuscaMenu();setTimeout(()=>abrirProdutoPorId(id),100)}
+function buscarCategoriaRapida(cat){
+ const input=document.getElementById('mesaBuscaInput');if(input){input.value=cat;renderizarResultadosBusca(cat);return;}
 }
 function abrirPerfilLoja(e){e?.preventDefault();mostrarToast(`${restauranteAtual?.nome||'Brasa 180°'} • Pedido mínimo R$ 15,00`)}
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();focarBuscaMenu()}});
+function chaveFavoritos(){return storageKey('favoritos')}
+function obterFavoritos(){try{const v=JSON.parse(localStorage.getItem(chaveFavoritos())||'[]');return Array.isArray(v)?v:[]}catch{return []}}
+function isFavorito(id){return obterFavoritos().includes(id)}
+function alternarFavorito(id,e){
+ if(e?.preventDefault)e.preventDefault();
+ const atual=obterFavoritos();
+ const novo=atual.includes(id)?atual.filter(x=>x!==id):[id,...atual].slice(0,20);
+ localStorage.setItem(chaveFavoritos(),JSON.stringify(novo));
+ renderizarFavoritos();
+ const bot=e?.currentTarget||e?.target;
+ if(bot){const ativo=novo.includes(id);bot.classList.toggle('ativo',ativo);bot.textContent=ativo?'♥':'♡';bot.setAttribute('aria-label',ativo?'Remover dos favoritos':'Adicionar aos favoritos')}
+ const produto=restauranteAtual?.produtos?.find(p=>p.id===id);
+ mostrarToast(novo.includes(id)?`${produto?.nome||'Produto'} salvo nos favoritos.`:`${produto?.nome||'Produto'} removido dos favoritos.`);
+}
+function renderizarFavoritos(){
+ const sec=$('secaoFavoritos'),lista=$('listaFavoritos');
+ if(!sec||!lista)return;
+ const produtos=Array.isArray(restauranteAtual?.produtos)?restauranteAtual.produtos:[];
+ const favoritos=obterFavoritos().map(id=>produtos.find(p=>p.id===id)).filter(Boolean).slice(0,10);
+ if(!favoritos.length){sec.style.display='none';lista.innerHTML='';return}
+ sec.style.display='block';
+ lista.innerHTML=favoritos.map(p=>`<article class="mesa-favorito-card">
+   <img class="mesa-favorito-img" src="${escaparHtml(p.imagem)}" alt="${escaparHtml(p.nome)}" loading="lazy">
+   <div class="mesa-favorito-nome">${escaparHtml(p.nome)}</div>
+   <div class="mesa-favorito-preco">${formatarPreco(p.preco)}</div>
+   <button class="mesa-favorito-btn" type="button" onclick="abrirProdutoPorId('${escaparHtml(p.id)}')">Adicionar</button>
+ </article>`).join('');
+}
 function renderizarHomeRedesign(){
  const produtos=Array.isArray(restauranteAtual?.produtos)?restauranteAtual.produtos:[];
  const primeira=produtos.find(p=>p.imagem)?.imagem;
@@ -550,11 +798,12 @@ function renderizarHomeRedesign(){
  let historico=[];try{historico=JSON.parse(historicoRaw)}catch{historico=[]}
  const validos=historico.map(h=>produtos.find(p=>p.id===h.id)).filter(Boolean).slice(0,8);
  const sec=$('secaoPecaDeNovo'),lista=$('listaPecaDeNovo');
- if(!validos.length){if(sec)sec.style.display='none';return;}
- if(sec)sec.style.display='block';
- if(lista)lista.innerHTML=validos.map(p=>`<article class="mesa-repetir-card"><img class="mesa-repetir-img" src="${escaparHtml(p.imagem)}" alt="${escaparHtml(p.nome)}" loading="lazy"><div class="mesa-repetir-nome">${escaparHtml(p.nome)}</div><div class="mesa-repetir-qtd">Pedido anterior</div><button class="mesa-repetir-btn" type="button" onclick="abrirProdutoPorId('${escaparHtml(p.id)}')">Adicionar ao carrinho</button></article>`).join('');
+ if(!validos.length){if(sec)sec.style.display='none'}else{
+   if(sec)sec.style.display='block';
+   if(lista)lista.innerHTML=validos.map(p=>`<article class="mesa-repetir-card"><img class="mesa-repetir-img" src="${escaparHtml(p.imagem)}" alt="${escaparHtml(p.nome)}" loading="lazy"><div class="mesa-repetir-nome">${escaparHtml(p.nome)}</div><div class="mesa-repetir-qtd">Pedido anterior</div><button class="mesa-repetir-btn" type="button" onclick="abrirProdutoPorId('${escaparHtml(p.id)}')">Adicionar ao carrinho</button></article>`).join('');
+ }
+ renderizarFavoritos();
 }
-
 function renderizarCategorias(){
  $('categorias').innerHTML=restauranteAtual.categorias.map(c=>{
    const id=escaparHtml(c.id);
@@ -571,7 +820,8 @@ function renderizarProdutos(cat='todos'){
    const nome=escaparHtml(p.nome);
    const descricao=escaparHtml(p.descricao);
    const kicker=p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Combo';
-   return `<article class="produto" data-categoria="${categoria}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}">${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${kicker}</div><h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-ar-card">${p.combo?'Montar combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`;
+   const favorito=isFavorito(p.id);
+   return `<article class="produto" data-categoria="${categoria}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}"><button class="produto-favorito-btn ${favorito?'ativo':''}" type="button" onclick="event.stopPropagation();alternarFavorito('${id}',event)" aria-label="${favorito?'Remover dos favoritos':'Adicionar aos favoritos'}">${favorito?'♥':'♡'}</button>${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${kicker}</div><h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-ar-card">${p.combo?'Montar combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`;
  }).join('');
  if(!lista.length)$('listaProdutos').innerHTML='<div class="carrinho-vazio" style="grid-column:1/-1">Nenhum item disponível nesta categoria.</div>';
 }
@@ -600,7 +850,7 @@ function renderizarCustomizacao(p){
    <div><label for="comboBebida">Bebida do combo *</label><select id="comboBebida"><option value="">Escolha a bebida</option>${bebidas.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>`;
  }
  box.style.display='grid';
- box.innerHTML += `<div><label for="observacaoItem">Observação do item</label><input id="observacaoItem" type="text" placeholder="Ex.: sem cebola, molho à parte" maxlength="140"></div>`;
+ box.innerHTML += `<div><label for="observacaoItem">Observação do item</label><textarea id="observacaoItem" placeholder="Ex.: sem cebola, molho à parte" maxlength="140"></textarea></div>`;
  box.querySelectorAll('.addon-check').forEach(el=>el.addEventListener('change',atualizarTotalProduto));
  atualizarTotalProduto();
 }
@@ -624,7 +874,6 @@ function abrirProdutoPorId(id){
  const kicker=$('modalKicker');
  if(kicker)kicker.textContent=p.combo?'Combo':p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Especial';
  renderizarCustomizacao(p);
- $('btnVerMesaProduto').style.display=p.arFoto?'flex':'none';
  atualizarTotalProduto();
  abrirModal('modalProduto');
 }
@@ -1405,51 +1654,96 @@ async function registrarPedidoSupabase({nome,telefone,mesaAtual,endereco,forma,t
 }
 async function processarCheckout(){
  if(!carrinho.length)return mostrarToast('Seu pedido está vazio.');
- const nome=$('clienteNome').value.trim();if(!nome)return mostrarToast('Informe seu nome.');const telefone=($('clienteTelefone')?.value||'').trim();if(!telefone)return mostrarToast('Informe seu WhatsApp/telefone.');
- let localPedido='';
- let mesaAtual='';
- let endereco='';
+ const nome=$('clienteNome').value.trim();
+ if(!nome)return mostrarToast('Informe seu nome.');
+ const telefone=($('clienteTelefone')?.value||'').trim();
+ if(!telefone)return mostrarToast('Informe seu WhatsApp/telefone.');
+ let localPedido='',mesaAtual='',endereco='';
  if(tipoAtendimentoSelecionado==='mesa'){
    mesaAtual=(($('numeroMesaPedido')?.value||localStorage.getItem(storageKey('mesa'))||'').trim());
    if(!mesaAtual)return mostrarToast('Informe o número da mesa.');
    if(!/^[0-9]+$/.test(mesaAtual)||Number(mesaAtual)<=0)return mostrarToast('Informe um número de mesa válido.');
    localStorage.setItem(storageKey('mesa'),mesaAtual);
-   localPedido=`*MESA:* ${mesaAtual}`
+   localPedido=`*MESA:* ${mesaAtual}`;
+ }else{
+   endereco=$('clienteEndereco').value.trim();
+   if(!endereco)return mostrarToast('Informe seu endereço de entrega.');
+   localPedido=`*Endereço:* ${endereco}`;
  }
- else{endereco=$('clienteEndereco').value.trim();if(!endereco)return mostrarToast('Informe seu endereço de entrega.');localPedido=`*Endereço:* ${endereco}`}
- const observacao=$('observacaoPedido').value.trim(); const forma=$('formaPagamento').value;let pagto=forma==='pix'?'PIX':forma==='dinheiro'?'Dinheiro':'Cartão';
+ const observacao=$('observacaoPedido').value.trim();
+ const forma=$('formaPagamento').value;
+ let pagto=forma==='pix'?'PIX':forma==='dinheiro'?'Dinheiro':'Cartão';
  let troco=null;
- if(forma==='dinheiro'){troco=validarTroco();if(troco===false)return;if(troco)pagto+=` (troco para ${formatarPreco(troco)})`}
- localStorage.setItem(storageKey('nome_cliente'),nome);localStorage.setItem(storageKey('telefone_cliente'),telefone);
+ if(forma==='dinheiro'){
+   troco=validarTroco();
+   if(troco===false)return;
+   if(troco)pagto+=` (troco para ${formatarPreco(troco)})`;
+ }
+ localStorage.setItem(storageKey('nome_cliente'),nome);
+ localStorage.setItem(storageKey('telefone_cliente'),telefone);
  if(mesaAtual)localStorage.setItem(storageKey('mesa'),mesaAtual);
  const codigo=gerarCodigoPedido();
+ const totalAntesDoEnvio=calcularTotal();
  mostrarToast('Registrando pedido…');
- $('btnAcaoFinalizar').disabled=true;
+ const botao=$('btnAcaoFinalizar');
+ if(botao)botao.disabled=true;
  try{
+   window.__mesa360CarrinhoAntesEnvio=JSON.parse(JSON.stringify(carrinho));
    const pedidoCriado=await registrarPedidoSupabase({nome,telefone,mesaAtual,endereco,forma,troco,observacao,codigo,tipoAtendimento:tipoAtendimentoSelecionado,cupomCodigo:cupomCheckout?.code||null});
    const numeroReal=pedidoCriado?.order_number||codigo;
    ultimoPedidoCodigo=numeroReal;
    localStorage.setItem(storageKey('ultimo_pedido'),numeroReal);
    const msg=whatsappMensagem(nome,numeroReal,localPedido,pagto,observacao);
    const url=`https://wa.me/${restauranteAtual.whatsapp}?text=${encodeURIComponent(msg)}`;
+   window.mesa360UltimoWhatsAppUrl=url;
+   window.mesa360UltimoPedido={id:pedidoCriado?.id||null,codigo:String(numeroReal),total:totalAntesDoEnvio,tipo:tipoAtendimentoSelecionado==='mesa'?'Minha mesa':'Entrega',status:'pending'};
+   localStorage.setItem(storageKey('ultimo_pedido_id'),String(pedidoCriado?.id||''));
+   atualizarHistoricoAposPedidoMesa360();
    limparCarrinhoAposEnvio();
-   $('btnAcaoFinalizar').style.display='none';
-   $('painelSucessoLocal').style.display='block';
-   $('painelSucessoLocal').innerHTML=`<div class="box-sucesso"><h3>Pedido ${numeroReal} registrado</h3><p>Seu pedido foi salvo no sistema. O WhatsApp será aberto para enviar os detalhes ao restaurante.</p></div>`;
-   mostrarToast('Pedido registrado. Abrindo WhatsApp…');
-   setTimeout(()=>{window.location.href=url},120);
+   if(botao)botao.style.display='none';
+   const painel=$('painelSucessoLocal');
+   if(painel){
+     painel.style.display='block';
+     painel.innerHTML=`<div class="box-sucesso"><h3>Pedido ${String(numeroReal).replace(/</g,'&lt;')} registrado</h3><p>Seu pedido foi salvo no sistema. Continue pelo painel de confirmação.</p></div>`;
+   }
+   abrirConfirmacaoPedido();
  }catch(erro){
    console.error('Erro ao registrar pedido:',erro);
-   $('btnAcaoFinalizar').disabled=false;
-   const detalhe = erro?.message || erro?.details || erro?.hint || String(erro);
+   if(botao)botao.disabled=false;
+   const detalhe=erro?.message||erro?.details||erro?.hint||String(erro);
    mostrarToast(`Erro ao registrar: ${detalhe}`);
    const painel=$('painelSucessoLocal');
    if(painel){
      painel.style.display='block';
-     painel.innerHTML=`<div class=\"box-sucesso\" style=\"border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.08)\"><h3>Não foi possível registrar o pedido</h3><p>${String(detalhe).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p></div>`;
+     painel.innerHTML=`<div class="box-sucesso" style="border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.08)"><h3>Não foi possível registrar o pedido</h3><p>${String(detalhe).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p></div>`;
    }
  }
 }
+function abrirConfirmacaoPedido(){
+ const dados=window.mesa360UltimoPedido||{};
+ const modal=$('mesaConfirmacaoPedido');
+ if(!modal)return;
+ $('mesaConfirmCodigo').textContent=dados.codigo||ultimoPedidoCodigo||'—';
+ $('mesaConfirmTotal').textContent=formatarPreco(Number(dados.total)||0);
+ $('mesaConfirmTipo').textContent=dados.tipo||'Pedido';
+ $('mesaConfirmMensagem').textContent=dados.tipo==='Minha mesa'
+   ? 'Seu pedido foi registrado para a mesa. Envie os detalhes pelo WhatsApp para a equipe do restaurante.'
+   : 'Seu pedido foi registrado. Envie os detalhes pelo WhatsApp para o restaurante continuar o atendimento.';
+ modal.classList.add('open');
+ document.body.style.overflow='hidden';
+}
+function fecharConfirmacaoPedido(event){
+ if(event && event.target!==event.currentTarget)return;
+ const modal=$('mesaConfirmacaoPedido');
+ if(modal)modal.classList.remove('open');
+ document.body.style.overflow='';
+}
+function abrirWhatsAppPedidoConfirmado(){
+ const url=window.mesa360UltimoWhatsAppUrl;
+ if(!url)return mostrarToast('Link do WhatsApp não disponível.');
+ window.location.href=url;
+}
+
 function abrirAtendimento(){
  const mesa=($('numeroMesaPedido')?.value||localStorage.getItem(storageKey('mesa'))||'').trim();
  if(tipoAtendimentoSelecionado!=='mesa' && !mesa)return mostrarToast('Ative Comer na minha mesa e informe a mesa para usar o atendimento.');
@@ -1529,5 +1823,142 @@ let ultimoToque=0;document.addEventListener('touchend',e=>{if(e.target.closest('
 iniciarRestaurante();
 inicializarSupabaseCatalogo();
 </script>
-<script>window.MESA360_PLAN_GUARD={stage:13,limitsManagedBySupabase:true,subscriptionAccessEnforced:true,billingMode:"test-ready"};</script></body>
+<script>window.MESA360_PLAN_GUARD={stage:13,limitsManagedBySupabase:true,subscriptionAccessEnforced:true,billingMode:"test-ready"};</script>
+<script id="mesa360-etapa6-js">
+(function(){
+  function atualizarStatusVisual(){
+    try{
+      if(!window.restauranteAtual) return;
+      const aberto=restauranteAtual.aberto!==false;
+      const el=document.querySelector('.mesa-meta .aberto');
+      if(el){el.textContent=aberto?'● Aberto':'● Fechado';el.style.color=aberto?'#059669':'#dc2626';}
+    }catch(e){}
+  }
+  const observer=new MutationObserver(atualizarStatusVisual);
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+  window.addEventListener('load',function(){setTimeout(atualizarStatusVisual,250);});
+})();
+</script>
+
+<div class="mesa-confirm-overlay" id="mesaConfirmacaoPedido" role="dialog" aria-modal="true" aria-labelledby="mesaConfirmTitulo" onclick="fecharConfirmacaoPedido(event)">
+  <div class="mesa-confirm-sheet" onclick="event.stopPropagation()">
+    <div class="mesa-confirm-handle"></div>
+    <div class="mesa-confirm-icon">✓</div>
+    <h2 class="mesa-confirm-title" id="mesaConfirmTitulo">Pedido recebido</h2>
+    <p class="mesa-confirm-sub" id="mesaConfirmMensagem">Seu pedido foi registrado. Envie os detalhes ao restaurante pelo WhatsApp para continuar.</p>
+    <div class="mesa-confirm-code"><small>Número do pedido</small><strong id="mesaConfirmCodigo">—</strong></div>
+    <div class="mesa-confirm-info">
+      <div><span>Total</span><b id="mesaConfirmTotal">R$ 0,00</b></div>
+      <div><span>Atendimento</span><b id="mesaConfirmTipo">—</b></div>
+    </div>
+    <div class="mesa-confirm-actions">
+      <button type="button" class="mesa-confirm-primary" id="mesaConfirmWhatsApp" onclick="abrirWhatsAppPedidoConfirmado()">Enviar pelo WhatsApp</button>
+      <button type="button" class="mesa-confirm-track" onclick="abrirAcompanhamentoPedido()">Acompanhar meu pedido</button>
+      <button type="button" class="mesa-confirm-secondary" onclick="fecharConfirmacaoPedido();window.scrollTo({top:0,behavior:'smooth'})">Voltar ao cardápio</button>
+    </div>
+    <p class="mesa-confirm-note">O pedido já foi salvo no sistema. O WhatsApp serve para enviar os detalhes ao restaurante.</p>
+  </div>
+</div>
+
+
+<div class="mesa-track-overlay" id="mesaAcompanhamentoPedido" role="dialog" aria-modal="true" aria-labelledby="mesaTrackTitulo" onclick="fecharAcompanhamentoPedido(event)">
+  <div class="mesa-track-sheet" onclick="event.stopPropagation()">
+    <div class="mesa-track-handle"></div>
+    <div class="mesa-track-head"><h2 id="mesaTrackTitulo">Acompanhe seu pedido</h2><button class="mesa-track-close" type="button" onclick="fecharAcompanhamentoPedido()">×</button></div>
+    <div class="mesa-track-code"><span>Pedido</span><strong id="mesaTrackCodigo">—</strong></div>
+    <div id="mesaTrackCancelled" class="mesa-track-cancelled" style="display:none"></div>
+    <div class="mesa-track-line" id="mesaTrackLine"></div>
+    <button type="button" class="mesa-track-refresh" onclick="atualizarAcompanhamentoPedido(true)">Atualizar status</button>
+    <p class="mesa-track-note" id="mesaTrackNote">O status é atualizado conforme o restaurante avança o pedido. Se o sistema ainda não disponibilizar a atualização, esta tela mantém o último status conhecido.</p>
+  </div>
+</div>
+
+<script>
+const MESA360_TRACK_STEPS=[
+ {key:'pending',title:'Pedido recebido',desc:'Seu pedido foi enviado e está aguardando confirmação.'},
+ {key:'confirmed',title:'Pedido confirmado',desc:'A equipe confirmou o recebimento do pedido.'},
+ {key:'preparing',title:'Em preparo',desc:'Seu pedido está sendo preparado.'},
+ {key:'ready',title:'Pronto',desc:'Seu pedido está pronto para entrega ou retirada na mesa.'},
+ {key:'out_for_delivery',title:'A caminho',desc:'O pedido saiu para entrega.'},
+ {key:'completed',title:'Finalizado',desc:'Pedido concluído. Obrigado pela preferência!'}
+];
+function mesa360NormalizarStatus(status){
+ const s=String(status||'pending').toLowerCase();
+ const map={pending:'pending',confirmed:'confirmed',accepted:'confirmed',preparing:'preparing',ready:'ready',out_for_delivery:'out_for_delivery',delivering:'out_for_delivery',completed:'completed',delivered:'completed',cancelled:'cancelled',canceled:'cancelled'};
+ return map[s]||'pending';
+}
+function renderizarAcompanhamentoPedido(status){
+ const atual=mesa360NormalizarStatus(status); const cancelado=atual==='cancelled';
+ const box=document.getElementById('mesaTrackCancelled'); if(box){box.style.display=cancelado?'block':'none';box.textContent='Este pedido foi cancelado. Para entender o motivo ou solicitar ajuda, fale com o restaurante pelo WhatsApp.';}
+ const line=document.getElementById('mesaTrackLine'); if(!line)return;
+ if(cancelado){line.innerHTML='';return;}
+ const idx=MESA360_TRACK_STEPS.findIndex(x=>x.key===atual);
+ line.innerHTML=MESA360_TRACK_STEPS.map((step,i)=>{const done=i<idx,active=i===idx;return `<div class="mesa-track-step ${done?'done':''} ${active?'active':''}"><div class="mesa-track-dot">${done?'✓':i+1}</div><div class="mesa-track-copy"><strong>${step.title}</strong><span>${step.desc}</span></div></div>`}).join('');
+}
+function abrirAcompanhamentoPedido(){
+ const dados=window.mesa360UltimoPedido||{}; const modal=document.getElementById('mesaAcompanhamentoPedido'); if(!modal)return;
+ document.getElementById('mesaTrackCodigo').textContent=dados.codigo||localStorage.getItem(storageKey('ultimo_pedido'))||'—';
+ renderizarAcompanhamentoPedido(dados.status||'pending'); modal.classList.add('open'); document.body.style.overflow='hidden'; atualizarAcompanhamentoPedido(false);
+}
+function fecharAcompanhamentoPedido(event){if(event&&event.target!==event.currentTarget)return;const modal=document.getElementById('mesaAcompanhamentoPedido');if(modal)modal.classList.remove('open');document.body.style.overflow='';}
+async function atualizarAcompanhamentoPedido(manual){
+ const dados=window.mesa360UltimoPedido||{}; const id=dados.id||localStorage.getItem(storageKey('ultimo_pedido_id'));
+ if(!id){renderizarAcompanhamentoPedido(dados.status||'pending');return;}
+ try{
+   const {data,error}=await menuSupabase.from('orders').select('status').eq('id',id).maybeSingle();
+   if(error)throw error;
+   if(data?.status){dados.status=data.status;window.mesa360UltimoPedido=dados;localStorage.setItem(storageKey('ultimo_pedido_status'),String(data.status));const hist=mesa360HistoricoPedidos();const pos=hist.findIndex(x=>x.codigo===dados.codigo);if(pos>=0){hist[pos].status=data.status;localStorage.setItem(storageKey('historico_pedidos'),JSON.stringify(hist));}renderizarAcompanhamentoPedido(data.status);}
+ }catch(e){
+   const salvo=localStorage.getItem(storageKey('ultimo_pedido_status'))||dados.status||'pending';renderizarAcompanhamentoPedido(salvo);
+   const note=document.getElementById('mesaTrackNote'); if(note)note.textContent=manual?'O status atual não pôde ser consultado agora. Exibindo o último status conhecido.':'Acompanhamento disponível. O status será atualizado quando houver acesso à informação do pedido.';
+ }
+}
+</script>
+
+<script id="mesa360-etapa11-js">
+const MESA360_ORDER_STATUS_LABELS={pending:'Recebido',confirmed:'Confirmado',accepted:'Confirmado',preparing:'Em preparo',ready:'Pronto',out_for_delivery:'A caminho',delivering:'A caminho',completed:'Finalizado',delivered:'Finalizado',cancelled:'Cancelado',canceled:'Cancelado'};
+function mesa360Esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function mesa360HistoricoPedidos(){try{const raw=localStorage.getItem(storageKey('historico_pedidos'))||'[]';const a=JSON.parse(raw);return Array.isArray(a)?a:[]}catch{return []}}
+function salvarHistoricoPedidoMesa360(pedido){try{const arr=mesa360HistoricoPedidos().filter(x=>x.codigo!==pedido.codigo);arr.unshift(pedido);localStorage.setItem(storageKey('historico_pedidos'),JSON.stringify(arr.slice(0,20)));}catch{}}
+function statusPedidoMesa360(status){return MESA360_ORDER_STATUS_LABELS[String(status||'pending').toLowerCase()]||'Recebido';}
+function formatarDataMesa360(v){try{return new Date(v).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return '';}}
+function renderizarMinhaConta(){
+ const nome=localStorage.getItem(storageKey('nome_cliente'))||'';const telefone=localStorage.getItem(storageKey('telefone_cliente'))||'';
+ if($('mesaContaNome'))$('mesaContaNome').value=nome;if($('mesaContaTelefone'))$('mesaContaTelefone').value=telefone;
+ const pedidos=mesa360HistoricoPedidos();const box=$('mesaContaPedidos');if(!box)return;
+ if(!pedidos.length){box.innerHTML='<div class="mesa-conta-empty">Seus pedidos aparecerão aqui depois da primeira compra.</div>';return;}
+ box.innerHTML=pedidos.map((p,i)=>`<article class="mesa-conta-order"><div class="mesa-conta-order-top"><span class="mesa-conta-order-code">Pedido ${mesa360Esc(p.codigo)}</span><span class="mesa-conta-order-status">${mesa360Esc(statusPedidoMesa360(p.status))}</span></div><div class="mesa-conta-order-meta"><span>${mesa360Esc(formatarDataMesa360(p.data))} • ${mesa360Esc(p.tipo||'Pedido')}</span><strong class="mesa-conta-order-total">${formatarPreco(Number(p.total)||0)}</strong></div><div class="mesa-conta-order-actions"><button type="button" class="primary" onclick="acompanharHistoricoMesa360(${i})">Acompanhar</button><button type="button" onclick="repetirPedidoMesa360(${i})">Pedir novamente</button></div></article>`).join('');
+}
+function abrirMinhaConta(){renderizarMinhaConta();const m=$('mesaMinhaConta');if(m){m.classList.add('open');document.body.style.overflow='hidden';}}
+function fecharMinhaConta(event){if(event&&event.target!==event.currentTarget)return;const m=$('mesaMinhaConta');if(m)m.classList.remove('open');if(!document.querySelector('.modal.ativo')&&!document.querySelector('.mesa-conta-overlay.open')&&!document.querySelector('.mesa-track-overlay.open')&&!document.querySelector('.mesa-confirm-overlay.open'))document.body.style.overflow='';}
+function salvarPerfilMesa360(){const nome=($('mesaContaNome')?.value||'').trim();const telefone=($('mesaContaTelefone')?.value||'').trim();if(!nome)return mostrarToast('Informe seu nome.');if(!telefone)return mostrarToast('Informe seu WhatsApp/telefone.');localStorage.setItem(storageKey('nome_cliente'),nome);localStorage.setItem(storageKey('telefone_cliente'),telefone);if($('clienteNome'))$('clienteNome').value=nome;if($('clienteTelefone'))$('clienteTelefone').value=telefone;mostrarToast('Seus dados foram salvos.');}
+function acompanharHistoricoMesa360(index){const p=mesa360HistoricoPedidos()[index];if(!p)return;window.mesa360UltimoPedido={id:p.id||null,codigo:p.codigo,total:p.total,tipo:p.tipo,status:p.status||'pending'};localStorage.setItem(storageKey('ultimo_pedido'),p.codigo||'');if(p.id)localStorage.setItem(storageKey('ultimo_pedido_id'),p.id);fecharMinhaConta();setTimeout(()=>abrirAcompanhamentoPedido(),80);}
+function repetirPedidoMesa360(index){const p=mesa360HistoricoPedidos()[index];if(!p||!Array.isArray(p.itens)||!p.itens.length)return mostrarToast('Os itens deste pedido não estão disponíveis para repetir.');let adicionados=0;for(const h of p.itens){const produto=restauranteAtual.produtos.find(x=>x.id===h.produtoId||x.dbId===h.produtoId||x.nome===h.nome);if(!produto)continue;const qtd=Math.max(1,Number(h.quantidade)||1);const item={produtoId:produto.id,nome:produto.nome,preco:Number(h.precoUnitario||produto.preco||0),precoUnitario:Number(h.precoUnitario||produto.preco||0),quantidade:qtd,addons:Array.isArray(h.addons)?h.addons:[],observacao:h.observacao||'',imagem:produto.imagem||''};carrinho.push(item);adicionados++;}if(adicionados){salvarEstado();atualizarContadorCarrinho();fecharMinhaConta();mostrarToast(`${adicionados} item(ns) adicionados ao pedido.`);abrirCarrinho();}else mostrarToast('Não encontramos os produtos deste pedido no cardápio atual.');}
+function atualizarHistoricoAposPedidoMesa360(){
+ const p=window.mesa360UltimoPedido;if(!p)return;const carrinhoAnterior=window.__mesa360CarrinhoAntesEnvio||[];salvarHistoricoPedidoMesa360({id:p.id||null,codigo:p.codigo,total:p.total,tipo:p.tipo,status:p.status||'pending',data:new Date().toISOString(),itens:carrinhoAnterior.map(i=>({produtoId:i.produtoId,nome:i.nome,precoUnitario:Number(i.precoUnitario||i.preco||0),quantidade:Number(i.quantidade)||1,addons:Array.isArray(i.addons)?i.addons.map(a=>({nome:a.nome,preco:Number(a.preco)||0})):[],observacao:i.observacao||''}))});}
+const mesa360ProcessarCheckoutOriginal=window.processarCheckout;
+</script>
+
+
+<script id="mesa360-etapa12-performance">
+(function(){
+  const $m=id=>document.getElementById(id);
+  function hideLoader(){const el=$m('m360Loading');if(el){el.classList.add('is-hidden');setTimeout(()=>el.remove(),350)}}
+  function showOffline(){const el=$m('m360Offline');if(el)el.classList.add('show')}
+  function hideOffline(){const el=$m('m360Offline');if(el)el.classList.remove('show')}
+  window.addEventListener('online',hideOffline);window.addEventListener('offline',showOffline);
+  if(!navigator.onLine)showOffline();
+  window.addEventListener('load',()=>setTimeout(hideLoader,350));
+  setTimeout(hideLoader,9000);
+  document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'){t.classList.remove('m360-img-loading');t.style.background='#f1f5f9';}},true);
+  function optimizeImages(){document.querySelectorAll('img').forEach(img=>{if(!img.hasAttribute('loading'))img.setAttribute('loading','lazy');if(!img.hasAttribute('decoding'))img.setAttribute('decoding','async');img.addEventListener('load',()=>img.classList.remove('m360-img-loading'),{once:true});if(img.complete)img.classList.remove('m360-img-loading');});}
+  const obs=new MutationObserver(()=>optimizeImages());obs.observe(document.body,{childList:true,subtree:true});optimizeImages();
+  const top=$m('m360Top');window.addEventListener('scroll',()=>{if(top)top.classList.toggle('show',window.scrollY>520)},{passive:true});
+  const oldToast=window.mostrarToast;
+  window.mostrarToast=function(msg){try{return oldToast?oldToast.apply(this,arguments):undefined}catch(e){console.warn(e)}};
+  window.addEventListener('error',e=>console.error('[Mesa360]',e.error||e.message));
+  window.addEventListener('unhandledrejection',e=>console.error('[Mesa360 Promise]',e.reason));
+})();
+</script>
+</body>
 </html>
