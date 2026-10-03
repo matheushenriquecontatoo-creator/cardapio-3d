@@ -102,6 +102,33 @@ header>p{margin:10px 16px 0;max-width:none;color:#6B7280;font-size:13px;line-hei
 footer{color:#6B7280}footer strong{color:#374151}
 @media(max-width:700px){.mesa-capa{height:165px}.mesa-nome{font-size:19px}.mesa-entrega{margin-top:12px}.produto-imagem-wrap{height:155px}}
 </style>
+
+<style>
+/* ===== MESA360 REDESIGN — ETAPA 2 / PRODUCT BOTTOM SHEET ===== */
+.modal-produto-sheet{align-items:flex-end;padding:0;background:rgba(17,24,39,.38);backdrop-filter:blur(7px)}
+.modal-produto-sheet .produto-sheet-conteudo{width:min(680px,100%);max-width:680px;max-height:min(92vh,860px);overflow:auto;margin:0 auto;padding:0;border:0;border-radius:26px 26px 0 0;background:#fff;color:#111827;box-shadow:0 -18px 70px rgba(17,24,39,.20);transform:translateY(18px);animation:m360SheetIn .22s ease forwards}
+@keyframes m360SheetIn{to{transform:translateY(0)}}
+.produto-sheet-handle{width:44px;height:5px;border-radius:999px;background:#d1d5db;margin:10px auto 0}
+.produto-sheet-fechar{position:absolute;z-index:4;right:14px;top:14px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(17,24,39,.08);background:rgba(255,255,255,.92);color:#111827;font-size:27px;line-height:1;display:grid;place-items:center;box-shadow:0 6px 18px rgba(17,24,39,.10)}
+.produto-sheet-imagem-wrap{height:300px;background:#f3f4f6;overflow:hidden}
+.produto-sheet-imagem{width:100%;height:100%;display:block;object-fit:cover}
+.produto-sheet-corpo{padding:20px 22px calc(22px + env(safe-area-inset-bottom))}
+.produto-sheet-topline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.produto-sheet-kicker{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#059669}
+.produto-sheet-corpo h2{margin:6px 0 7px;font-size:25px;line-height:1.15;color:#111827}
+.produto-sheet-corpo .modal-desc{font-size:14px;line-height:1.5;margin:0 0 16px;color:#6b7280}
+.produto-sheet-corpo .modal-preco{font-size:20px;margin:0;color:#059669;font-weight:900}
+.produto-sheet-corpo .customizacao-produto,.produto-sheet-corpo .combo-opcoes{margin-top:12px}
+.produto-sheet-quantidade-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;margin-top:10px;border-top:1px solid #eef0f2}
+.produto-sheet-quantidade-row>span{font-size:14px;font-weight:800;color:#111827}
+.produto-sheet-quantidade-row .quantidade-box{margin:0;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:3px}
+.produto-sheet-quantidade-row .btn-quantidade{width:36px;height:36px;border-radius:10px;background:#fff;border:1px solid #e5e7eb}
+.produto-sheet-quantidade-row .quantidade-numero{min-width:34px;text-align:center;font-weight:900;color:#111827}
+.produto-sheet-acoes{display:grid;gap:9px;margin-top:5px}
+.produto-sheet-adicionar{width:100%;min-height:52px;border-radius:14px;font-size:15px;font-weight:900;background:#10b981;box-shadow:0 8px 22px rgba(16,185,129,.20)}
+.produto-sheet-ar{width:100%;min-height:46px;border-radius:14px}
+@media(max-width:700px){.modal-produto-sheet .produto-sheet-conteudo{max-height:94vh;border-radius:24px 24px 0 0}.produto-sheet-imagem-wrap{height:235px}.produto-sheet-corpo{padding:17px 16px calc(18px + env(safe-area-inset-bottom))}.produto-sheet-corpo h2{font-size:21px}.produto-sheet-fechar{top:12px;right:12px}.produto-sheet-adicionar{min-height:50px}}
+</style>
 </head>
 <body>
 <header>
@@ -134,16 +161,22 @@ footer{color:#6B7280}footer strong{color:#374151}
   <button class="acao-flutuante acao-pedido" type="button" onclick="abrirCarrinho()" aria-label="Abrir meu pedido">🛒 <span>Meu pedido</span><span id="carrinhoContador" class="carrinho-contador">0</span></button>
 </div>
 
-<div id="modalProduto" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalNome">
-  <div class="modal-conteudo">
-    <button class="fechar-modal" type="button" onclick="fecharModalProduto()" aria-label="Fechar">×</button>
-    <h2 id="modalNome"></h2><p id="modalDescricao" class="modal-desc"></p><div id="modalPreco" class="modal-preco"></div>
-    <div id="customizacaoProduto" class="customizacao-produto" style="display:none"></div>
-    <div id="opcoesCombo" class="combo-opcoes" style="display:none"></div>
-    <div class="quantidade-box"><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(-1)">−</button><span id="quantidadeProduto" class="quantidade-numero">1</span><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(1)">+</button></div>
-    <div class="botoes-produto">
-      <button class="btn-principal" type="button" onclick="adicionarProdutoAtual()">🛒 Adicionar ao Pedido</button>
-      <button id="btnVerMesaProduto" class="btn-ar destaque" type="button" onclick="abrirARFoto()" style="display:none">📱 Ver na minha mesa</button>
+<div id="modalProduto" class="modal modal-produto-sheet" role="dialog" aria-modal="true" aria-labelledby="modalNome">
+  <div class="modal-conteudo produto-sheet-conteudo">
+    <div class="produto-sheet-handle" aria-hidden="true"></div>
+    <button class="fechar-modal produto-sheet-fechar" type="button" onclick="fecharModalProduto()" aria-label="Fechar">×</button>
+    <div class="produto-sheet-imagem-wrap"><img id="modalProdutoImagem" class="produto-sheet-imagem" alt=""></div>
+    <div class="produto-sheet-corpo">
+      <div class="produto-sheet-topline"><div class="produto-sheet-kicker" id="modalKicker">Hambúrguer</div><div id="modalPreco" class="modal-preco"></div></div>
+      <h2 id="modalNome"></h2>
+      <p id="modalDescricao" class="modal-desc"></p>
+      <div id="customizacaoProduto" class="customizacao-produto" style="display:none"></div>
+      <div id="opcoesCombo" class="combo-opcoes" style="display:none"></div>
+      <div class="produto-sheet-quantidade-row"><span>Quantidade</span><div class="quantidade-box"><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(-1)" aria-label="Diminuir quantidade">−</button><span id="quantidadeProduto" class="quantidade-numero">1</span><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(1)" aria-label="Aumentar quantidade">+</button></div></div>
+      <div class="botoes-produto produto-sheet-acoes">
+        <button id="btnAdicionarProduto" class="btn-principal produto-sheet-adicionar" type="button" onclick="adicionarProdutoAtual()">Adicionar ao carrinho • R$ 0,00</button>
+        <button id="btnVerMesaProduto" class="btn-ar destaque produto-sheet-ar" type="button" onclick="abrirARFoto()" style="display:none">📱 Ver na minha mesa</button>
+      </div>
     </div>
   </div>
 </div>
@@ -568,13 +601,31 @@ function renderizarCustomizacao(p){
  }
  box.style.display='grid';
  box.innerHTML += `<div><label for="observacaoItem">Observação do item</label><input id="observacaoItem" type="text" placeholder="Ex.: sem cebola, molho à parte" maxlength="140"></div>`;
+ box.querySelectorAll('.addon-check').forEach(el=>el.addEventListener('change',atualizarTotalProduto));
+ atualizarTotalProduto();
+}
+function precoConfiguradoProduto(){
+ const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
+ if(!p)return 0;
+ const addons=[...document.querySelectorAll('#customizacaoProduto .addon-check:checked')].reduce((s,x)=>s+Number(x.dataset.preco||0),0);
+ return Number(p.preco||0)+addons;
+}
+function atualizarTotalProduto(){
+ const total=precoConfiguradoProduto()*Math.max(1,quantidadeProdutoAtual);
+ const botao=$('btnAdicionarProduto');
+ if(botao)botao.textContent=`Adicionar ao carrinho • ${formatarPreco(total)}`;
 }
 function abrirProdutoPorId(id){
  const p=restauranteAtual.produtos.find(x=>x.id===id);if(!p)return;
  produtoSelecionado=p.id;quantidadeProdutoAtual=1;
  $('modalNome').textContent=p.nome;$('modalDescricao').textContent=p.descricao;$('modalPreco').textContent=formatarPreco(p.preco);$('quantidadeProduto').textContent='1';
+ const img=$('modalProdutoImagem');
+ if(img){img.src=p.imagem||'';img.alt=p.nome;img.style.display=p.imagem?'block':'none';}
+ const kicker=$('modalKicker');
+ if(kicker)kicker.textContent=p.combo?'Combo':p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Especial';
  renderizarCustomizacao(p);
  $('btnVerMesaProduto').style.display=p.arFoto?'flex':'none';
+ atualizarTotalProduto();
  abrirModal('modalProduto');
 }
 
@@ -1187,7 +1238,7 @@ function limparARFotoSessao(){
   }
 }
 
-function alterarQuantidadeProduto(v){quantidadeProdutoAtual=Math.max(1,quantidadeProdutoAtual+v);$('quantidadeProduto').textContent=quantidadeProdutoAtual}
+function alterarQuantidadeProduto(v){quantidadeProdutoAtual=Math.max(1,quantidadeProdutoAtual+v);$('quantidadeProduto').textContent=quantidadeProdutoAtual;atualizarTotalProduto()}
 function coletarCustomizacao(){
  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
  const addons=[...document.querySelectorAll('.addon-check:checked')].map(x=>({id:x.value,nome:x.dataset.nome,preco:Number(x.dataset.preco)}));
