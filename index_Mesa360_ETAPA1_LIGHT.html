@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0f1015">
+<meta name="theme-color" content="#F4F5F7">
 <title>Brasa 180° Smash & Grill — Cardápio</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -71,16 +71,62 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 .conta-fluxo label{font-size:12px;color:var(--muted);font-weight:700}
 .conta-fluxo input,.conta-fluxo select{width:100%;min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--text);padding:0 12px;font-size:15px;outline:none}
 .conta-fluxo input:focus,.conta-fluxo select:focus{border-color:rgba(245,158,11,.7)}
+
+/* ===== MESA360 REDESIGN — ETAPA 1 / LIGHT MODE ===== */
+:root{--primary:#10B981;--primary-hover:#059669;--bg:#F4F5F7;--surface:#FFFFFF;--surface-2:#F9FAFB;--border:#E5E7EB;--text:#111827;--muted:#6B7280;--success:#10B981}
+body{background:#F4F5F7;color:#111827}
+header{position:relative;text-align:left;padding:0 0 22px;background:#fff;border-bottom:0;overflow:hidden}
+.mesa-capa{height:190px;width:100%;position:relative;background:#e5e7eb center/cover no-repeat}
+.mesa-capa::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.34))}
+.mesa-header-acoes{position:absolute;top:14px;right:14px;z-index:4;display:flex;gap:8px}
+.mesa-header-btn{width:40px;height:40px;border:1px solid rgba(255,255,255,.7);border-radius:50%;background:rgba(17,24,39,.52);color:#fff;backdrop-filter:blur(12px);font-size:17px;cursor:pointer}
+.mesa-info{position:relative;margin:-32px 16px 0;padding:0 0 0 88px;min-height:72px;z-index:5}
+.mesa-logo{position:absolute;left:0;top:0;width:72px;height:72px;border-radius:50%;border:3px solid #fff;object-fit:cover;background:#fff;box-shadow:0 5px 18px rgba(0,0,0,.14)}
+.mesa-nome{font-size:21px;line-height:1.15;font-weight:900;letter-spacing:-.4px;padding-top:37px;color:#111827}
+.mesa-meta{display:flex;flex-wrap:wrap;gap:7px 12px;margin-top:7px;color:#6B7280;font-size:12px;font-weight:650}
+.mesa-meta .aberto{color:#059669;font-weight:900}.mesa-perfil{display:inline-block;margin-top:6px;color:#111827;font-size:12px;font-weight:850;text-decoration:none}
+.brand-badge{display:none}
+header>p{margin:10px 16px 0;max-width:none;color:#6B7280;font-size:13px;line-height:1.45}
+.categorias{top:0;padding:10px 12px;background:rgba(255,255,255,.94);border-bottom:1px solid #e5e7eb;box-shadow:0 3px 12px rgba(17,24,39,.05);backdrop-filter:blur(14px)}
+.categoria{border:1px solid #e5e7eb;background:#fff;color:#4b5563;padding:9px 15px;border-radius:999px;font-size:12px;font-weight:800}.categoria.ativa{background:#111827;color:#fff;border-color:#111827}
+.mesa-entrega{margin:14px 12px 0;background:linear-gradient(135deg,#10B981,#059669);border-radius:16px;color:#fff;min-height:116px;padding:18px 18px;display:flex;align-items:center;gap:16px;box-shadow:0 8px 24px rgba(16,185,129,.18);position:relative;overflow:hidden}
+.mesa-entrega::after{content:"";position:absolute;width:130px;height:130px;border-radius:50%;right:-35px;top:-45px;background:rgba(255,255,255,.09)}
+.mesa-entrega-icone{width:66px;height:66px;border-radius:20px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:36px;flex:0 0 auto}
+.mesa-entrega h2{font-size:21px;line-height:1.05;font-weight:950;margin:0}.mesa-entrega p{font-size:12px;margin:6px 0 0;opacity:.9}.mesa-entrega strong{display:block;font-size:11px;margin-top:5px}
+.mesa-dots{text-align:center;padding:8px 0 2px;color:#10B981;font-size:13px;letter-spacing:3px}
+.mesa-repetir{padding:12px 12px 2px}.mesa-section-title{font-size:18px;font-weight:900;color:#111827;margin:0 0 10px 3px}.mesa-repetir-lista{display:flex;gap:10px;overflow-x:auto;padding:1px 2px 7px;scrollbar-width:none}.mesa-repetir-lista::-webkit-scrollbar{display:none}
+.mesa-repetir-card{flex:0 0 190px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:9px;box-shadow:0 3px 12px rgba(17,24,39,.05)}.mesa-repetir-img{width:100%;height:95px;border-radius:12px;object-fit:cover;display:block;background:#f3f4f6}.mesa-repetir-nome{font-size:12px;font-weight:850;color:#111827;margin:8px 2px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mesa-repetir-qtd{font-size:10px;color:#6B7280;margin:0 2px 8px}.mesa-repetir-btn{width:100%;border:0;border-radius:11px;background:#10B981;color:#fff;padding:9px 7px;font-size:10px;font-weight:900;cursor:pointer}
+.produtos{margin:12px auto 110px;padding:0 12px;gap:11px}.produto{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 2px 10px rgba(17,24,39,.045)}.produto-imagem-wrap{background:#f3f4f6;height:205px}.produto-info{padding:13px}.produto-kicker{color:#059669}.produto-info h2{color:#111827}.produto-info p{color:#6B7280}.preco{color:#111827}.ver-ar-card{background:#ecfdf5;border:1px solid #a7f3d0;color:#047857}
+.acoes-flutuantes{right:12px;bottom:12px;width:min(430px,calc(100vw - 24px));}.acao-flutuante{box-shadow:0 8px 24px rgba(17,24,39,.16)}.acao-mesa{background:#fff;color:#111827;border-color:#e5e7eb}.acao-pedido{background:#111827;color:#fff}
+.modal{background:rgba(17,24,39,.48)}.modal-conteudo{background:#fff;color:#111827;border:1px solid #e5e7eb;border-radius:20px;box-shadow:0 24px 80px rgba(17,24,39,.22)}.fechar-modal{background:#f3f4f6;color:#111827;border-color:#e5e7eb}.modal h2{color:#111827}.modal-desc{color:#6B7280}.modal-preco{color:#059669}.btn-quantidade{background:#f3f4f6;color:#111827;border-color:#e5e7eb}.btn-principal{background:#10B981;color:#fff}.btn-ar{background:#f3f4f6;color:#111827;border-color:#e5e7eb}.btn-ar.destaque{background:#111827;color:#fff}.customizacao-produto{background:#f9fafb;border-color:#e5e7eb}.customizacao-titulo{color:#111827}.addon-opcao{background:#fff;border-color:#e5e7eb}.addon-nome{color:#111827}.combo-opcoes select,.formulario-pedido input,.formulario-pedido select,.conta-fluxo input,.conta-fluxo select{background:#fff;color:#111827;border-color:#d1d5db}.item-carrinho{border-color:#e5e7eb}.item-carrinho-nome{color:#111827}.item-btn{background:#f3f4f6;color:#111827;border-color:#e5e7eb}.carrinho-total{border-color:#e5e7eb;color:#111827}.toast{box-shadow:0 10px 30px rgba(17,24,39,.18)}
+footer{color:#6B7280}footer strong{color:#374151}
+@media(max-width:700px){.mesa-capa{height:165px}.mesa-nome{font-size:19px}.mesa-entrega{margin-top:12px}.produto-imagem-wrap{height:155px}}
 </style>
 </head>
 <body>
-<button id="btnCompartilharMenu" onclick="compartilharMenu()" style="position:fixed;right:14px;top:14px;z-index:1200;border:1px solid rgba(255,255,255,.12);background:rgba(10,10,12,.72);color:#fff;border-radius:999px;padding:9px 12px;font-size:11px;font-weight:900;backdrop-filter:blur(10px);cursor:pointer">Compartilhar</button>
 <header>
-  <div class="brand-badge">✦ Hamburgueria artesanal</div>
-  <button type="button" onclick="abrirAtendimento()" aria-label="Atendimento" style="margin:10px auto 0;display:block;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--text);border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer">🔔 Atendimento</button>
-  <h1 id="restauranteNome">Brasa 180° Smash & Grill</h1>
+  <div class="mesa-capa" id="mesaCapa"></div>
+  <div class="mesa-header-acoes">
+    <button class="mesa-header-btn" type="button" onclick="focarBuscaMenu()" aria-label="Buscar">⌕</button>
+    <button class="mesa-header-btn" type="button" onclick="compartilharMenu()" aria-label="Compartilhar">↗</button>
+  </div>
+  <div class="mesa-info">
+    <img id="mesaLogo" class="mesa-logo" alt="Logo Brasa 180°" loading="eager">
+    <h1 id="restauranteNome" class="mesa-nome">Brasa 180° Smash & Grill</h1>
+    <div class="mesa-meta"><span class="aberto">● Aberto</span><span>Pedido mín. R$ 15,00</span></div>
+    <a href="#" class="mesa-perfil" onclick="abrirPerfilLoja(event)">Perfil da loja</a>
+  </div>
   <p id="restauranteDescricao">Hambúrgueres artesanais na brasa, ingredientes selecionados e acompanhamentos para completar seu pedido.</p>
 </header>
+<section class="mesa-entrega" aria-label="Entrega grátis">
+  <div class="mesa-entrega-icone">🛵</div>
+  <div><h2>Entrega grátis</h2><p>em algumas regiões</p><strong>Aproveite já!</strong></div>
+</section>
+<div class="mesa-dots" aria-hidden="true">• • •</div>
+<section class="mesa-repetir" id="secaoPecaDeNovo" style="display:none">
+  <h2 class="mesa-section-title">Peça de novo</h2>
+  <div class="mesa-repetir-lista" id="listaPecaDeNovo"></div>
+</section>
 <nav class="categorias" id="categorias" aria-label="Categorias do cardápio"></nav>
 <main class="produtos" id="listaProdutos"></main>
 <div class="acoes-flutuantes" aria-label="Ações do pedido">
@@ -445,11 +491,35 @@ function iniciarRestaurante(){
  $('restauranteNome').textContent=restauranteAtual.nome;
  $('restauranteDescricao').textContent=restauranteAtual.descricao;
  $('rodapeNome').textContent=restauranteAtual.nome;
+ renderizarHomeRedesign();
  renderizarCategorias();
  renderizarProdutos('todos');
  atualizarCarrinho();
  alternarOpcoesPagamento();
  atualizarResumoAtendimento();
+}
+
+function focarBuscaMenu(){
+ const termo=prompt('O que você procura no cardápio?');
+ if(!termo)return;
+ const q=termo.trim().toLowerCase();
+ const alvo=restauranteAtual.produtos.find(p=>`${p.nome} ${p.descricao}`.toLowerCase().includes(q));
+ if(alvo){abrirProdutoPorId(alvo.id);return;}
+ mostrarToast('Nenhum produto encontrado.');
+}
+function abrirPerfilLoja(e){e?.preventDefault();mostrarToast(`${restauranteAtual?.nome||'Brasa 180°'} • Pedido mínimo R$ 15,00`)}
+function renderizarHomeRedesign(){
+ const produtos=Array.isArray(restauranteAtual?.produtos)?restauranteAtual.produtos:[];
+ const primeira=produtos.find(p=>p.imagem)?.imagem;
+ const capa=$('mesaCapa'),logo=$('mesaLogo');
+ if(primeira){if(capa)capa.style.backgroundImage=`url("${String(primeira).replace(/"/g,'&quot;')}")`;if(logo)logo.src=primeira;}
+ const historicoRaw=localStorage.getItem(storageKey('repetir_pedido'))||'[]';
+ let historico=[];try{historico=JSON.parse(historicoRaw)}catch{historico=[]}
+ const validos=historico.map(h=>produtos.find(p=>p.id===h.id)).filter(Boolean).slice(0,8);
+ const sec=$('secaoPecaDeNovo'),lista=$('listaPecaDeNovo');
+ if(!validos.length){if(sec)sec.style.display='none';return;}
+ if(sec)sec.style.display='block';
+ if(lista)lista.innerHTML=validos.map(p=>`<article class="mesa-repetir-card"><img class="mesa-repetir-img" src="${escaparHtml(p.imagem)}" alt="${escaparHtml(p.nome)}" loading="lazy"><div class="mesa-repetir-nome">${escaparHtml(p.nome)}</div><div class="mesa-repetir-qtd">Pedido anterior</div><button class="mesa-repetir-btn" type="button" onclick="abrirProdutoPorId('${escaparHtml(p.id)}')">Adicionar ao carrinho</button></article>`).join('');
 }
 
 function renderizarCategorias(){
@@ -1140,6 +1210,12 @@ function adicionarProdutoAtual(){
  const item={id:`${p.id}-${Date.now()}`,produtoId:p.id,nome:p.nome,preco:p.preco,quantidade:quantidadeProdutoAtual,addons:custom.addons,combo:custom.combo,observacao:custom.observacao||''};
  item.precoUnitario=p.preco+addonTotal;
  carrinho.push(item);
+ try{
+   const histKey=storageKey('repetir_pedido');
+   const hist=JSON.parse(localStorage.getItem(histKey)||'[]');
+   const next=[{id:p.id,at:Date.now()},...hist.filter(h=>h.id!==p.id)].slice(0,8);
+   localStorage.setItem(histKey,JSON.stringify(next));
+ }catch{}
  salvarEstado();
  atualizarCarrinho();
  fecharModalProduto();
