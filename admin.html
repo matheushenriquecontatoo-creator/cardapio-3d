@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel Administrativo — Mesa360 SaaS</title>
+<meta name="mesa360-stage" content="Etapa 16 — Multi-restaurante">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -20,7 +21,7 @@
 
 <div id="loginScreen" class="login">
   <div class="loginbox">
-    <h1>Brasa 180°</h1>
+    <h1>Mesa360</h1>
     <p>Painel administrativo e operacional</p>
     <div class="field"><label>E-mail</label><input id="loginEmail" class="input" type="email" autocomplete="username"></div>
     <div class="field"><label>Senha</label><input id="loginPassword" class="input" type="password" autocomplete="current-password"></div>
@@ -34,7 +35,7 @@
 
 <div id="app" class="app hidden">
   <aside class="sidebar">
-    <div class="brand"><b>Brasa 180°</b><small id="roleLabel">Painel</small></div>
+    <div class="brand"><b id="brandRestaurantName">Mesa360</b><small id="roleLabel">Painel</small></div>
     <nav class="nav">
       <div class="group">Operação</div>
       <button data-view="dashboard" onclick="go('dashboard')">Dashboard</button>
@@ -64,6 +65,7 @@
       <div class="store-status">
         <span id="statusDot" class="status-dot"></span>
         <span id="storeStatusText">Carregando...</span>
+        <span id="tenantContext" class="badge blue" style="margin-left:8px">Carregando restaurante...</span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button class="master" onclick="toggleStore()" id="storeToggle">...</button>
@@ -83,7 +85,7 @@
         <div class="grid2" style="margin-top:16px">
           <div class="panel"><h3>Pedidos recentes</h3><div id="recentOrders"></div></div>
           <div class="panel"><h3>Estoque / atenção operacional</h3><div class="notice">O controle de estoque por insumo exige a estrutura de ficha técnica e estoque no banco. A interface está preparada, mas não inventa baixas que o banco ainda não suporta.</div><div id="stockInfo"></div></div>
-          <div class="panel"><h3>Onboarding comercial</h3><div id="onboardingBox"></div></div>
+          <div class="panel"><h3>Onboarding comercial</h3><div id="onboardingBox"></div><div class="notice" style="margin-top:12px">Multi-restaurante ativo: este painel trabalha exclusivamente com o <b>restaurant_id</b> da conta autenticada. Produtos, pedidos, mesas, caixa, clientes e configurações são filtrados pelo restaurante atual.</div></div>
         </div>
       </section>
 
@@ -187,7 +189,6 @@
 <script>
 const SUPABASE_URL="https://dtkcjenytrpaholunkef.supabase.co";
 const SUPABASE_KEY="sb_publishable_G0tSaqoDOryj5LXHnQAZeQ_YhKWfLHn";
-const RESTAURANT_SLUG="brasa-180";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let session=null,profile=null,restaurant=null,settings=null;
 let products=[],categories=[],orders=[],addons=[],combos=[],tables=[],productModels=[],arConfigs=[],productAddons=[],comboItems=[],orderItems=[],payments=[],customers=[],cashSessions=[],cashMovements=[],drivers=[],coupons=[],loyaltyAccounts=[],teamProfiles=[];
@@ -260,6 +261,9 @@ async function boot(){
   const {data:r,error:re}=await sb.from("restaurants").select("*").eq("id",p.restaurant_id).single();
   if(re||!r){err(re||new Error("Restaurante não encontrado"),"Carregamento");return}
   restaurant=r;
+  document.title=`${restaurant.name||"Mesa360"} — Painel`;
+  if($("brandRestaurantName"))$("brandRestaurantName").textContent=restaurant.name||"Mesa360";
+  if($("tenantContext"))$("tenantContext").textContent=`${restaurant.name||"Restaurante"} · ${restaurant.slug||"sem-slug"}`;
   const {data:s}=await sb.from("restaurant_settings").select("*").eq("restaurant_id",restaurant.id).maybeSingle();settings=s;
   $("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");
   $("roleLabel").textContent=`${profile.full_name||session.user.email} · ${role()}`;
@@ -290,6 +294,7 @@ async function toggleStore(){
   if(error){err(error,"Status da loja");return}restaurant.is_open=next;renderStoreStatus();toast(next?"Loja aberta":"Loja fechada");
 }
 async function loadAll(){
+  if(!restaurant?.id){throw new Error("Contexto do restaurante não carregado.");}
   try{
     const [pc,cc,oo,aa,co,tt,cu,cs,cm,dd,cp,la,tp]=await Promise.all([
       sb.from("products").select("*,categories(id,name)").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
@@ -329,29 +334,44 @@ async function loadAll(){
     orderItems.forEach(i=>(byOrder[i.order_id]??=[]).push(i));
     orders.forEach(o=>o.items=byOrder[o.id]||[]);
     renderAll();
+    await syncOnboardingProgress();
+    renderOnboarding();
   }catch(e){err(e,"Carregamento dos dados")}
 }
 function renderAll(){renderProducts();renderCategories();renderOrders();renderKDS();renderTables();renderAddons();renderCombos();renderDashboard();renderCustomers();renderDelivery();renderReports();renderCash();renderCoupons();renderTeam();renderOnboarding();renderBilling()}
-function renderOnboarding(){
-  const steps=[
-    ['Identidade do restaurante',!!restaurant?.name],
-    ['WhatsApp comercial',!!String(restaurant?.phone_whatsapp||'').trim()],
-    ['Categoria ativa',categories.some(c=>c.is_active)],
-    ['Produto ativo',products.some(p=>p.is_active)],
-    ['Configuração operacional',!!settings]
+function onboardingState(){
+  const checks=[
+    {key:'identity',label:'Identidade do restaurante',done:!!restaurant?.name&&!!restaurant?.slug,action:"go('settings')",button:'Configurar'},
+    {key:'whatsapp',label:'WhatsApp comercial',done:!!String(restaurant?.phone_whatsapp||'').trim(),action:"go('settings')",button:'Configurar'},
+    {key:'category',label:'Pelo menos uma categoria ativa',done:categories.some(c=>c.is_active),action:"go('categories')",button:'Criar categoria'},
+    {key:'product',label:'Pelo menos um produto ativo',done:products.some(p=>p.is_active),action:"go('products')",button:'Cadastrar produto'},
+    {key:'table',label:'Pelo menos uma mesa ativa',done:tables.some(t=>t.is_active),action:"go('tables')",button:'Criar mesa'},
+    {key:'settings',label:'Configuração operacional',done:!!settings,action:"go('settings')",button:'Configurar'},
+    {key:'menu',label:'Cardápio público pronto',done:!!restaurant?.slug&&products.some(p=>p.is_active)&&categories.some(c=>c.is_active),action:'openPublicMenu()',button:'Abrir cardápio'},
+    {key:'qr',label:'QR Code de mesa pronto',done:tables.some(t=>t.is_active),action:"go('tables')",button:'Ver QR Codes'}
   ];
-  const done=steps.filter(x=>x[1]).length,total=steps.length;
-  const pct=Math.round(done/total*100);
-  if($('onboardingBox')) $('onboardingBox').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px"><b>${done}/${total} etapas</b><b>${pct}%</b></div><div class="progress"><i style="width:${pct}%"></i></div><div style="margin-top:12px;display:grid;gap:7px">${steps.map(x=>`<div>${x[1]?'✓':'○'} ${esc(x[0])}</div>`).join('')}</div><div style="margin-top:12px;color:var(--muted);font-size:12px">Plano atual: <b>${esc(restaurant?.plan||'trial')}</b> · Status: <b>${esc(restaurant?.subscription_status||'active')}</b></div>`;
-  if($('onboardingBox'))$('onboardingBox').insertAdjacentHTML('beforeend',`<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn small" onclick="openPublicMenu()">Abrir cardápio</button><button class="btn small" onclick="go('tables')">Configurar QR das mesas</button><button class="btn small" onclick="go('team')">Configurar equipe</button></div>`); if(done===total && restaurant && !restaurant.onboarding_completed && canWrite()) markOnboardingComplete();
+  return checks;
+}
+async function syncOnboardingProgress(){
+  if(!restaurant?.id||!canWrite())return;
+  const steps=onboardingState(),done=steps.filter(x=>x.done).length;
+  const nextStep=Math.max(Number(restaurant.onboarding_step||0),done);
+  const completed=done===steps.length;
+  const payload={onboarding_step:Math.min(nextStep,steps.length),onboarding_completed:completed};
+  if(Number(restaurant.onboarding_step||0)!==payload.onboarding_step || !!restaurant.onboarding_completed!==completed){
+    const {error}=await sb.from('restaurants').update(payload).eq('id',restaurant.id);
+    if(!error){restaurant.onboarding_step=payload.onboarding_step;restaurant.onboarding_completed=completed;}
+  }
+}
+function renderOnboarding(){
+  const box=$('onboardingBox');if(!box)return;
+  const steps=onboardingState(),done=steps.filter(x=>x.done).length,total=steps.length,pct=Math.round(done/total*100);
+  const firstPending=steps.find(x=>!x.done);
+  box.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px"><b>Configuração do restaurante</b><b>${done}/${total} · ${pct}%</b></div><div class="progress"><i style="width:${pct}%"></i></div><div style="margin-top:12px;display:grid;gap:8px">${steps.map((x,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;background:#0d141c;border:1px solid var(--border);border-radius:9px"><span>${x.done?'✓':'○'} ${i+1}. ${esc(x.label)}</span>${x.done?'<span class="badge green">Concluído</span>':`<button class="btn small" onclick="${x.action}">${esc(x.button)}</button>`}</div>`).join('')}</div><div style="margin-top:12px;color:var(--muted);font-size:12px">Plano atual: <b>${esc(restaurant?.plan||'trial')}</b> · Status: <b>${esc(restaurant?.subscription_status||'active')}</b></div>${done===total?'<div class="notice" style="margin-top:12px;border:1px solid #216b3c;background:#12351f;color:#b7f7c9"><b>Onboarding concluído.</b> O restaurante já possui catálogo, operação e acesso ao cardápio público.</div>':''}<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn small" onclick="openPublicMenu()">Abrir cardápio</button><button class="btn small" onclick="go('tables')">Mesas e QR Codes</button><button class="btn small" onclick="go('products')">Produtos</button><button class="btn small" onclick="go('settings')">Configurações</button></div>`;
+  if(firstPending && restaurant && !restaurant.onboarding_completed) syncOnboardingProgress();
 }
 let onboardingSaving=false;
-async function markOnboardingComplete(){
-  if(onboardingSaving)return;onboardingSaving=true;
-  const {error}=await sb.from('restaurants').update({onboarding_completed:true,onboarding_step:10}).eq('id',restaurant.id);
-  if(!error){restaurant.onboarding_completed=true;restaurant.onboarding_step=10;}
-  onboardingSaving=false;
-}
+async function markOnboardingComplete(){return syncOnboardingProgress()}
 const roleLabels={owner:'Proprietário',admin:'Administrador',cozinha:'Cozinha',kds:'KDS',caixa:'Caixa',garcom:'Garçom'};
 const permissionLabels={dashboard:'Dashboard',orders:'Pedidos',kds:'KDS',tables:'Mesas',cash:'Caixa',products:'Produtos',customers:'Clientes/CRM',delivery:'Delivery',marketing:'Marketing',reports:'Relatórios',settings:'Configurações',team:'Equipe',billing:'SaaS / Assinatura'};
 function renderTeam(){
@@ -542,16 +562,18 @@ function renderTables(){
  $('tablesGrid').innerHTML=tables.map(t=>{
   const os=activeOrders.filter(o=>Number(o.table_number)===Number(t.table_number));
   const total=os.reduce((a,o)=>a+Number(o.total||0),0);
-  const url=publicMenuUrl(Number(t.table_number));
-  return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div style="font-size:18px;font-weight:900">Mesa ${esc(t.table_number)}</div><small style="color:var(--muted)">${esc(t.description||'')}</small></div><span class="badge ${os.length?'yellow':'green'}">${os.length?'Ocupada':'Livre'}</span></div><div style="margin-top:12px;color:var(--muted);font-size:12px">${os.length} pedido(s) aberto(s) · ${money(total)}</div><div class="qr-card" style="margin-top:12px"><div id="qr-${t.id}" class="qr-code"></div><div class="qr-info"><b>QR da Mesa ${esc(t.table_number)}</b><small>O cliente entra no cardápio com esta mesa preenchida automaticamente.</small><div class="qr-actions"><button class="btn small" onclick="openTable('${t.id}')">Editar</button><button class="btn small" onclick="copyText('${url}')">Copiar link</button><button class="btn small primary" onclick="printTableQR('${t.id}')">Imprimir</button></div></div></div></div>`;
+  const ativa=t.is_active!==false;
+  const url=ativa?publicMenuUrl(Number(t.table_number)):'';
+  return `<div class="card" style="opacity:${ativa?'1':'.68'}"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div style="font-size:18px;font-weight:900">Mesa ${esc(t.table_number)}</div><small style="color:var(--muted)">${esc(t.description||'Sem descrição')}</small></div><span class="badge ${!ativa?'red':os.length?'yellow':'green'}">${!ativa?'Inativa':os.length?'Ocupada':'Livre'}</span></div><div style="margin-top:12px;color:var(--muted);font-size:12px">${os.length} pedido(s) aberto(s) · ${money(total)}</div>${ativa?`<div class="qr-card" style="margin-top:12px"><div id="qr-${t.id}" class="qr-code"></div><div class="qr-info"><b>QR da Mesa ${esc(t.table_number)}</b><small>Este QR abre o restaurante ${esc(restaurant?.name||'')} diretamente na Mesa ${esc(t.table_number)}.</small><div class="qr-actions"><button class="btn small" onclick="openTable('${t.id}')">Editar</button><button class="btn small" onclick="copyText('${url}')">Copiar link</button><button class="btn small primary" onclick="printTableQR('${t.id}')">Imprimir</button><button class="btn small" onclick="toggleTable('${t.id}')">Desativar</button></div></div></div>`:`<div class="actions" style="margin-top:12px"><button class="btn small" onclick="openTable('${t.id}')">Editar</button><button class="btn small success" onclick="toggleTable('${t.id}')">Reativar mesa</button></div>`}</div>`;
  }).join('')||'<div class="empty">Nenhuma mesa cadastrada.</div>';
- setTimeout(()=>tables.forEach(t=>{const el=$('qr-'+t.id);if(el&&window.QRCode)new QRCode(el,{text:publicMenuUrl(Number(t.table_number)),width:112,height:112,colorDark:'#111111',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}),0);
+ setTimeout(()=>tables.filter(t=>t.is_active!==false).forEach(t=>{const el=$('qr-'+t.id);if(el&&window.QRCode)new QRCode(el,{text:publicMenuUrl(Number(t.table_number)),width:112,height:112,colorDark:'#111111',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}),0);
 }
 
 function publicMenuUrl(table){
+ if(!restaurant?.id||!restaurant?.slug)throw new Error("Restaurante atual não identificado.");
  const base=window.location.origin+window.location.pathname.replace(/[^/]+$/,'');
  const mesa=table!==''&&table!==null&&table!==undefined?`&mesa=${encodeURIComponent(table)}`:'';
- return `${base}index.html?restaurante=${encodeURIComponent(restaurant?.slug||'brasa-180')}${mesa}`;
+ return `${base}index.html?restaurante=${encodeURIComponent(restaurant.slug)}${mesa}`;
 }
 function openPublicMenu(){window.open(publicMenuUrl(''),'_blank')}
 function copyText(text){navigator.clipboard?.writeText(text).then(()=>toast('Link copiado.')).catch(()=>prompt('Copie o link:',text))}
@@ -682,8 +704,8 @@ async function saveCashMovement(sessionId){try{const amount=Number($('cmAmount')
 async function closeCashSession(){try{if(!canWrite())throw new Error('Sem permissão.');const s=cashSession();if(!s)return toast('Não há caixa aberto.');const since=new Date(s.opened_at);const cashPaid=payments.filter(p=>p.status==='paid'&&p.method==='cash'&&new Date(p.created_at)>=since).reduce((a,p)=>a+Number(p.amount||0),0);const mov=cashMovements.filter(x=>x.session_id===s.id);const supplies=mov.filter(x=>x.type==='supply').reduce((a,x)=>a+Number(x.amount||0),0),withdrawals=mov.filter(x=>x.type==='withdrawal').reduce((a,x)=>a+Number(x.amount||0),0);const expected=Number(s.opening_amount||0)+cashPaid+supplies-withdrawals;const v=prompt(`Valor esperado: ${money(expected)}\nInforme o dinheiro contado no fechamento:`);if(v===null)return;const counted=Number(v);if(!Number.isFinite(counted)||counted<0)throw new Error('Valor contado inválido.');const {error}=await sb.from('cash_sessions').update({closed_by:session.user.id,expected_amount:expected,counted_amount:counted,difference:counted-expected,status:'closed',closed_at:new Date().toISOString()}).eq('id',s.id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll();toast(`Caixa fechado. Diferença: ${money(counted-expected)}`)}catch(e){err(e,'Fechamento do caixa')}}
 
 function fillSettings(){if(!restaurant)return; if($("publicMenuUrl"))$("publicMenuUrl").value=publicMenuUrl("");$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
-async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);restaurant.onboarding_step=Math.max(Number(restaurant.onboarding_step||0),2);renderStoreStatus();renderOnboarding();toast("Restaurante atualizado.")}catch(e){err(e,"Restaurante")}}
-async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_key:$("setPix").value.trim(),meta_pixel_id:$("metaPixel").value.trim(),ga_id:$("gaId").value.trim()};const p={restaurant_id:restaurant.id,delivery_fee:Number($("setDeliveryFee").value)||0,minimum_order:Number($("setMinOrder").value)||0,accepts_delivery:$("setDelivery").checked,accepts_table_orders:$("setTableOrders").checked,settings:merged};let q=settings?sb.from("restaurant_settings").update(p).eq("id",settings.id):sb.from("restaurant_settings").insert(p);const {data,error}=await q.select("*").single();if(error)throw error;settings=data;fillSettings();toast("Configurações salvas.")}catch(e){err(e,"Configurações")}}
+async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);restaurant.onboarding_step=Math.max(Number(restaurant.onboarding_step||0),2);renderStoreStatus();renderOnboarding();toast("Restaurante atualizado.");await syncOnboardingProgress();renderOnboarding()}catch(e){err(e,"Restaurante")}}
+async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_key:$("setPix").value.trim(),meta_pixel_id:$("metaPixel").value.trim(),ga_id:$("gaId").value.trim()};const p={restaurant_id:restaurant.id,delivery_fee:Number($("setDeliveryFee").value)||0,minimum_order:Number($("setMinOrder").value)||0,accepts_delivery:$("setDelivery").checked,accepts_table_orders:$("setTableOrders").checked,settings:merged};let q=settings?sb.from("restaurant_settings").update(p).eq("id",settings.id):sb.from("restaurant_settings").insert(p);const {data,error}=await q.select("*").single();if(error)throw error;settings=data;fillSettings();toast("Configurações salvas.");await syncOnboardingProgress();renderOnboarding()}catch(e){err(e,"Configurações")}}
 async function saveMarketing(){return saveSettings()}
 
 function openWhats(id,next){const o=orders.find(x=>x.id===id);if(!restaurant.phone_whatsapp)return;const status={pending:"recebido",preparing:"em preparo",ready:"pronto",out_for_delivery:"saiu para entrega",completed:"concluído",cancelled:"cancelado"}[next||o.status]||o.status;const text=`Olá, ${o.customer_name||"cliente"}! Seu pedido #${o.order_number} está ${status}.`;window.open(`https://wa.me/${o.customer_phone||restaurant.phone_whatsapp}?text=${encodeURIComponent(text)}`,"_blank")}
