@@ -541,32 +541,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 /* Gestos e performance do BottomSheet */
 .modal-produto-sheet .produto-sheet-conteudo{touch-action:pan-y;will-change:transform;}
 .produto-sheet-handle{touch-action:none;}
-
-/* =========================================================
-   MESA360 — CAMADA UI/UX CONVERSÃO MOBILE V1
-   ========================================================= */
-:root{--bg-primary:#F4F5F7;--card-bg:#FFFFFF;--brand-primary:#10B981;--brand-primary-dark:#059669;--text-main:#111827;--text-muted:#6B7280;--ui-border:#E5E7EB;--ui-shadow:0 4px 18px rgba(17,24,39,.06);--ui-shadow-soft:0 2px 10px rgba(17,24,39,.05)}
-html{scroll-behavior:smooth} body{background:var(--bg-primary);color:var(--text-main)}
-button,.categoria,.produto,.mesa-favorito-card,.mesa-repetir-card,.btn-opcao-tipo{transition:transform .12s ease,box-shadow .16s ease,background-color .16s ease,border-color .16s ease}
-button:active,.categoria:active,.produto:active,.mesa-favorito-card:active,.mesa-repetir-card:active,.btn-opcao-tipo:active{transform:scale(.95)}
-button,.categoria,.produto-favorito-btn,.btn-quantidade,.addon-q-btn,.item-btn,.mesa-header-btn,.busca-fechar,.mesa-conta-close,.produto-sheet-fechar{min-width:48px;min-height:48px}
-.m360-conversion-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 12px 0;padding:12px 14px;background:#fff;border:1px solid var(--ui-border);border-radius:16px;box-shadow:var(--ui-shadow-soft)}
-.m360-store-status{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;font-weight:800;color:var(--text-main)}
-.m360-status-dot{width:9px;height:9px;border-radius:50%;background:#10B981;box-shadow:0 0 0 4px #ECFDF5;animation:m360Pulse 1.8s infinite;flex:0 0 auto}.m360-store-meta{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-size:11px;white-space:nowrap}.m360-rating{font-weight:900;color:#111827}@keyframes m360Pulse{0%,100%{opacity:1}50%{opacity:.45}}
-.m360-menu-tools{position:sticky;top:0;z-index:480;padding:10px 12px 8px;background:rgba(244,245,247,.97);border-bottom:1px solid rgba(229,231,235,.9)}
-.m360-search{width:100%;min-height:48px;border:1px solid var(--ui-border);border-radius:15px;background:#fff;color:var(--text-main);padding:0 15px;font-size:14px;outline:none;box-shadow:var(--ui-shadow-soft)}.m360-search::placeholder{color:#9CA3AF}.m360-search:focus{border-color:#A7F3D0;box-shadow:0 0 0 3px rgba(16,185,129,.12)}
-.m360-quick-filters{display:flex;gap:8px;overflow-x:auto;padding:8px 1px 2px;scrollbar-width:none}.m360-quick-filters::-webkit-scrollbar{display:none}.m360-filter{flex:0 0 auto;min-height:44px;padding:0 14px;border:1px solid var(--ui-border);border-radius:999px;background:#fff;color:#374151;font-size:12px;font-weight:800;white-space:nowrap}.m360-filter.active{background:#ECFDF5;border-color:#A7F3D0;color:#047857;box-shadow:0 3px 10px rgba(16,185,129,.10)}
-.categorias{position:sticky;top:0;z-index:470;display:flex;overflow-x:auto;scrollbar-width:none;background:rgba(255,255,255,.98);box-shadow:0 3px 12px rgba(17,24,39,.06)}.categorias::-webkit-scrollbar{display:none}.categoria{flex:0 0 auto;min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 15px;border-radius:999px}.categoria.ativa{background:var(--brand-primary);border-color:var(--brand-primary);color:#fff;box-shadow:0 4px 12px rgba(16,185,129,.18)}
-.produto{border:1px solid #ECEEF1;border-radius:20px;background:#fff;box-shadow:var(--ui-shadow);cursor:pointer;overflow:hidden}.produto:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(17,24,39,.08)}.produto-imagem-wrap{position:relative;overflow:hidden;background:#F1F3F5}.produto-imagem-wrap img{transition:transform .25s ease;will-change:transform}.produto-badges{position:absolute;left:10px;top:10px;display:flex;flex-wrap:wrap;gap:6px;z-index:2;max-width:75%}.m360-badge{display:inline-flex;align-items:center;min-height:30px;padding:0 9px;border-radius:999px;background:#fff;color:#111827;border:1px solid rgba(229,231,235,.9);box-shadow:0 3px 10px rgba(17,24,39,.10);font-size:10px;font-weight:900}.m360-badge.promo{background:#ECFDF5;border-color:#A7F3D0;color:#047857}.m360-badge.veg{background:#F0FDF4;border-color:#BBF7D0;color:#166534}.m360-price-wrap{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.m360-price-old{color:#9CA3AF;text-decoration:line-through;font-size:12px;font-weight:700}.m360-price-current{color:#059669;font-size:18px;font-weight:950}
-.m360-skeleton-grid{display:grid;gap:12px;padding:0 12px}.m360-skeleton{background:#fff;border:1px solid #ECEEF1;border-radius:20px;overflow:hidden}.m360-skeleton-media{height:190px;background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 37%,#F3F4F6 63%);background-size:400% 100%;animation:m360Shimmer 1.25s ease infinite}.m360-skeleton-line{height:12px;margin:12px 14px;border-radius:8px;background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 37%,#F3F4F6 63%);background-size:400% 100%;animation:m360Shimmer 1.25s ease infinite}.m360-skeleton-line.short{width:42%;margin-top:0}.m360-skeleton-line.price{width:28%;height:18px;margin-top:15px;margin-bottom:16px}@keyframes m360Shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-.m360-crosssell{margin:18px -2px 0;padding-top:16px;border-top:1px solid #EEF0F3}.m360-crosssell-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.m360-crosssell-title{font-size:14px;font-weight:900;color:#111827}.m360-crosssell-list{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}.m360-crosssell-list::-webkit-scrollbar{display:none}.m360-crosssell-card{display:grid;grid-template-columns:56px minmax(120px,1fr) 48px;align-items:center;gap:9px;flex:0 0 min(300px,82vw);padding:9px;border:1px solid #E5E7EB;border-radius:15px;background:#fff}.m360-crosssell-card img{width:56px;height:56px;border-radius:11px;object-fit:cover;background:#F3F4F6}.m360-crosssell-name{font-size:12px;font-weight:850;color:#111827;line-height:1.25}.m360-crosssell-price{font-size:11px;color:#059669;font-weight:900;margin-top:4px}.m360-crosssell-add{width:48px;height:48px;border:1px solid #A7F3D0;border-radius:14px;background:#ECFDF5;color:#047857;font-size:24px;font-weight:800;display:grid;place-items:center}
-.m360-free-shipping{position:sticky;top:-1px;z-index:8;margin:-2px 0 12px;padding:11px 12px;background:#fff;border-bottom:1px solid #EEF0F3;box-shadow:0 2px 8px rgba(17,24,39,.04)}.m360-free-shipping-copy{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;font-weight:850;color:#374151;margin-bottom:7px}.m360-free-shipping-copy strong{color:#059669}.m360-progress{height:8px;background:#E5E7EB;border-radius:999px;overflow:hidden}.m360-progress span{display:block;height:100%;width:0;background:#10B981;border-radius:999px;transition:width .25s ease,background-color .2s ease}.m360-free-shipping.won .m360-progress span{background:#059669}
-.m360-conversion-toast{position:fixed;left:50%;bottom:max(88px,calc(78px + env(safe-area-inset-bottom)));z-index:5000;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:#111827;color:#fff;border-radius:999px;padding:12px 16px;box-shadow:0 10px 28px rgba(17,24,39,.20);font-size:12px;font-weight:850;white-space:nowrap;transition:opacity .18s ease,transform .18s ease}.m360-conversion-toast.show{opacity:1;transform:translate(-50%,0)}
-.modal-produto-sheet .produto-sheet-conteudo{touch-action:pan-y;border-radius:28px 28px 0 0}.produto-sheet-handle{width:42px;height:5px;background:#D1D5DB}.produto-sheet-fechar{width:48px;height:48px;background:#fff;color:#111827;box-shadow:0 4px 14px rgba(17,24,39,.10)}.produto-sheet-acoes{padding-bottom:max(12px,env(safe-area-inset-bottom))}.btn-quantidade,.addon-q-btn{min-width:48px;min-height:48px}.addon-q-btn{width:48px;height:48px}.acoes-flutuantes{bottom:max(12px,env(safe-area-inset-bottom));gap:8px}.acao-flutuante{min-height:52px;border-radius:16px}
-@media(min-width:701px){.m360-menu-tools{max-width:900px;margin:0 auto}.m360-skeleton-grid{max-width:900px;margin:0 auto}.produto{display:grid;grid-template-columns:190px 1fr;min-height:190px}.produto-imagem-wrap{height:100%;min-height:190px}}
-@media(max-width:700px){.m360-store-meta{gap:7px;font-size:10px}.m360-conversion-bar{align-items:flex-start}.produto{border-radius:18px}.produto-imagem-wrap{height:190px}.produto-info{padding:14px}.produto-info h2{font-size:17px}.m360-conversion-toast{max-width:calc(100vw - 28px);overflow:hidden;text-overflow:ellipsis}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto;animation-duration:.01ms;animation-iteration-count:1;transition-duration:.01ms}}
-
 </style>
 </head>
 <body>
@@ -595,8 +569,6 @@ button,.categoria,.produto-favorito-btn,.btn-quantidade,.addon-q-btn,.item-btn,.
 </div>
 <p id="restauranteDescricao">Hambúrgueres artesanais na brasa, ingredientes selecionados e acompanhamentos para completar seu pedido.</p>
 </header>
-<section class="m360-conversion-bar" aria-label="Informações do estabelecimento"><div class="m360-store-status"><span class="m360-status-dot" id="m360StatusDot" aria-hidden="true"></span><span id="m360StatusText">Aberto agora</span><span id="m360DeliveryTime">• 30–45 min</span></div><div class="m360-store-meta"><span class="m360-rating">★ 4.8</span><span>150+ avaliações</span></div></section>
-<section class="m360-menu-tools" aria-label="Buscar e filtrar o cardápio"><input id="m360MenuSearch" class="m360-search" type="search" inputmode="search" autocomplete="off" placeholder="🔎 Buscar hambúrguer, bebida, ingrediente..." aria-label="Buscar no cardápio" oninput="aplicarBuscaCardapio(this.value)"><div class="m360-quick-filters" role="group" aria-label="Filtros rápidos"><button type="button" class="m360-filter active" data-filtro="todos" onclick="aplicarFiltroRapido('todos',this)">Todos</button><button type="button" class="m360-filter" data-filtro="promo" onclick="aplicarFiltroRapido('promo',this)">Promoção de Hoje</button><button type="button" class="m360-filter" data-filtro="25" onclick="aplicarFiltroRapido('25',this)">Até R$ 25,00</button><button type="button" class="m360-filter" data-filtro="combos" onclick="aplicarFiltroRapido('combos',this)">Combos</button></div></section>
 <section aria-label="Entrega grátis" class="mesa-entrega">
 <div class="mesa-entrega-icone">🛵</div>
 <div><h2>Entrega grátis</h2><p>em algumas regiões</p><strong>Aproveite já!</strong></div>
@@ -611,7 +583,7 @@ button,.categoria,.produto-favorito-btn,.btn-quantidade,.addon-q-btn,.item-btn,.
 <div class="mesa-favoritos-lista" id="listaFavoritos"></div>
 </section>
 <nav aria-label="Categorias do cardápio" class="categorias" id="categorias"></nav>
-<main class="produtos" id="listaProdutos"><div class="m360-skeleton-grid" aria-label="Carregando produtos"><div class="m360-skeleton"><div class="m360-skeleton-media"></div><div class="m360-skeleton-line"></div><div class="m360-skeleton-line short"></div><div class="m360-skeleton-line price"></div></div><div class="m360-skeleton"><div class="m360-skeleton-media"></div><div class="m360-skeleton-line"></div><div class="m360-skeleton-line short"></div><div class="m360-skeleton-line price"></div></div><div class="m360-skeleton"><div class="m360-skeleton-media"></div><div class="m360-skeleton-line"></div><div class="m360-skeleton-line short"></div><div class="m360-skeleton-line price"></div></div></div></main>
+<main class="produtos" id="listaProdutos"></main>
 <div aria-label="Ações do pedido" class="acoes-flutuantes">
 <button aria-label="Comer na mesa" class="acao-flutuante acao-mesa" onclick="selecionarComerNaMesa()" type="button">🍽️ <span>Comer na mesa</span></button>
 <button aria-label="Abrir meu pedido" class="acao-flutuante acao-pedido" onclick="abrirCarrinho()" type="button">🛒 <span>Meu pedido</span><span class="carrinho-contador" id="carrinhoContador">0</span></button>
@@ -627,7 +599,6 @@ button,.categoria,.produto-favorito-btn,.btn-quantidade,.addon-q-btn,.item-btn,.
 <p class="modal-desc" id="modalDescricao"></p>
 <div class="customizacao-produto" id="customizacaoProduto" style="display:none"></div>
 <div class="combo-opcoes" id="opcoesCombo" style="display:none"></div>
-<section class="m360-crosssell" id="m360CrossSell" aria-label="Acompanhamentos sugeridos" style="display:none"><div class="m360-crosssell-head"><div class="m360-crosssell-title">Combina perfeitamente com</div></div><div class="m360-crosssell-list" id="m360CrossSellList"></div></section>
 <div class="produto-sheet-quantidade-row"><span>Quantidade</span><div class="quantidade-box"><button aria-label="Diminuir quantidade do produto" class="btn-quantidade" onclick="alterarQuantidadeProduto(-1)" type="button">−</button><span class="quantidade-numero" id="quantidadeProduto">1</span><button aria-label="Aumentar quantidade do produto" class="btn-quantidade" onclick="alterarQuantidadeProduto(1)" type="button">+</button></div></div>
 </div>
 <div class="produto-sheet-acoes">
@@ -688,7 +659,6 @@ button,.categoria,.produto-favorito-btn,.btn-quantidade,.addon-q-btn,.item-btn,.
 <div class="modal-conteudo">
 <button aria-label="Fechar pedido" class="fechar-modal" onclick="fecharCarrinho()" type="button">×</button>
 <h2 id="tituloPedido">Meu pedido</h2>
-<div class="m360-free-shipping" id="m360FreeShipping" aria-live="polite"><div class="m360-free-shipping-copy"><span id="m360FreeShippingText">Faltam R$ 50,00 para Frete Grátis!</span><strong id="m360FreeShippingValue">R$ 0,00</strong></div><div class="m360-progress" aria-hidden="true"><span id="m360FreeShippingBar"></span></div></div>
 <div class="atendimento-destaque">
 <h3>Onde você quer receber?</h3>
 <p>Escolha agora entre receber o pedido ou comer na sua mesa. Essa escolha faz parte do mesmo pedido.</p>
@@ -1111,16 +1081,33 @@ function renderizarHomeRedesign(){
  }
  renderizarFavoritos();
 }
-function renderizarCategorias(){const nav=$('categorias');if(!nav)return;nav.innerHTML=restauranteAtual.categorias.map(c=>{const id=escaparHtml(c.id),nome=escaparHtml(c.nome);return `<button type="button" class="categoria ${c.id==='todos'?'ativa':''}" data-categoria="${id}" onclick="filtrarProdutos('${id}',this)">${nome}</button>`}).join('');centralizarCategoriaAtiva()}
-function m360TemPromocao(p){const original=Number(p?.precoOriginal||p?.preco_original||p?.originalPrice||p?.precoAntigo||0);return original>Number(p?.preco||0)+0.009||Number(p?.descontoPercentual||p?.discountPercent||0)>0||p?.promocao===true||p?.isPromotion===true}
-function m360PrecoOriginal(p){return Number(p?.precoOriginal||p?.preco_original||p?.originalPrice||p?.precoAntigo||0)}
-function m360BadgeProduto(p){if(p?.badge)return String(p.badge);if(p?.vegetariano===true||p?.isVegetarian===true)return '🌱 Vegetariano';return ''}
-function renderizarProdutos(cat='todos'){const termo=String(window.m360BuscaTermo||'').trim().toLowerCase(),filtro=window.m360FiltroRapido||'todos';let lista=cat==='todos'?restauranteAtual.produtos:restauranteAtual.produtos.filter(p=>p.categoria===cat);if(termo)lista=lista.filter(p=>`${p.nome||''} ${p.descricao||''} ${p.categoria||''}`.toLowerCase().includes(termo));if(filtro==='25')lista=lista.filter(p=>Number(p.preco||0)<=25);if(filtro==='combos')lista=lista.filter(p=>p.combo===true||p.categoria==='combos');if(filtro==='promo')lista=lista.filter(m360TemPromocao);const el=$('listaProdutos');if(!el)return;el.innerHTML=lista.map(p=>{const id=escaparHtml(p.id),categoria=escaparHtml(p.categoria),imagem=escaparHtml(p.imagem),nome=escaparHtml(p.nome),descricao=escaparHtml(p.descricao);const kicker=p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':p.categoria==='combos'?'Combo':'Especial';const favorito=isFavorito(p.id),original=m360PrecoOriginal(p),promo=m360TemPromocao(p),badge=m360BadgeProduto(p);const desconto=promo&&original>Number(p.preco||0)?Math.round((1-(Number(p.preco||0)/original))*100):Number(p.descontoPercentual||p.discountPercent||0);const badges=`<div class="produto-badges">${badge?`<span class="m360-badge ${badge.includes('Vegetariano')?'veg':''}">${escaparHtml(badge)}</span>`:''}${promo?`<span class="m360-badge promo">${desconto>0?`${desconto}% OFF`:'OFERTA'}</span>`:''}${p.combo?'<span class="m360-badge">🍔 Combo</span>':''}${p.arFoto?'<span class="m360-badge">📱 AR</span>':''}</div>`;const preco=`<div class="m360-price-wrap">${original>Number(p.preco||0)?`<span class="m360-price-old">${formatarPreco(original)}</span>`:''}<span class="m360-price-current">${formatarPreco(p.preco)}</span></div>`;return `<article class="produto" data-categoria="${categoria}" data-produto-id="${id}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}">${badges}<button class="produto-favorito-btn ${favorito?'ativo':''}" type="button" onclick="event.stopPropagation();alternarFavorito('${id}',event)" aria-label="${favorito?'Remover dos favoritos':'Adicionar aos favoritos'}">${favorito?'♥':'♡'}</button></div><div class="produto-info"><div class="produto-kicker">${kicker}</div><h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape">${preco}<span class="ver-ar-card">${p.combo?'Montar combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`}).join('');if(!lista.length)el.innerHTML='<div class="carrinho-vazio" style="grid-column:1/-1">Nenhum item encontrado com esses filtros.</div>';requestAnimationFrame(iniciarObservacaoProdutos)}
-function filtrarProdutos(cat,btn){document.querySelectorAll('.categoria').forEach(b=>b.classList.remove('ativa'));btn?.classList.add('ativa');window.m360CategoriaAtual=cat;renderizarProdutos(cat);centralizarCategoriaAtiva(btn);const nav=document.querySelector('.categorias');if(nav)window.scrollTo({top:Math.max(0,nav.getBoundingClientRect().top+window.scrollY-4),behavior:'smooth'})}
-function centralizarCategoriaAtiva(btn=document.querySelector('.categoria.ativa')){btn?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}
-function aplicarBuscaCardapio(valor){window.m360BuscaTermo=String(valor||'');renderizarProdutos(window.m360CategoriaAtual||'todos')}
-function aplicarFiltroRapido(filtro,btn){window.m360FiltroRapido=filtro;document.querySelectorAll('.m360-filter').forEach(b=>b.classList.remove('active'));btn?.classList.add('active');renderizarProdutos(window.m360CategoriaAtual||'todos')}
-function iniciarObservacaoProdutos(){if(window.__m360ScrollObserverBound)return;window.__m360ScrollObserverBound=true;let ticking=false;window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{const cards=[...document.querySelectorAll('.produto[data-categoria]')];let melhor=null,dist=Infinity;const alvo=window.innerHeight*.32;for(const card of cards){const r=card.getBoundingClientRect();if(r.bottom<80||r.top>window.innerHeight)continue;const d=Math.abs((r.top+r.height*.2)-alvo);if(d<dist){dist=d;melhor=card}}if(melhor){const cat=melhor.dataset.categoria;const btn=[...document.querySelectorAll('.categoria')].find(b=>b.dataset.categoria===cat);if(btn){document.querySelectorAll('.categoria').forEach(b=>b.classList.remove('ativa'));btn.classList.add('ativa');if(window.__m360LastActiveCat!==cat){window.__m360LastActiveCat=cat;btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}}}ticking=false})},{passive:true})}
+function renderizarCategorias(){
+ $('categorias').innerHTML=restauranteAtual.categorias.map(c=>{
+   const id=escaparHtml(c.id);
+   const nome=escaparHtml(c.nome);
+   return `<button type="button" class="categoria ${c.id==='todos'?'ativa':''}" data-categoria="${id}" onclick="filtrarProdutos('${id}',this)">${nome}</button>`;
+ }).join('');
+}
+function renderizarProdutos(cat='todos'){
+ const lista=cat==='todos'?restauranteAtual.produtos:restauranteAtual.produtos.filter(p=>p.categoria===cat);
+ $('listaProdutos').innerHTML=lista.map(p=>{
+   const id=escaparHtml(p.id);
+   const categoria=escaparHtml(p.categoria);
+   const imagem=escaparHtml(p.imagem);
+   const nome=escaparHtml(p.nome);
+   const descricao=escaparHtml(p.descricao);
+   const kicker=p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Combo';
+   const favorito=isFavorito(p.id);
+   return `<article class="produto" data-categoria="${categoria}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}"><button class="produto-favorito-btn ${favorito?'ativo':''}" type="button" onclick="event.stopPropagation();alternarFavorito('${id}',event)" aria-label="${favorito?'Remover dos favoritos':'Adicionar aos favoritos'}">${favorito?'♥':'♡'}</button>${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${kicker}</div><h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-ar-card">${p.combo?'Montar combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`;
+ }).join('');
+ if(!lista.length)$('listaProdutos').innerHTML='<div class="carrinho-vazio" style="grid-column:1/-1">Nenhum item disponível nesta categoria.</div>';
+}
+function filtrarProdutos(cat,btn){
+ document.querySelectorAll('.categoria').forEach(b=>b.classList.remove('ativa'));
+ btn?.classList.add('ativa');
+ renderizarProdutos(cat);
+ window.scrollTo({top:document.querySelector('.categorias').offsetTop,behavior:'smooth'});
+}
 function renderizarCustomizacao(p){
  const box=$('customizacaoProduto'),comboBox=$('opcoesCombo');
  box.style.display='none';box.innerHTML='';comboBox.style.display='none';comboBox.innerHTML='';
@@ -1846,7 +1833,7 @@ function adicionarProdutoAtual(){
  atualizarCarrinho();
  fecharModalProduto();
  // Fluxo comercial: adicionou o produto -> fecha a etapa atual -> abre Meu pedido.
- setTimeout(()=>{abrirCarrinho();m360MostrarToastConversao('Item adicionado ao seu carrinho!');mostrarToast(`${p.nome} adicionado ao pedido.`)},80);
+ setTimeout(()=>{abrirCarrinho();mostrarToast(`${p.nome} adicionado ao pedido.`)},80);
 }
 function calcularSubtotal(){return carrinho.reduce((s,i)=>s+(Number(i.precoUnitario||i.preco)*i.quantidade),0)}
 function calcularTaxaEntrega(){return tipoAtendimentoSelecionado==='delivery'&&carrinho.length?Number(restauranteAtual.taxaEntrega||0):0}
@@ -2274,21 +2261,6 @@ const mesa360ProcessarCheckoutOriginal=window.processarCheckout;
   window.addEventListener('error',e=>console.error('[Mesa360]',e.error||e.message));
   window.addEventListener('unhandledrejection',e=>console.error('[Mesa360 Promise]',e.reason));
 })();
-
-/* ===== UI/UX CONVERSÃO V1 ===== */
-const M360_FRETE_GRATIS_META=50;
-function m360MostrarToastConversao(msg){const el=$('m360ConversionToast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(window.__m360ToastTimer);window.__m360ToastTimer=setTimeout(()=>el.classList.remove('show'),1800)}
-function m360AtualizarFreteGratis(){const box=$('m360FreeShipping'),text=$('m360FreeShippingText'),bar=$('m360FreeShippingBar'),value=$('m360FreeShippingValue');if(!box||!text||!bar||!value)return;const subtotal=calcularSubtotal(),falta=Math.max(0,M360_FRETE_GRATIS_META-subtotal),pct=Math.min(100,(subtotal/M360_FRETE_GRATIS_META)*100);bar.style.width=`${pct}%`;value.textContent=formatarPreco(Math.min(subtotal,M360_FRETE_GRATIS_META));if(falta<=0){box.classList.add('won');text.textContent='Você ganhou Frete Grátis!';value.textContent='100%'}else{box.classList.remove('won');text.textContent=`Faltam ${formatarPreco(falta)} para Frete Grátis!`}}
-function m360SugestoesPara(p){const produtos=Array.isArray(restauranteAtual?.produtos)?restauranteAtual.produtos:[],preferidas=['bebidas','porcoes'];let out=[];for(const cat of preferidas){const x=produtos.find(v=>v.id!==p?.id&&v.categoria===cat&&v.disponivel!==false);if(x&&!out.some(v=>v.id===x.id))out.push(x)}for(const x of produtos){if(out.length>=3)break;if(x.id!==p?.id&&x.disponivel!==false&&!out.some(v=>v.id===x.id))out.push(x)}return out.slice(0,3)}
-function renderizarAcompanhamentosSugeridos(p){const box=$('m360CrossSell'),list=$('m360CrossSellList');if(!box||!list)return;const sugestoes=m360SugestoesPara(p);if(!sugestoes.length){box.style.display='none';list.innerHTML='';return}box.style.display='block';list.innerHTML=sugestoes.map(x=>`<article class="m360-crosssell-card"><img src="${escaparHtml(x.imagem||'')}" alt="${escaparHtml(x.nome)}" loading="lazy"><div><div class="m360-crosssell-name">${escaparHtml(x.nome)}</div><div class="m360-crosssell-price">${formatarPreco(x.preco)}</div></div><button class="m360-crosssell-add" type="button" aria-label="Adicionar ${escaparHtml(x.nome)} rapidamente" onclick="event.stopPropagation();adicionarSugestaoRapida('${escaparHtml(x.id)}')">+</button></article>`).join('')}
-function adicionarSugestaoRapida(id){const p=restauranteAtual.produtos.find(x=>x.id===id);if(!p)return;carrinho.push({id:`${p.id}-${Date.now()}`,produtoId:p.id,nome:p.nome,preco:Number(p.preco||0),precoUnitario:Number(p.preco||0),quantidade:1,addons:[],combo:null,observacao:''});salvarEstado();atualizarCarrinho();m360MostrarToastConversao(`${p.nome} adicionado ao carrinho!`);mostrarToast(`${p.nome} adicionado ao pedido.`)}
-function m360SincronizarStatus(){const aberto=restauranteAtual?.aberto!==false,dot=$('m360StatusDot'),txt=$('m360StatusText');if(dot){dot.style.background=aberto?'#10B981':'#EF4444';dot.style.boxShadow=aberto?'0 0 0 4px #ECFDF5':'0 0 0 4px #FEF2F2'}if(txt)txt.textContent=aberto?'Aberto agora':'Fechado agora'}
-window.addEventListener('load',()=>setTimeout(()=>{m360SincronizarStatus();m360AtualizarFreteGratis()},450));
-const m360OpenProductOriginal=window.abrirProdutoPorId;
-window.abrirProdutoPorId=function(id){const r=m360OpenProductOriginal?.apply(this,arguments);const p=restauranteAtual.produtos.find(x=>x.id===id);if(p)setTimeout(()=>renderizarAcompanhamentosSugeridos(p),0);return r};
-const m360CartOriginal=window.atualizarCarrinho;
-window.atualizarCarrinho=function(){const r=m360CartOriginal?.apply(this,arguments);m360AtualizarFreteGratis();return r};
 </script>
-<div class="m360-conversion-toast" id="m360ConversionToast" role="status" aria-live="polite"></div>
 </body>
 </html>
