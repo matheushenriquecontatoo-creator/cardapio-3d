@@ -348,6 +348,7 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
       <div class="produto-sheet-quantidade-row"><span>Quantidade</span><div class="quantidade-box"><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(-1)" aria-label="Diminuir quantidade">−</button><span id="quantidadeProduto" class="quantidade-numero">1</span><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(1)" aria-label="Aumentar quantidade">+</button></div></div>
     </div>
     <div class="produto-sheet-acoes">
+      <button id="btnARProduto" class="btn-ar destaque" type="button" onclick="abrirARFoto()" style="display:none">📱 Ver na minha mesa (AR)</button>
       <button id="btnAdicionarProduto" class="btn-principal produto-sheet-adicionar" type="button" onclick="adicionarProdutoAtual()">Adicionar ao Pedido • R$ 0,00</button>
     </div>
   </div>
@@ -576,16 +577,6 @@ async function carregarCatalogoDoSupabase(){
    if(restaurante.primary_color){document.documentElement.style.setProperty('--primary',restaurante.primary_color);}
 
 
-   const mesaParam=(new URLSearchParams(window.location.search).get('mesa')||'').replace(/\D/g,'').slice(0,4);
-   let mesaValida=null;
-   if(mesaParam){
-     const mesaResp=await menuSupabase.from('tables').select('id,table_number,description,is_active').eq('restaurant_id',restaurante.id).eq('table_number',Number(mesaParam)).eq('is_active',true).maybeSingle();
-     if(mesaResp.error)throw mesaResp.error;
-     mesaValida=mesaResp.data||null;
-     if(!mesaValida)console.warn('[Mesa360] Mesa informada no QR não está ativa neste restaurante:',mesaParam);
-   }
-   window.supabaseTableContext=mesaValida;
-
    const [categoriasResp,produtosResp,arResp,configResp,addonsResp,combosResp,comboItemsResp]=await Promise.all([
      menuSupabase.from('categories').select('id,name,display_order,is_active').eq('restaurant_id',restaurante.id).eq('is_active',true).order('display_order',{ascending:true}),
      menuSupabase.from('products').select('id,category_id,name,description,price,image_url,is_available,is_active,display_order').eq('restaurant_id',restaurante.id).eq('is_active',true).eq('is_available',true).order('display_order',{ascending:true}),
@@ -696,11 +687,10 @@ function fecharModal(id){const el=$(id);if(!el)return;el.classList.remove('ativo
 function fecharTodosModais(){document.querySelectorAll('.modal.ativo').forEach(m=>m.classList.remove('ativo'));document.body.classList.remove('modal-aberto');const y=Number(window.__scrollYAntesModal||0);requestAnimationFrame(()=>window.scrollTo({top:y,behavior:'smooth'}))}
 function iniciarRestaurante(){
  const params=new URLSearchParams(window.location.search);
- const mesaURL=(window.supabaseTableContext?.table_number?String(window.supabaseTableContext.table_number):(params.get('mesa')||'').replace(/\D/g,'').slice(0,4).trim());
- const mesaParamInformada=(params.get('mesa')||'').trim();
+ const mesaURL=(params.get('mesa')||'').replace(/\D/g,'').slice(0,4).trim();
  const nomeSalvo=localStorage.getItem(storageKey('nome_cliente'))||'';
  const mesaSalva=localStorage.getItem(storageKey('mesa'))||'';
- if(mesaURL && (!mesaParamInformada || window.supabaseTableContext)){
+ if(mesaURL){
    tipoAtendimentoSelecionado='mesa';
    localStorage.setItem(storageKey('atendimento'),'mesa');
    localStorage.setItem(storageKey('mesa'),mesaURL);
@@ -712,11 +702,6 @@ function iniciarRestaurante(){
      atualizarResumoAtendimento();
      mostrarToast(`Você está na Mesa ${mesaURL}.`);
    },0);
- } else if(mesaParamInformada && !window.supabaseTableContext) {
-   localStorage.removeItem(storageKey('mesa'));
-   localStorage.removeItem(storageKey('atendimento'));
-   tipoAtendimentoSelecionado='delivery';
-   setTimeout(()=>mostrarToast('Esta mesa não está ativa neste restaurante.'),0);
  } else {
    const atendimentoSalvo=localStorage.getItem(storageKey('atendimento'));
    if(atendimentoSalvo==='mesa')tipoAtendimentoSelecionado='mesa';
@@ -890,6 +875,12 @@ function abrirProdutoPorId(id){
  const kicker=$('modalKicker');
  if(kicker)kicker.textContent=p.combo?'Combo':p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Especial';
  renderizarCustomizacao(p);
+ const btnAR=$('btnARProduto');
+ if(btnAR){
+   const disponivel=!!p.arFoto;
+   btnAR.style.display=disponivel?'flex':'none';
+   btnAR.textContent=disponivel?'📱 Ver na minha mesa (AR)':'📱 Ver na minha mesa (AR)';
+ }
  atualizarTotalProduto();
  abrirModal('modalProduto');
 }
