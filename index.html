@@ -266,7 +266,7 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
 
 
 
-.mesa-track-overlay{position:fixed;inset:0;background:rgba(17,24,39,.42);-webkit-display:none;align-items:flex-end;justify-content:center;z-index:10020}
+.mesa-track-overlay{position:fixed;inset:0;background:rgba(17,24,39,.42);display:none;align-items:flex-end;justify-content:center;z-index:10020}
 .mesa-track-overlay.open{display:flex}
 .mesa-track-sheet{width:min(100%,560px);max-height:min(88vh,760px);overflow:auto;background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -20px 60px rgba(0,0,0,.2);padding:12px 18px calc(22px + env(safe-area-inset-bottom));animation:mesaTrackUp .24s ease-out}
 @keyframes mesaTrackUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
@@ -280,7 +280,7 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
 
 
 .mesa-conta-btn{position:relative}
-.mesa-conta-overlay{position:fixed;inset:0;z-index:10040;background:rgba(17,24,39,.44);-webkit-display:none;align-items:flex-end;justify-content:center}
+.mesa-conta-overlay{position:fixed;inset:0;z-index:10040;background:rgba(17,24,39,.44);display:none;align-items:flex-end;justify-content:center}
 .mesa-conta-overlay.open{display:flex}
 .mesa-conta-sheet{width:min(100%,580px);max-height:min(90vh,820px);overflow:auto;background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -20px 70px rgba(0,0,0,.2);padding:12px 18px calc(24px + env(safe-area-inset-bottom));animation:mesaContaUp .24s ease-out}
 @keyframes mesaContaUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
