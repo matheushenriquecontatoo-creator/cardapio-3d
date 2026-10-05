@@ -4,11 +4,27 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#F4F5F7">
 <title>Brasa 180° Smash & Grill — Cardápio</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <style>
+
 :root{--primary:#f59e0b;--primary-hover:#d97706;--bg:#0f1015;--surface:#181920;--surface-2:#20222b;--border:rgba(255,255,255,.08);--text:#f3f4f6;--muted:#9ca3af;--success:#34d399}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth;overflow-x:hidden}body.modal-aberto{overflow:hidden}
@@ -17,14 +33,13 @@ button,input,select{font:inherit}button{touch-action:manipulation}img{max-width:
 header{padding:34px 18px 28px;text-align:center;background:radial-gradient(circle at 50% -25%,#4a2d10 0%,#19130c 30%,var(--bg) 72%);border-bottom:1px solid var(--border)}
 .brand-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.12);border-radius:999px;color:var(--primary);font-size:10px;font-weight:900;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:11px}
 header h1{font-size:clamp(27px,7vw,40px);line-height:1.05;letter-spacing:-.8px;font-weight:900}header p{max-width:560px;margin:9px auto 0;color:var(--muted);font-size:14px;line-height:1.5}
-.categorias{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;padding:13px 16px;background:rgba(15,16,21,.94);backdrop-filter:blur(14px);position:sticky;top:0;z-index:50;border-bottom:1px solid var(--border);overscroll-behavior-x:contain;touch-action:pan-x}
+.categorias{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;padding:13px 16px;background:rgba(15,16,21,.94);position:sticky;top:0;z-index:50;border-bottom:1px solid var(--border);overscroll-behavior-x:contain;touch-action:pan-x}
 .categorias::-webkit-scrollbar{display:none}.categoria{flex:0 0 auto;border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:9px 15px;border-radius:999px;white-space:nowrap;font-size:13px;font-weight:750;cursor:pointer}.categoria.ativa{background:var(--primary);color:#111;border-color:var(--primary)}
 .produtos{width:min(1180px,100%);margin:22px auto 110px;padding:0 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:16px}
 .produto{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;min-width:0;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.produto:active{transform:scale(.985)}
-.produto-imagem-wrap{position:relative;width:100%;height:205px;background:#1a1b22;overflow:hidden}.produto-imagem-wrap img{width:100%;height:100%;object-fit:cover;display:block}.badge-ar{position:absolute;top:10px;left:10px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.78);border:1px solid rgba(245,158,11,.55);color:var(--primary);font-size:10px;font-weight:900;backdrop-filter:blur(8px)}
-.produto-info{padding:16px;display:flex;flex-direction:column;gap:0;flex:1}.produto-kicker{font-size:9px;letter-spacing:1.1px;text-transform:uppercase;color:var(--primary);font-weight:900;margin-bottom:5px}.produto-info h2{font-size:18px;line-height:1.2;margin-bottom:6px}.produto-info p{color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:14px;flex:1}.produto-rodape{display:flex;align-items:center;justify-content:space-between;gap:10px}.preco{font-size:18px;font-weight:900}.ver-ar-card{padding:7px 10px;border-radius:10px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--primary);font-size:10px;font-weight:900;white-space:nowrap}
+.produto-imagem-wrap{position:relative;width:100%;height:205px;background:#1a1b22;overflow:hidden}.produto-imagem-wrap img{width:100%;height:100%;object-fit:cover;display:block}.badge-ar{position:absolute;top:10px;left:10px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.78);border:1px solid rgba(245,158,11,.55);color:var(--primary);font-size:10px;font-weight:900;display:flex;flex-direction:column;gap:0;flex:1}.produto-kicker{font-size:9px;letter-spacing:1.1px;text-transform:uppercase;color:var(--primary);font-weight:900;margin-bottom:5px}.produto-info h2{font-size:18px;line-height:1.2;margin-bottom:6px}.produto-info p{color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:14px;flex:1}.produto-rodape{display:flex;align-items:center;justify-content:space-between;gap:10px}.preco{font-size:18px;font-weight:900}.ver-ar-card{padding:7px 10px;border-radius:10px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--primary);font-size:10px;font-weight:900;white-space:nowrap}
 .acoes-flutuantes{position:fixed;right:16px;bottom:16px;z-index:800;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:min(430px,calc(100vw - 24px));align-items:stretch}.acao-flutuante{min-width:0;border:1px solid rgba(255,255,255,.08);padding:11px 12px;border-radius:15px;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 9px 28px rgba(0,0,0,.28);cursor:pointer;white-space:nowrap}.acao-mesa{background:var(--surface);color:#fff;border-color:rgba(245,158,11,.35)}.acao-pedido{background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:#111;border-color:transparent}.carrinho-contador{min-width:21px;height:21px;padding:0 6px;border-radius:999px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);backdrop-filter:blur(10px);z-index:1000;align-items:center;justify-content:center;padding:12px}.modal.ativo{display:flex}.modal-conteudo{position:relative;width:100%;max-width:500px;max-height:94vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:22px;color:#fff;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:1000;align-items:center;justify-content:center;padding:12px}.modal.ativo{display:flex}.modal-conteudo{position:relative;width:100%;max-width:500px;max-height:94vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:22px;color:#fff;box-shadow:0 24px 80px rgba(0,0,0,.45)}
 .fechar-modal{position:absolute;right:12px;top:12px;width:38px;height:38px;border:1px solid var(--border);border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:21px;cursor:pointer;z-index:20}.modal h2{font-size:21px;margin-right:42px}.modal-desc{color:var(--muted);line-height:1.5;font-size:13px;margin:7px 0 12px}.modal-preco{font-size:24px;font-weight:900;color:var(--primary);margin-bottom:14px}
 .quantidade-box{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0 17px}.btn-quantidade{width:42px;height:42px;border:1px solid var(--border);border-radius:50%;background:var(--surface-2);color:#fff;font-size:19px;font-weight:900;cursor:pointer}.quantidade-numero{font-size:18px;font-weight:900;min-width:24px;text-align:center}.botoes-produto{display:grid;gap:9px}.btn-principal,.btn-ar{width:100%;border:0;border-radius:13px;padding:14px;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}.btn-principal{background:var(--primary);color:#111}.btn-ar{background:var(--surface-2);border:1px solid var(--border);color:#fff}.btn-ar.destaque{background:linear-gradient(135deg,#f59e0b,#d97706);color:#111;border-color:transparent}
 .carrinho-lista{text-align:left;margin-top:12px}.carrinho-vazio{color:var(--muted);padding:25px 0;text-align:center;font-size:13px}.item-carrinho{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}.item-carrinho-nome{font-size:13px;font-weight:800}.item-carrinho-preco{font-size:11px;color:var(--muted);margin-top:4px}.item-controles{display:flex;align-items:center;gap:9px}.item-btn{width:32px;height:32px;border:1px solid var(--border);background:var(--surface-2);color:#fff;border-radius:50%;cursor:pointer;font-size:17px}.item-qtd{min-width:18px;text-align:center;font-size:12px;font-weight:900}.carrinho-total{display:flex;justify-content:space-between;gap:10px;padding:16px 0;font-size:17px;font-weight:900;border-bottom:1px solid var(--border)}
@@ -41,14 +56,14 @@ footer{text-align:center;padding:0 20px 32px;color:#70737e;font-size:10px;line-h
 .ar-foto-overlay{position:absolute;inset:0;z-index:10;pointer-events:auto;touch-action:none}
 .ar-foto-gesture-layer{position:absolute;inset:0;z-index:2;pointer-events:auto;touch-action:none}
 .ar-foto-top{position:absolute;top:max(14px,env(safe-area-inset-top));left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:30;pointer-events:none}
-.ar-foto-pill{padding:9px 13px;border-radius:999px;background:rgba(10,10,12,.62);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%);color:#fff;font-size:12px;font-weight:800;letter-spacing:.05px;box-shadow:0 8px 28px rgba(0,0,0,.18);pointer-events:auto}
-.ar-foto-fechar{width:40px;height:40px;border:1px solid rgba(255,255,255,.14);border-radius:50%;background:rgba(10,10,12,.62);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-size:23px;line-height:1;cursor:pointer;pointer-events:auto;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.ar-foto-pill{padding:9px 13px;border-radius:999px;background:rgba(10,10,12,.62);border:1px solid rgba(255,255,255,.12);-webkit-color:#fff;font-size:12px;font-weight:800;letter-spacing:.05px;box-shadow:0 8px 28px rgba(0,0,0,.18);pointer-events:auto}
+.ar-foto-fechar{width:40px;height:40px;border:1px solid rgba(255,255,255,.14);border-radius:50%;background:rgba(10,10,12,.62);-webkit-color:#fff;font-size:23px;line-height:1;cursor:pointer;pointer-events:auto;box-shadow:0 8px 28px rgba(0,0,0,.18)}
 .ar-foto-fallback-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(360px,88vw);z-index:8;text-align:center;pointer-events:none}
 .ar-foto-fallback-card img{width:min(300px,72vw);max-height:52vh;height:auto;object-fit:contain;filter:drop-shadow(0 17px 18px rgba(0,0,0,.35));pointer-events:none;touch-action:none;user-select:none;-webkit-user-drag:none;display:block;margin:auto}
 .ar-foto-bottom{position:absolute;left:14px;right:14px;bottom:max(14px,env(safe-area-inset-bottom));display:grid;gap:9px;z-index:30;pointer-events:none}
 .ar-foto-status{text-align:center;color:rgba(245,245,247,.82);font-size:11px;font-weight:700;line-height:1.3;padding:0 8px;text-shadow:0 2px 14px rgba(0,0,0,.9);pointer-events:none}
 .ar-foto-acoes{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.ar-foto-btn{min-height:50px;border:1px solid rgba(255,255,255,.12);border-radius:15px;background:rgba(10,10,12,.68);color:#fff;font-size:12px;font-weight:900;backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%);cursor:pointer;pointer-events:auto;box-shadow:0 10px 32px rgba(0,0,0,.22)}
+.ar-foto-btn{min-height:50px;border:1px solid rgba(255,255,255,.12);border-radius:15px;background:rgba(10,10,12,.68);color:#fff;font-size:12px;font-weight:900;-webkit-cursor:pointer;pointer-events:auto;box-shadow:0 10px 32px rgba(0,0,0,.22)}
 .ar-foto-btn.principal{background:linear-gradient(135deg,#ffad0a,#f59e0b);color:#111;border-color:transparent}
 @media(max-width:390px){.ar-foto-bottom{left:12px;right:12px}.ar-foto-btn{min-height:48px;font-size:11px}.ar-foto-status{font-size:10px}.ar-foto-pill{font-size:11px;padding:8px 11px}}
 @media(min-width:1100px){.produto:hover{transform:translateY(-3px);border-color:rgba(245,158,11,.22);box-shadow:0 16px 40px rgba(0,0,0,.18)}.produto-imagem-wrap img{transition:transform .35s ease}.produto:hover .produto-imagem-wrap img{transform:scale(1.035)}}
@@ -80,7 +95,7 @@ header{position:relative;text-align:left;padding:0 0 22px;background:#fff;border
 .mesa-capa{height:190px;width:100%;position:relative;background:#e5e7eb center/cover no-repeat}
 .mesa-capa::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.34))}
 .mesa-header-acoes{position:absolute;top:14px;right:14px;z-index:4;display:flex;gap:8px}
-.mesa-header-btn{width:40px;height:40px;border:1px solid rgba(255,255,255,.7);border-radius:50%;background:rgba(17,24,39,.52);color:#fff;backdrop-filter:blur(12px);font-size:17px;cursor:pointer}
+.mesa-header-btn{width:40px;height:40px;border:1px solid rgba(255,255,255,.7);border-radius:50%;background:rgba(17,24,39,.52);color:#fff;font-size:17px;cursor:pointer}
 .mesa-info{position:relative;margin:-32px 16px 0;padding:0 0 0 88px;min-height:72px;z-index:5}
 .mesa-logo{position:absolute;left:0;top:0;width:72px;height:72px;border-radius:50%;border:3px solid #fff;object-fit:cover;background:#fff;box-shadow:0 5px 18px rgba(0,0,0,.14)}
 .mesa-nome{font-size:21px;line-height:1.15;font-weight:900;letter-spacing:-.4px;padding-top:37px;color:#111827}
@@ -88,8 +103,7 @@ header{position:relative;text-align:left;padding:0 0 22px;background:#fff;border
 .mesa-meta .aberto{color:#059669;font-weight:900}.mesa-perfil{display:inline-block;margin-top:6px;color:#111827;font-size:12px;font-weight:850;text-decoration:none}
 .brand-badge{display:none}
 header>p{margin:10px 16px 0;max-width:none;color:#6B7280;font-size:13px;line-height:1.45}
-.categorias{top:0;padding:10px 12px;background:rgba(255,255,255,.94);border-bottom:1px solid #e5e7eb;box-shadow:0 3px 12px rgba(17,24,39,.05);backdrop-filter:blur(14px)}
-.categoria{border:1px solid #e5e7eb;background:#fff;color:#4b5563;padding:9px 15px;border-radius:999px;font-size:12px;font-weight:800}.categoria.ativa{background:#111827;color:#fff;border-color:#111827}
+.categorias{top:0;padding:10px 12px;background:rgba(255,255,255,.94);border-bottom:1px solid #e5e7eb;box-shadow:0 3px 12px rgba(17,24,39,.05);background:#fff;color:#4b5563;padding:9px 15px;border-radius:999px;font-size:12px;font-weight:800}.categoria.ativa{background:#111827;color:#fff;border-color:#111827}
 .mesa-entrega{margin:14px 12px 0;background:linear-gradient(135deg,#10B981,#059669);border-radius:16px;color:#fff;min-height:116px;padding:18px 18px;display:flex;align-items:center;gap:16px;box-shadow:0 8px 24px rgba(16,185,129,.18);position:relative;overflow:hidden}
 .mesa-entrega::after{content:"";position:absolute;width:130px;height:130px;border-radius:50%;right:-35px;top:-45px;background:rgba(255,255,255,.09)}
 .mesa-entrega-icone{width:66px;height:66px;border-radius:20px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:36px;flex:0 0 auto}
@@ -104,7 +118,7 @@ footer{color:#6B7280}footer strong{color:#374151}
 @media(max-width:700px){.mesa-capa{height:165px}.mesa-nome{font-size:19px}.mesa-entrega{margin-top:12px}.produto-imagem-wrap{height:155px}}
 
 /* ===== MESA360 ETAPA 7 — BUSCA E DESCOBERTA ===== */
-.busca-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.38);backdrop-filter:blur(7px);z-index:2500;align-items:flex-start;justify-content:center;padding:12px}.busca-overlay.ativo{display:flex}.busca-painel{width:min(680px,100%);margin-top:max(8px,env(safe-area-inset-top));background:#fff;border:1px solid #e5e7eb;border-radius:22px;box-shadow:0 22px 70px rgba(15,23,42,.22);overflow:hidden}.busca-topo{display:flex;align-items:center;gap:9px;padding:12px;border-bottom:1px solid #eef0f3}.busca-input-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:0;background:#f3f4f6;border-radius:14px;padding:0 12px}.busca-input-wrap span{font-size:19px;color:#6b7280}.busca-input{width:100%;height:46px;border:0;outline:0;background:transparent;color:#111827;font-size:15px}.busca-fechar{width:42px;height:42px;border:0;border-radius:50%;background:#f3f4f6;color:#374151;font-size:20px;cursor:pointer}.busca-resultados{max-height:min(62vh,520px);overflow:auto;padding:8px 12px 14px}.busca-hint{padding:22px 10px;text-align:center;color:#6b7280;font-size:13px;line-height:1.5}.busca-resultado{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px solid #f0f1f3;cursor:pointer}.busca-resultado:last-child{border-bottom:0}.busca-resultado-img{width:58px;height:58px;border-radius:12px;object-fit:cover;background:#f3f4f6}.busca-resultado-nome{font-size:14px;font-weight:800;color:#111827;line-height:1.25}.busca-resultado-desc{margin-top:3px;color:#6b7280;font-size:11px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.busca-resultado-preco{font-size:13px;font-weight:900;color:#059669;white-space:nowrap}.busca-chips{display:flex;gap:7px;overflow:auto;padding:4px 0 10px;scrollbar-width:none}.busca-chips::-webkit-scrollbar{display:none}.busca-chip{border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}.busca-chip.ativo{background:#ecfdf5;border-color:#a7f3d0;color:#047857}.busca-contador{padding:8px 4px 3px;color:#6b7280;font-size:11px;font-weight:700}.resultado-vazio{padding:30px 10px;text-align:center}.resultado-vazio-icone{font-size:30px;margin-bottom:7px}.resultado-vazio strong{display:block;color:#111827;font-size:14px}.resultado-vazio span{display:block;margin-top:5px;color:#6b7280;font-size:12px}
+.busca-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.38);z-index:2500;align-items:flex-start;justify-content:center;padding:12px}.busca-overlay.ativo{display:flex}.busca-painel{width:min(680px,100%);margin-top:max(8px,env(safe-area-inset-top));background:#fff;border:1px solid #e5e7eb;border-radius:22px;box-shadow:0 22px 70px rgba(15,23,42,.22);overflow:hidden}.busca-topo{display:flex;align-items:center;gap:9px;padding:12px;border-bottom:1px solid #eef0f3}.busca-input-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:0;background:#f3f4f6;border-radius:14px;padding:0 12px}.busca-input-wrap span{font-size:19px;color:#6b7280}.busca-input{width:100%;height:46px;border:0;outline:0;background:transparent;color:#111827;font-size:15px}.busca-fechar{width:42px;height:42px;border:0;border-radius:50%;background:#f3f4f6;color:#374151;font-size:20px;cursor:pointer}.busca-resultados{max-height:min(62vh,520px);overflow:auto;padding:8px 12px 14px}.busca-hint{padding:22px 10px;text-align:center;color:#6b7280;font-size:13px;line-height:1.5}.busca-resultado{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px solid #f0f1f3;cursor:pointer}.busca-resultado:last-child{border-bottom:0}.busca-resultado-img{width:58px;height:58px;border-radius:12px;object-fit:cover;background:#f3f4f6}.busca-resultado-nome{font-size:14px;font-weight:800;color:#111827;line-height:1.25}.busca-resultado-desc{margin-top:3px;color:#6b7280;font-size:11px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.busca-resultado-preco{font-size:13px;font-weight:900;color:#059669;white-space:nowrap}.busca-chips{display:flex;gap:7px;overflow:auto;padding:4px 0 10px;scrollbar-width:none}.busca-chips::-webkit-scrollbar{display:none}.busca-chip{border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}.busca-chip.ativo{background:#ecfdf5;border-color:#a7f3d0;color:#047857}.busca-contador{padding:8px 4px 3px;color:#6b7280;font-size:11px;font-weight:700}.resultado-vazio{padding:30px 10px;text-align:center}.resultado-vazio-icone{font-size:30px;margin-bottom:7px}.resultado-vazio strong{display:block;color:#111827;font-size:14px}.resultado-vazio span{display:block;margin-top:5px;color:#6b7280;font-size:12px}
 @media(max-width:520px){.busca-overlay{padding:8px}.busca-painel{border-radius:20px}.busca-resultados{max-height:66vh}}
 
 /* ETAPA 8 — fidelização, favoritos e recompra */
@@ -126,12 +140,11 @@ footer{color:#6B7280}footer strong{color:#374151}
 .mesa-repetir-lista{scrollbar-width:none!important}
 .mesa-repetir-lista::-webkit-scrollbar{display:none}
 @media(max-width:700px){.mesa-favoritos{padding-left:12px;padding-right:12px}.mesa-favorito-card{min-width:148px;max-width:148px}.mesa-favorito-img{height:94px}}
-</style>
 
-<style>
+
+
 /* ===== MESA360 REDESIGN — ETAPA 2 / PRODUCT BOTTOM SHEET ===== */
-.modal-produto-sheet{align-items:flex-end;padding:0;background:rgba(17,24,39,.38);backdrop-filter:blur(7px)}
-.modal-produto-sheet .produto-sheet-conteudo{width:min(680px,100%);max-width:680px;max-height:min(92vh,860px);overflow:auto;margin:0 auto;padding:0;border:0;border-radius:26px 26px 0 0;background:#fff;color:#111827;box-shadow:0 -18px 70px rgba(17,24,39,.20);transform:translateY(18px);animation:m360SheetIn .22s ease forwards}
+.modal-produto-sheet{align-items:flex-end;padding:0;background:rgba(17,24,39,.38);max-width:680px;max-height:min(92vh,860px);overflow:auto;margin:0 auto;padding:0;border:0;border-radius:26px 26px 0 0;background:#fff;color:#111827;box-shadow:0 -18px 70px rgba(17,24,39,.20);transform:translateY(18px);animation:m360SheetIn .22s ease forwards}
 @keyframes m360SheetIn{to{transform:translateY(0)}}
 .produto-sheet-handle{width:44px;height:5px;border-radius:999px;background:#d1d5db;margin:10px auto 0}
 .produto-sheet-fechar{position:absolute;z-index:4;right:14px;top:14px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(17,24,39,.08);background:rgba(255,255,255,.92);color:#111827;font-size:27px;line-height:1;display:grid;place-items:center;box-shadow:0 6px 18px rgba(17,24,39,.10)}
@@ -155,8 +168,7 @@ footer{color:#6B7280}footer strong{color:#374151}
 @media(max-width:700px){.modal-produto-sheet .produto-sheet-conteudo{max-height:94vh;border-radius:24px 24px 0 0}.produto-sheet-imagem-wrap{height:235px}.produto-sheet-corpo{padding:17px 16px calc(18px + env(safe-area-inset-bottom))}.produto-sheet-corpo h2{font-size:21px}.produto-sheet-fechar{top:12px;right:12px}.produto-sheet-adicionar{min-height:50px}}
 
 /* ===== MESA360 ETAPA 5 — BOTTOMSHEET UX ===== */
-.modal-produto-sheet{align-items:flex-end!important;justify-content:center!important;padding:0!important;background:rgba(15,23,42,.48)!important;backdrop-filter:blur(5px)}
-.modal-produto-sheet .produto-sheet-conteudo{width:min(100%,680px)!important;max-width:680px!important;max-height:min(92vh,900px)!important;height:auto!important;margin:0!important;border-radius:28px 28px 0 0!important;overflow:hidden!important;background:#fff!important;box-shadow:0 -18px 50px rgba(15,23,42,.22)!important;transform:translateY(0);display:flex!important;flex-direction:column!important;padding:0!important}
+.modal-produto-sheet{align-items:flex-end!important;justify-content:center!important;padding:0!important;background:rgba(15,23,42,.48)!important;max-width:680px!important;max-height:min(92vh,900px)!important;height:auto!important;margin:0!important;border-radius:28px 28px 0 0!important;overflow:hidden!important;background:#fff!important;box-shadow:0 -18px 50px rgba(15,23,42,.22)!important;transform:translateY(0);display:flex!important;flex-direction:column!important;padding:0!important}
 .produto-sheet-handle{position:absolute!important;z-index:8;top:9px;left:50%;transform:translateX(-50%);width:42px;height:5px;border-radius:99px;background:rgba(255,255,255,.82)!important;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .produto-sheet-fechar{position:absolute!important;z-index:9;top:14px!important;right:14px!important;width:40px!important;height:40px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.7)!important;background:rgba(255,255,255,.86)!important;color:#111827!important;box-shadow:0 4px 14px rgba(0,0,0,.14)!important;font-size:25px!important;line-height:1!important}
 .produto-sheet-imagem-wrap{height:245px!important;min-height:245px!important;width:100%!important;background:#f3f4f6!important;overflow:hidden!important;position:relative!important}
@@ -191,9 +203,9 @@ footer{color:#6B7280}footer strong{color:#374151}
 .produto-sheet-ar{display:none!important}
 @media(max-width:700px){.modal-produto-sheet .produto-sheet-conteudo{width:100%!important;max-height:94vh!important;border-radius:28px 28px 0 0!important}.produto-sheet-imagem-wrap{height:220px!important;min-height:220px!important}.produto-sheet-corpo{padding-left:16px!important;padding-right:16px!important}.produto-sheet-acoes{padding-left:12px!important;padding-right:12px!important}}
 @media(min-width:701px){.modal-produto-sheet .produto-sheet-conteudo{border-radius:28px!important;margin-bottom:18px!important}.produto-sheet-acoes{border-radius:0 0 28px 28px!important}}
-</style>
 
-<style id="mesa360-etapa6">
+
+
 /* ===== MESA360 ETAPA 6 — ACABAMENTO GERAL / HOME MOBILE ===== */
 html{scroll-behavior:smooth}
 body{background:#f5f6f8;color:#111827;letter-spacing:-.01em}
@@ -235,10 +247,10 @@ header>p{margin:9px 16px 13px!important;font-size:12px!important;max-width:620px
 footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
 @media(min-width:701px){.mesa-capa{height:235px!important}.mesa-entrega{max-width:876px!important;margin-left:auto!important;margin-right:auto!important}.mesa-dots{max-width:900px;margin:auto}.mesa-repetir{max-width:900px;margin:auto}.produtos{grid-template-columns:repeat(2,minmax(0,1fr))!important}.produto-imagem-wrap{height:210px!important}}
 @media(max-width:700px){.mesa-capa{height:180px!important}.mesa-nome{font-size:19px!important}.produto-imagem-wrap{height:158px!important}.produtos{grid-template-columns:1fr!important}.produto-info h2{font-size:15px!important}.acao-flutuante{flex:1!important}.acoes-flutuantes{width:calc(100vw - 20px)!important;right:10px!important}}
-</style>
 
-<style id="mesa360-etapa9-css">
-.mesa-confirm-overlay{position:fixed;inset:0;z-index:1200;background:rgba(15,23,42,.48);backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center;padding:0}
+
+
+.mesa-confirm-overlay{position:fixed;inset:0;z-index:1200;background:rgba(15,23,42,.48);display:none;align-items:flex-end;justify-content:center;padding:0}
 .mesa-confirm-overlay.open{display:flex}
 .mesa-confirm-sheet{width:min(100%,560px);background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -18px 60px rgba(15,23,42,.22);padding:26px 20px calc(22px + env(safe-area-inset-bottom));animation:mesaConfirmIn .24s ease-out}
 @keyframes mesaConfirmIn{from{transform:translateY(30px);opacity:.7}to{transform:translateY(0);opacity:1}}
@@ -251,11 +263,10 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
 .mesa-confirm-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.mesa-confirm-info div{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:11px 12px}.mesa-confirm-info span{display:block;font-size:11px;color:#6b7280;margin-bottom:3px}.mesa-confirm-info b{font-size:14px;color:#111827}
 .mesa-confirm-actions{display:grid;gap:9px}.mesa-confirm-primary{border:0;background:#059669;color:#fff;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer}.mesa-confirm-secondary{border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:14px;padding:13px 16px;font-size:14px;font-weight:700;cursor:pointer}
 .mesa-confirm-note{text-align:center;color:#9ca3af;font-size:11px;line-height:1.4;margin:12px 8px 0}
-</style>
 
 
-<style>
-.mesa-track-overlay{position:fixed;inset:0;background:rgba(17,24,39,.42);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center;z-index:10020}
+
+.mesa-track-overlay{position:fixed;inset:0;background:rgba(17,24,39,.42);-webkit-display:none;align-items:flex-end;justify-content:center;z-index:10020}
 .mesa-track-overlay.open{display:flex}
 .mesa-track-sheet{width:min(100%,560px);max-height:min(88vh,760px);overflow:auto;background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -20px 60px rgba(0,0,0,.2);padding:12px 18px calc(22px + env(safe-area-inset-bottom));animation:mesaTrackUp .24s ease-out}
 @keyframes mesaTrackUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
@@ -265,11 +276,11 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
 .mesa-track-line{position:relative;margin:4px 2px 20px}.mesa-track-step{position:relative;display:grid;grid-template-columns:34px 1fr;gap:12px;min-height:72px}.mesa-track-step:not(:last-child)::before{content:"";position:absolute;left:15px;top:31px;width:2px;height:52px;background:#e5e7eb}.mesa-track-step.done:not(:last-child)::before,.mesa-track-step.active:not(:last-child)::before{background:#10b981}.mesa-track-dot{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb;font-size:14px}.mesa-track-step.done .mesa-track-dot,.mesa-track-step.active .mesa-track-dot{background:#059669;border-color:#059669;color:#fff}.mesa-track-step.active .mesa-track-dot{box-shadow:0 0 0 5px #d1fae5}.mesa-track-copy strong{display:block;color:#374151;font-size:14px;line-height:1.2}.mesa-track-copy span{display:block;margin-top:4px;color:#9ca3af;font-size:12px;line-height:1.4}.mesa-track-step.done .mesa-track-copy strong,.mesa-track-step.active .mesa-track-copy strong{color:#111827}.mesa-track-refresh{width:100%;border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:14px;padding:12px;font-weight:700;cursor:pointer}.mesa-track-note{text-align:center;color:#9ca3af;font-size:11px;line-height:1.4;margin:11px 8px 0}
 .mesa-confirm-track{border:1px solid #d1fae5;background:#ecfdf5;color:#047857;border-radius:14px;padding:13px 16px;font-size:14px;font-weight:800;cursor:pointer;width:100%;margin-top:9px}
 .mesa-track-cancelled{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:14px;padding:13px;margin-bottom:15px;font-size:13px;line-height:1.4}
-</style>
 
-<style id="mesa360-etapa11-css">
+
+
 .mesa-conta-btn{position:relative}
-.mesa-conta-overlay{position:fixed;inset:0;z-index:10040;background:rgba(17,24,39,.44);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center}
+.mesa-conta-overlay{position:fixed;inset:0;z-index:10040;background:rgba(17,24,39,.44);-webkit-display:none;align-items:flex-end;justify-content:center}
 .mesa-conta-overlay.open{display:flex}
 .mesa-conta-sheet{width:min(100%,580px);max-height:min(90vh,820px);overflow:auto;background:#fff;border-radius:28px 28px 0 0;box-shadow:0 -20px 70px rgba(0,0,0,.2);padding:12px 18px calc(24px + env(safe-area-inset-bottom));animation:mesaContaUp .24s ease-out}
 @keyframes mesaContaUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
@@ -280,11 +291,134 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
 .mesa-conta-section-title{font-size:16px;font-weight:800;color:#111827;margin:18px 0 9px}.mesa-conta-empty{border:1px dashed #d1d5db;border-radius:16px;padding:18px;text-align:center;color:#9ca3af;font-size:13px;background:#fafafa}
 .mesa-conta-order{border:1px solid #e5e7eb;border-radius:17px;padding:14px;margin-bottom:9px;background:#fff}.mesa-conta-order-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.mesa-conta-order-code{font-weight:800;color:#111827}.mesa-conta-order-status{font-size:11px;font-weight:800;border-radius:999px;padding:5px 8px;background:#ecfdf5;color:#047857}.mesa-conta-order-meta{display:flex;justify-content:space-between;gap:8px;margin-top:8px;color:#6b7280;font-size:12px}.mesa-conta-order-total{font-size:15px;font-weight:800;color:#111827}.mesa-conta-order-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.mesa-conta-order-actions button{border:1px solid #e5e7eb;background:#fff;border-radius:11px;padding:9px;font-size:12px;font-weight:700;color:#374151;cursor:pointer}.mesa-conta-order-actions button.primary{background:#ecfdf5;border-color:#bbf7d0;color:#047857}
 @media(max-width:480px){.mesa-conta-profile-grid{grid-template-columns:1fr}.mesa-conta-order-actions{grid-template-columns:1fr 1fr}}
-</style>
 
 
-<style id="mesa360-etapa12-performance">
+
 .m360-loading-overlay{position:fixed;inset:0;z-index:99999;background:rgba(244,245,247,.96);display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .25s ease,visibility .25s ease}.m360-loading-overlay.is-hidden{opacity:0;visibility:hidden;pointer-events:none}.m360-loading-card{width:min(420px,100%);background:#fff;border:1px solid #e5e7eb;border-radius:24px;padding:28px;box-shadow:0 18px 60px rgba(15,23,42,.12);text-align:center}.m360-loading-logo{width:58px;height:58px;border-radius:18px;margin:0 auto 16px;object-fit:cover;background:#f1f5f9}.m360-spinner{width:28px;height:28px;border:3px solid #d1fae5;border-top-color:#059669;border-radius:50%;animation:m360spin .8s linear infinite;margin:18px auto 0}@keyframes m360spin{to{transform:rotate(360deg)}}.m360-offline{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);z-index:99998;background:#111827;color:#fff;padding:10px 14px;border-radius:999px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.25s}.m360-offline.show{opacity:1;transform:translate(-50%,0)}.m360-retry{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;padding:11px 16px;background:#059669;color:#fff;font-weight:700;cursor:pointer;margin-top:16px}.m360-top{position:fixed;right:16px;bottom:92px;z-index:70;width:44px;height:44px;border:1px solid #e5e7eb;border-radius:50%;background:#fff;color:#111827;box-shadow:0 8px 24px rgba(15,23,42,.12);display:none;align-items:center;justify-content:center;font-size:18px}.m360-top.show{display:flex}.m360-img-loading{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 37%,#f1f5f9 63%);background-size:400% 100%;animation:m360shimmer 1.2s ease infinite}@keyframes m360shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+
+/* =========================================================
+   MESA360 / BRASA 180 — UI/UX V1 FINAL OVERRIDES
+   Camada visual sobre a arquitetura existente.
+   Não altera Supabase, pedidos, AR, checkout ou carrinho.
+========================================================= */
+:root{
+  --bg-primary:#F4F5F7;
+  --card-bg:#FFFFFF;
+  --brand-primary:#10B981;
+  --brand-primary-dark:#059669;
+  --text-main:#111827;
+  --text-muted:#6B7280;
+  --border-soft:#E5E7EB;
+  --danger:#EF4444;
+  --warning:#F59E0B;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg-primary);color:var(--text-main)}
+button,a,input,select,textarea{touch-action:manipulation}
+button,input,select,textarea{font:inherit}
+button{min-height:48px}
+
+/* Header / prova social sem inventar avaliação comercial. */
+.mesa-meta{align-items:center}
+.mesa-meta .aberto{display:inline-flex;align-items:center;gap:5px}
+.mesa-meta .aberto::first-letter{color:var(--brand-primary)}
+.mesa-status-extra{display:inline-flex;align-items:center;gap:7px;color:var(--text-muted);font-weight:700}
+.mesa-status-dot{width:8px;height:8px;border-radius:50%;background:var(--brand-primary);box-shadow:0 0 0 0 rgba(16,185,129,.35);animation:m360pulse 1.8s infinite}
+@keyframes m360pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.28)}50%{box-shadow:0 0 0 7px rgba(16,185,129,0)}}
+
+/* Busca rápida no próprio cardápio. */
+.m360-menu-tools{display:grid;gap:10px;margin:14px 12px 0}
+.m360-search-wrap{position:relative}
+.m360-search{width:100%;min-height:50px;border:1px solid var(--border-soft);border-radius:16px;background:#fff;color:var(--text-main);padding:0 48px 0 45px;outline:none;box-shadow:0 3px 14px rgba(17,24,39,.05)}
+.m360-search:focus{border-color:var(--brand-primary);box-shadow:0 0 0 3px rgba(16,185,129,.10)}
+.m360-search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--text-muted);pointer-events:none}
+.m360-search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:transparent;color:var(--text-muted);border-radius:50%;display:none;cursor:pointer}
+.m360-search-clear.show{display:block}
+.m360-filter-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.m360-filter-row::-webkit-scrollbar{display:none}
+.m360-filter{flex:0 0 auto;min-height:42px;padding:0 14px;border:1px solid var(--border-soft);border-radius:999px;background:#fff;color:#4b5563;font-size:12px;font-weight:850;cursor:pointer;box-shadow:0 2px 8px rgba(17,24,39,.035)}
+.m360-filter.ativo{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+
+/* Categorias sticky, leves e centradas. */
+.categorias{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.97);box-shadow:0 3px 12px rgba(17,24,39,.05);-webkit-display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#4b5563;border-color:var(--border-soft);transition:transform .12s ease,background .16s ease,color .16s ease,box-shadow .16s ease}
+.categoria:active,.m360-filter:active,.produto:active,.acao-flutuante:active,.btn-principal:active,.btn-ar:active,.btn-quantidade:active,.item-btn:active,.m360-cross-btn:active{transform:scale(.95)}
+.categoria.ativa{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary);box-shadow:0 5px 14px rgba(16,185,129,.20)}
+
+/* Cards. */
+.produto{background:var(--card-bg);border-color:var(--border-soft);border-radius:18px;box-shadow:0 3px 14px rgba(17,24,39,.045);transition:transform .12s ease,box-shadow .18s ease,border-color .18s ease}
+.produto-imagem-wrap{background:#f1f5f9}
+.produto-imagem-wrap img{transition:opacity .2s ease,transform .3s ease}
+.produto-info h2{color:var(--text-main)}
+.produto-info p{color:var(--text-muted)}
+.preco{color:var(--text-main)}
+.badge-ar{background:#ecfdf5;border:1px solid #a7f3d0;color:#047857;-webkit-left:10px;bottom:10px;padding:6px 9px;border-radius:999px;background:#111827;color:#fff;font-size:10px;font-weight:900;z-index:3}
+.m360-badge.green{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.m360-price-old{text-decoration:line-through;color:#9ca3af;font-size:11px;font-weight:700;margin-right:5px}
+.m360-price-sale{color:#059669;font-weight:950}
+.m360-discount{display:inline-flex;margin-left:5px;padding:3px 6px;border-radius:999px;background:#dcfce7;color:#166534;font-size:9px;font-weight:950}
+
+/* Skeletons e imagens. */
+.m360-skeleton{position:relative;overflow:hidden;background:#eef2f7!important;color:transparent!important}
+.m360-skeleton::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);animation:m360shimmer2 1.25s infinite}
+@keyframes m360shimmer2{100%{transform:translateX(100%)}}
+
+/* BottomSheet mobile. */
+.modal-produto-sheet{align-items:flex-end;padding:0;background:rgba(17,24,39,.46);-webkit-max-width:560px;max-height:min(92vh,780px);padding:0;overflow:hidden;border:0;border-radius:28px 28px 0 0;background:#fff;color:var(--text-main);box-shadow:0 -12px 40px rgba(17,24,39,.16);touch-action:pan-y;display:flex;flex-direction:column}
+.produto-sheet-handle{width:42px;height:5px;border-radius:999px;background:#d1d5db;margin:9px auto 6px;flex:0 0 auto}
+.produto-sheet-fechar{width:48px;height:48px;right:12px;top:12px;background:rgba(17,24,39,.72);color:#fff;border:0;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.produto-sheet-imagem-wrap{height:min(42vh,340px);min-height:210px;background:#f3f4f6;flex:0 0 auto;overflow:hidden}
+.produto-sheet-imagem{width:100%;height:100%;object-fit:cover;display:block}
+.produto-sheet-corpo{overflow:auto;overscroll-behavior:contain;padding:18px 18px 120px;touch-action:pan-y}
+.produto-sheet-topline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.produto-sheet-kicker{font-size:11px;color:#059669;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+.modal-produto-sheet .modal-preco{color:#059669;margin:0;font-size:21px}
+.modal-produto-sheet .modal-desc{color:var(--text-muted)}
+.produto-sheet-quantidade-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:8px;font-weight:850;color:var(--text-main)}
+.produto-sheet-acoes{position:sticky;bottom:0;z-index:5;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.98);border-top:1px solid var(--border-soft);box-shadow:0 -5px 18px rgba(17,24,39,.07)}
+.produto-sheet-adicionar{min-height:54px;border-radius:15px;background:var(--brand-primary);color:#fff;box-shadow:0 7px 18px rgba(16,185,129,.20)}
+.btn-quantidade{width:48px;height:48px;min-height:48px;background:#f9fafb;color:#111827;border-color:#e5e7eb}
+
+/* Cross selling. */
+.m360-crosssell{margin-top:16px}
+.m360-cross-title{font-size:14px;font-weight:950;color:var(--text-main);margin-bottom:10px}
+.m360-cross-list{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;padding-bottom:3px}
+.m360-cross-list::-webkit-scrollbar{display:none}
+.m360-cross-card{flex:0 0 155px;border:1px solid var(--border-soft);border-radius:15px;background:#fff;padding:8px;box-shadow:0 3px 12px rgba(17,24,39,.045)}
+.m360-cross-img{width:100%;height:88px;object-fit:cover;border-radius:11px;background:#f1f5f9;display:block}
+.m360-cross-name{display:block;font-size:11px;font-weight:850;color:var(--text-main);margin:7px 2px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m360-cross-bottom{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.m360-cross-price{font-size:11px;color:#059669;font-weight:950}
+.m360-cross-btn{width:48px;height:48px;min-height:48px;border:0;border-radius:13px;background:#ecfdf5;color:#047857;font-size:22px;font-weight:900;cursor:pointer}
+
+/* Carrinho + frete grátis. */
+.m360-frete{margin:12px 0 4px;padding:12px;border-radius:15px;background:#f0fdf4;border:1px solid #bbf7d0}
+.m360-frete-text{font-size:12px;font-weight:850;color:#166534;line-height:1.35}
+.m360-frete-bar{height:7px;margin-top:9px;background:#dcfce7;border-radius:999px;overflow:hidden}
+.m360-frete-fill{height:100%;width:0;background:#10B981;border-radius:999px;transition:width .25s ease}
+.m360-frete.ganho{background:#ecfdf5;border-color:#86efac}
+.m360-frete.ganho .m360-frete-text{color:#047857}
+.carrinho-total{color:var(--text-main);border-color:var(--border-soft)}
+.item-carrinho{border-color:var(--border-soft)}
+.item-btn{width:48px;height:48px;min-height:48px;background:#f9fafb;color:#111827;border-color:#e5e7eb}
+.formulario-pedido input,.formulario-pedido select,.conta-fluxo input,.conta-fluxo select{background:#fff;color:var(--text-main);border-color:#d1d5db}
+
+/* Toast e ações inferiores. */
+.toast{bottom:calc(92px + env(safe-area-inset-bottom));background:#111827;color:#fff;box-shadow:0 8px 26px rgba(17,24,39,.20)}
+.acoes-flutuantes{bottom:calc(12px + env(safe-area-inset-bottom));}
+.acao-flutuante{min-height:52px;background:#fff;color:#111827;border-color:#e5e7eb;box-shadow:0 8px 24px rgba(17,24,39,.10)}
+.acao-pedido{background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}
+.carrinho-contador{background:#111827;color:#fff}
+
+/* AR: sem blur pesado, controles acessíveis. */
+.ar-foto-pill,.ar-foto-fechar,.ar-foto-btn{-webkit-background:rgba(17,24,39,.86)}
+.ar-foto-fechar{width:48px;height:48px;min-height:48px}
+.ar-foto-btn{min-height:52px}
+
+/* Preferências de movimento. */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+@media(max-width:700px){.produto-sheet-imagem-wrap{height:34vh;min-height:220px}.m360-menu-tools{margin-left:11px;margin-right:11px}}
+
 </style>
 </head>
 <body>
@@ -309,10 +443,23 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
   <div class="mesa-info">
     <img id="mesaLogo" class="mesa-logo" alt="Logo Brasa 180°" loading="eager">
     <h1 id="restauranteNome" class="mesa-nome">Brasa 180° Smash & Grill</h1>
-    <div class="mesa-meta"><span class="aberto">● Aberto</span><span>Pedido mín. R$ 15,00</span></div>
+    <div class="mesa-meta"><span class="aberto"><span class="mesa-status-dot" aria-hidden="true"></span>Aberto agora</span><span>Pedido mín. R$ 15,00</span><span class="mesa-status-extra">Entrega estimada: 30–45 min</span></div>
     <a href="#" class="mesa-perfil" onclick="abrirPerfilLoja(event)">Perfil da loja</a>
   </div>
   <p id="restauranteDescricao">Hambúrgueres artesanais na brasa, ingredientes selecionados e acompanhamentos para completar seu pedido.</p>
+<div class="m360-menu-tools" id="m360MenuTools">
+  <div class="m360-search-wrap">
+    <span class="m360-search-icon" aria-hidden="true">⌕</span>
+    <input id="m360Search" class="m360-search" type="search" inputmode="search" autocomplete="off" placeholder="Buscar no cardápio..." aria-label="Buscar no cardápio">
+    <button id="m360SearchClear" class="m360-search-clear" type="button" aria-label="Limpar busca">×</button>
+  </div>
+  <div class="m360-filter-row" id="m360FilterRow" aria-label="Filtros rápidos">
+    <button class="m360-filter ativo" type="button" data-filter="todos">Todos</button>
+    <button class="m360-filter" type="button" data-filter="promocao">Promoção de Hoje</button>
+    <button class="m360-filter" type="button" data-filter="preco25">Até R$ 25,00</button>
+    <button class="m360-filter" type="button" data-filter="combos">Combos</button>
+  </div>
+</div>
 </header>
 <section class="mesa-entrega" aria-label="Entrega grátis">
   <div class="mesa-entrega-icone">🛵</div>
@@ -348,7 +495,6 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
       <div class="produto-sheet-quantidade-row"><span>Quantidade</span><div class="quantidade-box"><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(-1)" aria-label="Diminuir quantidade">−</button><span id="quantidadeProduto" class="quantidade-numero">1</span><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(1)" aria-label="Aumentar quantidade">+</button></div></div>
     </div>
     <div class="produto-sheet-acoes">
-      <button id="btnARProduto" class="btn-ar destaque" type="button" onclick="abrirARFoto()" style="display:none">📱 Ver na minha mesa (AR)</button>
       <button id="btnAdicionarProduto" class="btn-principal produto-sheet-adicionar" type="button" onclick="adicionarProdutoAtual()">Adicionar ao Pedido • R$ 0,00</button>
     </div>
   </div>
@@ -426,6 +572,10 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
     </div>
     <div id="carrinhoLista" class="carrinho-lista"></div>
     <div id="carrinhoFinalizacao" style="display:none">
+      <div id="m360FreteGratis" class="m360-frete" aria-live="polite">
+        <div id="m360FreteTexto" class="m360-frete-text">Faltam R$ 50,00 para Frete Grátis!</div>
+        <div class="m360-frete-bar" aria-hidden="true"><div id="m360FreteFill" class="m360-frete-fill"></div></div>
+      </div>
       <div id="resumoTaxas" class="modal-desc" style="display:grid;gap:4px;margin:10px 0 0"></div>
       <div class="carrinho-total"><span>Total</span><span id="carrinhoTotal">R$ 0,00</span></div>
       <div class="formulario-pedido">
@@ -875,12 +1025,6 @@ function abrirProdutoPorId(id){
  const kicker=$('modalKicker');
  if(kicker)kicker.textContent=p.combo?'Combo':p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Especial';
  renderizarCustomizacao(p);
- const btnAR=$('btnARProduto');
- if(btnAR){
-   const disponivel=!!p.arFoto;
-   btnAR.style.display=disponivel?'flex':'none';
-   btnAR.textContent=disponivel?'📱 Ver na minha mesa (AR)':'📱 Ver na minha mesa (AR)';
- }
  atualizarTotalProduto();
  abrirModal('modalProduto');
 }
@@ -1966,6 +2110,137 @@ const mesa360ProcessarCheckoutOriginal=window.processarCheckout;
   window.addEventListener('error',e=>console.error('[Mesa360]',e.error||e.message));
   window.addEventListener('unhandledrejection',e=>console.error('[Mesa360 Promise]',e.reason));
 })();
+
+/* =========================================================
+   MESA360 / BRASA 180 — UI/UX CONVERSION LAYER
+   Não substitui as funções de negócio existentes.
+========================================================= */
+(function(){
+  const FREE_SHIPPING_THRESHOLD=50;
+  window.MESA360_UI={FREE_SHIPPING_THRESHOLD};
+
+  function uiProduct(id){return typeof restauranteAtual!=='undefined' && Array.isArray(restauranteAtual.produtos)?window.restauranteAtual.produtos.find(p=>String(p.id)===String(id)):null}
+  function esc(v){return typeof escaparHtml==='function'?escaparHtml(v):String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
+
+  function atualizarFreteGratis(){
+    const box=document.getElementById('m360FreteGratis');
+    const text=document.getElementById('m360FreteTexto');
+    const fill=document.getElementById('m360FreteFill');
+    if(!box||!text||!fill||typeof calcularSubtotal!=='function')return;
+    const subtotal=Math.max(0,Number(calcularSubtotal()||0));
+    const restante=Math.max(0,FREE_SHIPPING_THRESHOLD-subtotal);
+    const pct=Math.min(100,(subtotal/FREE_SHIPPING_THRESHOLD)*100);
+    fill.style.width=`${pct}%`;
+    if(subtotal>=FREE_SHIPPING_THRESHOLD){
+      box.classList.add('ganho');
+      text.textContent='Você ganhou Frete Grátis!';
+    }else{
+      box.classList.remove('ganho');
+      text.textContent=`Faltam ${formatarPreco(restante)} para Frete Grátis!`;
+    }
+  }
+  window.atualizarFreteGratis=atualizarFreteGratis;
+
+  if(typeof window.atualizarCarrinho==='function'){
+    const originalAtualizarCarrinho=window.atualizarCarrinho;
+    window.atualizarCarrinho=function(){
+      originalAtualizarCarrinho.apply(this,arguments);
+      requestAnimationFrame(atualizarFreteGratis);
+    };
+  }
+
+  function adicionarCrossSell(id){
+    const p=uiProduct(id); if(!p)return;
+    const item={id:`${p.id}-${Date.now()}`,produtoId:p.id,nome:p.nome,preco:Number(p.preco||0),quantidade:1,addons:[],combo:null,observacao:'',precoUnitario:Number(p.preco||0)};
+    if(!Array.isArray(carrinho))carrinho=[];
+    carrinho.push(item);
+    if(typeof salvarEstado==='function')salvarEstado();
+    if(typeof atualizarCarrinho==='function')atualizarCarrinho();
+    if(typeof mostrarToast==='function')mostrarToast(`${p.nome} adicionado ao pedido.`);
+  }
+  window.adicionarCrossSell=adicionarCrossSell;
+
+  function montarCrossSell(produtoId){
+    const host=document.querySelector('.produto-sheet-corpo');
+    if(!host)return;
+    document.getElementById('m360CrossSell')?.remove();
+    const todos=typeof restauranteAtual!=='undefined' && Array.isArray(restauranteAtual.produtos)?window.restauranteAtual.produtos:[];
+    const preferidos=todos.filter(p=>String(p.id)!==String(produtoId) && ['bebidas','porcoes'].includes(String(p.categoria))).slice(0,3);
+    const fallback=todos.filter(p=>String(p.id)!==String(produtoId)).slice(0,3);
+    const lista=(preferidos.length?preferidos:fallback).slice(0,3);
+    if(!lista.length)return;
+    const sec=document.createElement('section');
+    sec.id='m360CrossSell';sec.className='m360-crosssell';
+    sec.innerHTML=`<div class="m360-cross-title">Combina perfeitamente com</div><div class="m360-cross-list">${lista.map(p=>`<article class="m360-cross-card"><img class="m360-cross-img" loading="lazy" src="${esc(p.imagem||'')}" alt="${esc(p.nome)}"><span class="m360-cross-name">${esc(p.nome)}</span><div class="m360-cross-bottom"><span class="m360-cross-price">${formatarPreco(p.preco)}</span><button type="button" class="m360-cross-btn" aria-label="Adicionar ${esc(p.nome)}" onclick="adicionarCrossSell('${esc(p.id)}')">+</button></div></article>`).join('')}</div>`;
+    const actions=host.querySelector('.produto-sheet-quantidade-row');
+    host.insertBefore(sec,actions||null);
+  }
+
+  if(typeof window.abrirProdutoPorId==='function'){
+    const originalAbrirProduto=window.abrirProdutoPorId;
+    window.abrirProdutoPorId=function(id){
+      originalAbrirProduto.apply(this,arguments);
+      requestAnimationFrame(()=>{
+        const p=uiProduct(id);
+        if(!p)return;
+        montarCrossSell(p.id);
+        const actions=document.querySelector('.produto-sheet-acoes');
+        document.getElementById('btnARProduto')?.remove();
+        if(p.arFoto && actions){
+          const ar=document.createElement('button');
+          ar.id='btnARProduto';ar.type='button';ar.className='btn-ar';
+          ar.setAttribute('aria-label','Ver este produto na minha mesa em realidade aumentada');
+          ar.textContent='📱 Ver na minha mesa (AR)';
+          ar.onclick=()=>abrirARFoto();
+          actions.insertBefore(ar,actions.firstChild);
+        }
+      });
+    };
+  }
+
+  // Busca instantânea e filtros sem tocar na lógica do catálogo/Supabase.
+  function aplicarBuscaFiltro(){
+    const q=(document.getElementById('m360Search')?.value||'').trim().toLowerCase();
+    const filtro=document.querySelector('.m360-filter.ativo')?.dataset.filter||'todos';
+    const cards=[...document.querySelectorAll('#listaProdutos .produto')];
+    const produtos=typeof restauranteAtual!=='undefined' && Array.isArray(restauranteAtual.produtos)?window.restauranteAtual.produtos:[];
+    cards.forEach(card=>{
+      const nome=card.querySelector('h2')?.textContent?.toLowerCase()||'';
+      const desc=card.querySelector('p')?.textContent?.toLowerCase()||'';
+      const id=card.getAttribute('onclick')?.match(/abrirProdutoPorId\('([^']+)'\)/)?.[1];
+      const p=id?uiProduct(id):null;
+      let ok=!q || `${nome} ${desc}`.includes(q);
+      if(filtro==='preco25')ok=ok&&Number(p?.preco||0)<=25;
+      if(filtro==='combos')ok=ok&&!!p?.combo;
+      if(filtro==='promocao')ok=ok&&Number(p?.precoOriginal||0)>Number(p?.preco||0);
+      card.style.display=ok?'':'none';
+    });
+  }
+  function centralizarCategoria(btn){
+    if(!btn)return;
+    btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }
+  window.mesa360BuscaRapida=aplicarBuscaFiltro;
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const input=document.getElementById('m360Search');
+    const clear=document.getElementById('m360SearchClear');
+    input?.addEventListener('input',()=>{if(clear)clear.classList.toggle('show',!!input.value);aplicarBuscaFiltro()});
+    clear?.addEventListener('click',()=>{if(input){input.value='';input.focus();}clear.classList.remove('show');aplicarBuscaFiltro()});
+    document.querySelectorAll('.m360-filter').forEach(btn=>btn.addEventListener('click',()=>{
+      document.querySelectorAll('.m360-filter').forEach(x=>x.classList.remove('ativo'));btn.classList.add('ativo');aplicarBuscaFiltro();
+    }));
+    document.querySelector('.categorias')?.addEventListener('click',e=>{
+      const btn=e.target.closest('.categoria');if(btn)requestAnimationFrame(()=>centralizarCategoria(btn));
+    });
+    // Skeleton visual durante a primeira pintura do catálogo.
+    document.querySelectorAll('#listaProdutos .produto-imagem-wrap img').forEach(img=>{
+      if(!img.complete){img.classList.add('m360-skeleton');img.addEventListener('load',()=>img.classList.remove('m360-skeleton'),{once:true});img.addEventListener('error',()=>img.classList.remove('m360-skeleton'),{once:true});}
+    });
+    setTimeout(atualizarFreteGratis,250);
+  });
+})();
+
 </script>
 </body>
 </html>
