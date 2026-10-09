@@ -517,6 +517,7 @@ let restauranteAtual={
 
 let adicionaisDisponiveis=[];
 let adicionaisPorProduto=new Map();
+let gruposPersonalizacaoPorProduto=new Map();
 let combosDisponiveis=[];
 let comboItensPorId=new Map();
 let carrinho=JSON.parse(localStorage.getItem(storageKey('carrinho'))||'[]');
@@ -640,6 +641,30 @@ async function carregarCatalogoDoSupabase(){
      productAddonsDB=pa.data||[];
    }
 
+   // Personalização estruturada é opcional até a migração SQL ser aplicada.
+   // Erros por tabelas/colunas ainda não existentes não interrompem o cardápio atual.
+   let ingredientesPorProduto=new Map();
+   let gruposCustomDB=[], opcoesCustomDB=[], vinculosCustomDB=[];
+   if(produtosDB.length){
+     const idsProdutos=produtosDB.map(p=>p.id);
+     const [ingredientesResp,gruposResp,vinculosResp]=await Promise.all([
+       menuSupabase.from('products').select('id,ingredients').in('id',idsProdutos),
+       menuSupabase.from('customization_groups').select('id,restaurant_id,name,selection_type,min_select,max_select,display_order').eq('restaurant_id',restaurante.id).eq('is_active',true).order('display_order',{ascending:true}),
+       menuSupabase.from('product_customization_groups').select('product_id,group_id,display_order').in('product_id',idsProdutos).order('display_order',{ascending:true})
+     ]);
+     if(!ingredientesResp.error)(ingredientesResp.data||[]).forEach(x=>ingredientesPorProduto.set(x.id,Array.isArray(x.ingredients)?x.ingredients:[]));
+     if(!gruposResp.error && !vinculosResp.error){
+       gruposCustomDB=gruposResp.data||[];vinculosCustomDB=vinculosResp.data||[];
+       if(gruposCustomDB.length){
+         const op=await menuSupabase.from('customization_options').select('id,group_id,name,price_modifier,is_available,display_order').in('group_id',gruposCustomDB.map(g=>g.id)).eq('is_available',true).order('display_order',{ascending:true});
+         if(!op.error)opcoesCustomDB=op.data||[];
+       }
+     }
+   }
+   const grupoPorId=new Map(gruposCustomDB.map(g=>[g.id,{...g,options:opcoesCustomDB.filter(o=>o.group_id===g.id)}]));
+   gruposPersonalizacaoPorProduto=new Map();
+   vinculosCustomDB.forEach(v=>{const g=grupoPorId.get(v.group_id);if(g&&g.options.length){if(!gruposPersonalizacaoPorProduto.has(v.product_id))gruposPersonalizacaoPorProduto.set(v.product_id,[]);gruposPersonalizacaoPorProduto.get(v.product_id).push(g);}});
+
    const categoriaPorId=new Map(categoriasDB.map(c=>[c.id,c]));
    const arPorProduto=new Map(arDB.map(a=>[a.product_id,a]));
    const addonPorId=new Map(addonsDB.map(a=>[a.id,a]));
@@ -662,6 +687,7 @@ async function carregarCatalogoDoSupabase(){
      const ehArDemo=(String(db.name||'').trim().toLowerCase()===MESA360_AR_DEMO_PRODUTO);
      return {
        id:'db-'+db.id,dbId:db.id,nome:db.name,descricao:db.description||'',preco:Number(db.price||0),
+       ingredientes:ingredientesPorProduto.get(db.id)||[],
        categoria,imagem:resolverImagemSupabase(db.image_url,fallback,db.name),disponivel:true,
        ar:ehArDemo,arScale:ehArDemo?(ar?.ar_scale||'realista'):'disabled',arFoto:ehArDemo?MESA360_AR_DEMO_FOTO:null,combo:false
      };
@@ -877,36 +903,62 @@ function filtrarProdutos(cat,btn){
 function renderizarCustomizacao(p){
  const box=$('customizacaoProduto'),comboBox=$('opcoesCombo');
  box.style.display='none';box.innerHTML='';comboBox.style.display='none';comboBox.innerHTML='';
- if(p?.dbId && p.categoria==='burgers'){
+ const parts=[];
+ const ingredientes=Array.isArray(p?.ingredientes)?p.ingredientes:[];
+ const ingredientesValidos=ingredientes.map((x,i)=>typeof x==='string'?{id:`ing-${i}`,name:x}:{id:String(x?.id||`ing-${i}`),name:String(x?.name||x?.nome||'').trim()}).filter(x=>x.name);
+ if(ingredientesValidos.length){
+   parts.push(`<section class="m360-custom-group"><div class="customizacao-titulo">Retirar ingredientes</div><div class="customizacao-sub">Marque o que você prefere sem.</div><div class="addon-lista">${ingredientesValidos.map(x=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="ingrediente-remover-check" value="${escaparHtml(x.id)}" data-nome="${escaparHtml(x.name)}"><span class="addon-nome">Sem ${escaparHtml(x.name)}</span></span></label>`).join('')}</div></section>`);
+ }
+ const grupos=p?.dbId?(gruposPersonalizacaoPorProduto.get(p.dbId)||[]):[];
+ grupos.forEach(g=>{
+   const required=Number(g.min_select||0)>0;
+   const hint=required?`Escolha pelo menos ${g.min_select}.`:(g.max_select!==null&&g.max_select!==undefined?`Escolha até ${g.max_select}.`:'Escolha conforme sua preferência.');
+   parts.push(`<section class="m360-custom-group" data-group-id="${escaparHtml(g.id)}" data-selection-type="${escaparHtml(g.selection_type)}" data-min-select="${Number(g.min_select||0)}" data-max-select="${g.max_select===null||g.max_select===undefined?'':Number(g.max_select)}"><div class="customizacao-titulo">${escaparHtml(g.name)}${required?' *':''}</div><div class="customizacao-sub">${hint}</div><div class="addon-lista">${g.options.map(o=>`<label class="addon-opcao"><span class="addon-esq"><input type="${g.selection_type==='single'?'radio':'checkbox'}" name="custom-group-${escaparHtml(g.id)}" class="custom-option-check" value="${escaparHtml(o.id)}" data-group-id="${escaparHtml(g.id)}" data-nome="${escaparHtml(o.name)}" data-preco="${Number(o.price_modifier||0)}"><span class="addon-nome">${escaparHtml(o.name)}</span></span><span class="addon-preco">${Number(o.price_modifier||0)>0?'+ '+formatarPreco(o.price_modifier):'Incluído'}</span></label>`).join('')}</div></section>`);
+ });
+ if(p?.dbId){
    const addons=adicionaisPorProduto.get(p.dbId)||[];
    if(addons.length){
-     box.style.display='grid';
-     box.innerHTML=`<div class="customizacao-titulo">Personalize seu hambúrguer</div><div class="customizacao-sub">Escolha os adicionais que quiser.</div><div class="addon-lista">${addons.map(a=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="addon-check" value="${a.id}" data-nome="${a.name}" data-preco="${a.price}"><span class="addon-nome">${escaparHtml(a.name)}</span></span><span class="addon-preco">+ ${formatarPreco(a.price)}</span></label>`).join('')}</div>`;
+     parts.push(`<section class="m360-custom-group"><div class="customizacao-titulo">Adicionais</div><div class="customizacao-sub">Adicione extras ao seu produto.</div><div class="addon-lista">${addons.map(a=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="addon-check" value="${escaparHtml(a.id)}" data-nome="${escaparHtml(a.name)}" data-preco="${Number(a.price||0)}"><span class="addon-nome">${escaparHtml(a.name)}</span></span><span class="addon-preco">+ ${formatarPreco(a.price)}</span></label>`).join('')}</div></section>`);
    }
- }else if(p?.combo){
+ }
+ if(p?.combo){
    comboBox.style.display='grid';
    const burgers=restauranteAtual.produtos.filter(x=>x.categoria==='burgers');
    const porcoes=restauranteAtual.produtos.filter(x=>x.categoria==='porcoes');
    const bebidas=restauranteAtual.produtos.filter(x=>x.categoria==='bebidas');
-   comboBox.innerHTML=`<div><label for="comboBurger">Hambúrguer do combo *</label><select id="comboBurger"><option value="">Escolha o hambúrguer</option>${burgers.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>
-   <div><label for="comboPorcao">Porção do combo *</label><select id="comboPorcao"><option value="">Escolha a porção</option>${porcoes.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>
-   <div><label for="comboBebida">Bebida do combo *</label><select id="comboBebida"><option value="">Escolha a bebida</option>${bebidas.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>`;
+   comboBox.innerHTML=`<div><label for="comboBurger">Hambúrguer do combo *</label><select id="comboBurger"><option value="">Escolha o hambúrguer</option>${burgers.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div><div><label for="comboPorcao">Porção do combo *</label><select id="comboPorcao"><option value="">Escolha a porção</option>${porcoes.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div><div><label for="comboBebida">Bebida do combo *</label><select id="comboBebida"><option value="">Escolha a bebida</option>${bebidas.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>`;
  }
+ if(parts.length){box.style.display='grid';box.innerHTML=parts.join('');}
+ box.innerHTML += `<div><label for="observacaoItem">Observação do item</label><textarea id="observacaoItem" placeholder="Ex.: molho à parte, ponto da carne" maxlength="140"></textarea></div>`;
  box.style.display='grid';
- box.innerHTML += `<div><label for="observacaoItem">Observação do item</label><textarea id="observacaoItem" placeholder="Ex.: sem cebola, molho à parte" maxlength="140"></textarea></div>`;
- box.querySelectorAll('.addon-check').forEach(el=>el.addEventListener('change',atualizarTotalProduto));
+ box.querySelectorAll('.addon-check,.custom-option-check').forEach(el=>el.addEventListener('change',()=>{validarLimitesGrupo(el);atualizarTotalProduto()}));
  atualizarTotalProduto();
 }
+function validarLimitesGrupo(el){
+ const group=el?.closest('[data-group-id]');if(!group)return true;
+ const max=group.dataset.maxSelect===''?null:Number(group.dataset.maxSelect);
+ const selecionados=[...group.querySelectorAll('.custom-option-check:checked')];
+ if(max!==null&&selecionados.length>max){el.checked=false;mostrarToast(`Escolha no máximo ${max} opção(ões) em ${group.querySelector('.customizacao-titulo')?.textContent||'este grupo'}.`);return false;}
+ return true;
+}
+function validarPersonalizacao(){
+ for(const group of document.querySelectorAll('#customizacaoProduto [data-group-id]')){
+   const min=Number(group.dataset.minSelect||0),max=group.dataset.maxSelect===''?null:Number(group.dataset.maxSelect);
+   const count=group.querySelectorAll('.custom-option-check:checked').length;
+   const nome=group.querySelector('.customizacao-titulo')?.textContent||'Este grupo';
+   if(count<min){mostrarToast(`Escolha pelo menos ${min} opção(ões) em ${nome}.`);group.scrollIntoView({behavior:'smooth',block:'center'});return false;}
+   if(max!==null&&count>max){mostrarToast(`Escolha no máximo ${max} opção(ões) em ${nome}.`);group.scrollIntoView({behavior:'smooth',block:'center'});return false;}
+ }
+ return true;
+}
 function precoConfiguradoProduto(){
- const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
- if(!p)return 0;
- const addons=[...document.querySelectorAll('#customizacaoProduto .addon-check:checked')].reduce((s,x)=>s+Number(x.dataset.preco||0),0);
+ const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);if(!p)return 0;
+ const addons=[...document.querySelectorAll('#customizacaoProduto .addon-check:checked,#customizacaoProduto .custom-option-check:checked')].reduce((s,x)=>s+Number(x.dataset.preco||0),0);
  return Number(p.preco||0)+addons;
 }
 function atualizarTotalProduto(){
  const total=precoConfiguradoProduto()*Math.max(1,quantidadeProdutoAtual);
- const botao=$('btnAdicionarProduto');
- if(botao)botao.textContent=`Adicionar ao carrinho • ${formatarPreco(total)}`;
+ const botao=$('btnAdicionarProduto');if(botao)botao.textContent=`Adicionar ao Pedido • ${formatarPreco(total)}`;
 }
 function abrirProdutoPorId(id){
  const p=restauranteAtual.produtos.find(x=>x.id===id);if(!p)return;
@@ -1546,7 +1598,9 @@ function limparARFotoSessao(){
 function alterarQuantidadeProduto(v){quantidadeProdutoAtual=Math.max(1,quantidadeProdutoAtual+v);$('quantidadeProduto').textContent=quantidadeProdutoAtual;atualizarTotalProduto()}
 function coletarCustomizacao(){
  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
- const addons=[...document.querySelectorAll('.addon-check:checked')].map(x=>({id:x.value,nome:x.dataset.nome,preco:Number(x.dataset.preco)}));
+ const addons=[...document.querySelectorAll('#customizacaoProduto .addon-check:checked')].map(x=>({id:x.value,nome:x.dataset.nome,preco:Number(x.dataset.preco)}));
+ const opcoesPersonalizadas=[...document.querySelectorAll('#customizacaoProduto .custom-option-check:checked')].map(x=>({id:x.value,grupoId:x.dataset.groupId,nome:x.dataset.nome,preco:Number(x.dataset.preco||0)}));
+ const ingredientesRemovidos=[...document.querySelectorAll('#customizacaoProduto .ingrediente-remover-check:checked')].map(x=>x.dataset.nome);
  let combo=null;
  if(p?.combo){
    const b=$('comboBurger')?.value,poc=$('comboPorcao')?.value,bev=$('comboBebida')?.value;
@@ -1557,13 +1611,14 @@ function coletarCustomizacao(){
    combo={hamburguer:bp.nome,porcao:pp.nome,bebida:vp.nome};
  }
  const observacao=document.getElementById('observacaoItem')?.value.trim()||'';
- return {addons,combo,observacao};
+ return {addons,opcoesPersonalizadas,ingredientesRemovidos,combo,observacao};
 }
 function adicionarProdutoAtual(){
  const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);if(!p)return;
+ if(!validarPersonalizacao())return;
  const custom=coletarCustomizacao();if(custom===null)return;
- const addonTotal=custom.addons.reduce((s,a)=>s+a.preco,0);
- const item={id:`${p.id}-${Date.now()}`,produtoId:p.id,nome:p.nome,preco:p.preco,quantidade:quantidadeProdutoAtual,addons:custom.addons,combo:custom.combo,observacao:custom.observacao||''};
+ const addonTotal=custom.addons.reduce((s,a)=>s+a.preco,0)+custom.opcoesPersonalizadas.reduce((s,a)=>s+a.preco,0);
+ const item={id:`${p.id}-${Date.now()}`,produtoId:p.id,nome:p.nome,preco:p.preco,quantidade:quantidadeProdutoAtual,addons:custom.addons,opcoesPersonalizadas:custom.opcoesPersonalizadas,ingredientesRemovidos:custom.ingredientesRemovidos,combo:custom.combo,observacao:custom.observacao||''};
  item.precoUnitario=p.preco+addonTotal;
  carrinho.push(item);
  try{
@@ -1617,7 +1672,7 @@ function renderizarUpsellCarrinho(){
 function renderizarCarrinho(){
  const lista=$('carrinhoLista'),fin=$('carrinhoFinalizacao');
  if(!carrinho.length){lista.innerHTML='<div class="carrinho-vazio">Seu pedido está vazio. Escolha seus favoritos no cardápio.</div>';fin.style.display='none';$('acoesMesaOperacao').style.display='none';renderizarUpsellCarrinho();return}
- lista.innerHTML=carrinho.map((i,idx)=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.quantidade}x ${escaparHtml(i.nome)}</div><div class="item-carrinho-preco">${formatarPreco(i.precoUnitario||i.preco)} cada${i.addons?.length?`<br>+ ${i.addons.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.combo?`<br>Combo: ${escaparHtml(i.combo.hamburguer||'')} + ${escaparHtml(i.combo.porcao||'')} + ${escaparHtml(i.combo.bebida||'')}`:''}${i.observacao?`<br>Obs.: ${escaparHtml(i.observacao)}`:''}</div></div><div class="item-controles"><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},1)">+</button><button class="item-btn" type="button" onclick="removerItemCarrinho(${idx})" aria-label="Remover">×</button></div></div>`).join('');
+ lista.innerHTML=carrinho.map((i,idx)=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.quantidade}x ${escaparHtml(i.nome)}</div><div class="item-carrinho-preco">${formatarPreco(i.precoUnitario||i.preco)} cada${i.addons?.length?`<br>+ ${i.addons.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.opcoesPersonalizadas?.length?`<br>Opções: ${i.opcoesPersonalizadas.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.ingredientesRemovidos?.length?`<br>Sem: ${i.ingredientesRemovidos.map(a=>escaparHtml(a)).join(', ')}`:''}${i.combo?`<br>Combo: ${escaparHtml(i.combo.hamburguer||'')} + ${escaparHtml(i.combo.porcao||'')} + ${escaparHtml(i.combo.bebida||'')}`:''}${i.observacao?`<br>Obs.: ${escaparHtml(i.observacao)}`:''}</div></div><div class="item-controles"><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},1)">+</button><button class="item-btn" type="button" onclick="removerItemCarrinho(${idx})" aria-label="Remover">×</button></div></div>`).join('');
  const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega();
  $('resumoTaxas').innerHTML=`<div><span>Subtotal: </span><strong>${formatarPreco(subtotal)}</strong></div>${taxa?`<div><span>Taxa de entrega: </span><strong>${formatarPreco(taxa)}</strong></div>`:'<div><span>Taxa de entrega: </span><strong>R$ 0,00</strong></div>'}`;
  $('carrinhoTotal').textContent=formatarPreco(calcularTotal());
@@ -1754,7 +1809,7 @@ async function registrarPedidoSupabase({nome,telefone,mesaAtual,endereco,forma,t
      unit_price:Number(i.precoUnitario||i.preco),
      quantity:Number(i.quantidade),
      variant_name:i.combo?`Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}`:null,
-     observation:[i.addons?.length?`Adicionais: ${i.addons.map(a=>a.nome).join(', ')}`:'',i.observacao?`Obs.: ${i.observacao}`:''].filter(Boolean).join(' | ')||null
+     observation:[i.addons?.length?`Adicionais: ${i.addons.map(a=>a.nome).join(', ')}`:'',i.opcoesPersonalizadas?.length?`Personalização: ${i.opcoesPersonalizadas.map(a=>a.nome).join(', ')}`:'',i.ingredientesRemovidos?.length?`Sem: ${i.ingredientesRemovidos.join(', ')}`:'',i.observacao?`Obs.: ${i.observacao}`:''].filter(Boolean).join(' | ')||null
    };
  });
  const {data:pedidoCriado,error}=await menuSupabase.rpc('criar_pedido_publico',{pedido,itens});
@@ -2054,9 +2109,9 @@ function abrirMinhaConta(){renderizarMinhaConta();const m=$('mesaMinhaConta');if
 function fecharMinhaConta(event){if(event&&event.target!==event.currentTarget)return;const m=$('mesaMinhaConta');if(m)m.classList.remove('open');if(!document.querySelector('.modal.ativo')&&!document.querySelector('.mesa-conta-overlay.open')&&!document.querySelector('.mesa-track-overlay.open')&&!document.querySelector('.mesa-confirm-overlay.open'))document.body.style.overflow='';}
 function salvarPerfilMesa360(){const nome=($('mesaContaNome')?.value||'').trim();const telefone=($('mesaContaTelefone')?.value||'').trim();if(!nome)return mostrarToast('Informe seu nome.');if(!telefone)return mostrarToast('Informe seu WhatsApp/telefone.');localStorage.setItem(storageKey('nome_cliente'),nome);localStorage.setItem(storageKey('telefone_cliente'),telefone);if($('clienteNome'))$('clienteNome').value=nome;if($('clienteTelefone'))$('clienteTelefone').value=telefone;mostrarToast('Seus dados foram salvos.');}
 function acompanharHistoricoMesa360(index){const p=mesa360HistoricoPedidos()[index];if(!p)return;window.mesa360UltimoPedido={id:p.id||null,codigo:p.codigo,total:p.total,tipo:p.tipo,status:p.status||'pending'};localStorage.setItem(storageKey('ultimo_pedido'),p.codigo||'');if(p.id)localStorage.setItem(storageKey('ultimo_pedido_id'),p.id);fecharMinhaConta();setTimeout(()=>abrirAcompanhamentoPedido(),80);}
-function repetirPedidoMesa360(index){const p=mesa360HistoricoPedidos()[index];if(!p||!Array.isArray(p.itens)||!p.itens.length)return mostrarToast('Os itens deste pedido não estão disponíveis para repetir.');let adicionados=0;for(const h of p.itens){const produto=restauranteAtual.produtos.find(x=>x.id===h.produtoId||x.dbId===h.produtoId||x.nome===h.nome);if(!produto)continue;const qtd=Math.max(1,Number(h.quantidade)||1);const item={produtoId:produto.id,nome:produto.nome,preco:Number(h.precoUnitario||produto.preco||0),precoUnitario:Number(h.precoUnitario||produto.preco||0),quantidade:qtd,addons:Array.isArray(h.addons)?h.addons:[],observacao:h.observacao||'',imagem:produto.imagem||''};carrinho.push(item);adicionados++;}if(adicionados){salvarEstado();atualizarContadorCarrinho();fecharMinhaConta();mostrarToast(`${adicionados} item(ns) adicionados ao pedido.`);abrirCarrinho();}else mostrarToast('Não encontramos os produtos deste pedido no cardápio atual.');}
+function repetirPedidoMesa360(index){const p=mesa360HistoricoPedidos()[index];if(!p||!Array.isArray(p.itens)||!p.itens.length)return mostrarToast('Os itens deste pedido não estão disponíveis para repetir.');let adicionados=0;for(const h of p.itens){const produto=restauranteAtual.produtos.find(x=>x.id===h.produtoId||x.dbId===h.produtoId||x.nome===h.nome);if(!produto)continue;const qtd=Math.max(1,Number(h.quantidade)||1);const item={produtoId:produto.id,nome:produto.nome,preco:Number(h.precoUnitario||produto.preco||0),precoUnitario:Number(h.precoUnitario||produto.preco||0),quantidade:qtd,addons:Array.isArray(h.addons)?h.addons:[],opcoesPersonalizadas:Array.isArray(h.opcoesPersonalizadas)?h.opcoesPersonalizadas:[],ingredientesRemovidos:Array.isArray(h.ingredientesRemovidos)?h.ingredientesRemovidos:[],observacao:h.observacao||'',imagem:produto.imagem||''};carrinho.push(item);adicionados++;}if(adicionados){salvarEstado();atualizarContadorCarrinho();fecharMinhaConta();mostrarToast(`${adicionados} item(ns) adicionados ao pedido.`);abrirCarrinho();}else mostrarToast('Não encontramos os produtos deste pedido no cardápio atual.');}
 function atualizarHistoricoAposPedidoMesa360(){
- const p=window.mesa360UltimoPedido;if(!p)return;const carrinhoAnterior=window.__mesa360CarrinhoAntesEnvio||[];salvarHistoricoPedidoMesa360({id:p.id||null,codigo:p.codigo,total:p.total,tipo:p.tipo,status:p.status||'pending',data:new Date().toISOString(),itens:carrinhoAnterior.map(i=>({produtoId:i.produtoId,nome:i.nome,precoUnitario:Number(i.precoUnitario||i.preco||0),quantidade:Number(i.quantidade)||1,addons:Array.isArray(i.addons)?i.addons.map(a=>({nome:a.nome,preco:Number(a.preco)||0})):[],observacao:i.observacao||''}))});}
+ const p=window.mesa360UltimoPedido;if(!p)return;const carrinhoAnterior=window.__mesa360CarrinhoAntesEnvio||[];salvarHistoricoPedidoMesa360({id:p.id||null,codigo:p.codigo,total:p.total,tipo:p.tipo,status:p.status||'pending',data:new Date().toISOString(),itens:carrinhoAnterior.map(i=>({produtoId:i.produtoId,nome:i.nome,precoUnitario:Number(i.precoUnitario||i.preco||0),quantidade:Number(i.quantidade)||1,addons:Array.isArray(i.addons)?i.addons.map(a=>({nome:a.nome,preco:Number(a.preco)||0})):[],opcoesPersonalizadas:Array.isArray(i.opcoesPersonalizadas)?i.opcoesPersonalizadas.map(a=>({nome:a.nome,preco:Number(a.preco)||0,grupoId:a.grupoId})):[],ingredientesRemovidos:Array.isArray(i.ingredientesRemovidos)?i.ingredientesRemovidos.slice():[],observacao:i.observacao||''}))});}
 const mesa360ProcessarCheckoutOriginal=window.processarCheckout;
 </script>
 
