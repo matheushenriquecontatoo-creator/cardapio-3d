@@ -47,7 +47,6 @@
       <button data-view="products" onclick="go('products')">Produtos</button>
       <button data-view="categories" onclick="go('categories')">Categorias</button>
       <button data-view="addons" onclick="go('addons')">Adicionais</button>
-      <button data-view="customization" onclick="go('customization')">Personalização</button>
       <button data-view="combos" onclick="go('combos')">Combos</button>
       <div class="group">Gestão</div>
       <button data-view="customers" onclick="go('customers')">Clientes / CRM</button>
@@ -131,13 +130,6 @@
         <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Preço</th><th>Disponível</th><th>Ações</th></tr></thead><tbody id="addonsBody"></tbody></table></div></div>
       </section>
 
-      <section id="view-customization" class="view">
-        <div class="page-title"><div><h1>Personalização de produtos</h1><p>Configure grupos, opções pagas e ingredientes que o cliente pode retirar.</p></div><button class="btn primary" onclick="openCustomGroup()">+ Novo grupo</button></div>
-        <div id="customizationNotice" class="notice warn">Carregando estrutura de personalização…</div>
-        <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Grupo</th><th>Tipo</th><th>Limites</th><th>Opções</th><th>Status</th><th>Ações</th></tr></thead><tbody id="customGroupsBody"></tbody></table></div></div>
-        <div class="notice" style="margin-top:12px">Para cada produto, vincule os grupos e cadastre os ingredientes incluídos na tela Produtos → Editar. Os grupos e opções são reutilizáveis dentro do mesmo restaurante.</div>
-      </section>
-
       <section id="view-combos" class="view">
         <div class="page-title"><div><h1>Combos</h1><p>Crie, edite e monte combos usando os produtos do restaurante.</p></div><button class="btn primary" onclick="openCombo()">+ Novo combo</button></div>
         <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Preço</th><th>Status</th><th>Itens</th><th>Ações</th></tr></thead><tbody id="combosBody"></tbody></table></div></div>
@@ -200,7 +192,6 @@ const SUPABASE_KEY="sb_publishable_G0tSaqoDOryj5LXHnQAZeQ_YhKWfLHn";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let session=null,profile=null,restaurant=null,settings=null;
 let products=[],categories=[],orders=[],addons=[],combos=[],tables=[],productModels=[],arConfigs=[],productAddons=[],comboItems=[],orderItems=[],payments=[],customers=[],cashSessions=[],cashMovements=[],drivers=[],coupons=[],loyaltyAccounts=[],teamProfiles=[];
-let customizationGroups=[],customizationOptions=[],productCustomizationGroups=[],customizationSchemaReady=false;
 let currentOrderFilter="all", realtimeChannel=null, audioCtx=null;
 
 const $=id=>document.getElementById(id);
@@ -339,15 +330,6 @@ async function loadAll(){
     productModels=pm.data||[];arConfigs=ar.data||[];productAddons=pa.data||[];comboItems=ci.data||[];
     orderItems=oi.data||[];payments=pay.data||[];
 
-    // Personalização é carregada separadamente para que a ausência da migração não derrube o painel.
-    customizationSchemaReady=false;customizationGroups=[];customizationOptions=[];productCustomizationGroups=[];
-    const [cg,co2,pcg]=await Promise.all([
-      sb.from("customization_groups").select("*").eq("restaurant_id",restaurant.id).order("display_order").order("name"),
-      sb.from("customization_options").select("*").order("display_order").order("name"),
-      productIds.length?sb.from("product_customization_groups").select("*").in("product_id",productIds):Promise.resolve({data:[],error:null})
-    ]);
-    if(!cg.error&&!co2.error&&!pcg.error){customizationGroups=cg.data||[];customizationOptions=(co2.data||[]).filter(o=>customizationGroups.some(g=>g.id===o.group_id));productCustomizationGroups=pcg.data||[];customizationSchemaReady=true;}
-
     const byOrder={};
     orderItems.forEach(i=>(byOrder[i.order_id]??=[]).push(i));
     orders.forEach(o=>o.items=byOrder[o.id]||[]);
@@ -356,7 +338,7 @@ async function loadAll(){
     renderOnboarding();
   }catch(e){err(e,"Carregamento dos dados")}
 }
-function renderAll(){renderProducts();renderCategories();renderOrders();renderKDS();renderTables();renderAddons();renderCustomization();renderCombos();renderDashboard();renderCustomers();renderDelivery();renderReports();renderCash();renderCoupons();renderTeam();renderOnboarding();renderBilling()}
+function renderAll(){renderProducts();renderCategories();renderOrders();renderKDS();renderTables();renderAddons();renderCombos();renderDashboard();renderCustomers();renderDelivery();renderReports();renderCash();renderCoupons();renderTeam();renderOnboarding();renderBilling()}
 function onboardingState(){
   const checks=[
     {key:'identity',label:'Identidade do restaurante',done:!!restaurant?.name&&!!restaurant?.slug,action:"go('settings')",button:'Configurar'},
@@ -421,9 +403,9 @@ function slugify(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036
 function renderProducts(){
   const q=($("productSearch")?.value||"").toLowerCase();
   const rows=products.filter(p=>p.name.toLowerCase().includes(q)).map(p=>{
-    const model=modelFor(p.id),ar=arFor(p.id),adds=addonIdsFor(p.id).length,groups=productCustomizationGroups.filter(x=>x.product_id===p.id).length;
+    const model=modelFor(p.id),ar=arFor(p.id),adds=addonIdsFor(p.id).length;
     return `<tr>
-      <td><div style="display:flex;align-items:center;gap:9px"><img class="thumb" src="${esc(p.image_url||"")}" onerror="this.style.visibility='hidden'"><div><b>${esc(p.name)}</b><div style="display:flex;gap:4px;margin-top:4px">${model?'<span class="badge blue">3D</span>':""}${ar?.ar_enabled?'<span class="badge green">AR</span>':""}${adds?`<span class="badge">${adds} adicional(is)</span>`:""}${groups?`<span class="badge">${groups} grupo(s)</span>`:""}</div></div></div></td>
+      <td><div style="display:flex;align-items:center;gap:9px"><img class="thumb" src="${esc(p.image_url||"")}" onerror="this.style.visibility='hidden'"><div><b>${esc(p.name)}</b><div style="display:flex;gap:4px;margin-top:4px">${model?'<span class="badge blue">3D</span>':""}${ar?.ar_enabled?'<span class="badge green">AR</span>':""}${adds?`<span class="badge">${adds} adicional(is)</span>`:""}</div></div></div></td>
       <td>${esc(p.categories?.name||"Sem categoria")}</td><td>${money(p.price)}</td>
       <td><button class="btn small ${p.is_available?"success":""}" onclick="toggleAvailable('${p.id}')">${p.is_available?"Disponível":"Esgotado"}</button></td>
       <td>${p.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td>
@@ -433,8 +415,6 @@ function renderProducts(){
 }
 function productForm(p={}){
   const selected=addonIdsFor(p.id);
-  const selectedCustomGroups=productCustomizationGroups.filter(x=>x.product_id===p.id).map(x=>x.group_id);
-  const ingredientNames=(Array.isArray(p.ingredients)?p.ingredients:[]).map(x=>typeof x==='string'?x:(x?.name||x?.nome||'')).filter(Boolean).join(', ');
   const model=modelFor(p.id)||{};
   const ar=arFor(p.id)||{};
   return `<h2>${p.id?"Editar produto":"Novo produto"}</h2>
@@ -448,8 +428,6 @@ function productForm(p={}){
     <div class="field"><label class="check"><input id="pfAvailable" type="checkbox" ${p.is_available!==false?"checked":""}> Disponível</label></div>
     <div class="field"><label class="check"><input id="pfActive" type="checkbox" ${p.is_active!==false?"checked":""}> Ativo no cardápio</label></div>
     <div class="field full"><label>Adicionais permitidos</label><div class="grid3">${addons.length?addons.map(a=>`<label class="check" style="padding:8px;background:#0d141c;border:1px solid var(--border);border-radius:8px"><input class="pfAddon" type="checkbox" value="${a.id}" ${selected.includes(a.id)?"checked":""}> ${esc(a.name)} · ${money(a.price)}</label>`).join(""):`<span class="notice">Cadastre adicionais primeiro.</span>`}</div></div>
-    <div class="field full"><label>Ingredientes incluídos (separados por vírgula)</label><input id="pfIngredients" class="input" value="${esc(ingredientNames)}" placeholder="Pão, carne, queijo, alface, tomate"><small style="color:#8190a0">O cliente poderá marcar quais ingredientes deseja retirar.</small></div>
-    <div class="field full"><label>Grupos de personalização deste produto</label><div class="grid3">${customizationSchemaReady&&customizationGroups.length?customizationGroups.map(g=>`<label class="check" style="padding:8px;background:#0d141c;border:1px solid var(--border);border-radius:8px"><input class="pfCustomGroup" type="checkbox" value="${g.id}" ${selectedCustomGroups.includes(g.id)?"checked":""}> ${esc(g.name)}${g.is_active?"":" (inativo)"}</label>`).join(""):`<span class="notice">${customizationSchemaReady?"Crie grupos na tela Personalização primeiro.":"Aplique a migração SQL de personalização para ativar estes campos."}</span>`}</div></div>
     <div class="field full"><label>Modelo 3D (GLB)</label>
       ${model.model_url?`<div class="notice">Modelo atual: <a href="${esc(model.model_url)}" target="_blank" style="color:#9edfff">abrir modelo</a></div>`:""}
       <input id="pfModel" class="input" type="file" accept=".glb,model/gltf-binary">
@@ -475,9 +453,7 @@ async function saveProduct(id){
     const name=$("pfName").value.trim(),price=Number($("pfPrice").value);
     if(!name)throw new Error("Informe o nome do produto.");
     if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");
-    const ingredients=[$("pfIngredients").value.split(",").map(x=>x.trim()).filter(Boolean)].flat().filter((x,i,a)=>a.findIndex(y=>y.toLocaleLowerCase("pt-BR")===x.toLocaleLowerCase("pt-BR"))===i).map(name=>({name}));
     const payload={restaurant_id:restaurant.id,name,description:$("pfDesc").value.trim()||null,price,category_id:$("pfCat").value||null,display_order:Number($("pfOrder").value)||0,is_available:$("pfAvailable").checked,is_active:$("pfActive").checked};
-    if(customizationSchemaReady)payload.ingredients=ingredients;
     let productId=id;
     if(id){const {error}=await sb.from("products").update(payload).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error}
     else{const {data,error}=await sb.from("products").insert(payload).select("id").single();if(error)throw error;productId=data.id}
@@ -485,11 +461,6 @@ async function saveProduct(id){
     const addonIds=[...document.querySelectorAll(".pfAddon:checked")].map(x=>x.value);
     const {error:delErr}=await sb.from("product_add_ons").delete().eq("product_id",productId);if(delErr)throw delErr;
     if(addonIds.length){const {error:addErr}=await sb.from("product_add_ons").insert(addonIds.map(add_on_id=>({product_id:productId,add_on_id})));if(addErr)throw addErr}
-    if(customizationSchemaReady){
-      const customGroupIds=[...document.querySelectorAll(".pfCustomGroup:checked")].map(x=>x.value);
-      const {error:delCustomErr}=await sb.from("product_customization_groups").delete().eq("product_id",productId);if(delCustomErr)throw delCustomErr;
-      if(customGroupIds.length){const {error:insCustomErr}=await sb.from("product_customization_groups").insert(customGroupIds.map((group_id,display_order)=>({product_id:productId,group_id,display_order})));if(insCustomErr)throw insCustomErr}
-    }
     const modelFile=$("pfModel").files[0],posterFile=$("pfPoster").files[0];
     let modelUrl=$("pfModelUrl").value.trim()||null;
     if(modelFile)modelUrl=await uploadAsset(modelFile,"models",productId);
@@ -636,34 +607,6 @@ async function saveTable(id){
 async function toggleTable(id){
   try{if(!canWrite())throw new Error("Sem permissão.");const t=tables.find(x=>x.id===id);if(!t)return;const openOrders=orders.some(o=>o.table_number===t.table_number&&!["completed","cancelled"].includes(o.status));if(openOrders)return toast("Não desative uma mesa com pedido aberto.");const {error}=await sb.from("tables").update({is_active:false}).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error;await loadAll()}catch(e){err(e,"Mesa")}
 }
-function renderCustomization(){
-  const notice=$("customizationNotice"),body=$("customGroupsBody");if(!notice||!body)return;
-  if(!customizationSchemaReady){notice.textContent="A estrutura do banco ainda não está instalada. Acesse o Supabase e execute Mesa360_Etapa1_Migracao_Personalizacao.sql antes de cadastrar grupos.";body.innerHTML='<tr><td colspan="6" class="empty">Migração necessária.</td></tr>';return;}
-  notice.textContent="Personalização ativa. As alterações ficam isoladas no restaurante atual.";
-  body.innerHTML=customizationGroups.map(g=>{const opts=customizationOptions.filter(o=>o.group_id===g.id);return `<tr><td><b>${esc(g.name)}</b></td><td>${g.selection_type==='single'?'Escolha única':'Múltipla escolha'}</td><td>${g.min_select} mín. · ${g.max_select===null?'sem máximo':g.max_select+' máx.'}</td><td>${opts.map(o=>`${esc(o.name)} (${money(o.price_modifier)})`).join('<br>')||'—'}</td><td>${g.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td><div class="actions"><button class="btn small" onclick="openCustomGroup('${g.id}')">Editar</button><button class="btn small" onclick="toggleCustomGroup('${g.id}')">${g.is_active?'Desativar':'Ativar'}</button></div></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Nenhum grupo cadastrado.</td></tr>';
-}
-function openCustomGroup(id){
-  if(!canWrite())return toast('Sem permissão.');if(!customizationSchemaReady)return toast('Aplique a migração SQL primeiro.');
-  const g=customizationGroups.find(x=>x.id===id)||{name:'',selection_type:'multiple',min_select:0,max_select:null,display_order:customizationGroups.length,is_active:true};
-  const opts=customizationOptions.filter(o=>o.group_id===g.id).sort((a,b)=>a.display_order-b.display_order).map(o=>`${o.name}|${Number(o.price_modifier||0).toFixed(2)}`).join('\n');
-  openModal(`<h2>${id?'Editar grupo':'Novo grupo de personalização'}</h2><div class="field"><label>Nome do grupo</label><input id="cgName" class="input" value="${esc(g.name)}" placeholder="Ex.: Tamanho, Ponto da carne, Queijo"></div><div class="formgrid"><div class="field"><label>Tipo de seleção</label><select id="cgType" class="select"><option value="single" ${g.selection_type==='single'?'selected':''}>Escolha única</option><option value="multiple" ${g.selection_type==='multiple'?'selected':''}>Múltipla escolha</option></select></div><div class="field"><label>Mínimo de escolhas</label><input id="cgMin" class="input" type="number" min="0" value="${Number(g.min_select||0)}"></div><div class="field"><label>Máximo de escolhas (vazio = sem limite)</label><input id="cgMax" class="input" type="number" min="0" value="${g.max_select===null||g.max_select===undefined?'':g.max_select}"></div><div class="field"><label>Ordem</label><input id="cgOrder" class="input" type="number" value="${Number(g.display_order||0)}"></div></div><div class="field"><label>Opções (uma por linha: nome|preço adicional)</label><textarea id="cgOptions" class="textarea" rows="7" placeholder="Pequeno|0\nGrande|5.00\nExtra queijo|3.00">${esc(opts)}</textarea><small style="color:#8190a0">Use preço 0 para opção incluída. O preço adicional não pode ser negativo.</small></div><label class="check"><input id="cgActive" type="checkbox" ${g.is_active?'checked':''}> Grupo ativo</label><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCustomGroup('${id||''}')">Salvar grupo</button></div>`);
-}
-async function saveCustomGroup(id){
-  try{
-    if(!canWrite())throw new Error('Sem permissão.');if(!customizationSchemaReady)throw new Error('Aplique a migração SQL primeiro.');
-    const name=$("cgName").value.trim(),selection_type=$("cgType").value,min_select=Number($("cgMin").value||0),maxRaw=$("cgMax").value.trim(),max_select=maxRaw===''?null:Number(maxRaw),display_order=Number($("cgOrder").value)||0,is_active=$("cgActive").checked;
-    if(!name)throw new Error('Informe o nome do grupo.');if(!Number.isInteger(min_select)||min_select<0)throw new Error('Mínimo inválido.');if(max_select!==null&&(!Number.isInteger(max_select)||max_select<min_select))throw new Error('O máximo deve ser vazio ou maior/igual ao mínimo.');if(selection_type==='single'&&max_select!==null&&max_select>1)throw new Error('Grupo de escolha única aceita máximo 1.');
-    const options=$("cgOptions").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map((line,i)=>{const at=line.lastIndexOf('|');const label=(at<0?line:line.slice(0,at)).trim(),price=at<0?0:Number(line.slice(at+1).trim());if(!label)throw new Error(`Opção ${i+1} sem nome.`);if(!Number.isFinite(price)||price<0)throw new Error(`Preço inválido na opção ${label}.`);return {name:label,price_modifier:price,display_order:i,is_available:true}});
-    if(!options.length)throw new Error('Cadastre pelo menos uma opção.');if(min_select>options.length)throw new Error('O mínimo não pode ser maior que a quantidade de opções.');
-    const payload={restaurant_id:restaurant.id,name,selection_type,min_select,max_select,display_order,is_active};let groupId=id;
-    if(id){const {error}=await sb.from('customization_groups').update(payload).eq('id',id).eq('restaurant_id',restaurant.id);if(error)throw error}else{const {data,error}=await sb.from('customization_groups').insert(payload).select('id').single();if(error)throw error;groupId=data.id}
-    const {error:delErr}=await sb.from('customization_options').delete().eq('group_id',groupId);if(delErr)throw delErr;
-    const {error:insErr}=await sb.from('customization_options').insert(options.map(o=>({...o,group_id:groupId})));if(insErr)throw insErr;
-    closeModal();await loadAll();go('customization');toast('Grupo de personalização salvo.');
-  }catch(e){err(e,'Salvar personalização')}
-}
-async function toggleCustomGroup(id){try{if(!canWrite())throw new Error('Sem permissão.');const g=customizationGroups.find(x=>x.id===id);if(!g)return;const {error}=await sb.from('customization_groups').update({is_active:!g.is_active}).eq('id',id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll();go('customization')}catch(e){err(e,'Status do grupo')}}
-
 function renderAddons(){$("addonsBody").innerHTML=addons.map(a=>`<tr><td>${esc(a.name)}</td><td>${money(a.price)}</td><td>${a.is_available?'<span class="badge green">Sim</span>':'<span class="badge red">Não</span>'}</td><td><div class="actions"><button class="btn small" onclick="editAddon('${a.id}')">Editar</button><button class="btn small" onclick="toggleAddon('${a.id}')">${a.is_available?"Pausar":"Ativar"}</button></div></td></tr>`).join("")||`<tr><td colspan="4" class="empty">Nenhum adicional.</td></tr>`}
 function openAddon(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Novo adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" min="0"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" checked> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon()">Salvar</button></div>`)}
 function editAddon(id){const a=addons.find(x=>x.id===id);if(!a)return;openModal(`<h2>Editar adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input" value="${esc(a.name)}"></div><div class="field"><label>Preço</label><input id="afPrice" class="input" type="number" step=".01" min="0" value="${a.price}"></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" ${a.is_available?"checked":""}> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon('${id}')">Salvar</button></div>`)}
