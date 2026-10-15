@@ -126,6 +126,12 @@ footer{color:#6B7280}footer strong{color:#374151}
 .mesa-repetir-lista{scrollbar-width:none!important}
 .mesa-repetir-lista::-webkit-scrollbar{display:none}
 @media(max-width:700px){.mesa-favoritos{padding-left:12px;padding-right:12px}.mesa-favorito-card{min-width:148px;max-width:148px}.mesa-favorito-img{height:94px}}
+
+/* Etapa 3: AR com destaque visual consistente no detalhe do produto. */
+#btnARProduto{display:flex;align-items:center;justify-content:center;gap:9px;min-height:54px;padding:15px 16px;border:2px solid #059669;border-radius:14px;background:linear-gradient(135deg,#10b981,#047857);color:#fff;font-size:14px;font-weight:900;box-shadow:0 8px 22px rgba(5,150,105,.22);letter-spacing:.1px}
+#btnARProduto::before{content:"✦";font-size:17px;line-height:1}
+#btnARProduto:focus-visible{outline:3px solid #a7f3d0;outline-offset:3px}
+#btnARProduto:active{transform:scale(.99)}
 </style>
 
 <style>
@@ -376,7 +382,7 @@ footer{padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
       <div class="produto-sheet-quantidade-row"><span>Quantidade</span><div class="quantidade-box"><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(-1)" aria-label="Diminuir quantidade">−</button><span id="quantidadeProduto" class="quantidade-numero">1</span><button class="btn-quantidade" type="button" onclick="alterarQuantidadeProduto(1)" aria-label="Aumentar quantidade">+</button></div></div>
     </div>
     <div class="produto-sheet-acoes">
-      <button id="btnARProduto" class="btn-ar destaque" type="button" onclick="abrirARFoto()" style="display:none">📱 Ver na minha mesa (AR)</button>
+      <button id="btnARProduto" class="btn-ar destaque" type="button" onclick="abrirARFoto()" style="display:none">📱 Experimentar na minha mesa (AR)</button>
       <button id="btnAdicionarProduto" class="btn-principal produto-sheet-adicionar" type="button" onclick="adicionarProdutoAtual()">Adicionar ao Pedido • R$ 0,00</button>
     </div>
   </div>
@@ -992,7 +998,7 @@ function abrirProdutoPorId(id){
  if(btnAR){
    const disponivel=!!p.arFoto;
    btnAR.style.display=disponivel?'flex':'none';
-   btnAR.textContent=disponivel?'📱 Ver na minha mesa (AR)':'📱 Ver na minha mesa (AR)';
+   btnAR.textContent='Experimentar na minha mesa (AR)';
  }
  atualizarTotalProduto();
  abrirModal('modalProduto');
@@ -1535,14 +1541,15 @@ async function reiniciarARFoto(){
   await abrirARFoto();
 }
 
-function adicionarAoPedidoAR(){
+async function adicionarAoPedidoAR(){
   const p=restauranteAtual.produtos.find(x=>x.id===produtoSelecionado);
   if(!p)return;
-  fecharARFoto(false);
-  setTimeout(()=>adicionarProdutoAtual(),40);
+  await fecharARFoto(false);
+  // As escolhas continuam no formulário; validação e cálculo usam o mesmo fluxo do botão normal.
+  adicionarProdutoAtual();
 }
 
-async function fecharARFoto(){
+async function fecharARFoto(retornarAoProduto=true){
   try{
     if(arFotoSession)await arFotoSession.end();
   }catch(e){
@@ -1560,6 +1567,15 @@ async function fecharARFoto(){
   arFotoUI.modal()?.classList.remove('ativo');
   document.body.classList.remove('modal-aberto');
   arFotoPointers.clear();
+  // O formulário de personalização permanece no DOM durante o AR; reabrir o detalhe
+  // permite conferir/alterar as escolhas sem perder adicionais, observações ou quantidade.
+  if(retornarAoProduto&&produtoSelecionado){
+    const produto=restauranteAtual?.produtos?.find(x=>x.id===produtoSelecionado);
+    if(produto){
+      abrirModal('modalProduto');
+      atualizarTotalProduto();
+    }
+  }
 }
 
 function limparARFotoSessao(){
