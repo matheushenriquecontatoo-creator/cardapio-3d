@@ -935,14 +935,16 @@ function renderizarCustomizacao(p){
  atualizarTotalProduto();
 }
 function validarLimitesGrupo(el){
- const group=el?.closest('[data-group-id]');if(!group)return true;
- const max=group.dataset.maxSelect===''?null:Number(group.dataset.maxSelect);
+ // Os inputs também possuem data-group-id; localizar a seção do grupo evita validar o próprio input.
+ const group=el?.closest('.m360-custom-group[data-group-id]');if(!group)return true;
+ const maxRaw=group.dataset.maxSelect;
+ const max=maxRaw===''||maxRaw===undefined?null:Number(maxRaw);
  const selecionados=[...group.querySelectorAll('.custom-option-check:checked')];
- if(max!==null&&selecionados.length>max){el.checked=false;mostrarToast(`Escolha no máximo ${max} opção(ões) em ${group.querySelector('.customizacao-titulo')?.textContent||'este grupo'}.`);return false;}
+ if(max!==null&&selecionados.length>max){el.checked=false;mostrarToast(`Escolha no máximo ${max} opção(ões) em ${group.querySelector('.customizacao-titulo')?.textContent||'este grupo'}.`);atualizarTotalProduto();return false;}
  return true;
 }
 function validarPersonalizacao(){
- for(const group of document.querySelectorAll('#customizacaoProduto [data-group-id]')){
+ for(const group of document.querySelectorAll('#customizacaoProduto .m360-custom-group[data-group-id]')){
    const min=Number(group.dataset.minSelect||0),max=group.dataset.maxSelect===''?null:Number(group.dataset.maxSelect);
    const count=group.querySelectorAll('.custom-option-check:checked').length;
    const nome=group.querySelector('.customizacao-titulo')?.textContent||'Este grupo';
