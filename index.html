@@ -668,12 +668,21 @@ async function carregarCatalogoDoSupabase(){
    const categoriaPorId=new Map(categoriasDB.map(c=>[c.id,c]));
    const arPorProduto=new Map(arDB.map(a=>[a.product_id,a]));
    const addonPorId=new Map(addonsDB.map(a=>[a.id,a]));
-   adicionaisDisponiveis=addonsDB;
-   adicionaisPorProduto=new Map();
-   productAddonsDB.forEach(x=>{
-     if(!adicionaisPorProduto.has(x.product_id))adicionaisPorProduto.set(x.product_id,[]);
-     const a=addonPorId.get(x.add_on_id);if(a)adicionaisPorProduto.get(x.product_id).push(a);
-   });
+   // Catálogo-base de adicionais solicitado para aparecer em todos os produtos.
+   // Preços do Supabase sempre prevalecem; os valores abaixo são fallback caso o restaurante ainda não os tenha cadastrado.
+   const adicionaisBase=[
+     {name:'Bacon',price:4},{name:'Cebola Caramelizada',price:4},{name:'Ovo',price:3},
+     {name:'American Cheese',price:4},{name:'Adicional de burger com queijo',price:10},
+     {name:'Alface',price:1.5},{name:'Picles',price:2},{name:'Cebola Crispy',price:4},
+     {name:'Onion Rings',price:4},{name:'Cebola Roxa',price:1.5},{name:'Tomate',price:1.5},{name:'Cheddar',price:4}
+   ];
+   const chaveAddon=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
+   const addonsPorNome=new Map(adicionaisBase.map(a=>[chaveAddon(a.name),{...a,id:`base-${chaveAddon(a.name).replace(/[^a-z0-9]+/g,'-')}`,is_available:true}]));
+   // Mantém adicionais extras cadastrados pelo restaurante e usa seus preços reais quando houver correspondência.
+   addonsDB.forEach(a=>addonsPorNome.set(chaveAddon(a.name),{...addonsPorNome.get(chaveAddon(a.name)),...a,price:Number(a.price||0)}));
+   adicionaisDisponiveis=[...addonsPorNome.values()].filter(a=>a.is_available!==false).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));
+   // A lista completa é global: não depende de vínculos em product_add_ons.
+   adicionaisPorProduto=new Map(produtosDB.map(p=>[p.id,adicionaisDisponiveis]));
 
    const produtosBanco=produtosDB.map(db=>{
      const categoriaDB=categoriaPorId.get(db.category_id);
@@ -918,11 +927,10 @@ function renderizarCustomizacao(p){
    const hint=required?`Escolha pelo menos ${g.min_select}.`:(g.max_select!==null&&g.max_select!==undefined?`Escolha até ${g.max_select}.`:'Escolha conforme sua preferência.');
    parts.push(`<section class="m360-custom-group" data-group-id="${escaparHtml(g.id)}" data-selection-type="${escaparHtml(g.selection_type)}" data-min-select="${Number(g.min_select||0)}" data-max-select="${g.max_select===null||g.max_select===undefined?'':Number(g.max_select)}"><div class="customizacao-titulo">${escaparHtml(g.name)}${required?' *':''}</div><div class="customizacao-sub">${hint}</div><div class="addon-lista">${g.options.map(o=>`<label class="addon-opcao"><span class="addon-esq"><input type="${g.selection_type==='single'?'radio':'checkbox'}" name="custom-group-${escaparHtml(g.id)}" class="custom-option-check" value="${escaparHtml(o.id)}" data-group-id="${escaparHtml(g.id)}" data-nome="${escaparHtml(o.name)}" data-preco="${Number(o.price_modifier||0)}"><span class="addon-nome">${escaparHtml(o.name)}</span></span><span class="addon-preco">${Number(o.price_modifier||0)>0?'+ '+formatarPreco(o.price_modifier):'Incluído'}</span></label>`).join('')}</div></section>`);
  });
- if(p?.dbId){
-   const addons=adicionaisPorProduto.get(p.dbId)||[];
-   if(addons.length){
-     parts.push(`<section class="m360-custom-group"><div class="customizacao-titulo">Adicionais</div><div class="customizacao-sub">Adicione extras ao seu produto.</div><div class="addon-lista">${addons.map(a=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="addon-check" value="${escaparHtml(a.id)}" data-nome="${escaparHtml(a.name)}" data-preco="${Number(a.price||0)}"><span class="addon-nome">${escaparHtml(a.name)}</span></span><span class="addon-preco">+ ${formatarPreco(a.price)}</span></label>`).join('')}</div></section>`);
-   }
+ // Aba/lista completa de adicionais disponível em todos os produtos e pedidos.
+ const addons=adicionaisDisponiveis.filter(a=>a.is_available!==false);
+ if(addons.length){
+   parts.push(`<section class="m360-custom-group m360-adicionais-completos"><div class="customizacao-titulo">Adicionais</div><div class="customizacao-sub">Escolha os extras que deseja. Os valores são somados ao pedido.</div><div class="addon-lista">${addons.map(a=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="addon-check" value="${escaparHtml(a.id)}" data-nome="${escaparHtml(a.name)}" data-preco="${Number(a.price||0)}"><span class="addon-nome">${escaparHtml(a.name)}</span></span><span class="addon-preco">+ ${formatarPreco(a.price)}</span></label>`).join('')}</div></section>`);
  }
  if(p?.combo){
    comboBox.style.display='grid';
