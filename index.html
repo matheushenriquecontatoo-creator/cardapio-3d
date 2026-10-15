@@ -662,7 +662,13 @@ async function carregarCatalogoDoSupabase(){
      menuSupabase.from('combo_items').select('id,combo_id,product_id,quantity').order('created_at',{ascending:true})
    ]);
 
-   for(const r of [categoriasResp,produtosResp,arResp,configResp,addonsResp,combosResp,comboItemsResp]){if(r.error)throw r.error;}
+   // Apenas categorias e produtos são essenciais para exibir o cardápio.
+   // Falhas em tabelas opcionais (AR, adicionais, combos ou configurações)
+   // não devem bloquear a renderização dos produtos principais.
+   for(const r of [categoriasResp,produtosResp]){if(r.error)throw r.error;}
+   for(const [nomeConsulta,r] of [['AR',arResp],['configurações',configResp],['adicionais',addonsResp],['combos',combosResp],['itens de combos',comboItemsResp]]){
+     if(r.error)console.warn(`[Mesa360/Supabase] Consulta opcional de ${nomeConsulta} indisponível; seguindo sem esses dados.`,r.error);
+   }
 
    const categoriasDB=categoriasResp.data||[];
    const produtosDB=produtosResp.data||[];
@@ -676,7 +682,7 @@ async function carregarCatalogoDoSupabase(){
    let productAddonsDB=[];
    if(produtosDB.length){
      const pa=await menuSupabase.from('product_add_ons').select('product_id,add_on_id').in('product_id',produtosDB.map(p=>p.id));
-     if(pa.error)throw pa.error;
+     if(pa.error)console.warn('[Mesa360/Supabase] Vínculos opcionais de adicionais indisponíveis.',pa.error);
      productAddonsDB=pa.data||[];
    }
 
@@ -796,7 +802,9 @@ async function carregarCatalogoDoSupabase(){
  }catch(error){
    window.supabaseConnectionStatus='erro';
    console.error('[Mesa360/Supabase] Falha ao carregar catálogo:',error);
-   mostrarToast('Não foi possível carregar o cardápio.');
+   mostrarToast('Não foi possível carregar o cardápio. Atualize a página ou tente novamente.');
+   const lista=document.getElementById('listaProdutos');
+   if(lista)lista.innerHTML='<div class="carrinho-vazio" style="grid-column:1/-1;padding:24px 12px;text-align:center">Não foi possível carregar os produtos agora. Atualize a página para tentar novamente.</div>';
    return false;
  }
 }
