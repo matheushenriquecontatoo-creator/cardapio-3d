@@ -697,8 +697,11 @@ async function carregarCatalogoDoSupabase(){
    comboItensPorId=new Map();
    comboItemsDB.forEach(item=>{if(!comboItensPorId.has(item.combo_id))comboItensPorId.set(item.combo_id,[]);comboItensPorId.get(item.combo_id).push(item)});
    combosDisponiveis=combosDB.map(c=>{
-     const itens=(comboItensPorId.get(c.id)||[]).map(i=>({productId:i.product_id,quantity:i.quantity,nome:produtoPorDbId.get(i.product_id)?.nome||'',produto:produtoPorDbId.get(i.product_id)||null}));
-     return {id:'combo-'+c.id,dbId:c.id,nome:c.name,slug:c.slug,descricao:c.description||'',preco:Number(c.price||0),categoria:'combos',imagem:resolverImagemSupabase(c.image_url,'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85'),combo:true,itens};
+     const itens=(comboItensPorId.get(c.id)||[]).map(i=>({productId:i.product_id,quantity:Math.max(1,Number(i.quantity)||1),nome:produtoPorDbId.get(i.product_id)?.nome||'',produto:produtoPorDbId.get(i.product_id)||null}));
+     const totalAvulso=itens.reduce((s,i)=>s+Number(i.produto?.preco||0)*i.quantity,0);
+     const preco=Number(c.price||0);
+     const economia=Math.max(0,totalAvulso-preco);
+     return {id:'combo-'+c.id,dbId:c.id,nome:c.name,slug:c.slug,descricao:c.description||'',preco,totalAvulso,economia,descontoPercentual:totalAvulso>0?Math.round(economia/totalAvulso*100):0,categoria:'combos',imagem:resolverImagemSupabase(c.image_url,'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85'),combo:true,itens};
    });
 
    const produtosFinais=[...produtosBanco,...combosDisponiveis];
@@ -890,7 +893,7 @@ function renderizarProdutos(cat='todos'){
    const descricao=escaparHtml(p.descricao);
    const kicker=p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Combo';
    const favorito=isFavorito(p.id);
-   return `<article class="produto" data-categoria="${categoria}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}"><button class="produto-favorito-btn ${favorito?'ativo':''}" type="button" onclick="event.stopPropagation();alternarFavorito('${id}',event)" aria-label="${favorito?'Remover dos favoritos':'Adicionar aos favoritos'}">${favorito?'♥':'♡'}</button>${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${kicker}</div><h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}</span><span class="ver-ar-card">${p.combo?'Montar combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`;
+   return `<article class="produto" data-categoria="${categoria}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}"><button class="produto-favorito-btn ${favorito?'ativo':''}" type="button" onclick="event.stopPropagation();alternarFavorito('${id}',event)" aria-label="${favorito?'Remover dos favoritos':'Adicionar aos favoritos'}">${favorito?'♥':'♡'}</button>${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${kicker}</div><h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}${p.combo&&p.economia>0?`<small style="display:block;font-size:11px;color:#059669;font-weight:800">Economize ${formatarPreco(p.economia)}${p.descontoPercentual?` (${p.descontoPercentual}%)`:''}</small>`:''}</span><span class="ver-ar-card">${p.combo?'Ver itens do combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`;
  }).join('');
  if(!lista.length)$('listaProdutos').innerHTML='<div class="carrinho-vazio" style="grid-column:1/-1">Nenhum item disponível nesta categoria.</div>';
 }
@@ -923,10 +926,9 @@ function renderizarCustomizacao(p){
  }
  if(p?.combo){
    comboBox.style.display='grid';
-   const burgers=restauranteAtual.produtos.filter(x=>x.categoria==='burgers');
-   const porcoes=restauranteAtual.produtos.filter(x=>x.categoria==='porcoes');
-   const bebidas=restauranteAtual.produtos.filter(x=>x.categoria==='bebidas');
-   comboBox.innerHTML=`<div><label for="comboBurger">Hambúrguer do combo *</label><select id="comboBurger"><option value="">Escolha o hambúrguer</option>${burgers.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div><div><label for="comboPorcao">Porção do combo *</label><select id="comboPorcao"><option value="">Escolha a porção</option>${porcoes.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div><div><label for="comboBebida">Bebida do combo *</label><select id="comboBebida"><option value="">Escolha a bebida</option>${bebidas.map(x=>`<option value="${x.dbId}">${escaparHtml(x.nome)}</option>`).join('')}</select></div>`;
+   const itens=Array.isArray(p.itens)?p.itens:[];
+   const composicao=itens.length?itens.map(i=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--border)"><span>${Math.max(1,Number(i.quantity)||1)}x ${escaparHtml(i.nome||'Produto')}</span><span style="white-space:nowrap;color:var(--muted)">${formatarPreco(Number(i.produto?.preco||0)*Math.max(1,Number(i.quantity)||1))}</span></div>`).join(''):'<div>Este combo ainda não tem produtos vinculados. Entre em contato com o restaurante.</div>';
+   comboBox.innerHTML=`<div><div class="customizacao-titulo">Itens incluídos</div>${composicao}${p.totalAvulso>0?`<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0"><span>Total comprando separado</span><strong>${formatarPreco(p.totalAvulso)}</strong></div>`:''}${p.economia>0?`<div style="color:#059669;font-weight:800;padding-bottom:8px">Você economiza ${formatarPreco(p.economia)}${p.descontoPercentual?` (${p.descontoPercentual}%)`:''}</div>`:''}</div>`;
  }
  if(parts.length){box.style.display='grid';box.innerHTML=parts.join('');}
  box.innerHTML += `<div><label for="observacaoItem">Observação do item</label><textarea id="observacaoItem" placeholder="Ex.: molho à parte, ponto da carne" maxlength="140"></textarea></div>`;
@@ -973,7 +975,7 @@ function abrirProdutoPorId(id){
  const incluidos=$('produtoIncluidos');
  if(incluidos){
    const fonte=Array.isArray(p.ingredientes)?p.ingredientes:(Array.isArray(p.ingredients)?p.ingredients:[]);
-   const itens=fonte.map(x=>typeof x==='string'?x:(x?.name||x?.nome||'')).map(x=>String(x||'').trim()).filter(Boolean).slice(0,12);
+   const itens=p.combo&&Array.isArray(p.itens)&&p.itens.length?p.itens.map(i=>`${Math.max(1,Number(i.quantity)||1)}x ${i.nome||'Produto'}`):fonte.map(x=>typeof x==='string'?x:(x?.name||x?.nome||'')).map(x=>String(x||'').trim()).filter(Boolean).slice(0,12);
    incluidos.classList.toggle('ativo',itens.length>0);
    incluidos.innerHTML=itens.length?`<div class="produto-incluidos-titulo">Incluído neste produto</div><div class="produto-incluidos-lista">${itens.map(x=>`<span class="produto-incluido-chip">${escaparHtml(x)}</span>`).join('')}</div>`:'';
  }
@@ -1605,12 +1607,9 @@ function coletarCustomizacao(){
  const ingredientesRemovidos=[...document.querySelectorAll('#customizacaoProduto .ingrediente-remover-check:checked')].map(x=>x.dataset.nome);
  let combo=null;
  if(p?.combo){
-   const b=$('comboBurger')?.value,poc=$('comboPorcao')?.value,bev=$('comboBebida')?.value;
-   if(!b||!poc||!bev){mostrarToast('Escolha o hambúrguer, a porção e a bebida do combo.');return null}
-   const findByDbId=id=>restauranteAtual.produtos.find(x=>x.dbId===id);
-   const bp=findByDbId(b),pp=findByDbId(poc),vp=findByDbId(bev);
-   if(!bp||!pp||!vp){mostrarToast('Não foi possível montar este combo.');return null}
-   combo={hamburguer:bp.nome,porcao:pp.nome,bebida:vp.nome};
+   const itens=Array.isArray(p.itens)?p.itens.filter(i=>i.produto&&Number(i.quantity)>0):[];
+   if(!itens.length){mostrarToast('Este combo ainda não tem itens configurados. Avise o restaurante.');return null}
+   combo={itens:itens.map(i=>({nome:i.nome,quantidade:Math.max(1,Number(i.quantity)||1)}))};
  }
  const observacao=document.getElementById('observacaoItem')?.value.trim()||'';
  return {addons,opcoesPersonalizadas,ingredientesRemovidos,combo,observacao};
@@ -1654,12 +1653,20 @@ function obterSugestoesCarrinho(){
  const produtos=Array.isArray(restauranteAtual?.produtos)?restauranteAtual.produtos:[];
  if(!produtos.length)return [];
  const idsNoCarrinho=new Set(carrinho.map(i=>i.produtoId));
- const temBurger=carrinho.some(i=>restauranteAtual.produtos.find(p=>p.id===i.produtoId)?.categoria==='burgers');
- const ordem=temBurger?['porcoes','bebidas','combos','burgers']:['porcoes','bebidas','combos','burgers'];
- const candidatos=produtos.filter(p=>p?.disponivel!==false&&!idsNoCarrinho.has(p.id));
+ const categoriasNoCarrinho=new Set(carrinho.map(i=>restauranteAtual.produtos.find(p=>p.id===i.produtoId)?.categoria).filter(Boolean));
+ let ordem;
+ if(categoriasNoCarrinho.has('burgers'))ordem=['porcoes','bebidas','combos','burgers'];
+ else if(categoriasNoCarrinho.has('porcoes'))ordem=['bebidas','burgers','combos','porcoes'];
+ else if(categoriasNoCarrinho.has('bebidas'))ordem=['burgers','porcoes','combos','bebidas'];
+ else if(categoriasNoCarrinho.has('combos'))ordem=['bebidas','porcoes','burgers','combos'];
+ else ordem=['burgers','porcoes','bebidas','combos'];
+ const candidatos=produtos.filter(p=>p?.disponivel!==false&&!idsNoCarrinho.has(p.id)&&(!p.combo||p.itens?.length));
  const saida=[];
  for(const categoria of ordem){
-   for(const p of candidatos.filter(x=>x.categoria===categoria)){if(!saida.some(x=>x.id===p.id))saida.push(p);if(saida.length>=3)return saida;}
+   for(const p of candidatos.filter(x=>x.categoria===categoria)){
+     if(!saida.some(x=>x.id===p.id))saida.push(p);
+     if(saida.length>=3)return saida;
+   }
  }
  for(const p of candidatos){if(!saida.some(x=>x.id===p.id))saida.push(p);if(saida.length>=3)break;}
  return saida;
@@ -1674,7 +1681,7 @@ function renderizarUpsellCarrinho(){
 function renderizarCarrinho(){
  const lista=$('carrinhoLista'),fin=$('carrinhoFinalizacao');
  if(!carrinho.length){lista.innerHTML='<div class="carrinho-vazio">Seu pedido está vazio. Escolha seus favoritos no cardápio.</div>';fin.style.display='none';$('acoesMesaOperacao').style.display='none';renderizarUpsellCarrinho();return}
- lista.innerHTML=carrinho.map((i,idx)=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.quantidade}x ${escaparHtml(i.nome)}</div><div class="item-carrinho-preco">${formatarPreco(i.precoUnitario||i.preco)} cada${i.addons?.length?`<br>+ ${i.addons.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.opcoesPersonalizadas?.length?`<br>Opções: ${i.opcoesPersonalizadas.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.ingredientesRemovidos?.length?`<br>Sem: ${i.ingredientesRemovidos.map(a=>escaparHtml(a)).join(', ')}`:''}${i.combo?`<br>Combo: ${escaparHtml(i.combo.hamburguer||'')} + ${escaparHtml(i.combo.porcao||'')} + ${escaparHtml(i.combo.bebida||'')}`:''}${i.observacao?`<br>Obs.: ${escaparHtml(i.observacao)}`:''}</div></div><div class="item-controles"><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},1)">+</button><button class="item-btn" type="button" onclick="removerItemCarrinho(${idx})" aria-label="Remover">×</button></div></div>`).join('');
+ lista.innerHTML=carrinho.map((i,idx)=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.quantidade}x ${escaparHtml(i.nome)}</div><div class="item-carrinho-preco">${formatarPreco(i.precoUnitario||i.preco)} cada${i.addons?.length?`<br>+ ${i.addons.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.opcoesPersonalizadas?.length?`<br>Opções: ${i.opcoesPersonalizadas.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.ingredientesRemovidos?.length?`<br>Sem: ${i.ingredientesRemovidos.map(a=>escaparHtml(a)).join(', ')}`:''}${i.combo?`<br>Itens do combo: ${i.combo.itens.map(x=>`${x.quantidade}x ${escaparHtml(x.nome)}`).join(', ')}`:''}${i.observacao?`<br>Obs.: ${escaparHtml(i.observacao)}`:''}</div></div><div class="item-controles"><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},1)">+</button><button class="item-btn" type="button" onclick="removerItemCarrinho(${idx})" aria-label="Remover">×</button></div></div>`).join('');
  const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega();
  $('resumoTaxas').innerHTML=`<div><span>Subtotal: </span><strong>${formatarPreco(subtotal)}</strong></div>${taxa?`<div><span>Taxa de entrega: </span><strong>${formatarPreco(taxa)}</strong></div>`:'<div><span>Taxa de entrega: </span><strong>R$ 0,00</strong></div>'}`;
  $('carrinhoTotal').textContent=formatarPreco(calcularTotal());
@@ -1767,7 +1774,7 @@ function whatsappMensagem(nome,codigo,localPedido,pagto,observacao){
  let msg=tipoAtendimentoSelecionado==='mesa'
    ? `*MESA ${(($('numeroMesaPedido')?.value||'').trim()||'NÃO INFORMADA').toUpperCase()} - PEDIDO LOCAL*\n\nOlá! Gostaria de fazer um pedido pelo cardápio da ${restauranteAtual?.nome||"restaurante"}.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* ${canal}\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`
    : `Olá! Gostaria de fazer um pedido pelo cardápio da ${restauranteAtual?.nome||"restaurante"}.\n\n*PEDIDO:* ${codigo}\n*CLIENTE:* ${nome}\n*ATENDIMENTO:* ${canal}\n${localPedido}\n*PAGAMENTO:* ${pagto}\n\n*ITENS:*\n`;
- carrinho.forEach(i=>{msg+=`• ${i.quantidade}x ${i.nome} — ${formatarPreco((i.precoUnitario||i.preco)*i.quantidade)}\n`;if(i.addons?.length)msg+=`  Adicionais: ${i.addons.map(a=>a.nome).join(', ')}\n`;if(i.combo)msg+=`  Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}\n`;if(i.observacao)msg+=`  Observação: ${i.observacao}\n`});
+ carrinho.forEach(i=>{msg+=`• ${i.quantidade}x ${i.nome} — ${formatarPreco((i.precoUnitario||i.preco)*i.quantidade)}\n`;if(i.addons?.length)msg+=`  Adicionais: ${i.addons.map(a=>a.nome).join(', ')}\n`;if(i.combo)msg+=`  Itens do combo: ${i.combo.itens.map(x=>`${x.quantidade}x ${x.nome}`).join(', ')}\n`;if(i.observacao)msg+=`  Observação: ${i.observacao}\n`});
  if(observacao)msg+=`\n*OBSERVAÇÕES GERAIS:* ${observacao}\n`;
  msg+=`*SUBTOTAL:* ${formatarPreco(calcularSubtotal())}\n`;
  if(tipoAtendimentoSelecionado==='delivery')msg+=`*TAXA DE ENTREGA:* ${formatarPreco(calcularTaxaEntrega())}\n`;
@@ -1810,7 +1817,7 @@ async function registrarPedidoSupabase({nome,telefone,mesaAtual,endereco,forma,t
      product_name:i.nome,
      unit_price:Number(i.precoUnitario||i.preco),
      quantity:Number(i.quantidade),
-     variant_name:i.combo?`Combo: ${i.combo.hamburguer} + ${i.combo.porcao} + ${i.combo.bebida}`:null,
+     variant_name:i.combo?`Combo: ${i.combo.itens.map(x=>`${x.quantidade}x ${x.nome}`).join(', ')}`:null,
      observation:[i.addons?.length?`Adicionais: ${i.addons.map(a=>a.nome).join(', ')}`:'',i.opcoesPersonalizadas?.length?`Personalização: ${i.opcoesPersonalizadas.map(a=>a.nome).join(', ')}`:'',i.ingredientesRemovidos?.length?`Sem: ${i.ingredientesRemovidos.join(', ')}`:'',i.observacao?`Obs.: ${i.observacao}`:''].filter(Boolean).join(' | ')||null
    };
  });
