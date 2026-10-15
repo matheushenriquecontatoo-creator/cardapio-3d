@@ -132,6 +132,12 @@ footer{color:#6B7280}footer strong{color:#374151}
 #btnARProduto::before{content:"✦";font-size:17px;line-height:1}
 #btnARProduto:focus-visible{outline:3px solid #a7f3d0;outline-offset:3px}
 #btnARProduto:active{transform:scale(.99)}
+
+/* Etapas 5–7: carrinho contextual, prova social verificável e checkout transparente */
+.carrinho-upsell{border:1px solid rgba(120,120,120,.2);border-radius:14px;padding:12px;margin:12px 0;background:var(--surface,#fff)}
+.carrinho-upsell-titulo{font-weight:850;font-size:15px}.carrinho-upsell-sub{font-size:12px;opacity:.72;margin:3px 0 10px}
+.carrinho-upsell-card{min-width:0}.produto-selo-real{display:inline-flex;align-items:center;margin-top:5px;padding:4px 7px;border-radius:6px;background:#e8f7ed;color:#176534;font-size:10px;font-weight:800}
+#resumoTaxas .linha-desconto{color:#16803d}#resumoTaxas .linha-total-checkout{border-top:1px solid rgba(120,120,120,.25);padding-top:7px;margin-top:5px;font-size:15px}
 </style>
 
 <style>
@@ -177,7 +183,14 @@ footer{color:#6B7280}footer strong{color:#374151}
 .customizacao-titulo{font-size:18px!important;font-weight:800!important;color:#111827!important;margin-top:2px!important}
 .customizacao-sub{font-size:13px!important;color:#9ca3af!important;margin-top:-6px!important;margin-bottom:2px!important}
 .addon-lista{display:grid!important;gap:9px!important}
-.addon-opcao{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:14px 13px!important;border:1px solid #e5e7eb!important;border-radius:14px!important;background:#fff!important;cursor:pointer!important;transition:.16s ease!important}
+.addon-opcao{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:9px!important;padding:8px 9px!important;border:1px solid #e5e7eb!important;border-radius:12px!important;background:#fff!important;cursor:pointer!important;transition:.16s ease!important;min-height:62px!important}
+.m360-adicionais-completos .addon-lista{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+.m360-adicionais-completos .addon-opcao{min-width:0!important;min-height:62px!important;padding:7px!important;gap:6px!important}
+.addon-thumb{width:44px!important;height:44px!important;flex:0 0 44px!important;border-radius:9px!important;object-fit:cover!important;background:#f3f4f6!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:22px!important;overflow:hidden!important}
+.addon-esq{display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important;flex:1 1 auto!important}
+.m360-adicionais-completos .addon-nome{font-size:12px!important;line-height:1.2!important;overflow-wrap:anywhere!important}
+.m360-adicionais-completos .addon-preco{font-size:11px!important}
+@media(max-width:380px){.m360-adicionais-completos .addon-lista{grid-template-columns:1fr!important}.m360-adicionais-completos .addon-opcao{min-height:56px!important}}
 .addon-opcao:has(.addon-check:checked){border-color:#10b981!important;background:#f0fdf4!important;box-shadow:0 0 0 1px rgba(16,185,129,.12)!important}
 .addon-esq{display:flex!important;align-items:center!important;gap:11px!important;min-width:0!important}
 .addon-check{width:19px!important;height:19px!important;accent-color:#10b981!important;flex:0 0 auto!important}
@@ -624,7 +637,7 @@ async function carregarCatalogoDoSupabase(){
      menuSupabase.from('products').select('id,category_id,name,description,price,image_url,is_available,is_active,display_order').eq('restaurant_id',restaurante.id).eq('is_active',true).eq('is_available',true).order('display_order',{ascending:true}),
      menuSupabase.from('ar_configs').select('product_id,ar_enabled,ar_scale').eq('ar_enabled',true),
      menuSupabase.from('restaurant_settings').select('*').eq('restaurant_id',restaurante.id).maybeSingle(),
-     menuSupabase.from('add_ons').select('id,name,price,is_available').eq('restaurant_id',restaurante.id).eq('is_available',true).order('name'),
+     menuSupabase.from('add_ons').select('id,name,price,is_available,image_url').eq('restaurant_id',restaurante.id).eq('is_available',true).order('name'),
      menuSupabase.from('combos').select('id,name,slug,description,price,image_url,is_active,display_order').eq('restaurant_id',restaurante.id).eq('is_active',true).order('display_order',{ascending:true}),
      menuSupabase.from('combo_items').select('id,combo_id,product_id,quantity').order('created_at',{ascending:true})
    ]);
@@ -646,6 +659,22 @@ async function carregarCatalogoDoSupabase(){
      if(pa.error)throw pa.error;
      productAddonsDB=pa.data||[];
    }
+
+   // Prova social: contar apenas unidades de pedidos concluídos do restaurante atual.
+   // Se a política de acesso ou o esquema não permitir a consulta, não exibir selos (sem inventar números).
+   window.mesa360PedidosReaisPorProduto=Object.create(null);
+   try{
+     const popularidadeResp=await menuSupabase.from('order_items')
+       .select('product_id,quantity,orders!inner(restaurant_id,status)')
+       .eq('orders.restaurant_id',restaurante.id)
+       .in('orders.status',['completed','delivered','concluido','entregue']);
+     if(!popularidadeResp.error){
+       (popularidadeResp.data||[]).forEach(item=>{
+         if(!item.product_id)return;
+         window.mesa360PedidosReaisPorProduto[item.product_id]=(window.mesa360PedidosReaisPorProduto[item.product_id]||0)+Math.max(1,Number(item.quantity)||1);
+       });
+     }
+   }catch(err){console.info('[Mesa360] Selos de popularidade ocultos: não foi possível validar pedidos reais.',err);}
 
    // Personalização estruturada é opcional até a migração SQL ser aplicada.
    // Erros por tabelas/colunas ainda não existentes não interrompem o cardápio atual.
@@ -908,7 +937,7 @@ function renderizarProdutos(cat='todos'){
    const descricao=escaparHtml(p.descricao);
    const kicker=p.categoria==='burgers'?'Hambúrguer':p.categoria==='porcoes'?'Porção':p.categoria==='bebidas'?'Bebida':'Combo';
    const favorito=isFavorito(p.id);
-   return `<article class="produto" data-categoria="${categoria}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}"><button class="produto-favorito-btn ${favorito?'ativo':''}" type="button" onclick="event.stopPropagation();alternarFavorito('${id}',event)" aria-label="${favorito?'Remover dos favoritos':'Adicionar aos favoritos'}">${favorito?'♥':'♡'}</button>${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${kicker}</div><h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}${p.combo&&p.economia>0?`<small style="display:block;font-size:11px;color:#059669;font-weight:800">Economize ${formatarPreco(p.economia)}${p.descontoPercentual?` (${p.descontoPercentual}%)`:''}</small>`:''}</span><span class="ver-ar-card">${p.combo?'Ver itens do combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`;
+   return `<article class="produto" data-categoria="${categoria}" onclick="abrirProdutoPorId('${id}')"><div class="produto-imagem-wrap"><img loading="lazy" decoding="async" src="${imagem}" alt="${nome}"><button class="produto-favorito-btn ${favorito?'ativo':''}" type="button" onclick="event.stopPropagation();alternarFavorito('${id}',event)" aria-label="${favorito?'Remover dos favoritos':'Adicionar aos favoritos'}">${favorito?'♥':'♡'}</button>${p.combo?'<span class="combo-badge">COMBO</span>':''}${p.arFoto?'<span class="badge-ar">📱 AR FOTO</span>':''}</div><div class="produto-info"><div class="produto-kicker">${kicker}</div>${Number(window.mesa360PedidosReaisPorProduto?.[p.dbId||p.id]||0)>=5?`<span class="produto-selo-real">Pedido por ${Number(window.mesa360PedidosReaisPorProduto[p.dbId||p.id])} vezes</span>`:""}<h2>${nome}</h2><p>${descricao}</p><div class="produto-rodape"><span class="preco">${formatarPreco(p.preco)}${p.combo&&p.economia>0?`<small style="display:block;font-size:11px;color:#059669;font-weight:800">Economize ${formatarPreco(p.economia)}${p.descontoPercentual?` (${p.descontoPercentual}%)`:''}</small>`:''}</span><span class="ver-ar-card">${p.combo?'Ver itens do combo':p.arFoto?'Ver em AR':'Ver detalhes'}</span></div></div></article>`;
  }).join('');
  if(!lista.length)$('listaProdutos').innerHTML='<div class="carrinho-vazio" style="grid-column:1/-1">Nenhum item disponível nesta categoria.</div>';
 }
@@ -935,8 +964,9 @@ function renderizarCustomizacao(p){
  });
  // Aba/lista completa de adicionais disponível em todos os produtos e pedidos.
  const addons=adicionaisDisponiveis.filter(a=>a.is_available!==false);
+ const emojiAddon=n=>{const t=String(n||'').toLowerCase();if(t.includes('bacon'))return '🥓';if(t.includes('cebola'))return '🧅';if(t.includes('ovo'))return '🍳';if(t.includes('cheese')||t.includes('queijo')||t.includes('cheddar'))return '🧀';if(t.includes('alface'))return '🥬';if(t.includes('picles'))return '🥒';if(t.includes('tomate'))return '🍅';if(t.includes('onion rings'))return '🧅';return '🍔'};
  if(addons.length){
-   parts.push(`<section class="m360-custom-group m360-adicionais-completos"><div class="customizacao-titulo">Adicionais</div><div class="customizacao-sub">Escolha os extras que deseja. Os valores são somados ao pedido.</div><div class="addon-lista">${addons.map(a=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="addon-check" value="${escaparHtml(a.id)}" data-nome="${escaparHtml(a.name)}" data-preco="${Number(a.price||0)}"><span class="addon-nome">${escaparHtml(a.name)}</span></span><span class="addon-preco">+ ${formatarPreco(a.price)}</span></label>`).join('')}</div></section>`);
+   parts.push(`<section class="m360-custom-group m360-adicionais-completos"><div class="customizacao-titulo">Adicionais</div><div class="customizacao-sub">Escolha os extras que deseja. Os valores são somados ao pedido.</div><div class="addon-lista">${addons.map(a=>`<label class="addon-opcao"><span class="addon-esq"><input type="checkbox" class="addon-check" value="${escaparHtml(a.id)}" data-nome="${escaparHtml(a.name)}" data-preco="${Number(a.price||0)}">${a.image_url?`<img class="addon-thumb" loading="lazy" decoding="async" src="${escaparHtml(a.image_url)}" alt="${escaparHtml(a.name)}" onerror="this.outerHTML='&lt;span class=\"addon-thumb\" aria-hidden=\"true\"&gt;${emojiAddon(a.name)}&lt;/span&gt;'">`:`<span class="addon-thumb" aria-hidden="true">${emojiAddon(a.name)}</span>`}<span class="addon-nome">${escaparHtml(a.name)}</span></span><span class="addon-preco">+ ${formatarPreco(a.price)}</span></label>`).join('')}</div></section>`);
  }
  if(p?.combo){
    comboBox.style.display='grid';
@@ -1684,7 +1714,8 @@ function obterSugestoesCarrinho(){
  else if(categoriasNoCarrinho.has('bebidas'))ordem=['burgers','porcoes','combos','bebidas'];
  else if(categoriasNoCarrinho.has('combos'))ordem=['bebidas','porcoes','burgers','combos'];
  else ordem=['burgers','porcoes','bebidas','combos'];
- const candidatos=produtos.filter(p=>p?.disponivel!==false&&!idsNoCarrinho.has(p.id)&&(!p.combo||p.itens?.length));
+ const nomesNoCarrinho=new Set(carrinho.map(i=>String(i.nome||'').trim().toLocaleLowerCase('pt-BR')));
+ const candidatos=produtos.filter(p=>p?.disponivel!==false&&!idsNoCarrinho.has(p.id)&&!nomesNoCarrinho.has(String(p.nome||'').trim().toLocaleLowerCase('pt-BR'))&&(!p.combo||p.itens?.length));
  const saida=[];
  for(const categoria of ordem){
    for(const p of candidatos.filter(x=>x.categoria===categoria)){
@@ -1707,7 +1738,7 @@ function renderizarCarrinho(){
  if(!carrinho.length){lista.innerHTML='<div class="carrinho-vazio">Seu pedido está vazio. Escolha seus favoritos no cardápio.</div>';fin.style.display='none';$('acoesMesaOperacao').style.display='none';renderizarUpsellCarrinho();return}
  lista.innerHTML=carrinho.map((i,idx)=>`<div class="item-carrinho"><div><div class="item-carrinho-nome">${i.quantidade}x ${escaparHtml(i.nome)}</div><div class="item-carrinho-preco">${formatarPreco(i.precoUnitario||i.preco)} cada${i.addons?.length?`<br>+ ${i.addons.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.opcoesPersonalizadas?.length?`<br>Opções: ${i.opcoesPersonalizadas.map(a=>escaparHtml(a.nome)).join(', ')}`:''}${i.ingredientesRemovidos?.length?`<br>Sem: ${i.ingredientesRemovidos.map(a=>escaparHtml(a)).join(', ')}`:''}${i.combo?`<br>Itens do combo: ${i.combo.itens.map(x=>`${x.quantidade}x ${escaparHtml(x.nome)}`).join(', ')}`:''}${i.observacao?`<br>Obs.: ${escaparHtml(i.observacao)}`:''}</div></div><div class="item-controles"><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},-1)">−</button><span class="item-qtd">${i.quantidade}</span><button class="item-btn" type="button" onclick="alterarQuantidadeCarrinho(${idx},1)">+</button><button class="item-btn" type="button" onclick="removerItemCarrinho(${idx})" aria-label="Remover">×</button></div></div>`).join('');
  const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega();
- $('resumoTaxas').innerHTML=`<div><span>Subtotal: </span><strong>${formatarPreco(subtotal)}</strong></div>${taxa?`<div><span>Taxa de entrega: </span><strong>${formatarPreco(taxa)}</strong></div>`:'<div><span>Taxa de entrega: </span><strong>R$ 0,00</strong></div>'}`;
+ $('resumoTaxas').innerHTML=`<div><span>Subtotal dos itens</span><strong>${formatarPreco(subtotal)}</strong></div><div><span>Taxa de entrega</span><strong>${formatarPreco(taxa)}</strong></div>${descontoCheckout>0?`<div class="linha-desconto"><span>Desconto${cupomCheckout?.code?` (${escaparHtml(cupomCheckout.code)})`:''}</span><strong>−${formatarPreco(descontoCheckout)}</strong></div>`:''}<div class="linha-total-checkout"><span>Total a pagar</span><strong>${formatarPreco(calcularTotal())}</strong></div>`;
  $('carrinhoTotal').textContent=formatarPreco(calcularTotal());
  fin.style.display='block';renderizarUpsellCarrinho();atualizarResumoAtendimento();
 }
@@ -1740,7 +1771,7 @@ function atualizarResumoAtendimento(){
  if(btnPickup){btnPickup.classList.toggle('canal-indisponivel',!canais.pickup);btnPickup.disabled=!canais.pickup;}
  const acoes=$('acoesMesaOperacao');if(acoes)acoes.style.display=mesaSelecionada?'grid':'none';
  const subtotal=calcularSubtotal(),taxa=calcularTaxaEntrega();
- if($('resumoTaxas'))$('resumoTaxas').innerHTML=`<div><span>Subtotal: </span><strong>${formatarPreco(subtotal)}</strong></div><div><span>Taxa de entrega: </span><strong>${formatarPreco(taxa)}</strong></div>`;
+ if($('resumoTaxas'))$('resumoTaxas').innerHTML=`<div><span>Subtotal dos itens</span><strong>${formatarPreco(subtotal)}</strong></div><div><span>Taxa de entrega</span><strong>${formatarPreco(taxa)}</strong></div>${descontoCheckout>0?`<div class="linha-desconto"><span>Desconto${cupomCheckout?.code?` (${escaparHtml(cupomCheckout.code)})`:''}</span><strong>−${formatarPreco(descontoCheckout)}</strong></div>`:''}<div class="linha-total-checkout"><span>Total a pagar</span><strong>${formatarPreco(calcularTotal())}</strong></div>`;
  if($('carrinhoTotal'))$('carrinhoTotal').textContent=formatarPreco(calcularTotal());
 }
 function selecionarTipoAtendimento(tipo){
@@ -1857,6 +1888,8 @@ async function processarCheckout(){
  if(!nome)return mostrarToast('Informe seu nome.');
  const telefone=($('clienteTelefone')?.value||'').trim();
  if(!telefone)return mostrarToast('Informe seu WhatsApp/telefone.');
+ const telefoneNumeros=telefone.replace(/\D/g,'');
+ if(telefoneNumeros.length<10||telefoneNumeros.length>13)return mostrarToast('Confira o WhatsApp/telefone informado.');
  const canais=obterCanaisAtendimento();
  if(!canais[tipoAtendimentoSelecionado])return mostrarToast('Esta modalidade não está disponível neste restaurante.');
  const subtotalAtual=calcularSubtotal();
@@ -1890,6 +1923,7 @@ async function processarCheckout(){
  if(mesaAtual)localStorage.setItem(storageKey('mesa'),mesaAtual);
  const codigo=gerarCodigoPedido();
  const totalAntesDoEnvio=calcularTotal();
+ if(!Number.isFinite(totalAntesDoEnvio)||totalAntesDoEnvio<0||Math.abs(totalAntesDoEnvio-(calcularSubtotal()+calcularTaxaEntrega()-descontoCheckout))>0.01)return mostrarToast('Não foi possível confirmar o total. Revise o pedido e tente novamente.');
  mostrarToast('Registrando pedido…');
  const botao=$('btnAcaoFinalizar');
  if(botao)botao.disabled=true;
