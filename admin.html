@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Administrativo — Mesa360 SaaS</title>
-<meta name="mesa360-stage" content="Etapa 16 — Multi-restaurante">
+<title>Menuva — Painel Administrativo</title>
+<meta name="menuva-stage" content="Etapa 16 — Multi-restaurante">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -21,8 +21,8 @@
 
 <div id="loginScreen" class="login">
   <div class="loginbox">
-    <h1>Mesa360</h1>
-    <p>Painel administrativo e operacional</p>
+    <h1>Menuva</h1>
+    <p>Cardápio Digital AR · Painel administrativo e operacional</p>
     <div class="field"><label>E-mail</label><input id="loginEmail" class="input" type="email" autocomplete="username"></div>
     <div class="field"><label>Senha</label><input id="loginPassword" class="input" type="password" autocomplete="current-password"></div>
     <button class="btn primary" onclick="login()">Entrar</button>
@@ -35,7 +35,7 @@
 
 <div id="app" class="app hidden">
   <aside class="sidebar">
-    <div class="brand"><b id="brandRestaurantName">Mesa360</b><small id="roleLabel">Painel</small></div>
+    <div class="brand"><b id="brandRestaurantName">I Love Smash</b><small>Menuva · Cardápio Digital AR</small><small id="roleLabel">Painel do restaurante</small></div>
     <nav class="nav">
       <div class="group">Operação</div>
       <button data-view="dashboard" onclick="go('dashboard')">Dashboard</button>
@@ -57,7 +57,7 @@
       <button data-view="team" onclick="go('team')">Equipe / Permissões</button>
       <button data-view="settings" onclick="go('settings')">Configurações</button>
       <button data-view="billing" onclick="go('billing')">SaaS / Assinatura</button>
-<button data-view="saas" id="saasNav" onclick="go('saas')" style="display:none">Gestão Mesa360</button>
+<button data-view="saas" id="saasNav" onclick="go('saas')" style="display:none">Administração Menuva</button>
     </nav>
   </aside>
 
@@ -91,7 +91,7 @@
       </section>
 
       <section id="view-products" class="view">
-        <div class="page-title"><div><h1>Produtos</h1><p>Cadastro completo do cardápio, adicionais, 3D e AR.</p></div><button class="btn primary" onclick="openProduct()">+ Novo produto</button></div>
+        <div class="page-title"><div><h1>Produtos</h1><p>Cadastro completo do cardápio, adicionais, 3D e AR.</p></div><div class="actions"><button class="btn" onclick="importarCatalogoBaseILoveSmash()">Importar bebidas e molhos</button><button class="btn primary" onclick="openProduct()">+ Novo produto</button></div></div>
         <div class="panel">
           <div class="searchbar"><input id="productSearch" class="input" placeholder="Buscar produto..." oninput="renderProducts()"></div>
           <div class="table-wrap"><table class="table"><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Disponibilidade</th><th>Status</th><th>Ações</th></tr></thead><tbody id="productsBody"></tbody></table></div>
@@ -132,10 +132,12 @@
       </section>
 
       <section id="view-customization" class="view">
-        <div class="page-title"><div><h1>Personalização de produtos</h1><p>Configure grupos, opções pagas e ingredientes que o cliente pode retirar.</p></div><button class="btn primary" onclick="openCustomGroup()">+ Novo grupo</button></div>
+        <div class="page-title"><div><h1>Personalização de produtos</h1><p>Configure grupos, opções pagas e ingredientes que o cliente pode retirar.</p></div><div class="actions"><button class="btn" onclick="configurarTamanhosHamburguer()">Configurar tamanhos dos hambúrgueres</button><button class="btn" onclick="configurarTamanhosPorcoes()">Configurar tamanhos das porções</button><button class="btn primary" onclick="openCustomGroup()">+ Novo grupo</button></div></div>
         <div id="customizationNotice" class="notice warn">Carregando estrutura de personalização…</div>
+        <div class="notice" style="margin-bottom:12px"><b>Configuração alinhada ao cardápio:</b> use os modelos de grupo para quantidade de carnes e tamanho de porções. Depois vincule cada grupo somente aos produtos compatíveis em Produtos → Editar. Configure preços reais; não cadastre valores fictícios.</div>
         <div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Grupo</th><th>Tipo</th><th>Limites</th><th>Opções</th><th>Status</th><th>Ações</th></tr></thead><tbody id="customGroupsBody"></tbody></table></div></div>
-        <div class="notice" style="margin-top:12px">Para cada produto, vincule os grupos e cadastre os ingredientes incluídos na tela Produtos → Editar. Os grupos e opções são reutilizáveis dentro do mesmo restaurante.</div>
+        <div class="grid2" style="margin-top:12px"><div class="panel"><h3>Hambúrgueres</h3><p class="muted">Crie o grupo <b>Quantidade de carnes</b>, com escolha única e opções de 1 a 4 carnes. Configure os valores adicionais reais e vincule somente aos hambúrgueres compatíveis.</p></div><div class="panel"><h3>Batatas e porções</h3><p class="muted">Crie o grupo <b>Tamanho da porção</b>, com escolha única e opções Pequena, Média e Grande. Configure os valores reais e vincule aos produtos compatíveis.</p></div><div class="panel"><h3>Complete seu pedido</h3><p class="muted">O cardápio sugere produtos cadastrados e disponíveis, priorizando bebidas, porções e acompanhamentos. Mantenha nomes, categorias, preços e disponibilidade atualizados em Produtos e Categorias.</p></div><div class="panel"><h3>Visualização 3D e AR</h3><p class="muted">Edite o produto, envie um modelo 3D GLB ou informe sua URL pública e marque <b>Liberar “Ver na minha mesa”</b>. Uma imagem de capa não substitui o modelo 3D.</p></div></div>
+        <div class="notice" style="margin-top:12px">Os grupos e opções são reutilizáveis dentro do mesmo restaurante. Revise a vinculação de cada grupo antes de publicar.</div>
       </section>
 
       <section id="view-combos" class="view">
@@ -183,8 +185,8 @@
         <div class="panel" style="margin-bottom:16px"><h3>Cardápio público</h3><p style="color:var(--muted);font-size:13px;margin:0 0 12px">Link geral do restaurante para QR Code, Instagram, Google e WhatsApp.</p><div class="actions"><input id="publicMenuUrl" class="input" readonly style="flex:1"><button class="btn" onclick="copyPublicMenuUrl()">Copiar link</button><button class="btn" onclick="printPublicMenuQR()">Imprimir QR</button><button class="btn primary" onclick="openPublicMenu()">Abrir</button></div><div style="margin-top:12px;padding:11px;border-radius:10px;background:#0d141c;color:#9aa7b5;font-size:11px;line-height:1.5">URL comercial: <b style="color:#fff">?restaurante=${esc(restaurant?.slug||'')}</b>. Depois podemos conectar domínio próprio sem alterar o cadastro do restaurante.</div></div>
         <div class="page-title"><div><h1>Configurações</h1><p>Dados gerais do restaurante e operação.</p></div></div>
         <div class="grid2">
-          <div class="panel"><h3>Restaurante</h3><div class="field"><label>Nome</label><input id="setName" class="input"></div><div class="field"><label>WhatsApp</label><input id="setWhatsapp" class="input"></div><div class="field"><label>Horários</label><textarea id="setHours" class="textarea" rows="4"></textarea></div><div class="field"><label>Cor principal</label><input id="setColor" class="input" type="color"></div><button class="btn primary" onclick="saveRestaurant()">Salvar restaurante</button></div>
-          <div class="panel"><h3>Operação</h3><div class="field"><label>Chave PIX</label><input id="setPix" class="input"></div><div class="field"><label>Taxa de entrega</label><input id="setDeliveryFee" class="input" type="number" step=".01"></div><div class="field"><label>Pedido mínimo</label><input id="setMinOrder" class="input" type="number" step=".01"></div><label class="check"><input id="setDelivery" type="checkbox"> Aceitar delivery</label><br><label class="check"><input id="setTableOrders" type="checkbox"> Aceitar pedidos de mesa</label><br><button class="btn primary" onclick="saveSettings()">Salvar operação</button></div>
+          <div class="panel"><h3>Restaurante e perfil público</h3><div class="field"><label>Nome</label><input id="setName" class="input"></div><div class="field"><label>WhatsApp</label><input id="setWhatsapp" class="input"></div><div class="field"><label>Horários de atendimento</label><textarea id="setHours" class="textarea" rows="5" placeholder="Domingo: 11h às 16h - 18h às 23h15m&#10;Segunda-feira: 18h às 23h"></textarea><small class="muted">Use uma linha por dia. O cardápio usa estes horários para mostrar Online/Offline e avisar a próxima abertura. Ex.: Domingo: 11h às 16h - 18h às 23h15m. O botão de status da loja continua sendo o bloqueio manual.</small></div><div class="field"><label>Endereço exibido no perfil</label><input id="setAddress" class="input" placeholder="Rua, número, bairro, cidade e CEP"></div><div class="field"><label>Instagram (URL)</label><input id="setInstagram" class="input" placeholder="https://www.instagram.com/..."></div><div class="field"><label>Formas de pagamento (uma por linha)</label><textarea id="setPaymentMethods" class="textarea" rows="4" placeholder="PIX&#10;Cartão de crédito (online)&#10;Dinheiro na entrega&#10;Cartão na entrega"></textarea></div><div class="field"><label>Cor principal</label><input id="setColor" class="input" type="color"></div><button class="btn primary" onclick="saveRestaurant()">Salvar restaurante</button></div>
+          <div class="panel"><h3>Operação</h3><div class="field"><label>Chave PIX</label><input id="setPix" class="input"></div><div class="field"><label>Taxa de entrega</label><input id="setDeliveryFee" class="input" type="number" step=".01" min="0"></div><div class="field"><label>Pedido mínimo (R$)</label><input id="setMinOrder" class="input" type="number" step=".01" min="25" value="25"></div><small class="muted">O cardápio aplica R$ 25,00 como pedido mínimo, mesmo que um valor menor esteja salvo.</small><label class="check"><input id="setDelivery" type="checkbox"> Aceitar delivery</label><br><label class="check"><input id="setTableOrders" type="checkbox"> Aceitar pedidos de mesa</label><hr style="border-color:var(--border);margin:16px 0"><h3>Faixas promocionais animadas</h3><label class="check"><input id="setPromoCashbackEnabled" type="checkbox" checked> Exibir faixa de cashback</label><div class="field"><label>Título do cashback</label><input id="setPromoCashbackTitle" class="input" placeholder="Cashback"></div><div class="field"><label>Texto do cashback</label><input id="setPromoCashbackText" class="input" placeholder="Pagando com Pix ou Cartão · Aproveite já!"></div><label class="check"><input id="setPromoDeliveryEnabled" type="checkbox" checked> Exibir faixa de desconto</label><div class="field"><label>Título do desconto</label><input id="setPromoDeliveryTitle" class="input" placeholder="Desconto na entrega"></div><div class="field"><label>Valor do desconto na entrega (R$)</label><input id="setPromoDeliveryDiscount" class="input" type="number" step=".01" min="0" value="7"></div><div class="field"><label>Pedido mínimo para desconto (R$)</label><input id="setPromoDeliveryMinimum" class="input" type="number" step=".01" min="0" value="35"></div><div class="field"><label>Texto do desconto</label><input id="setPromoDeliveryText" class="input" placeholder="Em todas as regiões · TAXA GRÁTIS · Pedido mínimo R$ 35,00"></div><button class="btn primary" onclick="saveSettings()">Salvar operação e promoções</button></div>
         </div>
       </section>
     </div>
@@ -224,7 +226,7 @@ async function login(){
   session=data.session;await boot();
 }
 function openSignup(){
-  openModal(`<h2>Criar restaurante</h2><p style="color:var(--muted);font-size:12px;line-height:1.5">Abra sua conta do Mesa360 e receba um cardápio público próprio. O plano inicial será <b>trial</b>; nenhuma cobrança é feita por este cadastro.</p><div class="formgrid"><div class="field"><label>Nome do restaurante</label><input id="suName" class="input" placeholder="Ex.: Brasa 180°"></div><div class="field"><label>Identificador do cardápio</label><input id="suSlug" class="input" placeholder="brasa-180" oninput="this.value=slugify(this.value)"></div><div class="field"><label>Nome do responsável</label><input id="suOwner" class="input" placeholder="Seu nome"></div><div class="field"><label>WhatsApp comercial</label><input id="suPhone" class="input" placeholder="5511999999999"></div><div class="field"><label>E-mail de acesso</label><input id="suEmail" class="input" type="email" autocomplete="email"></div><div class="field"><label>Senha</label><input id="suPassword" class="input" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></div></div><div id="signupError" class="login-error"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="createRestaurantAccount()">Criar conta</button></div>`);
+  openModal(`<h2>Criar restaurante</h2><p style="color:var(--muted);font-size:12px;line-height:1.5">Abra sua conta na Menuva e receba um cardápio público próprio. O plano inicial será <b>trial</b>; nenhuma cobrança é feita por este cadastro.</p><div class="formgrid"><div class="field"><label>Nome do restaurante</label><input id="suName" class="input" placeholder="Ex.: Brasa 180°"></div><div class="field"><label>Identificador do cardápio</label><input id="suSlug" class="input" placeholder="brasa-180" oninput="this.value=slugify(this.value)"></div><div class="field"><label>Nome do responsável</label><input id="suOwner" class="input" placeholder="Seu nome"></div><div class="field"><label>WhatsApp comercial</label><input id="suPhone" class="input" placeholder="5511999999999"></div><div class="field"><label>E-mail de acesso</label><input id="suEmail" class="input" type="email" autocomplete="email"></div><div class="field"><label>Senha</label><input id="suPassword" class="input" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></div></div><div id="signupError" class="login-error"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="createRestaurantAccount()">Criar conta</button></div>`);
 }
 async function createRestaurantAccount(){
   const errorBox=$("signupError");errorBox.textContent="";
@@ -270,8 +272,8 @@ async function boot(){
   const {data:r,error:re}=await sb.from("restaurants").select("*").eq("id",p.restaurant_id).single();
   if(re||!r){err(re||new Error("Restaurante não encontrado"),"Carregamento");return}
   restaurant=r;
-  document.title=`${restaurant.name||"Mesa360"} — Painel`;
-  if($("brandRestaurantName"))$("brandRestaurantName").textContent=restaurant.name||"Mesa360";
+  document.title=`${restaurant.name||"Restaurante"} — Painel do Restaurante | Menuva`;
+  if($("brandRestaurantName"))$("brandRestaurantName").textContent=restaurant.name||"Restaurante";
   if($("tenantContext"))$("tenantContext").textContent=`${restaurant.name||"Restaurante"} · ${restaurant.slug||"sem-slug"}`;
   const {data:s}=await sb.from("restaurant_settings").select("*").eq("restaurant_id",restaurant.id).maybeSingle();settings=s;
   $("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");
@@ -294,13 +296,23 @@ function go(v){
   if(v==="tables")renderTables();
   if(v==="orders")renderOrders();
 }
+function adminStoreOpenNow(){
+  if(!restaurant||restaurant.is_open===false)return false;
+  const hours=String(restaurant.business_hours||'').trim();if(!hours)return true;
+  const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const lines=hours.split(/\n|;/).map(x=>x.trim()).filter(Boolean),dayNames=['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
+  const hasDays=lines.some(x=>dayNames.some(d=>norm(x).startsWith(d)));if(!hasDays)return true;
+  const now=new Date(),today=dayNames[now.getDay()],line=lines.find(x=>norm(x).startsWith(today));if(!line)return false;
+  const minute=now.getHours()*60+now.getMinutes(),re=/(\d{1,2})\s*h(?:\s*(\d{1,2})\s*m)?\s*(?:às|as|a)\s*(\d{1,2})\s*h(?:\s*(\d{1,2})\s*m)?/gi;let m;
+  while((m=re.exec(line))!==null){const start=Number(m[1])*60+Number(m[2]||0),end=Number(m[3])*60+Number(m[4]||0);if(minute>=start&&minute<end)return true}return false;
+}
 function renderStoreStatus(){
-  const open=!!restaurant.is_open;$("statusDot").classList.toggle("open",open);$("storeStatusText").textContent=open?"LOJA ABERTA":"LOJA FECHADA";$("storeToggle").textContent=open?"LOJA ABERTA":"LOJA FECHADA";
+  const open=adminStoreOpenNow(),manualOpen=!!restaurant?.is_open;$("statusDot").classList.toggle("open",open);$("storeStatusText").textContent=open?"LOJA ONLINE":"LOJA OFFLINE";$("storeToggle").textContent=manualOpen?"PAUSAR PEDIDOS":"ATIVAR PEDIDOS";$("storeToggle").title=open?"Pausar recebimento de pedidos":"Ativar o status manual; o horário de funcionamento continua sendo respeitado";
 }
 async function toggleStore(){
   if(!canWrite()){toast("Seu perfil não pode alterar o status da loja.");return}
   const next=!restaurant.is_open;const {error}=await sb.from("restaurants").update({is_open:next}).eq("id",restaurant.id);
-  if(error){err(error,"Status da loja");return}restaurant.is_open=next;renderStoreStatus();toast(next?"Loja aberta":"Loja fechada");
+  if(error){err(error,"Status da loja");return}restaurant.is_open=next;renderStoreStatus();toast(next?(adminStoreOpenNow()?"Loja online e aceitando pedidos":"Status manual ativado, mas o horário de funcionamento ainda está fechado."):"Pedidos pausados manualmente");
 }
 async function loadAll(){
   if(!restaurant?.id){throw new Error("Contexto do restaurante não carregado.");}
@@ -456,7 +468,7 @@ function productForm(p={}){
       <input id="pfModelUrl" class="input" style="margin-top:7px" placeholder="Ou cole a URL do GLB" value="${esc(model.model_url||"")}">
     </div>
     <div class="field"><label>Imagem de capa do 3D (opcional)</label><input id="pfPoster" class="input" type="file" accept="image/*"></div>
-    <div class="field"><label>AR</label><label class="check"><input id="pfAr" type="checkbox" ${ar.ar_enabled?"checked":""}> Liberar "Ver na minha mesa"</label></div>
+    <div class="field"><label>Realidade aumentada (AR)</label><label class="check"><input id="pfAr" type="checkbox" ${ar.ar_enabled?"checked":""}> Liberar "Ver na minha mesa"</label><small style="color:#8190a0">Requer um modelo 3D GLB público e válido. A imagem de capa não substitui o modelo 3D.</small></div>
   </div>
   <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveProduct('${p.id||""}')">Salvar produto</button></div>`}
 function openProduct(id){if(!canWrite()){toast("Seu perfil não pode editar produtos.");return}const p=products.find(x=>x.id===id)||{};openModal(productForm(p))}
@@ -493,6 +505,7 @@ async function saveProduct(id){
     const modelFile=$("pfModel").files[0],posterFile=$("pfPoster").files[0];
     let modelUrl=$("pfModelUrl").value.trim()||null;
     if(modelFile)modelUrl=await uploadAsset(modelFile,"models",productId);
+    if($("pfAr").checked&&!modelUrl)throw new Error("Para ativar AR, informe ou envie um modelo 3D GLB válido.");
     let posterUrl=modelFor(productId)?.poster_url||null;
     if(posterFile)posterUrl=await uploadAsset(posterFile,"models-posters",productId);
     if(modelUrl){
@@ -638,7 +651,7 @@ async function toggleTable(id){
 }
 function renderCustomization(){
   const notice=$("customizationNotice"),body=$("customGroupsBody");if(!notice||!body)return;
-  if(!customizationSchemaReady){notice.textContent="A estrutura do banco ainda não está instalada. Acesse o Supabase e execute Mesa360_Etapa1_Migracao_Personalizacao.sql antes de cadastrar grupos.";body.innerHTML='<tr><td colspan="6" class="empty">Migração necessária.</td></tr>';return;}
+  if(!customizationSchemaReady){notice.textContent="A estrutura do banco ainda não está instalada. Acesse o Supabase e execute a migração inicial de personalização indicada no projeto antes de cadastrar grupos.";body.innerHTML='<tr><td colspan="6" class="empty">Migração necessária.</td></tr>';return;}
   notice.textContent="Personalização ativa. As alterações ficam isoladas no restaurante atual.";
   body.innerHTML=customizationGroups.map(g=>{const opts=customizationOptions.filter(o=>o.group_id===g.id);return `<tr><td><b>${esc(g.name)}</b></td><td>${g.selection_type==='single'?'Escolha única':'Múltipla escolha'}</td><td>${g.min_select} mín. · ${g.max_select===null?'sem máximo':g.max_select+' máx.'}</td><td>${opts.map(o=>`${esc(o.name)} (${money(o.price_modifier)})`).join('<br>')||'—'}</td><td>${g.is_active?'<span class="badge green">Ativo</span>':'<span class="badge red">Inativo</span>'}</td><td><div class="actions"><button class="btn small" onclick="openCustomGroup('${g.id}')">Editar</button><button class="btn small" onclick="toggleCustomGroup('${g.id}')">${g.is_active?'Desativar':'Ativar'}</button></div></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Nenhum grupo cadastrado.</td></tr>';
 }
@@ -646,7 +659,16 @@ function openCustomGroup(id){
   if(!canWrite())return toast('Sem permissão.');if(!customizationSchemaReady)return toast('Aplique a migração SQL primeiro.');
   const g=customizationGroups.find(x=>x.id===id)||{name:'',selection_type:'multiple',min_select:0,max_select:null,display_order:customizationGroups.length,is_active:true};
   const opts=customizationOptions.filter(o=>o.group_id===g.id).sort((a,b)=>a.display_order-b.display_order).map(o=>`${o.name}|${Number(o.price_modifier||0).toFixed(2)}`).join('\n');
-  openModal(`<h2>${id?'Editar grupo':'Novo grupo de personalização'}</h2><div class="field"><label>Nome do grupo</label><input id="cgName" class="input" value="${esc(g.name)}" placeholder="Ex.: Tamanho, Ponto da carne, Queijo"></div><div class="formgrid"><div class="field"><label>Tipo de seleção</label><select id="cgType" class="select"><option value="single" ${g.selection_type==='single'?'selected':''}>Escolha única</option><option value="multiple" ${g.selection_type==='multiple'?'selected':''}>Múltipla escolha</option></select></div><div class="field"><label>Mínimo de escolhas</label><input id="cgMin" class="input" type="number" min="0" value="${Number(g.min_select||0)}"></div><div class="field"><label>Máximo de escolhas (vazio = sem limite)</label><input id="cgMax" class="input" type="number" min="0" value="${g.max_select===null||g.max_select===undefined?'':g.max_select}"></div><div class="field"><label>Ordem</label><input id="cgOrder" class="input" type="number" value="${Number(g.display_order||0)}"></div></div><div class="field"><label>Opções (uma por linha: nome|preço adicional)</label><textarea id="cgOptions" class="textarea" rows="7" placeholder="Pequeno|0\nGrande|5.00\nExtra queijo|3.00">${esc(opts)}</textarea><small style="color:#8190a0">Use preço 0 para opção incluída. O preço adicional não pode ser negativo.</small></div><label class="check"><input id="cgActive" type="checkbox" ${g.is_active?'checked':''}> Grupo ativo</label><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCustomGroup('${id||''}')">Salvar grupo</button></div>`);
+  openModal(`<h2>${id?'Editar grupo':'Novo grupo de personalização'}</h2><div class="field"><label>Nome do grupo</label><input id="cgName" class="input" value="${esc(g.name)}" placeholder="Ex.: Tamanho, Ponto da carne, Queijo"></div><div class="formgrid"><div class="field"><label>Tipo de seleção</label><select id="cgType" class="select"><option value="single" ${g.selection_type==='single'?'selected':''}>Escolha única</option><option value="multiple" ${g.selection_type==='multiple'?'selected':''}>Múltipla escolha</option></select></div><div class="field"><label>Mínimo de escolhas</label><input id="cgMin" class="input" type="number" min="0" value="${Number(g.min_select||0)}"></div><div class="field"><label>Máximo de escolhas (vazio = sem limite)</label><input id="cgMax" class="input" type="number" min="0" value="${g.max_select===null||g.max_select===undefined?'':g.max_select}"></div><div class="field"><label>Ordem</label><input id="cgOrder" class="input" type="number" value="${Number(g.display_order||0)}"></div></div><div class="field"><label>Modelo rápido (opcional)</label><select id="cgPreset" class="select" onchange="applyCustomGroupPreset()"><option value="">Escolher modelo…</option><option value="meats">Quantidade de carnes</option><option value="portion">Tamanho da porção</option><option value="drinks">Tamanho da bebida</option><option value="extras">Adicionais</option></select><small style="color:#8190a0">O modelo preenche nomes e valores iniciais. Confira os preços reais antes de salvar.</small></div><div class="field"><label>Opções (uma por linha: nome|preço adicional)</label><textarea id="cgOptions" class="textarea" rows="7" placeholder="Pequena|0\nMédia|0\nGrande|0">${esc(opts)}</textarea><small style="color:#8190a0">Informe o adicional em relação ao preço-base. Use 0 quando não houver cobrança adicional.</small></div><label class="check"><input id="cgActive" type="checkbox" ${g.is_active?'checked':''}> Grupo ativo</label><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveCustomGroup('${id||''}')">Salvar grupo</button></div>`);
+}
+function applyCustomGroupPreset(){
+  const preset=$("cgPreset")?.value;const name=$("cgName"),type=$("cgType"),min=$("cgMin"),max=$("cgMax"),options=$("cgOptions");if(!preset||!name||!type||!min||!max||!options)return;
+  const presets={
+    meats:{name:"Quantidade de carnes",type:"single",min:1,max:1,options:"1 carne|0\n2 carnes|0\n3 carnes|0\n4 carnes|0"},
+    portion:{name:"Tamanho da porção",type:"single",min:1,max:1,options:"Pequena|0\nMédia|0\nGrande|0"},
+    drinks:{name:"Tamanho da bebida",type:"single",min:1,max:1,options:"300 ml|0\n500 ml|0\n1 litro|0\n2 litros|0"},
+    extras:{name:"Adicionais",type:"multiple",min:0,max:"",options:"Queijo extra|0\nBacon|0\nOvo|0"}
+  };const p=presets[preset];if(!p)return;name.value=p.name;type.value=p.type;min.value=p.min;max.value=p.max;options.value=p.options;
 }
 async function saveCustomGroup(id){
   try{
@@ -665,6 +687,71 @@ async function saveCustomGroup(id){
 async function toggleCustomGroup(id){try{if(!canWrite())throw new Error('Sem permissão.');const g=customizationGroups.find(x=>x.id===id);if(!g)return;const {error}=await sb.from('customization_groups').update({is_active:!g.is_active}).eq('id',id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll();go('customization')}catch(e){err(e,'Status do grupo')}}
 
 function renderAddons(){$("addonsBody").innerHTML=addons.map(a=>`<tr><td>${a.image_url?`<img class="thumb" loading="lazy" src="${esc(a.image_url)}" alt="${esc(a.name)}" onerror="this.style.visibility='hidden'">`:'<span class="badge">Sem imagem</span>'}</td><td>${esc(a.name)}</td><td>${money(a.price)}</td><td>${a.is_available?'<span class="badge green">Sim</span>':'<span class="badge red">Não</span>'}</td><td><div class="actions"><button class="btn small" onclick="editAddon('${a.id}')">Editar</button><button class="btn small" onclick="toggleAddon('${a.id}')">${a.is_available?"Pausar":"Ativar"}</button></div></td></tr>`).join("")||`<tr><td colspan="5" class="empty">Nenhum adicional.</td></tr>`}
+async function importarCatalogoBaseILoveSmash(){
+ try{
+  if(!canWrite())throw new Error('Sem permissão para cadastrar produtos.');
+  const catalogo=[
+   ['Coca Cola - Lata',8,'bebidas'],['Coca Cola Zero - Lata',8,'bebidas'],['Mineiro - Lata',8,'bebidas'],['Água Mineral com Gás',4,'bebidas'],['Água Mineral sem Gás',4,'bebidas'],['Sprite Lemon 500ml',8,'bebidas'],['Antarctica Lata',8,'bebidas'],['Antarctica Lata Zero',8,'bebidas'],['Monster Original',10,'bebidas'],['Monster Sem Açúcar',10,'bebidas'],['Suco Del Valle Uva - Lata',8,'bebidas'],['Suco Del Valle Pêssego - Lata',8,'bebidas'],
+   ['Maionese Chimichurri',4,'molhos'],['Molho de Alho',4,'molhos'],['Maionese de Bacon',4,'molhos'],['Molho Verde',4,'molhos'],['Molho Barbecue',4,'molhos'],['Molho de Goiabada Picante',4,'molhos'],['Mostarda Heinz - 3 Sachês',1.5,'molhos'],['Maionese Heinz - 3 Sachês',1.5,'molhos'],['Ketchup Heinz - 3 Sachês',1.5,'molhos']
+  ];
+  const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const {data:existing,error:readErr}=await sb.from('products').select('id,name,category_id').eq('restaurant_id',restaurant.id);if(readErr)throw readErr;
+  const known=new Set((existing||[]).map(x=>norm(x.name)));
+  const faltantes=catalogo.filter(([name])=>!known.has(norm(name)));
+  if((existing||[]).length+faltantes.length>30)throw new Error(`O catálogo pede ${faltantes.length} novos produtos, mas o plano atual comporta 30 e já existem ${(existing||[]).length}. Para importar a lista completa, libere espaço desativando/substituindo produtos que não usa ou aumente o limite do plano. Nenhum produto foi alterado.`);
+  let added=0;const categoryMap={};
+  for(const [catName,order] of [['Bebidas',20],['Molhos',30]]){
+   let c=categories.find(x=>norm(x.name)===norm(catName));
+   if(!c){const {data,error}=await sb.from('categories').insert({restaurant_id:restaurant.id,name:catName,display_order:order,is_active:true}).select('*').single();if(error)throw error;c=data;categories.push(c)}
+   categoryMap[catName.toLowerCase()]=c.id;
+  }
+  for(const [name,price,cat] of faltantes){const {error}=await sb.from('products').insert({restaurant_id:restaurant.id,name,description:cat==='bebidas'?'Bebida gelada.':'Molho ou sachês para acompanhar seu pedido.',price,category_id:categoryMap[cat],display_order:100+added,is_available:true,is_active:true});if(error)throw error;known.add(norm(name));added++}
+  await loadAll();go('products');toast(added?`${added} produtos de bebidas e molhos adicionados.`:'Bebidas e molhos já estavam cadastrados.');
+ }catch(e){err(e,'Importar bebidas e molhos')}
+}
+function configurarTamanhosPorcoes(){
+ if(!canWrite())return toast('Sem permissão.');if(!customizationSchemaReady)return toast('A migração SQL de personalização ainda não está instalada.');
+ openModal(`<h2>Configurar tamanhos das porções</h2><p class="muted">Informe os acréscimos em relação ao preço-base de cada produto. O preço-base atual será preservado; não usaremos valores inventados.</p><div class="formgrid"><div class="field"><label>Pequena — acréscimo (R$)</label><input id="portionSmallExtra" class="input" type="number" min="0" step=".01" value="0"></div><div class="field"><label>Média — acréscimo (R$)</label><input id="portionMediumExtra" class="input" type="number" min="0" step=".01" placeholder="Informe o acréscimo"></div><div class="field"><label>Grande — acréscimo (R$)</label><input id="portionLargeExtra" class="input" type="number" min="0" step=".01" placeholder="Informe o acréscimo"></div></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="salvarTamanhosPorcoes()">Salvar e vincular às porções</button></div>`);
+}
+async function salvarTamanhosPorcoes(){
+ try{
+  if(!canWrite())throw new Error('Sem permissão.');
+  const small=Number($('portionSmallExtra').value),medium=Number($('portionMediumExtra').value),large=Number($('portionLargeExtra').value);
+  if([small,medium,large].some(x=>!Number.isFinite(x)||x<0))throw new Error('Informe acréscimos válidos e não negativos para os três tamanhos.');
+  const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const portions=products.filter(p=>{const c=categories.find(x=>x.id===p.category_id);const n=norm(p.name);return /porcao|batata|acompanhamento/.test(norm(c?.name||''))&&p.is_active!==false&&!/\b(pequena|medio|media|grande)\b/.test(n)});
+  if(!portions.length)throw new Error('Não encontrei porções genéricas ativas para vincular.');
+  let group=customizationGroups.find(g=>norm(g.name)==='tamanho da porcao');
+  const payload={restaurant_id:restaurant.id,name:'Tamanho da porção',selection_type:'single',min_select:1,max_select:1,display_order:1,is_active:true};
+  if(group){const {error}=await sb.from('customization_groups').update(payload).eq('id',group.id).eq('restaurant_id',restaurant.id);if(error)throw error}
+  else{const {data,error}=await sb.from('customization_groups').insert(payload).select('id').single();if(error)throw error;group={id:data.id,...payload}}
+  const {error:delErr}=await sb.from('customization_options').delete().eq('group_id',group.id);if(delErr)throw delErr;
+  const opts=[['Pequena',small],['Média',medium],['Grande',large]].map(([name,price_modifier],display_order)=>({group_id:group.id,name,price_modifier,is_available:true,display_order}));
+  const {error:insErr}=await sb.from('customization_options').insert(opts);if(insErr)throw insErr;
+  const {data:linked,error:linkReadErr}=await sb.from('product_customization_groups').select('product_id,group_id').in('product_id',portions.map(x=>x.id));if(linkReadErr)throw linkReadErr;
+  for(const product of portions){if((linked||[]).some(x=>x.product_id===product.id&&x.group_id===group.id))continue;const {error}=await sb.from('product_customization_groups').insert({product_id:product.id,group_id:group.id,display_order:1});if(error)throw error}
+  closeModal();await loadAll();go('customization');toast(`Tamanhos configurados em ${portions.length} porções, com os acréscimos informados.`);
+ }catch(e){err(e,'Tamanhos das porções')}
+}
+async function configurarTamanhosHamburguer(){
+ try{
+  if(!canWrite())throw new Error('Sem permissão.');if(!customizationSchemaReady)throw new Error('A migração SQL de personalização ainda não está instalada.');
+  const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const burgers=products.filter(p=>{const cat=categories.find(c=>c.id===p.category_id);return /hamburg|burger|lanche/.test(norm(cat?.name||''))&&p.is_active!==false});
+  if(!burgers.length)throw new Error('Não encontrei produtos ativos na categoria Hambúrgueres/Burgers. Confira as categorias.');
+  let group=customizationGroups.find(g=>norm(g.name)==='tamanho do hamburguer'||norm(g.name)==='tamanho do hamburger');
+  const payload={restaurant_id:restaurant.id,name:'Tamanho do hambúrguer',selection_type:'single',min_select:1,max_select:1,display_order:0,is_active:true};
+  if(group){const {error}=await sb.from('customization_groups').update(payload).eq('id',group.id).eq('restaurant_id',restaurant.id);if(error)throw error}
+  else{const {data,error}=await sb.from('customization_groups').insert(payload).select('id').single();if(error)throw error;group={id:data.id,...payload}}
+  const {error:delErr}=await sb.from('customization_options').delete().eq('group_id',group.id);if(delErr)throw delErr;
+  const opts=[['Simples',0],['Duplo',10],['Triplo',20],['Quádruplo',30]].map(([name,price_modifier])=>({group_id:group.id,name,price_modifier,is_available:true,display_order:optsOrder(name)}));
+  function optsOrder(n){return ['Simples','Duplo','Triplo','Quádruplo'].indexOf(n)}
+  const {error:insErr}=await sb.from('customization_options').insert(opts);if(insErr)throw insErr;
+  const {data:linked,error:linkReadErr}=await sb.from('product_customization_groups').select('product_id,group_id').in('product_id',burgers.map(x=>x.id));if(linkReadErr)throw linkReadErr;
+  for(const b of burgers){if((linked||[]).some(x=>x.product_id===b.id&&x.group_id===group.id))continue;const {error}=await sb.from('product_customization_groups').insert({product_id:b.id,group_id:group.id,display_order:0});if(error)throw error}
+  await loadAll();go('customization');toast(`Tamanhos configurados em ${burgers.length} hambúrgueres. Acréscimos: Simples +R$ 0, Duplo +R$ 10, Triplo +R$ 20 e Quádruplo +R$ 30. O preço-base de cada hambúrguer foi preservado.`);
+ }catch(e){err(e,'Tamanhos dos hambúrgueres')}
+}
 function openAddon(){if(!canWrite())return toast("Sem permissão.");openModal(`<h2>Novo adicional</h2><div class="field"><label>Nome</label><input id="afName" class="input" maxlength="100"></div><div class="field"><label>Preço (R$)</label><input id="afPrice" class="input" type="number" step=".01" min="0"></div><div class="field"><label>Imagem do adicional (opcional, até 4 MB)</label><input id="afImage" class="input" type="file" accept="image/jpeg,image/png,image/webp,image/avif"><small style="color:var(--muted)">Use uma imagem quadrada e leve para o cardápio carregar mais rápido.</small></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" checked> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon()">Salvar</button></div>`)}
 function editAddon(id){const a=addons.find(x=>x.id===id);if(!a)return;openModal(`<h2>Editar adicional</h2>${a.image_url?`<div class="field"><img src="${esc(a.image_url)}" alt="${esc(a.name)}" style="width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid var(--border)"></div>`:""}<div class="field"><label>Nome</label><input id="afName" class="input" maxlength="100" value="${esc(a.name)}"></div><div class="field"><label>Preço (R$)</label><input id="afPrice" class="input" type="number" step=".01" min="0" value="${Number(a.price||0)}"></div><div class="field"><label>Imagem do adicional (opcional, até 4 MB)</label><input id="afImage" class="input" type="file" accept="image/jpeg,image/png,image/webp,image/avif"><small style="color:var(--muted)">Selecione outro arquivo para substituir a imagem atual; deixe vazio para mantê-la.</small></div><div class="field"><label class="check"><input id="afAvail" type="checkbox" ${a.is_available?"checked":""}> Disponível</label></div><div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveAddon('${id}')">Salvar</button></div>`)}
 async function saveAddon(id){try{if(!canWrite())throw new Error("Sem permissão.");const name=$("afName").value.trim(),price=Number($("afPrice").value),file=$("afImage")?.files?.[0];if(!name)throw new Error("Informe o nome.");if(!Number.isFinite(price)||price<0)throw new Error("Preço inválido.");if(file){if(!file.type.startsWith("image/"))throw new Error("Selecione um arquivo de imagem.");if(file.size>4*1024*1024)throw new Error("A imagem deve ter no máximo 4 MB.");if(!["image/jpeg","image/png","image/webp","image/avif"].includes(file.type))throw new Error("Use JPG, PNG, WebP ou AVIF.")}const payload={restaurant_id:restaurant.id,name,price,is_available:$("afAvail").checked};let addonId=id;if(id){const {error}=await sb.from("add_ons").update(payload).eq("id",id).eq("restaurant_id",restaurant.id);if(error)throw error}else{const {data,error}=await sb.from("add_ons").insert(payload).select("id").single();if(error)throw error;addonId=data.id}if(file){const url=await uploadAsset(file,"addons",addonId);const {error}=await sb.from("add_ons").update({image_url:url}).eq("id",addonId).eq("restaurant_id",restaurant.id);if(error)throw error}closeModal();await loadAll();toast("Adicional salvo.")}catch(e){err(e,"Adicional")}}
@@ -776,9 +863,9 @@ async function openCashMovement(){try{if(!canWrite())throw new Error('Sem permis
 async function saveCashMovement(sessionId){try{const amount=Number($('cmAmount').value);if(!Number.isFinite(amount)||amount<=0)throw new Error('Informe um valor válido.');const {error}=await sb.from('cash_movements').insert({restaurant_id:restaurant.id,session_id:sessionId,user_id:session.user.id,type:$('cmType').value,amount,description:$('cmDesc').value.trim()||null});if(error)throw error;closeModal();await loadAll();toast('Movimentação registrada.')}catch(e){err(e,'Movimentação')}}
 async function closeCashSession(){try{if(!canWrite())throw new Error('Sem permissão.');const s=cashSession();if(!s)return toast('Não há caixa aberto.');const since=new Date(s.opened_at);const cashPaid=payments.filter(p=>p.status==='paid'&&p.method==='cash'&&new Date(p.created_at)>=since).reduce((a,p)=>a+Number(p.amount||0),0);const mov=cashMovements.filter(x=>x.session_id===s.id);const supplies=mov.filter(x=>x.type==='supply').reduce((a,x)=>a+Number(x.amount||0),0),withdrawals=mov.filter(x=>x.type==='withdrawal').reduce((a,x)=>a+Number(x.amount||0),0);const expected=Number(s.opening_amount||0)+cashPaid+supplies-withdrawals;const v=prompt(`Valor esperado: ${money(expected)}\nInforme o dinheiro contado no fechamento:`);if(v===null)return;const counted=Number(v);if(!Number.isFinite(counted)||counted<0)throw new Error('Valor contado inválido.');const {error}=await sb.from('cash_sessions').update({closed_by:session.user.id,expected_amount:expected,counted_amount:counted,difference:counted-expected,status:'closed',closed_at:new Date().toISOString()}).eq('id',s.id).eq('restaurant_id',restaurant.id);if(error)throw error;await loadAll();toast(`Caixa fechado. Diferença: ${money(counted-expected)}`)}catch(e){err(e,'Fechamento do caixa')}}
 
-function fillSettings(){if(!restaurant)return; if($("publicMenuUrl"))$("publicMenuUrl").value=publicMenuUrl("");$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{};$("setPix").value=s.settings?.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=s.minimum_order||0;$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=s.settings?.meta_pixel_id||"";$("gaId").value=s.settings?.ga_id||""}
+function fillSettings(){if(!restaurant)return; if($("publicMenuUrl"))$("publicMenuUrl").value=publicMenuUrl("");$("setName").value=restaurant.name||"";$("setWhatsapp").value=restaurant.phone_whatsapp||"";$("setHours").value=restaurant.business_hours||"";$("setColor").value=restaurant.primary_color||"#f59e0b";const s=settings||{},cfg=s.settings||{};$("setPix").value=cfg.pix_key||"";$("setDeliveryFee").value=s.delivery_fee||0;$("setMinOrder").value=Math.max(25,Number(s.minimum_order||25));$("setDelivery").checked=s.accepts_delivery!==false;$("setTableOrders").checked=s.accepts_table_orders!==false;$("metaPixel").value=cfg.meta_pixel_id||"";$("gaId").value=cfg.ga_id||"";if($("setAddress"))$("setAddress").value=cfg.business_address||cfg.address||"R. Dr. Jesuíno Felicíssimo, 49 — Q.ta Boa Esperança I, Uberaba - MG, 38017-290";if($("setInstagram"))$("setInstagram").value=cfg.instagram_url||cfg.instagram||"https://www.instagram.com/ilovesmash_/";if($("setPaymentMethods"))$("setPaymentMethods").value=(Array.isArray(cfg.payment_methods)?cfg.payment_methods:["PIX","Cartão de crédito (online)","Dinheiro na entrega","Cartão de crédito na entrega"]).join("\n");if($("setPromoCashbackEnabled"))$("setPromoCashbackEnabled").checked=cfg.promo_cashback_enabled!==false;if($("setPromoCashbackTitle"))$("setPromoCashbackTitle").value=cfg.promo_cashback_title||"Cashback";if($("setPromoCashbackText"))$("setPromoCashbackText").value=cfg.promo_cashback_text||"Pagando com Pix ou Cartão · Aproveite já!";if($("setPromoDeliveryEnabled"))$("setPromoDeliveryEnabled").checked=cfg.promo_delivery_enabled!==false;if($("setPromoDeliveryTitle"))$("setPromoDeliveryTitle").value=cfg.promo_delivery_title||"Desconto na entrega";if($("setPromoDeliveryText"))$("setPromoDeliveryText").value=cfg.promo_delivery_text||"Em todas as regiões · TAXA GRÁTIS · Pedido mínimo R$ 35,00";if($("setPromoDeliveryDiscount"))$("setPromoDeliveryDiscount").value=Number(cfg.promo_delivery_discount??7);if($("setPromoDeliveryMinimum"))$("setPromoDeliveryMinimum").value=Number(cfg.promo_delivery_minimum??35)} 
 async function saveRestaurant(){try{const p={name:$("setName").value.trim(),phone_whatsapp:$("setWhatsapp").value.trim(),business_hours:$("setHours").value.trim(),primary_color:$("setColor").value};const {error}=await sb.from("restaurants").update(p).eq("id",restaurant.id);if(error)throw error;Object.assign(restaurant,p);restaurant.onboarding_step=Math.max(Number(restaurant.onboarding_step||0),2);renderStoreStatus();renderOnboarding();toast("Restaurante atualizado.");await syncOnboardingProgress();renderOnboarding()}catch(e){err(e,"Restaurante")}}
-async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_key:$("setPix").value.trim(),meta_pixel_id:$("metaPixel").value.trim(),ga_id:$("gaId").value.trim()};const p={restaurant_id:restaurant.id,delivery_fee:Number($("setDeliveryFee").value)||0,minimum_order:Number($("setMinOrder").value)||0,accepts_delivery:$("setDelivery").checked,accepts_table_orders:$("setTableOrders").checked,settings:merged};let q=settings?sb.from("restaurant_settings").update(p).eq("id",settings.id):sb.from("restaurant_settings").insert(p);const {data,error}=await q.select("*").single();if(error)throw error;settings=data;fillSettings();toast("Configurações salvas.");await syncOnboardingProgress();renderOnboarding()}catch(e){err(e,"Configurações")}}
+async function saveSettings(){try{const merged={...(settings?.settings||{}),pix_key:$("setPix").value.trim(),meta_pixel_id:$("metaPixel").value.trim(),ga_id:$("gaId").value.trim(),business_address:$("setAddress")?.value.trim()||"",instagram_url:$("setInstagram")?.value.trim()||"",payment_methods:($("setPaymentMethods")?.value||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean),promo_cashback_enabled:$("setPromoCashbackEnabled")?.checked!==false,promo_cashback_title:$("setPromoCashbackTitle")?.value.trim()||"Cashback",promo_cashback_text:$("setPromoCashbackText")?.value.trim()||"Pagando com Pix ou Cartão · Aproveite já!",promo_delivery_enabled:$("setPromoDeliveryEnabled")?.checked!==false,promo_delivery_title:$("setPromoDeliveryTitle")?.value.trim()||"Desconto de R$ 7,00 na entrega",promo_delivery_text:$("setPromoDeliveryText")?.value.trim()||"Em todas as regiões · TAXA GRÁTIS · Pedido mínimo R$ 35,00",promo_delivery_discount:Math.max(0,Number($("setPromoDeliveryDiscount")?.value)||0),promo_delivery_minimum:Math.max(0,Number($("setPromoDeliveryMinimum")?.value)||35)};const p={restaurant_id:restaurant.id,delivery_fee:Number($("setDeliveryFee").value)||0,minimum_order:Math.max(25,Number($("setMinOrder").value)||25),accepts_delivery:$("setDelivery").checked,accepts_table_orders:$("setTableOrders").checked,settings:merged};let q=settings?sb.from("restaurant_settings").update(p).eq("id",settings.id):sb.from("restaurant_settings").insert(p);const {data,error}=await q.select("*").single();if(error)throw error;settings=data;fillSettings();toast("Configurações, pedido mínimo e promoções salvos.");await syncOnboardingProgress();renderOnboarding()}catch(e){err(e,"Configurações")}}
 async function saveMarketing(){return saveSettings()}
 
 function openWhats(id,next){const o=orders.find(x=>x.id===id);if(!restaurant.phone_whatsapp)return;const status={pending:"recebido",preparing:"em preparo",ready:"pronto",out_for_delivery:"saiu para entrega",completed:"concluído",cancelled:"cancelado"}[next||o.status]||o.status;const text=`Olá, ${o.customer_name||"cliente"}! Seu pedido #${o.order_number} está ${status}.`;window.open(`https://wa.me/${o.customer_phone||restaurant.phone_whatsapp}?text=${encodeURIComponent(text)}`,"_blank")}
