@@ -1850,7 +1850,7 @@ function coletarCustomizacao(){
  if(p?.combo){
    const itens=Array.isArray(p.itens)?p.itens.filter(i=>i.produto&&Number(i.quantity)>0):[];
    if(!itens.length){mostrarToast('Este combo ainda não tem itens configurados. Avise o restaurante.');return null}
-   combo={itens:itens.map(i=>({nome:i.nome,quantidade:Math.max(1,Number(i.quantity)||1)}))};
+   combo={id:p.dbId,itens:itens.map(i=>({nome:i.nome,quantidade:Math.max(1,Number(i.quantity)||1)}))};
  }
  const observacao=document.getElementById('observacaoItem')?.value.trim()||'';
  return {addons,opcoesPersonalizadas,ingredientesRemovidos,combo,observacao};
@@ -2056,12 +2056,15 @@ async function registrarPedidoSupabase({nome,telefone,mesaAtual,endereco,forma,t
  const itens=carrinho.map(i=>{
    const produtoAtual=restauranteAtual.produtos.find(p=>p.id===i.produtoId);
    return {
-     product_id:produtoAtual?.dbId||null,
+     product_id:i.combo?null:(produtoAtual?.dbId||null),
+     combo_id:i.combo?.id||null,
      product_name:i.nome,
      unit_price:Number(i.precoUnitario||i.preco),
      quantity:Number(i.quantidade),
-     variant_name:i.combo?`Combo: ${i.combo.itens.map(x=>`${x.quantidade}x ${x.nome}`).join(', ')}`:null,
-     observation:[i.addons?.length?`Adicionais: ${i.addons.map(a=>a.nome).join(', ')}`:'',i.opcoesPersonalizadas?.length?`Personalização: ${i.opcoesPersonalizadas.map(a=>a.nome).join(', ')}`:'',i.ingredientesRemovidos?.length?`Sem: ${i.ingredientesRemovidos.join(', ')}`:'',i.observacao?`Obs.: ${i.observacao}`:''].filter(Boolean).join(' | ')||null
+     variant_name:i.combo?null:(i.variant_name||null),
+     addons:(i.addons||[]).map(a=>({id:a.id})),
+     custom_options:(i.opcoesPersonalizadas||[]).map(a=>({id:a.id,group_id:a.grupoId})),
+     observation:[i.ingredientesRemovidos?.length?`Sem: ${i.ingredientesRemovidos.join(', ')}`:'',i.observacao?`Obs.: ${i.observacao}`:''].filter(Boolean).join(' | ')||null
    };
  });
  const {data:pedidoCriado,error}=await menuSupabase.rpc('criar_pedido_publico',{pedido,itens});
